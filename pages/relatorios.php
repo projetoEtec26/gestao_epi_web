@@ -408,7 +408,8 @@ function gerarRelatorioCustos() {
             `;
 
             res.data.forEach(row => {
-                const valorFloat = parseFloat(row.custo_total);
+                const custoTotal = parseFloat(row.custo_total);
+                const valorFloat = isNaN(custoTotal) ? 0 : custoTotal;
                 html += `
                     <tr>
                         <td class="fw-bold">${row.mes}</td>
@@ -508,7 +509,7 @@ function exportarCSV() {
                 linha = [
                     row.mes,
                     row.total_itens_entregues,
-                    row.custo_total.toString().replace('.', ',')
+                    (row.custo_total ?? 0).toString().replace('.', ',')
                 ];
             }
             const linhaSanit = linha.map(v => `"${(v || '').toString().replace(/"/g, '""')}"`);

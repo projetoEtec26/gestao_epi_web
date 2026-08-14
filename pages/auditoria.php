@@ -255,18 +255,12 @@ try {
 
 <!-- ================= JAVASCRIPT ================= -->
 <script>
-const API_TOKEN = '<?= $_SESSION['token'] ?>';
-const API_BASE_URL = 'https://gestao-epi-api.onrender.com/';
+const PROXY_URL = 'api_proxy.php';
 
 /**
- * Consulta a API de logs de forma síncrona/AJAX para buscar os detalhes estruturados
+ * Consulta a API de logs via proxy server-side para buscar os detalhes estruturados
  */
 function verDetalhesLog(logId) {
-    const headers = {
-        'Authorization': `Bearer ${API_TOKEN}`,
-        'Accept': 'application/json'
-    };
-
     document.getElementById('det-log-id').innerText = '...';
     document.getElementById('det-log-data').innerText = '...';
     document.getElementById('det-log-resp').innerText = '...';
@@ -277,7 +271,7 @@ function verDetalhesLog(logId) {
     const modal = new bootstrap.Modal(document.getElementById('modalDetalhesLog'));
     modal.show();
 
-    fetch(`${API_BASE_URL}logs/${logId}`, { headers })
+    fetch(`${PROXY_URL}?route=logs/${logId}`)
         .then(res => res.json())
         .then(res => {
             if (res.success && res.data) {
@@ -305,4 +299,4 @@ function verDetalhesLog(logId) {
 }
 </script>
 
-<?php require_once __DIR__ . '/../components/header.php'; ?>
+<?php require_once __DIR__ . '/../components/footer.php'; ?>

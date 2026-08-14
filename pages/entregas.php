@@ -99,7 +99,8 @@ try {
                             <?php foreach ($entregas as $entr): ?>
                                 <?php
                                 $statusClass = strtolower($entr['entr_status']);
-                                $validacaoClass = ($entr['entr_validacao_senha'] === 'VALIDADA') ? 'ativo' : 'inativo';
+                                $validacaoSenha = $entr['entr_validacao_senha'] ?? 'PENDENTE';
+                                $validacaoClass = ($validacaoSenha === 'VALIDADA') ? 'ativo' : 'inativo';
                                 
                                 // Detalhamento rápido dos EPIs para busca e exibição textual
                                 $itensNomes = [];
@@ -135,7 +136,7 @@ try {
                                         <span class="badge bg-light text-dark border"><?= htmlspecialchars($entr['entr_motivo']) ?></span>
                                     </td>
                                     <td>
-                                        <span class="status-badge <?= $validacaoClass ?>"><i class="bi bi-fingerprint"></i> <?= htmlspecialchars($entr['entr_validacao_senha']) ?></span>
+                                        <span class="status-badge <?= $validacaoClass ?>"><i class="bi bi-fingerprint"></i> <?= htmlspecialchars($validacaoSenha) ?></span>
                                     </td>
                                     <td>
                                         <span class="status-badge <?= $statusClass ?>"><?= htmlspecialchars($entr['entr_status']) ?></span>

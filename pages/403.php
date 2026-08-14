@@ -59,7 +59,7 @@ if (session_status() === PHP_SESSION_NONE) {
     <h1 class="fw-bold mb-3">403</h1>
     <h4 class="mb-3">Acesso Negado</h4>
     <p class="text-muted mb-4">Você não possui permissão para acessar esta funcionalidade. A autoridade deste endpoint é controlada remotamente pela API.</p>
-    <a href="/gestao_epi-web/index.php" class="btn btn-primary"><i class="bi bi-house me-1"></i> Ir para a Página Inicial</a>
+    <a href="../index.php" class="btn btn-primary"><i class="bi bi-house me-1"></i> Ir para a Página Inicial</a>
 </div>
 </body>
 </html>

@@ -847,7 +847,7 @@ function initBuscaEFiltros() {
  */
 function confirmarExclusao(id, nome) {
     document.getElementById('excluir-epi-id').value = id;
-    document.getElementById('excluir-epi-name').innerText = nome;
+    document.getElementById('excluir-epi-nome').innerText = nome;
     
     new bootstrap.Modal(document.getElementById('modalExcluir')).show();
 }

@@ -261,8 +261,7 @@ $podeDevolver = in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXAR
 
 <!-- ================= JAVASCRIPT ================= -->
 <script>
-const API_TOKEN = '<?= $_SESSION['token'] ?>';
-const API_BASE_URL = 'https://gestao-epi-api.onrender.com/';
+const PROXY_URL = 'api_proxy.php';
 const PODE_DEVOLVER = <?= $podeDevolver ? 'true' : 'false' ?>;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -317,15 +316,10 @@ function selecionarFuncionario(funId, nome) {
  * Carrega itens que estão atualmente com o funcionário (ENTREGUE)
  */
 function carregarEpiPosse(funId) {
-    const headers = {
-        'Authorization': `Bearer ${API_TOKEN}`,
-        'Accept': 'application/json'
-    };
-
     const tbody = document.getElementById('lista-posse-atual');
     tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Buscando EPIs em posse...</td></tr>';
 
-    fetch(`${API_BASE_URL}entregas/funcionario/${funId}`, { headers })
+    fetch(`${PROXY_URL}?route=entregas/funcionario/${funId}`)
         .then(res => res.json())
         .then(res => {
             if (res.success && res.data) {
@@ -347,7 +341,7 @@ function carregarEpiPosse(funId) {
                             if (PODE_DEVOLVER) {
                                 acaoHtml = `
                                     <button class="btn btn-sm btn-outline-danger py-1 px-2" 
-                                            onclick="prepararDevolucao(${item.item_id}, '${item.item_epi_nome_snapshot.replace(/'/g, "\\'")}')">
+                                            onclick="prepararDevolucao(${item.item_id}, '${(item.item_epi_nome_snapshot || '').replace(/'/g, "\\'")}')">
                                         <i class="bi bi-arrow-counterclockwise"></i> Devolver
                                     </button>
                                 `;
@@ -384,15 +378,10 @@ function carregarEpiPosse(funId) {
  * Carrega histórico de devoluções realizadas pelo funcionário
  */
 function carregarHistoricoDevolucoes(funId) {
-    const headers = {
-        'Authorization': `Bearer ${API_TOKEN}`,
-        'Accept': 'application/json'
-    };
-
     const tbody = document.getElementById('lista-historico-devolucoes');
     tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Buscando histórico...</td></tr>';
 
-    fetch(`${API_BASE_URL}devolucoes/funcionario/${funId}`, { headers })
+    fetch(`${PROXY_URL}?route=devolucoes/funcionario/${funId}`)
         .then(res => res.json())
         .then(res => {
             if (res.success && res.data && res.data.length > 0) {

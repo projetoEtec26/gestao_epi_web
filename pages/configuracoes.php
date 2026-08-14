@@ -134,7 +134,7 @@ $perfilLabel = $perfisMap[$currentUser['usu_perfil']] ?? $currentUser['usu_perfi
                     <div class="alert alert-info d-flex align-items-start m-0" role="alert" style="font-size: 12px;">
                         <i class="bi bi-info-circle-fill me-2 mt-1"></i>
                         <div>
-                            Para alterar o apontamento da API (ex: migrar de **Render (nuvem)** para **XAMPP (localhost)**), acesse e modifique o arquivo de configurações em [api.php](file:///C:/xampp/htdocs/gestao_epi-web/config/api.php).
+                            Para alterar o apontamento da API (ex: migrar de Render (nuvem) para XAMPP (localhost)), acesse e modifique o arquivo de configuração <code>config/api.php</code> na raiz da aplicação.
                         </div>
                     </div>
                 </div>

@@ -59,7 +59,7 @@ if (session_status() === PHP_SESSION_NONE) {
     <h1 class="fw-bold mb-3">404</h1>
     <h4 class="mb-3">Página Não Encontrada</h4>
     <p class="text-muted mb-4">O recurso solicitado não pôde ser localizado ou a rota informada é inexistente.</p>
-    <a href="/gestao_epi-web/index.php" class="btn btn-primary"><i class="bi bi-house me-1"></i> Ir para a Página Inicial</a>
+    <a href="../index.php" class="btn btn-primary"><i class="bi bi-house me-1"></i> Ir para a Página Inicial</a>
 </div>
 </body>
 </html>

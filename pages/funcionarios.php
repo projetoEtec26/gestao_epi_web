@@ -294,6 +294,8 @@ $podeGerenciarPin = in_array($userProfile, ['ADMINISTRADOR', 'RH_ADMINISTRATIVO'
                                 $statusPin = $func['assinatura_status'] ?? 'PENDENTE';
                                 $statusPinClass = strtolower(str_replace(' ', '-', $statusPin));
                                 $situacaoClass = strtolower($func['fun_situacao']);
+                                $dataAdmissao = $func['fun_dataadmissao'] ?? '';
+                                $dataAdmissaoFormatada = !empty($dataAdmissao) ? date('d/m/Y', strtotime($dataAdmissao)) : '---';
                                 ?>
                                 <tr class="func-row" 
                                     data-nome="<?= htmlspecialchars(strtolower($func['fun_nome'])) ?>"
@@ -308,7 +310,7 @@ $podeGerenciarPin = in_array($userProfile, ['ADMINISTRADOR', 'RH_ADMINISTRATIVO'
                                         <div class="fw-medium"><?= htmlspecialchars($func['fun_cargo']) ?></div>
                                         <div class="text-muted" style="font-size: 12px;"><?= htmlspecialchars($func['fun_departamento']) ?></div>
                                     </td>
-                                    <td><?= date('d/m/Y', strtotime($func['fun_dataadmissao'])) ?></td>
+                                    <td><?= $dataAdmissaoFormatada ?></td>
                                     <td>
                                         <span class="status-badge <?= $statusPinClass ?>"><?= htmlspecialchars($statusPin) ?></span>
                                     </td>
