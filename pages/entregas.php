@@ -31,11 +31,18 @@ try {
     <?php require_once __DIR__ . '/../components/topbar.php'; ?>
     
     <div class="content-body">
-        <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
             <div>
                 <h3 class="fw-bold m-0" style="color: var(--color-primary);">Histórico de Entregas</h3>
-                <p class="text-muted">Consulte registros de fornecimento de EPIs homologados com termos de ciência e assinaturas validadas.</p>
+                <p class="text-muted mb-0">Consulte registros de fornecimento de EPIs homologados com termos de ciência e assinaturas validadas.</p>
             </div>
+            <?php if (in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR'], true)): ?>
+                <div>
+                    <a href="nova_entrega.php" class="btn btn-primary shadow-sm">
+                        <i class="bi bi-plus-circle-fill me-1"></i> Nova Entrega (Contingência)
+                    </a>
+                </div>
+            <?php endif; ?>
         </div>
 
         <?php if ($erro !== null): ?>
@@ -369,6 +376,20 @@ function imprimirTermo() {
         janela.print();
         janela.close();
     }, 500);
+}
+
+function executarAcaoSubmenuEntrega(acao) {
+    if (acao === 'nova_entrega' || acao === 'nova') {
+        window.location.href = '<?= APP_ROOT ?>pages/nova_entrega.php';
+    } else if (acao === 'devolucao' || acao === 'devolucoes') {
+        window.location.href = '<?= APP_ROOT ?>pages/devolucoes.php';
+    } else {
+        if (window.location.pathname.indexOf('entregas.php') !== -1) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            window.location.href = '<?= APP_ROOT ?>pages/entregas.php';
+        }
+    }
 }
 </script>
 

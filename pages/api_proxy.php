@@ -33,6 +33,13 @@ if ($route === '') {
     exit;
 }
 
+// Repassa os demais parâmetros de query (filtros, paginação etc.) para a API
+$queryParams = $_GET;
+unset($queryParams['route']);
+if (!empty($queryParams)) {
+    $route .= (str_contains($route, '?') ? '&' : '?') . http_build_query($queryParams);
+}
+
 try {
     $api = new ApiService();
     $method = $_SERVER['REQUEST_METHOD'];

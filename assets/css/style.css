@@ -94,7 +94,7 @@ body.sidebar-collapsed #main-content {
 /* Sidebar Estilizada */
 #sidebar {
     width: var(--sidebar-width);
-    background-color: var(--color-sidebar-bg);
+    background-color: #0b1120;
     height: 100vh;
     position: fixed;
     top: 0;
@@ -103,7 +103,7 @@ body.sidebar-collapsed #main-content {
     display: flex;
     flex-direction: column;
     transition: var(--transition-smooth);
-    border-right: 1px solid var(--color-border);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 body.sidebar-collapsed #sidebar {
@@ -114,22 +114,23 @@ body.sidebar-collapsed #sidebar {
     height: var(--topbar-height);
     display: flex;
     align-items: center;
-    padding: 0 24px;
+    padding: 0 20px;
     gap: 12px;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 #sidebar .brand i {
     font-size: 24px;
-    color: var(--color-primary);
+    color: #06b6d4;
 }
 
 #sidebar .brand span {
     font-weight: 700;
-    font-size: 20px;
+    font-size: 19px;
     color: #ffffff;
     transition: var(--transition-smooth);
     white-space: nowrap;
+    letter-spacing: 0.5px;
 }
 
 body.sidebar-collapsed #sidebar .brand span {
@@ -141,30 +142,56 @@ body.sidebar-collapsed #sidebar .brand span {
 #sidebar .nav-menu {
     flex-grow: 1;
     list-style: none;
-    padding: 24px 12px;
+    padding: 16px 12px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
     overflow-y: auto;
+}
+
+#sidebar .nav-item {
+    width: 100%;
+    cursor: pointer;
 }
 
 #sidebar .nav-item a {
     display: flex;
     align-items: center;
-    padding: 12px 16px;
-    color: var(--color-sidebar-text);
+    width: 100%;
+    padding: 9px 12px;
+    color: #94a3b8;
     text-decoration: none;
-    border-radius: 8px;
-    font-weight: 500;
+    border-radius: 10px;
+    font-weight: 400;
+    font-size: 14px;
     transition: var(--transition-smooth);
     gap: 12px;
     white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid transparent;
 }
 
-#sidebar .nav-item a i {
-    font-size: 18px;
-    min-width: 20px;
-    text-align: center;
+#sidebar .nav-item .icon-box {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 17px;
+    color: #94a3b8;
+    transition: var(--transition-smooth);
+    flex-shrink: 0;
+}
+
+#sidebar .nav-item .icon-box svg {
+    stroke: currentColor;
+    transition: var(--transition-smooth);
+}
+
+#sidebar .nav-item a span:not(.icon-box) {
+    pointer-events: none;
 }
 
 #sidebar .nav-item a:hover {
@@ -172,12 +199,120 @@ body.sidebar-collapsed #sidebar .brand span {
     color: #ffffff;
 }
 
-#sidebar .nav-item.active a {
-    background-color: var(--color-primary);
+#sidebar .nav-item a:hover .icon-box {
     color: #ffffff;
 }
 
-body.sidebar-collapsed #sidebar .nav-item a span {
+#sidebar .nav-item a:hover .icon-box svg {
+    stroke: #ffffff;
+}
+
+#sidebar .nav-item.active a {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.22) 0%, rgba(14, 165, 233, 0.12) 100%);
+    border: 1px solid rgba(6, 182, 212, 0.4);
+    box-shadow: 0 4px 14px rgba(6, 182, 212, 0.15);
+    color: #ffffff;
+    font-weight: 500;
+}
+
+#sidebar .nav-item.active .icon-box {
+    background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(6, 182, 212, 0.35);
+}
+
+/* Submenu Expansível na Sidebar com Ícone + */
+.nav-item-submenu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.submenu-toggle-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;
+}
+
+.submenu-toggle-btn:hover {
+    color: #ffffff;
+    background: rgba(6, 182, 212, 0.25);
+}
+
+.sidebar-submenu-list {
+    list-style: none;
+    padding-left: 28px;
+    margin: 4px 0 8px 0;
+    display: none;
+}
+
+.sidebar-submenu-list.open {
+    display: block;
+}
+
+.sidebar-submenu-list li {
+    margin-bottom: 2px;
+}
+
+.sidebar-submenu-list a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    font-size: 12.5px;
+    color: #94a3b8;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+}
+
+.sidebar-submenu-list a:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-submenu-list a.active-sub {
+    color: #ffffff;
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.25) 0%, rgba(14, 165, 233, 0.15) 100%);
+    border: 1px solid rgba(6, 182, 212, 0.35);
+    font-weight: 600;
+}
+
+/* Item de Logout (Sair) */
+#sidebar .nav-item.logout-item {
+    margin-top: auto;
+    padding-top: 12px;
+}
+
+#sidebar .nav-item.logout-item a {
+    color: #ef4444;
+}
+
+#sidebar .nav-item.logout-item a .icon-box {
+    color: #ef4444;
+}
+
+#sidebar .nav-item.logout-item a:hover {
+    background-color: rgba(239, 68, 68, 0.12);
+    color: #f87171;
+}
+
+#sidebar .nav-item.logout-item a:hover .icon-box {
+    color: #f87171;
+}
+
+body.sidebar-collapsed #sidebar .nav-item a span:not(.icon-box) {
     display: none;
 }
 
@@ -425,6 +560,24 @@ body.dark-mode .table-custom tr:hover td {
     background-color: var(--color-primary-light);
 }
 
+/* Autocomplete em Tempo Real */
+.autocomplete-item {
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    text-decoration: none !important;
+    border-left: 4px solid transparent !important;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.active {
+    background-color: #eff6ff !important;
+    border-left-color: #2563eb !important;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: 0 !important;
+}
+
 /* Responsividade Mobile */
 @media (max-width: 991px) {
     #sidebar {
@@ -444,3 +597,263 @@ body.dark-mode .table-custom tr:hover td {
         pointer-events: none;
     }
 }
+
+/* ========================================================
+   SPEED DIAL / FLOATING ACTION BUTTON (FAB)
+   ======================================================== */
+.speed-dial-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1040;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s;
+}
+
+.speed-dial-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.speed-dial-container {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+/* Botão Flutuante Principal (+ / X) */
+.speed-dial-toggle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    border: none;
+    outline: none;
+    box-shadow: 0 10px 25px -3px rgba(37, 99, 235, 0.5), 0 4px 10px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55), background-color 0.25s, box-shadow 0.25s;
+    user-select: none;
+}
+
+.speed-dial-toggle:hover {
+    transform: scale(1.08);
+    box-shadow: 0 14px 30px -3px rgba(37, 99, 235, 0.65), 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.speed-dial-toggle:active {
+    transform: scale(0.95);
+}
+
+.speed-dial-toggle.active {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    box-shadow: 0 10px 25px -3px rgba(37, 99, 235, 0.6);
+}
+
+.speed-dial-toggle .icon-toggle {
+    transition: transform 0.3s ease;
+    display: inline-block;
+    line-height: 1;
+}
+
+/* Menu de Ações Empilhado */
+.speed-dial-menu {
+    position: absolute;
+    bottom: 74px;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 14px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease, visibility 0.25s;
+    pointer-events: none;
+}
+
+.speed-dial-container.active .speed-dial-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* Item de Ação Individual */
+.speed-dial-action {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.speed-dial-action:hover {
+    transform: translateX(-3px);
+}
+
+/* Badge / Label Branca */
+.speed-dial-label {
+    background-color: #ffffff;
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.08);
+    white-space: nowrap;
+    user-select: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+body.dark-mode .speed-dial-label {
+    background-color: #1e293b;
+    color: #f8fafc;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.speed-dial-action:hover .speed-dial-label {
+    background-color: #f8fafc;
+    color: #2563eb;
+}
+
+body.dark-mode .speed-dial-action:hover .speed-dial-label {
+    background-color: #334155;
+    color: #60a5fa;
+}
+
+/* Botão Redondo com Ícone */
+.speed-dial-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s;
+    flex-shrink: 0;
+}
+
+.speed-dial-action:hover .speed-dial-btn {
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.6);
+}
+
+/* Submenu da Sidebar (Estilo Gov.br Accordion) */
+#sidebar .nav-item.has-submenu {
+    position: relative;
+}
+
+#sidebar .submenu-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: rgba(6, 182, 212, 0.15);
+    color: #06b6d4;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+#sidebar .nav-item.has-submenu:hover .submenu-toggle-btn {
+    background-color: rgba(6, 182, 212, 0.3);
+    color: #ffffff;
+    box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+}
+
+/* Quando expandido (open), o botão muda para Coral/Vermelho (#ef4444) e o + vira um X */
+#sidebar .nav-item.open .submenu-toggle-btn,
+#sidebar .nav-item.has-submenu.open > a .submenu-toggle-btn {
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+#sidebar .nav-item.open .submenu-toggle-btn i.bi-plus-lg {
+    transform: rotate(45deg);
+}
+
+/* Submenu Deslocado para o Lado (Indentação Gov.br) */
+#sidebar .nav-submenu {
+    list-style: none;
+    padding-left: 10px;
+    margin: 6px 0 8px 20px; /* Deslocado para o lado para mostrar a hierarquia */
+    border-left: 3px solid rgba(6, 182, 212, 0.4); /* Guia vertical de destaque */
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    background-color: rgba(15, 23, 42, 0.4);
+    border-radius: 0 8px 8px 0;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    transition: all 0.3s ease-in-out;
+}
+
+#sidebar .nav-submenu.show,
+#sidebar .nav-item.open .nav-submenu {
+    display: flex;
+}
+
+#sidebar .submenu-item a {
+    display: flex;
+    align-items: center;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #cbd5e1;
+    border-radius: 6px;
+    gap: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    background-color: transparent;
+}
+
+#sidebar .submenu-item a:hover {
+    color: #ffffff;
+    background-color: rgba(6, 182, 212, 0.15);
+    transform: translateX(6px); /* Efeito suave deslizando para a direita */
+}
+
+#sidebar .submenu-item.active a {
+    color: #38bdf8;
+    background-color: rgba(56, 189, 248, 0.2);
+    font-weight: 600;
+}
+
+#sidebar .submenu-item .sub-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+
+

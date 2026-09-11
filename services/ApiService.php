@@ -16,7 +16,7 @@ class ApiService {
         }
         $config = require $configFile;
         $this->baseUrl = rtrim($config['api_base_url'], '/') . '/';
-        $this->appRoot = $config['app_root_url'] ?? '/gestao_epi-web/';
+        $this->appRoot = $config['app_root_url'] ?? '/gestao_epi_web/';
 
         // Garante que a sessão esteja iniciada
         if (session_status() === PHP_SESSION_NONE) {
@@ -25,11 +25,11 @@ class ApiService {
     }
 
     /**
-     * Executa uma requisição HTTP via cURL à API REST com política de Retry automática
+     * Executa uma requisição HTTP via cURL à API REST com política de Retry otimizada
      */
     public function request(string $method, string $endpoint, ?array $data = null): array {
-        $maxRetries = 3;
-        $retryDelay = 3; // segundos
+        $maxRetries = 1;
+        $retryDelay = 1; // segundo
         $attempt = 0;
 
         while ($attempt <= $maxRetries) {
@@ -58,34 +58,43 @@ class ApiService {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 15); // Timeout de 15 segundos
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3); // Connect timeout otimizado de 3s
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Response timeout otimizado de 10s
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Evita problemas de SSL em localhost/Render de teste
-            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36');
-
             if ($data !== null && in_array(strtoupper($method), ['POST', 'PUT', 'PATCH'], true)) {
                 $jsonData = json_encode($data);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
             }
 
+            // Libera a trava do arquivo de sessão no PHP para evitar deadlocks no Apache/localhost
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+
             $response = curl_exec($ch);
             $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $errno = curl_errno($ch);
             $error = curl_error($ch);
             curl_close($ch);
 
-            // Condições para realizar o retry (erro de conexão/timeout ou erro de gateway temporário)
-            $isNetworkError = ($response === false);
+            // Tenta novamente apenas se for falha pontual de rede/gateway (não se for timeout prolongado)
             $isGatewayError = in_array($statusCode, [502, 503, 504], true);
+            $isTransientError = ($response === false && $errno !== CURLE_OPERATION_TIMEDOUT);
 
-            if (($isNetworkError || $isGatewayError) && $attempt < $maxRetries) {
+            if (($isTransientError || $isGatewayError) && $attempt < $maxRetries) {
                 $attempt++;
                 sleep($retryDelay);
                 continue;
             }
 
             if ($response === false) {
+                $msgErro = 'Não foi possível conectar ao servidor de API local. Verifique se o Apache e o MySQL do XAMPP estão ativos.';
+                if ($errno === CURLE_OPERATION_TIMEDOUT) {
+                    $msgErro = 'Tempo limite de resposta excedido (Timeout). Verifique o servidor Apache ou a conexão com o banco de dados.';
+                }
                 return [
                     'success' => false,
-                    'message' => 'Não foi possível conectar ao servidor de API remoto. Verifique se o Apache e a API estão online. Detalhes: ' . $error,
+                    'message' => $msgErro . ' (Detalhes: ' . $error . ')',
                     'data' => null,
                     'status_code' => 0
                 ];

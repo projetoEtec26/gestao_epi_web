@@ -156,6 +156,11 @@ try {
         <div class="card-custom">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6 class="fw-bold m-0 text-muted">Exibindo <?= count($logs) ?> registros de auditoria</h6>
+                <div class="d-flex gap-2">
+                    <a href="relatorio_auditoria_impressao.php<?= !empty($queryString) ? '?' . htmlspecialchars($queryString) : '' ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-printer me-1"></i> Imprimir Relatório (v2)
+                    </a>
+                </div>
             </div>
             
             <div class="table-responsive-custom">
@@ -187,7 +192,16 @@ try {
                                 elseif ($acao === 'EXCLUSÃO' || $acao === 'BLOQUEIO') $acaoClass = 'vencido';
                                 elseif ($acao === 'DEVOLUÇÃO' || $acao === 'DESBLOQUEIO') $acaoClass = 'ativo';
                                 
-                                $dataLog = date('d/m/Y H:i:s', strtotime($log['log_data_hora']));
+                                // O backend grava log_datahora em UTC (NOW() do MySQL Aiven) — converte para o fuso de Brasília
+                                $dataLog = (new DateTime($log['log_datahora'], new DateTimeZone('UTC')))
+                                    ->setTimezone(new DateTimeZone('America/Sao_Paulo'))
+                                    ->format('d/m/Y H:i:s');
+
+                                $ocorrencia = $log['log_ocorrencia'] ?? null;
+                                if (empty($ocorrencia)) {
+                                    $detalhesJson = json_decode($log['log_detalhes'] ?? '', true);
+                                    $ocorrencia = $detalhesJson['ocorrencia'] ?? 'Sem descrição.';
+                                }
                                 ?>
                                 <tr>
                                     <td><span class="text-muted fw-medium" style="font-size: 13px;"><?= $dataLog ?></span></td>
@@ -203,8 +217,8 @@ try {
                                         <div class="text-muted" style="font-size: 11px;">ID do Reg: <?= $log['log_registro_id'] ?? '---' ?></div>
                                     </td>
                                     <td>
-                                        <div class="text-truncate text-muted" style="max-width: 320px; font-size: 13px;" title="<?= htmlspecialchars($log['log_ocorrencia']) ?>">
-                                            <?= htmlspecialchars($log['log_ocorrencia']) ?>
+                                        <div class="text-truncate text-muted" style="max-width: 320px; font-size: 13px;" title="<?= htmlspecialchars($ocorrencia) ?>">
+                                            <?= htmlspecialchars($ocorrencia) ?>
                                         </div>
                                     </td>
                                     <td class="text-end">
@@ -277,10 +291,20 @@ function verDetalhesLog(logId) {
             if (res.success && res.data) {
                 const log = res.data;
                 document.getElementById('det-log-id').innerText = log.log_id;
-                document.getElementById('det-log-data').innerText = new Date(log.log_data_hora).toLocaleString('pt-BR');
+                // Interpreta o timestamp como UTC e exibe no fuso local do navegador
+                document.getElementById('det-log-data').innerText = new Date(String(log.log_datahora).replace(' ', 'T') + 'Z').toLocaleString('pt-BR');
                 document.getElementById('det-log-resp').innerText = log.usu_login || 'Sistema';
                 document.getElementById('det-log-tabela').innerText = `${log.log_tabela} (ID Reg: ${log.log_registro_id || '---'})`;
-                document.getElementById('det-log-ocorrencia').innerText = log.log_ocorrencia;
+                let detalheOcorrencia = (log.log_ocorrencia || '');
+                if (!detalheOcorrencia) {
+                    try {
+                        const det = JSON.parse(log.log_detalhes || '{}');
+                        detalheOcorrencia = det.ocorrencia || 'Sem descrição.';
+                    } catch {
+                        detalheOcorrencia = 'Sem descrição.';
+                    }
+                }
+                document.getElementById('det-log-ocorrencia').innerText = detalheOcorrencia;
                 
                 // Formatação bonita do JSON
                 try {

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 $page_title = 'Catálogo de EPIs';
 $active_menu = 'epis';
-$page_roles = ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR', 'GESTOR'];
+$page_roles = ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR', 'GESTOR']; // RH possui acesso somente consulta (API bloqueia escrita)
 
 require_once __DIR__ . '/../components/header.php';
 require_once __DIR__ . '/../components/sidebar.php';
@@ -63,7 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
             'epi_modelo' => $modelo !== '' ? $modelo : null,
             'epi_identificacao' => $identificacao !== '' ? $identificacao : null,
             'epi_ref_fornecedor' => $refFornecedor !== '' ? $refFornecedor : null,
-            'epi_exige_tamanho' => $exigeTamanho
+            'epi_exige_tamanho' => $exigeTamanho,
+            'epi_vida_util_obs' => trim($_POST['epi_vida_util_obs'] ?? '') !== '' ? trim($_POST['epi_vida_util_obs']) : null
         ];
 
         try {
@@ -105,6 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
         $identificacao = trim($_POST['epi_identificacao'] ?? '');
         $refFornecedor = trim($_POST['epi_ref_fornecedor'] ?? '');
         $exigeTamanho = isset($_POST['epi_exige_tamanho']) ? 1 : 0;
+        $histFornecedor = trim($_POST['hist_fornecedor'] ?? '');
 
         $payload = [
             'epi_nome' => $nome,
@@ -123,7 +125,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
             'epi_modelo' => $modelo !== '' ? $modelo : null,
             'epi_identificacao' => $identificacao !== '' ? $identificacao : null,
             'epi_ref_fornecedor' => $refFornecedor !== '' ? $refFornecedor : null,
-            'epi_exige_tamanho' => $exigeTamanho
+            'epi_exige_tamanho' => $exigeTamanho,
+            'epi_vida_util_obs' => trim($_POST['epi_vida_util_obs'] ?? '') !== '' ? trim($_POST['epi_vida_util_obs']) : null,
+            'hist_fornecedor' => $histFornecedor !== '' ? $histFornecedor : null
         ];
 
         try {
@@ -171,6 +175,15 @@ try {
 $podeEditar = in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST'], true);
 $podeExcluir = in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST'], true);
 $podeVerCustos = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR'], true);
+
+// Dados para o Painel de Monitoramento de C.A. (remove campos financeiros de perfis sem permissão)
+$episParaPainel = $epis;
+if (!$podeVerCustos) {
+    $episParaPainel = array_map(static function (array $e): array {
+        unset($e['epi_valor'], $e['epi_origem_preco']);
+        return $e;
+    }, $epis);
+}
 ?>
 
 <div id="main-content">
@@ -182,12 +195,23 @@ $podeVerCustos = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR'], true);
                 <h3 class="fw-bold m-0" style="color: var(--color-primary);">Catálogo de EPIs</h3>
                 <p class="text-muted">Gerencie a homologação, rastreabilidade e validade do Certificado de Aprovação (C.A.) dos EPIs.</p>
             </div>
-            
-            <?php if ($podeEditar): ?>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCadastrar">
-                    <i class="bi bi-plus-lg me-1"></i> Novo Item
-                </button>
-            <?php endif; ?>
+
+            <div class="d-flex gap-2">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-secondary btn-view active" id="btn-visao-catalogo" onclick="alternarVisao('catalogo')">
+                        <i class="bi bi-box-seam me-1"></i> Catálogo
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-view" id="btn-visao-painel" onclick="alternarVisao('painel')">
+                        <i class="bi bi-shield-exclamation me-1"></i> Monitoramento de C.A.
+                    </button>
+                </div>
+
+                <?php if ($podeEditar): ?>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCadastrar">
+                        <i class="bi bi-plus-lg me-1"></i> Novo Item
+                    </button>
+                <?php endif; ?>
+            </div>
         </div>
 
         <?php if ($erro !== null): ?>
@@ -204,17 +228,42 @@ $podeVerCustos = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR'], true);
             </div>
         <?php endif; ?>
 
+        <div id="visao-catalogo">
         <!-- Listagem e Filtro -->
         <div class="card-custom">
             <div class="row g-3 mb-4">
-                <div class="col-md-6 col-lg-4">
+                <div class="col-md-6 col-lg-5 position-relative">
+                    <label for="busca-input" class="form-label fw-semibold" style="font-size: 12px;">
+                        <i class="bi bi-search text-primary me-1"></i> Buscar Equipamento (Tempo Real) *
+                    </label>
                     <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search text-muted"></i></span>
-                        <input type="text" id="busca-input" class="form-control border-start-0" placeholder="Buscar por nome, fabricante ou CA...">
+                        <span class="input-group-text bg-white border-end-0 text-primary">
+                            <i class="bi bi-shield-check"></i>
+                        </span>
+                        <input type="text" 
+                               id="busca-input" 
+                               class="form-control border-start-0 border-end-0 py-2" 
+                               placeholder="Digite o nome (ex: Prot...), fabricante ou C.A...." 
+                               autocomplete="off"
+                               oninput="aoDigitarBuscaEpi(this.value)"
+                               onfocus="aoFocarBuscaEpi()"
+                               onkeydown="aoTeclarBuscaEpi(event)">
+                        <button class="btn btn-outline-secondary border-start-0 d-none" 
+                                type="button" 
+                                id="btn-limpar-busca" 
+                                onclick="limparBuscaEpi()" 
+                                title="Limpar busca">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                    <!-- Dropdown Flutuante de Autocomplete / Sugestões em Tempo Real -->
+                    <div id="autocomplete-lista-epis" 
+                         class="shadow-lg mt-1 p-0 border" 
+                         style="display: none; position: absolute; top: 100%; left: 0; right: 0; width: 100%; max-height: 320px; overflow-y: auto; z-index: 99999; border-radius: 10px; background: #ffffff; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2) !important;">
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <select id="filtro-tipo" class="form-select">
+                    <select id="filtro-tipo" class="form-select" onchange="aplicarFiltrosEpi()">
                         <option value="">Todos os Tipos</option>
                         <option value="EPI_COM_CA">EPI com C.A.</option>
                         <option value="ITEM_SEGURANCA_SEM_CA">Item de Segurança sem C.A.</option>
@@ -223,7 +272,7 @@ $podeVerCustos = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR'], true);
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select id="filtro-ca-status" class="form-select">
+                    <select id="filtro-ca-status" class="form-select" onchange="aplicarFiltrosEpi()">
                         <option value="">Todos os Status C.A.</option>
                         <option value="vigente">Vigente</option>
                         <option value="vencido">Vencido / Próximo</option>
@@ -291,6 +340,7 @@ $podeVerCustos = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR'], true);
                                 }
                                 ?>
                                 <tr class="epi-row" 
+                                    data-id="<?= (int)$epi['epi_id'] ?>"
                                     data-nome="<?= htmlspecialchars(strtolower($epi['epi_nome'])) ?>"
                                     data-fabricante="<?= htmlspecialchars(strtolower($epi['epi_fabricante'])) ?>"
                                     data-ca="<?= htmlspecialchars($epi['epi_ca'] ?? '') ?>"
@@ -344,7 +394,22 @@ $podeVerCustos = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR'], true);
                 </table>
             </div>
         </div>
+        </div><!-- /visao-catalogo -->
+
+        <!-- ================= PAINEL DE MONITORAMENTO DE C.A. ================= -->
+        <div id="visao-painel-ca" class="d-none">
+            <div class="card-custom">
+                <h5 class="fw-bold mb-1 text-color-primary"><i class="bi bi-shield-exclamation me-2"></i>Painel de Monitoramento de C.A.</h5>
+                <p class="text-muted" style="font-size: 13px;">Validação de conformidade legal de uso do EPI: acompanhamento da validade dos Certificados de Aprovação junto ao Ministério do Trabalho.</p>
+
+                <div class="d-flex flex-wrap gap-2 mb-4" id="ca-chips"></div>
+
+                <div id="ca-lista" class="d-flex flex-column gap-3"></div>
+            </div>
+        </div>
     </div>
+
+
 </div>
 
 <!-- ================= MODAIS DE AÇÃO ================= -->
@@ -741,13 +806,421 @@ $podeVerCustos = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR'], true);
             </div>
         </div>
     </div>
+<!-- Modal Histórico de Preços -->
+<div class="modal fade" id="modalHistoricoPrecos" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" style="color: var(--color-primary);">
+                    <i class="bi bi-clock-history me-2"></i>Histórico e Cotação de Preços dos EPIs
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-3">Consulte a cotação atual, origem dos preços e valores homologados para os equipamentos de proteção.</p>
+                <div class="table-responsive border rounded" style="max-height: 350px; overflow-y: auto;">
+                    <table class="table table-hover align-middle m-0" style="font-size: 13px;">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Equipamento (EPI)</th>
+                                <th>Fabricante / C.A.</th>
+                                <th>Origem da Cotação</th>
+                                <th>Preço Homologado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($epis)): ?>
+                                <tr><td colspan="4" class="text-center text-muted py-3">Nenhum EPI cadastrado.</td></tr>
+                            <?php else: ?>
+                                <?php foreach ($epis as $e): ?>
+                                    <?php
+                                    $val = (float)($e['epi_valor'] ?? 0);
+                                    $valFmt = 'R$ ' . number_format($val, 2, ',', '.');
+                                    $origem = $e['epi_origem_preco'] ?? 'COMPRA_DIRETA';
+                                    ?>
+                                    <tr>
+                                        <td class="fw-semibold"><?= htmlspecialchars($e['epi_nome']) ?></td>
+                                        <td>
+                                            <div><?= htmlspecialchars($e['epi_fabricante'] ?? '---') ?></div>
+                                            <small class="text-muted">C.A. <?= htmlspecialchars($e['epi_ca'] ?? 'N/A') ?></small>
+                                        </td>
+                                        <td><span class="badge bg-light text-dark border"><?= htmlspecialchars($origem) ?></span></td>
+                                        <td class="fw-bold text-success"><?= $valFmt ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
 </div>
+
+
 
 <!-- ================= JAVASCRIPT ================= -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    initBuscaEFiltros();
+// Base de Catálogo para Busca e Autocomplete
+let listaEpisCadastrados = <?= json_encode(array_values(array_map(function($e) {
+    return [
+        'epi_id' => (int)$e['epi_id'],
+        'epi_nome' => $e['epi_nome'] ?? '',
+        'epi_ca' => $e['epi_ca'] ?? '',
+        'epi_fabricante' => $e['epi_fabricante'] ?? '',
+        'epi_tipo_item' => $e['epi_tipo_item'] ?? 'EPI_COM_CA',
+        'epi_vencimento_ca' => $e['epi_vencimento_ca'] ?? '',
+        'epi_status' => $e['epi_status'] ?? 'ATIVO'
+    ];
+}, $epis)), JSON_UNESCAPED_UNICODE) ?>;
+
+let sugestoesEpisAtuais = [];
+let indexFocadoEpiAutocomplete = -1;
+
+function normalizarTexto(str) {
+    return String(str || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+}
+
+function htmlEscape(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function destacarTrecho(texto, query) {
+    if (!texto) return '';
+    if (!query) return htmlEscape(texto);
+    const textoNorm = normalizarTexto(texto);
+    const queryNorm = normalizarTexto(query);
+    const idx = textoNorm.indexOf(queryNorm);
+    if (idx === -1) return htmlEscape(texto);
+
+    const antes = texto.substring(0, idx);
+    const meio = texto.substring(idx, idx + query.length);
+    const depois = texto.substring(idx + query.length);
+    return `${htmlEscape(antes)}<strong class="text-primary">${htmlEscape(meio)}</strong>${htmlEscape(depois)}`;
+}
+
+function aoDigitarBuscaEpi(termo) {
+    indexFocadoEpiAutocomplete = -1;
+    const btnLimpar = document.getElementById('btn-limpar-busca');
+    if (termo && termo.length > 0) {
+        btnLimpar.classList.remove('d-none');
+    } else {
+        btnLimpar.classList.add('d-none');
+    }
+    aplicarFiltrosEpi();
+}
+
+function aoFocarBuscaEpi() {
+    const busca = document.getElementById('busca-input');
+    if (busca && busca.value.trim().length >= 1) {
+        aplicarFiltrosEpi();
+    }
+}
+
+function limparBuscaEpi() {
+    const busca = document.getElementById('busca-input');
+    if (busca) {
+        busca.value = '';
+        busca.focus();
+    }
+    const btnLimpar = document.getElementById('btn-limpar-busca');
+    if (btnLimpar) btnLimpar.classList.add('d-none');
+    fecharAutocompleteEpi();
+    aplicarFiltrosEpi();
+}
+
+function fecharAutocompleteEpi() {
+    const autoList = document.getElementById('autocomplete-lista-epis');
+    if (autoList) {
+        autoList.style.display = 'none';
+        autoList.classList.add('d-none');
+        autoList.innerHTML = '';
+    }
+    indexFocadoEpiAutocomplete = -1;
+    sugestoesEpisAtuais = [];
+}
+
+function aplicarFiltrosEpi() {
+    const busca = document.getElementById('busca-input');
+    const filtroTipo = document.getElementById('filtro-tipo');
+    const filtroCaStatus = document.getElementById('filtro-ca-status');
+    const rows = document.querySelectorAll('.epi-row');
+
+    const rawQuery = busca ? busca.value.trim() : '';
+    const queryNorm = normalizarTexto(rawQuery);
+    const queryCleanCa = rawQuery.replace(/\D/g, '');
+    const tipo = filtroTipo ? filtroTipo.value : '';
+    const caStatus = filtroCaStatus ? filtroCaStatus.value : '';
+
+    let visiveis = 0;
+
+    rows.forEach(row => {
+        const rNome = normalizarTexto(row.getAttribute('data-nome'));
+        const rFabricante = normalizarTexto(row.getAttribute('data-fabricante'));
+        const rCa = row.getAttribute('data-ca') || '';
+        const rCaLimpo = rCa.replace(/\D/g, '');
+        const rTipo = row.getAttribute('data-tipo') || '';
+        const rCaStatus = row.getAttribute('data-castatus') || '';
+
+        // "COMEÇA COM" (startsWith) estritamente no início do nome do EPI, do fabricante ou do C.A.
+        let bateBusca = false;
+        if (!queryNorm) {
+            bateBusca = true;
+        } else {
+            const comecaNome = rNome.startsWith(queryNorm);
+            const comecaFab = rFabricante.startsWith(queryNorm);
+            const comecaCa = (queryCleanCa.length > 0 && rCaLimpo.startsWith(queryCleanCa)) || rCa.startsWith(rawQuery);
+
+            bateBusca = comecaNome || comecaFab || comecaCa;
+        }
+
+        const bateTipo = (tipo === '' || rTipo === tipo);
+        const bateCaStatus = (caStatus === '' || rCaStatus === caStatus);
+
+        if (bateBusca && bateTipo && bateCaStatus) {
+            row.style.display = '';
+            visiveis++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    renderizarAutocompleteEpi(rawQuery, queryNorm, queryCleanCa, tipo, caStatus);
+}
+
+function renderizarAutocompleteEpi(rawQuery, queryNorm, queryCleanCa, tipo, caStatus) {
+    const autoList = document.getElementById('autocomplete-lista-epis');
+    if (!autoList) return;
+
+    if (!queryNorm || queryNorm.length < 1) {
+        fecharAutocompleteEpi();
+        return;
+    }
+
+    // Filtra catálogo por nome, fabricante ou C.A.
+    sugestoesEpisAtuais = listaEpisCadastrados.filter(e => {
+        const eTipo = e.epi_tipo_item || '';
+        if (tipo !== '' && eTipo !== tipo) return false;
+
+        const nomeNorm = normalizarTexto(e.epi_nome);
+        const fabNorm = normalizarTexto(e.epi_fabricante);
+        const caLimpo = String(e.epi_ca || '').replace(/\D/g, '');
+
+        const matchNome = nomeNorm.includes(queryNorm);
+        const matchFab = fabNorm.includes(queryNorm);
+        const matchCa = (queryCleanCa.length > 0 && caLimpo.includes(queryCleanCa)) || String(e.epi_ca || '').includes(rawQuery);
+
+        return matchNome || matchFab || matchCa;
+    });
+
+    indexFocadoEpiAutocomplete = -1;
+
+    if (sugestoesEpisAtuais.length === 0) {
+        autoList.innerHTML = `
+            <div class="p-3 text-center text-muted" style="font-size: 13px;">
+                <i class="bi bi-search me-1 text-secondary"></i> Nenhum equipamento encontrado com "<strong>${htmlEscape(rawQuery)}</strong>"
+            </div>`;
+        autoList.style.display = 'block';
+        autoList.classList.remove('d-none');
+        return;
+    }
+
+    const itensExibir = sugestoesEpisAtuais.slice(0, 8);
+    let html = `
+        <div class="px-3 py-2 bg-light border-bottom text-muted d-flex justify-content-between align-items-center" style="font-size: 11px;">
+            <span><i class="bi bi-box-seam me-1 text-primary"></i> ${sugestoesEpisAtuais.length} equipamento(s) encontrado(s)</span>
+            <span><kbd>▲</kbd> <kbd>▼</kbd> para navegar • <kbd>Enter</kbd> para escolher</span>
+        </div>
+        <div class="list-group list-group-flush">
+    `;
+
+    itensExibir.forEach((e, idx) => {
+        const nomeDestacado = destacarTrecho(e.epi_nome, rawQuery);
+        const fab = htmlEscape(e.epi_fabricante || 'Fabricante não informado');
+        const caDesc = e.epi_ca ? `C.A. ${e.epi_ca}` : 'Sem C.A.';
+
+        const iniciais = (e.epi_nome || 'EP')
+            .split(' ')
+            .filter(n => n.length > 0)
+            .slice(0, 2)
+            .map(n => n[0].toUpperCase())
+            .join('');
+
+        let statusCaHtml = '';
+        if (e.epi_vencimento_ca) {
+            const dataVenc = new Date(e.epi_vencimento_ca);
+            const hoje = new Date();
+            const dataFmt = e.epi_vencimento_ca.split('-').reverse().join('/');
+            if (dataVenc < hoje) {
+                statusCaHtml = `<span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1" style="font-size: 10px;"><i class="bi bi-exclamation-triangle me-1"></i>C.A. Vencido (${dataFmt})</span>`;
+            } else {
+                statusCaHtml = `<span class="text-muted ms-1" style="font-size: 10px;"><i class="bi bi-calendar-check me-1"></i>Val: ${dataFmt}</span>`;
+            }
+        }
+
+        let tipoLabel = 'EPI';
+        if (e.epi_tipo_item === 'UNIFORME') tipoLabel = 'Uniforme';
+        else if (e.epi_tipo_item === 'ITEM_SEGURANCA_SEM_CA') tipoLabel = 'Item sem C.A.';
+
+        html += `
+            <a href="javascript:void(0)" 
+               class="list-group-item list-group-item-action p-2 border-0 border-bottom d-flex align-items-center gap-2 autocomplete-item auto-epi-item" 
+               id="auto-epi-${idx}"
+               onclick="selecionarEpiAutocomplete('${e.epi_nome.replace(/'/g, "\\'")}', ${e.epi_id})"
+               onmouseover="destacarItemEpi(${idx})">
+                <div class="rounded-circle bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center flex-shrink-0" 
+                     style="width: 36px; height: 36px; font-size: 13px; letter-spacing: 0.5px;">
+                    ${iniciais}
+                </div>
+                <div class="flex-grow-1 min-w-0" style="line-height: 1.25;">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="fw-semibold text-dark text-truncate" style="font-size: 13px;">${nomeDestacado}</span>
+                        <span class="badge bg-light text-secondary border ms-1 flex-shrink-0" style="font-size: 10px;">ID #${e.epi_id}</span>
+                    </div>
+                    <div class="text-muted d-flex flex-wrap align-items-center gap-1 mt-1" style="font-size: 11px;">
+                        <span><i class="bi bi-building me-1"></i>${fab}</span> • 
+                        <span><i class="bi bi-shield me-1"></i>${caDesc} (${tipoLabel})</span>
+                        ${statusCaHtml ? ' • ' + statusCaHtml : ''}
+                    </div>
+                </div>
+            </a>
+        `;
+    });
+
+    html += `</div>`;
+    autoList.innerHTML = html;
+    autoList.style.display = 'block';
+    autoList.classList.remove('d-none');
+}
+
+function destacarItemEpi(idx) {
+    indexFocadoEpiAutocomplete = idx;
+    const items = document.querySelectorAll('.auto-epi-item');
+    items.forEach((el, i) => {
+        if (i === idx) {
+            el.classList.add('active');
+        } else {
+            el.classList.remove('active');
+        }
+    });
+}
+
+function aoTeclarBuscaEpi(e) {
+    const autoList = document.getElementById('autocomplete-lista-epis');
+    if (!autoList || autoList.style.display === 'none') return;
+
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (sugestoesEpisAtuais.length > 0) {
+            indexFocadoEpiAutocomplete = (indexFocadoEpiAutocomplete + 1) % Math.min(sugestoesEpisAtuais.length, 8);
+            destacarItemEpi(indexFocadoEpiAutocomplete);
+            const el = document.getElementById(`auto-epi-${indexFocadoEpiAutocomplete}`);
+            if (el) el.scrollIntoView({ block: 'nearest' });
+        }
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (sugestoesEpisAtuais.length > 0) {
+            indexFocadoEpiAutocomplete = (indexFocadoEpiAutocomplete - 1 + Math.min(sugestoesEpisAtuais.length, 8)) % Math.min(sugestoesEpisAtuais.length, 8);
+            destacarItemEpi(indexFocadoEpiAutocomplete);
+            const el = document.getElementById(`auto-epi-${indexFocadoEpiAutocomplete}`);
+            if (el) el.scrollIntoView({ block: 'nearest' });
+        }
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (indexFocadoEpiAutocomplete >= 0 && sugestoesEpisAtuais[indexFocadoEpiAutocomplete]) {
+            selecionarEpiAutocomplete(sugestoesEpisAtuais[indexFocadoEpiAutocomplete].epi_nome, sugestoesEpisAtuais[indexFocadoEpiAutocomplete].epi_id);
+        } else if (sugestoesEpisAtuais.length === 1) {
+            selecionarEpiAutocomplete(sugestoesEpisAtuais[0].epi_nome, sugestoesEpisAtuais[0].epi_id);
+        }
+    } else if (e.key === 'Escape') {
+        fecharAutocompleteEpi();
+    }
+}
+
+function selecionarEpiAutocomplete(nome, epiId) {
+    const busca = document.getElementById('busca-input');
+    if (busca) {
+        busca.value = nome;
+    }
+    const btnLimpar = document.getElementById('btn-limpar-busca');
+    if (btnLimpar) btnLimpar.classList.remove('d-none');
+    fecharAutocompleteEpi();
+    aplicarFiltrosEpi();
+
+    if (epiId) {
+        const row = document.querySelector(`.epi-row[data-id="${epiId}"]`);
+        if (row) {
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            row.classList.add('table-active');
+            setTimeout(() => row.classList.remove('table-active'), 2500);
+        }
+    }
+}
+
+// Fecha autocomplete se clicar fora
+document.addEventListener('click', function(e) {
+    const busca = document.getElementById('busca-input');
+    const wrapper = busca ? busca.closest('.position-relative') : null;
+    if (wrapper && !wrapper.contains(e.target)) {
+        fecharAutocompleteEpi();
+    }
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    restaurarEstadoFiltros();
+    
+    document.querySelectorAll('form[method="POST"]').forEach(form => {
+        form.addEventListener('submit', function() {
+            salvarEstadoFiltros();
+        });
+    });
+});
+
+function salvarEstadoFiltros() {
+    const estado = {
+        busca: document.getElementById('busca-input')?.value || '',
+        filtroTipo: document.getElementById('filtro-tipo')?.value || '',
+        filtroCaStatus: document.getElementById('filtro-ca-status')?.value || '',
+        scrollY: window.scrollY
+    };
+    sessionStorage.setItem('epis_estado_filtros', JSON.stringify(estado));
+}
+
+function restaurarEstadoFiltros() {
+    const estadoSalvo = sessionStorage.getItem('epis_estado_filtros');
+    if (!estadoSalvo) return;
+    
+    sessionStorage.removeItem('epis_estado_filtros');
+    
+    try {
+        const estado = JSON.parse(estadoSalvo);
+        
+        if (estado.busca) document.getElementById('busca-input').value = estado.busca;
+        if (estado.filtroTipo) document.getElementById('filtro-tipo').value = estado.filtroTipo;
+        if (estado.filtroCaStatus) document.getElementById('filtro-ca-status').value = estado.filtroCaStatus;
+        
+        if (estado.busca || estado.filtroTipo || estado.filtroCaStatus) {
+            aplicarFiltrosEpi();
+        }
+        
+        if (estado.scrollY > 0) {
+            setTimeout(() => window.scrollTo(0, estado.scrollY), 100);
+        }
+    } catch (e) {}
+}
 
 /**
  * Controla os inputs obrigatórios de C.A. e dados de rastreabilidade dependendo do Tipo de Item selecionado
@@ -802,44 +1275,6 @@ function toggleVidaUtil(prefix) {
         inputUni.required = false;
         inputVal.value = '';
     }
-}
-
-/**
- * Lógica do buscador e filtros no front-end
- */
-function initBuscaEFiltros() {
-    const busca = document.getElementById('busca-input');
-    const filtroTipo = document.getElementById('filtro-tipo');
-    const filtroCaStatus = document.getElementById('filtro-ca-status');
-    const rows = document.querySelectorAll('.epi-row');
-    
-    function aplicarFiltros() {
-        const query = busca.value.toLowerCase().trim();
-        const tipo = filtroTipo.value;
-        const caStatus = filtroCaStatus.value;
-        
-        rows.forEach(row => {
-            const rNome = row.getAttribute('data-nome');
-            const rFabricante = row.getAttribute('data-fabricante');
-            const rCa = row.getAttribute('data-ca');
-            const rTipo = row.getAttribute('data-tipo');
-            const rCaStatus = row.getAttribute('data-castatus');
-            
-            const bateBusca = rNome.includes(query) || rFabricante.includes(query) || rCa.includes(query);
-            const bateTipo = (tipo === '' || rTipo === tipo);
-            const bateCaStatus = (caStatus === '' || rCaStatus === caStatus);
-            
-            if (bateBusca && bateTipo && bateCaStatus) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-    }
-    
-    busca.addEventListener('input', aplicarFiltros);
-    filtroTipo.addEventListener('change', aplicarFiltros);
-    filtroCaStatus.addEventListener('change', aplicarFiltros);
 }
 
 /**
@@ -955,6 +1390,208 @@ function verFichaEpi(epi) {
 
     new bootstrap.Modal(document.getElementById('modalDetalhes')).show();
 }
+
+/* ===================== PAINEL DE MONITORAMENTO DE C.A. ===================== */
+
+const PODE_EDITAR_EPI = <?= $podeEditar ? 'true' : 'false' ?>;
+let caFiltroAtivo = 'todos';
+let episClassificados = [];
+
+/**
+ * Alterna entre a visão de Catálogo e o Painel de Monitoramento de C.A.
+ */
+function alternarVisao(visao) {
+    const ehCatalogo = visao === 'catalogo';
+
+    document.getElementById('visao-catalogo').classList.toggle('d-none', !ehCatalogo);
+    document.getElementById('visao-painel-ca').classList.toggle('d-none', ehCatalogo);
+
+    const btnCatalogo = document.getElementById('btn-visao-catalogo');
+    const btnPainel = document.getElementById('btn-visao-painel');
+    btnCatalogo.classList.toggle('active', ehCatalogo);
+    btnPainel.classList.toggle('active', !ehCatalogo);
+    btnCatalogo.classList.toggle('btn-secondary', !ehCatalogo);
+    btnPainel.classList.toggle('btn-secondary', ehCatalogo);
+
+    if (!ehCatalogo) renderizarPainelCa();
+}
+
+/**
+ * Classifica cada EPI pelo status do C.A. (critério idêntico ao aplicativo)
+ */
+function classificarCaEpi(epi) {
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+    const ca = (epi.epi_ca || '').toString().trim();
+
+    if (ca === '' || ca.toUpperCase() === 'SEM C.A.') {
+        return { status: 'sem-ca', score: 4 };
+    }
+    if (!epi.epi_vencimento_ca) {
+        return { status: 'valido', score: 3 };
+    }
+
+    const vencimento = new Date(String(epi.epi_vencimento_ca).split(' ')[0] + 'T00:00:00');
+    if (isNaN(vencimento.getTime())) return { status: 'valido', score: 3 };
+
+    if (vencimento < hoje) return { status: 'vencido', score: 1 };
+
+    const diasRestantes = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+    return diasRestantes <= 30 ? { status: 'vencendo', score: 2 } : { status: 'valido', score: 3 };
+}
+
+function badgeCa(status, epi) {
+    switch (status) {
+        case 'vencido': return '<span class="badge bg-danger">CRÍTICO / VENCIDO</span>';
+        case 'vencendo': {
+            const vencimento = new Date(String(epi.epi_vencimento_ca).split(' ')[0] + 'T00:00:00');
+            const diasRestantes = Math.ceil((vencimento - new Date()) / (1000 * 60 * 60 * 24));
+            return `<span class="badge bg-warning text-dark">ATENÇÃO / VENCENDO (${diasRestantes}d)</span>`;
+        }
+        case 'valido': return '<span class="badge bg-success">VÁLIDO</span>';
+        default: return '<span class="badge bg-info text-dark">SEM C.A.</span>';
+    }
+}
+
+function montarCardsCa() {
+    const lista = document.getElementById('ca-lista');
+
+    const filtrados = episClassificados.filter(e => caFiltroAtivo === 'todos' || e.status === caFiltroAtivo);
+
+    if (!filtrados.length) {
+        lista.innerHTML = '<p class="text-muted text-center py-4 m-0">Nenhum EPI encontrado para este filtro de monitoramento.</p>';
+        return;
+    }
+
+    lista.innerHTML = filtrados.map(e => {
+        const vidaUtil = e.epi.epi_vida_util_tipo === 'CONTROLADO'
+            ? `${e.epi.epi_vida_util} ${lowerUnidade(e.epi.epi_vida_util_unidade)}`
+            : 'Ilimitada';
+
+        let rastreabilidade;
+        if (e.status === 'sem-ca') {
+            const temDados = e.epi.epi_modelo || e.epi.epi_identificacao || e.epi.epi_numero_lote || e.epi.epi_ref_fornecedor;
+            rastreabilidade = temDados
+                ? `Lote: ${e.epi.epi_identificacao || e.epi.epi_numero_lote || '---'} | Modelo: ${e.epi.epi_modelo || '---'}`
+                : '⚠ Sem dados de rastreabilidade';
+        } else {
+            rastreabilidade = `C.A.: <strong>${e.epi.epi_ca}</strong> | Vencimento C.A.: ${formatarDataBR(e.epi.epi_vencimento_ca)}`;
+        }
+
+        return `
+            <div class="border rounded-3 p-3 d-flex flex-wrap justify-content-between align-items-center gap-2 ${e.status === 'vencido' ? 'border-danger-subtle bg-danger-subtle bg-opacity-10' : ''}">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <strong>${e.epi.epi_nome}</strong>
+                        ${badgeCa(e.status, e.epi)}
+                    </div>
+                    <div style="font-size: 12px;" class="text-muted">
+                        Fabricante: ${e.epi.epi_fabricante || '---'}
+                        | Vida útil: ${vidaUtil}
+                        | Localização: ${e.epi.epi_localizacao || '---'}
+                        <br>${rastreabilidade}
+                    </div>
+                </div>
+                <button class="btn btn-sm btn-light border" onclick='abrirEpiDoPainel(${jsonParaAtributo(e.epi)})'>
+                    <i class="bi bi-eye"></i> Detalhes
+                </button>
+            </div>`;
+    }).join('');
+}
+
+function lowerUnidade(unidade) {
+    const mapa = { DIAS: 'dias', MESES: 'meses', ANOS: 'anos' };
+    return mapa[unidade] || (unidade || '').toLowerCase();
+}
+
+function formatarDataBR(valor) {
+    if (!valor) return '---';
+    const partes = String(valor).split(' ')[0].split('-');
+    return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : valor;
+}
+
+// Serializa com aspas simples para uso seguro dentro do atributo onclick
+function jsonParaAtributo(obj) {
+    return JSON.stringify(obj).replace(/'/g, '&#39;');
+}
+
+function abrirEpiDoPainel(epi) {
+    if (PODE_EDITAR_EPI) {
+        prepararEdicao(epi);
+    } else {
+        verFichaEpi(epi);
+    }
+}
+
+function renderizarPainelCa() {
+    // Recarrega os dados atuais da tabela (renderizados no servidor)
+    if (!episClassificados.length) {
+        const dadosTabela = <?= json_encode(array_values($episParaPainel)) ?>;
+        episClassificados = dadosTabela
+            .map(epi => ({ epi, ...classificarCaEpi(epi) }))
+            .sort((a, b) => a.score - b.score || a.epi.epi_nome.localeCompare(b.epi.epi_nome, 'pt-BR', { sensitivity: 'base' }));
+    }
+
+    // Chips com contagem por categoria
+    const contagem = { todos: episClassificados.length, vencido: 0, vencendo: 0, valido: 0, 'sem-ca': 0 };
+    episClassificados.forEach(e => contagem[e.status]++);
+
+    const chipsDef = [
+        { id: 'todos', label: 'Todos', icone: 'list', classe: 'outline-primary' },
+        { id: 'vencido', label: 'Vencidos', icone: 'exclamation-triangle-fill', classe: 'outline-danger' },
+        { id: 'vencendo', label: 'Vencendo (30 dias)', icone: 'hourglass-split', classe: 'outline-warning' },
+        { id: 'valido', label: 'Válidos', icone: 'check-circle-fill', classe: 'outline-success' },
+        { id: 'sem-ca', label: 'Sem C.A.', icone: 'tag', classe: 'outline-info' }
+    ];
+
+    document.getElementById('ca-chips').innerHTML = chipsDef.map(c => `
+        <button type="button" class="btn btn-sm btn-${c.classe} ${caFiltroAtivo === c.id ? 'active' : ''}" onclick="filtrarPainelCa('${c.id}')">
+            <i class="bi bi-${c.icone} me-1"></i>${c.label} (${contagem[c.id] ?? 0})
+        </button>`).join('');
+
+    montarCardsCa();
+}
+
+function filtrarPainelCa(filtro) {
+    caFiltroAtivo = filtro;
+    renderizarPainelCa();
+}
+
+function executarAcaoSubmenuEpi(acao) {
+    if (acao === 'novo' || acao === 'novo_epi') {
+        const modalEl = document.getElementById('modalCadastrar');
+        if (modalEl) (bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl)).show();
+        return;
+    }
+
+    if (acao === 'controle_ca' || acao === 'ca') {
+        if (typeof alternarVisao === 'function') alternarVisao('painel');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (acao === 'historico_precos' || acao === 'precos') {
+        const modalEl = document.getElementById('modalHistoricoPrecos');
+        if (modalEl) (bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl)).show();
+    } else {
+        if (typeof alternarVisao === 'function') alternarVisao('catalogo');
+        if (typeof limparBuscaEpi === 'function') limparBuscaEpi();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    if (window.history && window.history.pushState) {
+        const urlNova = window.location.protocol + "//" + window.location.host + window.location.pathname + '?acao=' + acao;
+        window.history.pushState({ path: urlNova }, '', urlNova);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const visaoParam = urlParams.get('visao');
+    const acaoParam = urlParams.get('acao');
+
+    if (acaoParam) {
+        executarAcaoSubmenuEpi(acaoParam);
+    } else if (visaoParam === 'painel') {
+        alternarVisao('painel');
+    }
+});
 </script>
 
 <?php require_once __DIR__ . '/../components/footer.php'; ?>

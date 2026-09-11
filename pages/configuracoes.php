@@ -120,6 +120,30 @@ $perfilLabel = $perfisMap[$currentUser['usu_perfil']] ?? $currentUser['usu_perfi
                             <span class="fw-semibold text-muted"><?= !empty($currentUser['usu_ultimo_login']) ? date('d/m/Y H:i', strtotime($currentUser['usu_ultimo_login'])) : 'Esta sessão' ?></span>
                         </div>
                     </div>
+
+                    <hr>
+
+                    <!-- Termos de Uso -->
+                    <h6 class="fw-bold mb-3"><i class="bi bi-file-text me-1 text-primary"></i>Termos de Uso</h6>
+                    <?php $aceitouTermos = !empty($currentUser['usu_aceite_termos']); ?>
+                    <div class="alert <?= $aceitouTermos ? 'alert-success' : 'alert-warning' ?> d-flex align-items-center py-2" role="alert" style="font-size: 12px;">
+                        <i class="bi <?= $aceitouTermos ? 'bi-patch-check-fill' : 'bi-exclamation-triangle-fill' ?> me-2"></i>
+                        <div>
+                            <?php if ($aceitouTermos): ?>
+                                <?php
+                                $dataAceiteMs = isset($currentUser['usu_data_aceite_termos']) ? (int)$currentUser['usu_data_aceite_termos'] : null;
+                                echo $dataAceiteMs !== null && $dataAceiteMs > 0
+                                    ? 'Aceitos em ' . date('d/m/Y \à\s H:i', (int)($dataAceiteMs / 1000)) . '.'
+                                    : 'Termos de Uso já foram aceitos.';
+                                ?>
+                            <?php else: ?>
+                                Você ainda não registrou o aceite dos Termos de Uso.
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <a href="<?= APP_ROOT ?>pages/aceitar-termos.php" class="btn btn-outline-primary w-100 btn-sm">
+                        <i class="bi bi-file-text me-1"></i> Ver Termos de Uso
+                    </a>
                 </div>
 
                 <!-- Conexão de API e Ambiente -->

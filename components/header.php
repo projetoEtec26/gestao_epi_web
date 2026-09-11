@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+// Garante o fuso horário padrão oficial do Brasil (America/Sao_Paulo - GMT-3)
+date_default_timezone_set('America/Sao_Paulo');
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -12,7 +15,7 @@ header("Expires: 0");
 
 $config = require __DIR__ . '/../config/api.php';
 if (!defined('APP_ROOT')) {
-    define('APP_ROOT', $config['app_root_url'] ?? '/gestao_epi-web/');
+    define('APP_ROOT', $config['app_root_url'] ?? '/gestao_epi_web/');
 }
 
 // Função helper global para formatação de moeda brasileira (R$) sem dependência da extensão 'intl'
@@ -57,7 +60,7 @@ if (isset($page_roles) && is_array($page_roles)) {
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- CSS Customizado (Design System, Modo Escuro, Sidebar) -->
-    <link rel="stylesheet" href="<?= APP_ROOT ?>assets/css/style.css">
+    <link rel="stylesheet" href="<?= APP_ROOT ?>assets/css/style.css?v=<?= time() ?>">
     
     <!-- Chart.js CDN (Para Gráficos) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
