@@ -206,7 +206,8 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
 
-### 📅 Versão 3.1.0 (11/09/2026) – Resiliência cURL, Suíte Completa de Relatórios PHP e Estabilização de UX
+### 📅 Versão 3.1.0 (11/09/2026) – Resiliência cURL, Suíte Completa de Relatórios PHP, Autenticação & Estabilização de UX
+*   **Correção da Persistência de Sessão e Autenticação (`login.php`, `services/ApiService.php`, `components/header.php`):** Solucionado o problema de travamento e perda de sessão no login com credenciais homologadas (`admin` / `admin123`). O `ApiService` foi ajustado para restaurar a sessão via `@session_start()` pós-cURL, prevenindo perda de `$_SESSION` e loops de redirecionamento, além de sincronizar o `localStorage` (`token` e `usuario`) e logs de status no console.
 *   **Política de Retry e Resiliência da API (`services/ApiService.php`):** Implementada política de retry automático contra erros de Gateway (`502 Bad Gateway`, `503 Service Unavailable`) com timeout adaptativo, garantindo reconexão transparente ao ambiente em nuvem (Render Free Tier) sem interrupção para o operador.
 *   **Módulo de Relatórios Gerenciais Completo (`pages/`):** Consolidação dos 6 relatórios corporativos especializados em PHP puro (`relatorio_geral.php`, `relatorio_financeiro.php`, `relatorio_consumo_epi.php`, `relatorio_validade_ca.php`, `relatorio_auditoria_logs.php`, `relatorio_auditoria_impressao.php`), com suporte a exportação em PDF/CSV, máscaras LGPD e auditoria em background.
 *   **Fluxos de Trabalho e Interfaces Dedicadas:** Adicionadas e homologadas as páginas de Aceite de Termos de Uso (`pages/aceitar-termos.php`), Ficha Completa do Colaborador (`pages/ficha_colaborador.php`) e Workflow em Etapas de Nova Entrega (`pages/nova_entrega.php`).
