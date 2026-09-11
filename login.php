@@ -9,9 +9,14 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$config = require __DIR__ . '/config/api.php';
+if (!defined('APP_ROOT')) {
+    define('APP_ROOT', $config['app_root_url'] ?? '/gestao_epi_web/');
+}
+
 // Se o usuário já estiver logado com token válido e não exigir troca de senha, redireciona para a dashboard
 if (isset($_SESSION['token']) && $_SESSION['token'] !== '' && isset($_SESSION['usuario']) && !($_SESSION['exige_troca_senha'] ?? false)) {
-    header('Location: pages/dashboard.php');
+    header('Location: ' . APP_ROOT . 'pages/dashboard.php');
     exit;
 }
 
@@ -43,25 +48,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
                 'senha' => $senha
             ]);
 
+            $statusCode = $response['status_code'] ?? 200;
+
             if (isset($response['success']) && $response['success']) {
                 $data = $response['data'];
                 $_SESSION['token'] = $data['token'];
                 $_SESSION['usuario'] = $data['usuario'];
                 $_SESSION['exige_troca_senha'] = $data['exige_troca_senha'] ?? false;
 
-                if ($_SESSION['exige_troca_senha']) {
-                    // Armazena a senha temporária para ser enviada na tela de troca obrigatória
-                    $_SESSION['senha_temporaria'] = $senha;
-                    $sucesso = 'Login inicial efetuado. Por questões de segurança, você precisa alterar sua senha temporária agora.';
-                } else {
-                    // Login bem sucedido direto
-                    header('Location: pages/dashboard.php');
-                    exit;
-                }
+                // Garante a gravação imediata da sessão PHP em disco
+                session_write_close();
+
+                $redirectUrl = $_SESSION['exige_troca_senha'] ? APP_ROOT . 'login.php' : APP_ROOT . 'pages/dashboard.php';
+                header('Location: ' . $redirectUrl);
+                exit;
             } else {
                 $erro = $response['message'] ?? 'Credenciais inválidas.';
                 if (isset($response['raw_response'])) {
-                    // Limita a exibição da resposta bruta a 250 caracteres
                     $erro .= ' [Bruto: ' . htmlspecialchars(substr($response['raw_response'], 0, 250)) . '...]';
                 }
             }
@@ -97,9 +100,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
             if (isset($response['success']) && $response['success']) {
                 unset($_SESSION['senha_temporaria']);
                 $_SESSION['exige_troca_senha'] = false;
+                session_write_close();
                 
                 $_SESSION['success_message'] = 'Senha alterada com sucesso! Bem-vindo ao Gestão EPI.';
-                header('Location: pages/dashboard.php');
+                header('Location: ' . APP_ROOT . 'pages/dashboard.php');
                 exit;
             } else {
                 $erro = $response['message'] ?? 'Não foi possível alterar a senha.';
@@ -225,6 +229,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
             <i class="bi bi-check-circle-fill me-2"></i>
             <div><?= htmlspecialchars($sucesso) ?></div>
         </div>
+        <script>
+            try {
+                localStorage.removeItem('token');
+                localStorage.removeItem('usuario');
+                console.log('[AUTH LOGOUT] localStorage limpo com sucesso.');
+            } catch(e) {}
+        </script>
     <?php endif; ?>
 
     <?php if (($_SESSION['exige_troca_senha'] ?? false) === true): ?>

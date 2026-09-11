@@ -6,10 +6,11 @@ $api = new ApiService();
 
 $loginRes = $api->post('auth/login', [
     'usu_login' => 'admin',
-    'senha' => '123456'
+    'senha' => 'admin123'
 ]);
 
-echo "Login response: " . json_encode($loginRes) . "\n";
+echo "Login response: " . json_encode($loginRes, JSON_PRETTY_PRINT) . "\n";
+
 
 if (isset($loginRes['data']['token'])) {
     $_SESSION['token'] = $loginRes['data']['token'];

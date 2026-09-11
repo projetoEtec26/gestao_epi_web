@@ -64,6 +64,17 @@ if (isset($page_roles) && is_array($page_roles)) {
     
     <!-- Chart.js CDN (Para Gráficos) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Persistência de Autenticação Client-Side e Logs no Console -->
+    <script>
+        console.log('[AUTH SESSION ACTIVE] Status HTTP 200 - Usuário: <?= htmlspecialchars($currentUser['usu_login'] ?? '') ?> | Perfil: <?= htmlspecialchars($userProfile) ?>');
+        try {
+            localStorage.setItem('token', <?= json_encode($_SESSION['token'] ?? '') ?>);
+            localStorage.setItem('usuario', JSON.stringify(<?= json_encode($_SESSION['usuario'] ?? []) ?>));
+        } catch (e) {
+            console.error('[AUTH ERROR] Erro ao sincronizar localStorage:', e);
+        }
+    </script>
 </head>
 <body>
 <div id="app-wrapper">
