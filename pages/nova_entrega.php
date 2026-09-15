@@ -57,9 +57,17 @@ try {
                     Registro oficial de fornecimento de EPIs, substituições com devolução vinculada e coleta de assinatura eletrônica por PIN.
                 </p>
             </div>
-            <div>
-                <a href="entregas.php" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-clock-history me-1"></i> Histórico de Entregas
+            <div class="d-flex align-items-center gap-2">
+                <div class="btn-group-toggle-view" role="group">
+                    <a href="entregas.php" class="btn btn-view">
+                        <i class="bi bi-clock-history me-1"></i> Histórico
+                    </a>
+                    <a href="devolucoes.php" class="btn btn-view">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Devolução
+                    </a>
+                </div>
+                <a href="nova_entrega.php" class="btn btn-primary px-3 py-2 fw-semibold rounded-3 shadow-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Nova Entrega
                 </a>
             </div>
         </div>
@@ -76,7 +84,7 @@ try {
             <div class="col-lg-8">
                 
                 <!-- PASSO 1: Seleção do Colaborador -->
-                <div class="card-custom mb-4">
+                <div class="card-custom mb-4" style="position: relative; z-index: 1050;">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold m-0 text-color-primary">
                             <span class="badge bg-primary text-white rounded-circle me-1" style="width: 22px; height: 22px; line-height: 14px; font-size: 11px;">1</span>
@@ -116,8 +124,8 @@ try {
 
                             <!-- Dropdown Flutuante de Autocomplete -->
                             <div id="dropdown-autocomplete-colab" 
-                                 class="shadow-lg mt-1 p-0 border" 
-                                 style="display: none; position: absolute; top: 100%; left: 0; right: 0; width: 100%; max-height: 320px; overflow-y: auto; z-index: 99999; border-radius: 10px; background: #ffffff; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2) !important;">
+                                 class="shadow-lg mt-1 p-0 border autocomplete-dropdown-container" 
+                                 style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; width: 100%; max-height: 320px; overflow-y: auto; z-index: 999999; border-radius: 12px;">
                             </div>
                         </div>
                         <div class="col-md-3">
@@ -147,7 +155,7 @@ try {
                 </div>
 
                 <!-- PASSO 2: EPIs Atualmente em Posse (Para Substituição Rápida) -->
-                <div id="card-epis-em-posse" class="card-custom mb-4 d-none">
+                <div id="card-epis-em-posse" class="card-custom mb-4 d-none" style="position: relative; z-index: 1000;">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="fw-bold m-0 text-color-primary">
                             <i class="bi bi-box-seam me-1"></i> EPIs Atualmente em Posse do Colaborador
@@ -177,7 +185,7 @@ try {
                 </div>
 
                 <!-- PASSO 3: Seleção e Adição de Novos EPIs ao Carrinho -->
-                <div class="card-custom mb-4">
+                <div class="card-custom mb-4" style="position: relative; z-index: 950;">
                     <h6 class="fw-bold mb-3 text-color-primary">
                         <span class="badge bg-primary text-white rounded-circle me-1" style="width: 22px; height: 22px; line-height: 14px; font-size: 11px;">2</span>
                         Adicionar Equipamentos (EPIs) ao Carrinho
@@ -343,9 +351,9 @@ try {
                             <i class="bi bi-key-fill me-1"></i> Digite a Senha / PIN do Colaborador *
                         </label>
                         <input type="password" id="input-pin-assinatura" class="form-control text-center fw-bold fs-5" 
-                               maxlength="8" placeholder="••••" autocomplete="off" style="letter-spacing: 4px;">
+                               maxlength="10" placeholder="••••••••" autocomplete="off" style="letter-spacing: 4px;">
                         <div class="form-text" style="font-size: 11px;">
-                            PIN de 4 a 6 dígitos cadastrado pelo funcionário para validação digital da entrega.
+                            Senha/PIN de 4 a 10 caracteres alfanuméricos cadastrada pelo funcionário para validação digital da entrega.
                         </div>
                     </div>
 
@@ -430,6 +438,68 @@ try {
     </div>
 </div>
 
+<!-- Modal de Devolução Vinculada / Substituição de EPI -->
+<div class="modal fade" id="modalDevolucaoVinculada" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h6 class="modal-title fw-bold" style="color: var(--color-primary);">
+                    <i class="bi bi-arrow-repeat me-1"></i> Substituir Equipamento (Devolução Vinculada)
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modal-dev-item-orig-id">
+                <input type="hidden" id="modal-dev-epi-id">
+                
+                <div class="alert alert-warning py-2 mb-3" style="font-size: 12px;">
+                    <i class="bi bi-info-circle-fill me-1"></i>
+                    Substituindo: <strong id="modal-dev-epi-nome">---</strong>. O item em posse será registrado para devolução vinculada e a substituição será adicionada ao carrinho.
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label" style="font-size: 11px;">Motivo da Devolução *</label>
+                        <select id="modal-dev-motivo" class="form-select form-select-sm">
+                            <option value="SUBSTITUICAO" selected>Substituição por Desgaste</option>
+                            <option value="DANIFICADO">Danificado / Avariado</option>
+                            <option value="VENCIDO">Validade C.A. Vencida</option>
+                            <option value="TAMANHO_INCORRETO">Tamanho Inadequado</option>
+                            <option value="OUTRO">Outro Motivo</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label" style="font-size: 11px;">Condição do Item Devolvido *</label>
+                        <select id="modal-dev-condicao" class="form-select form-select-sm">
+                            <option value="DESCARTADO" selected>Descartado (Inutilizado)</option>
+                            <option value="DESINFETADO">Higienizado / Reutilizável</option>
+                            <option value="EM_MANUTENCAO">Enviado para Manutenção</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12 mb-2">
+                        <label class="form-label" style="font-size: 11px;">Destino do Item Devolvido *</label>
+                        <select id="modal-dev-destino" class="form-select form-select-sm">
+                            <option value="DESCARTE" selected>Lixo / Descarte Definitivo</option>
+                            <option value="ESTOQUE_SEGUNDA_MAO">Estoque Reutilizável / Reserva</option>
+                            <option value="FORNECEDOR">Devolvido ao Fornecedor / Garantia</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12 mb-2">
+                        <label class="form-label" style="font-size: 11px;">Observação / Justificativa</label>
+                        <textarea id="modal-dev-obs" class="form-control form-control-sm" rows="2" placeholder="Detalhes do estado do equipamento devolvido..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light btn-sm border" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning btn-sm fw-bold" onclick="confirmarSubstituicaoVinculada()">
+                    <i class="bi bi-arrow-repeat me-1"></i> Confirmar Substituição
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal de Cadastro / Redefinição de PIN Rápido -->
 <div class="modal fade" id="modalPinRapido" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -442,15 +512,15 @@ try {
             </div>
             <div class="modal-body">
                 <p class="text-muted mb-2" style="font-size: 11px;">
-                    Defina um PIN numérico de 4 a 6 dígitos para o colaborador assinar eletronicamente.
+                    Defina uma senha/PIN de 4 a 10 caracteres alfanuméricos para o colaborador assinar eletronicamente.
                 </p>
                 <div class="mb-2">
-                    <label class="form-label" style="font-size: 11px;">Novo PIN (4 a 6 números)</label>
-                    <input type="password" id="modal-pin-novo" class="form-control text-center fs-5" maxlength="6" placeholder="••••">
+                    <label class="form-label" style="font-size: 11px;">Novo PIN (4 a 10 caracteres alfanuméricos)</label>
+                    <input type="password" id="modal-pin-novo" class="form-control text-center fs-5" maxlength="10" placeholder="••••••••" autocomplete="off">
                 </div>
                 <div class="mb-2">
                     <label class="form-label" style="font-size: 11px;">Confirmar PIN</label>
-                    <input type="password" id="modal-pin-confirma" class="form-control text-center fs-5" maxlength="6" placeholder="••••">
+                    <input type="password" id="modal-pin-confirma" class="form-control text-center fs-5" maxlength="10" placeholder="••••••••" autocomplete="off">
                 </div>
             </div>
             <div class="modal-footer">
@@ -626,6 +696,17 @@ function htmlEscape(str) {
 }
 
 /**
+ * Destaca trechos pesquisados no autocomplete
+ */
+function destacarTrecho(texto, query) {
+    if (!texto) return '';
+    if (!query || !query.trim()) return htmlEscape(texto);
+    const termoClean = query.trim();
+    const regex = new RegExp(`(${termoClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return htmlEscape(texto).replace(regex, '<mark class="bg-warning-subtle text-dark p-0 rounded-1">$1</mark>');
+}
+
+/**
  * Disparado ao digitar no campo de busca do colaborador
  */
 function aoDigitarBuscaColaborador(termo) {
@@ -653,20 +734,11 @@ function aoDigitarBuscaColaborador(termo) {
             const matNorm = normalizarTexto(f.fun_matricula);
             const cpfLimpo = String(f.fun_cpf || '').replace(/\D/g, '');
 
-            // "Começa com" no nome completo ou no início de qualquer uma das palavras (ex: Primeiro nome ou Sobrenome)
-            const palavrasNome = nomeNorm.split(/\s+/).filter(Boolean);
-            const matchNome = nomeNorm.startsWith(termoNorm) || palavrasNome.some(p => p.startsWith(termoNorm));
-
-            // "Começa com" no cargo
-            const palavrasCargo = cargoNorm.split(/\s+/).filter(Boolean);
-            const matchCargo = cargoNorm.startsWith(termoNorm) || palavrasCargo.some(p => p.startsWith(termoNorm));
-
-            // "Começa com" no departamento ou matrícula
-            const matchDepto = deptoNorm.startsWith(termoNorm);
-            const matchMat = matNorm.startsWith(termoNorm);
-
-            // "Começa com" no CPF (apenas os dígitos iniciais)
-            const matchCpf = (termoCpfLimpo.length > 0 && cpfLimpo.startsWith(termoCpfLimpo));
+            const matchNome = nomeNorm.includes(termoNorm);
+            const matchCargo = cargoNorm.includes(termoNorm);
+            const matchDepto = deptoNorm.includes(termoNorm);
+            const matchMat = matNorm.includes(termoNorm);
+            const matchCpf = (termoCpfLimpo.length > 0 && cpfLimpo.includes(termoCpfLimpo)) || String(f.fun_cpf || '').includes(termoNorm);
 
             return matchNome || matchCargo || matchDepto || matchMat || matchCpf;
         });
@@ -693,7 +765,7 @@ function renderizarDropdownAutocomplete(termoDigitado) {
     if (resultadosAutocomplete.length === 0) {
         dropdown.innerHTML = `
             <div class="p-3 text-center text-muted" style="font-size: 13px;">
-                <i class="bi bi-search me-1 text-secondary"></i> Nenhum colaborador começando com "<strong>${htmlEscape(termoDigitado)}</strong>"
+                <i class="bi bi-search me-1 text-secondary"></i> Nenhum colaborador encontrado com "<strong>${htmlEscape(termoDigitado)}</strong>"
             </div>`;
         dropdown.style.display = 'block';
         return;
@@ -728,7 +800,7 @@ function renderizarDropdownAutocomplete(termoDigitado) {
                 </div>
                 <div class="flex-grow-1 min-w-0" style="line-height: 1.25;">
                     <div class="d-flex align-items-center justify-content-between">
-                        <span class="fw-semibold text-dark text-truncate" style="font-size: 13px;">${htmlEscape(f.fun_nome)}</span>
+                        <span class="fw-semibold text-body text-truncate" style="font-size: 13px;">${destacarTrecho(f.fun_nome, termoDigitado)}</span>
                         <span class="badge bg-light text-secondary border ms-1" style="font-size: 10px;">ID #${f.fun_id}</span>
                     </div>
                     <div class="text-muted d-flex flex-wrap align-items-center gap-1 mt-1" style="font-size: 11px;">
@@ -904,7 +976,7 @@ function renderizarDropdownAutocompleteEpi(termoDigitado) {
                 </div>
                 <div class="flex-grow-1 min-w-0" style="line-height: 1.3;">
                     <div class="d-flex align-items-center justify-content-between gap-2">
-                        <span class="fw-semibold text-dark text-truncate" style="font-size: 13px;">${nomeDestacado}</span>
+                        <span class="fw-semibold text-body text-truncate" style="font-size: 13px;">${nomeDestacado}</span>
                         <span class="badge bg-light text-secondary border flex-shrink-0" style="font-size: 10px; padding: 3px 8px; border-radius: 6px;">ID #${e.epi_id}</span>
                     </div>
                     <div class="text-muted d-flex flex-wrap align-items-center gap-1 mt-1" style="font-size: 11px;">
@@ -1029,6 +1101,32 @@ document.addEventListener('click', function(e) {
     }
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    const inputColab = document.getElementById('input-busca-colaborador');
+    if (inputColab) {
+        inputColab.addEventListener('input', function() {
+            aoDigitarBuscaColaborador(this.value);
+        });
+        inputColab.addEventListener('keyup', function() {
+            aoDigitarBuscaColaborador(this.value);
+        });
+    }
+
+    const ddColab = document.getElementById('dropdown-autocomplete-colab');
+    if (ddColab) {
+        ddColab.addEventListener('mousedown', function(e) {
+            const item = e.target.closest('.autocomplete-item');
+            if (item) {
+                e.preventDefault();
+                const match = item.id ? item.id.match(/\d+$/) : null;
+                if (match && resultadosAutocomplete[match[0]]) {
+                    selecionarColaborador(resultadosAutocomplete[match[0]].fun_id);
+                }
+            }
+        });
+    }
+});
+
 /**
  * Gera um UUID v4 para idempotência da operação idêntico ao aplicativo Android
  */
@@ -1122,22 +1220,35 @@ async function verificarStatusPin(funId) {
     badge.innerHTML = '<span class="badge bg-secondary"><i class="bi bi-hourglass-split"></i> Verificando PIN...</span>';
 
     try {
-        const res = await fetch(`${PROXY_URL}?route=assinaturas/funcionario/${funId}`).then(r => r.json());
-        if (res.success && res.data) {
-            const ass = res.data;
-            if (ass.ass_status === 'ATIVO') {
-                badge.innerHTML = '<span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i> PIN Ativo e Válido</span>';
-            } else if (ass.ass_status === 'BLOQUEADO') {
-                badge.innerHTML = `
-                    <span class="badge bg-danger"><i class="bi bi-lock-fill me-1"></i> PIN Bloqueado</span>
-                    <button type="button" class="btn btn-xs btn-outline-danger ms-1" onclick="desbloquearPinColaborador(${ass.ass_id})">Desbloquear</button>
-                `;
-            } else {
-                badge.innerHTML = `
-                    <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle-fill me-1"></i> ${ass.ass_status}</span>
-                    <button type="button" class="btn btn-xs btn-outline-primary ms-1" onclick="abrirModalPinRapido()">Redefinir</button>
-                `;
+        let status = '';
+        let assId = null;
+
+        const resAss = await fetch(`${PROXY_URL}?route=assinaturas/funcionario/${funId}`).then(r => r.json()).catch(() => null);
+        if (resAss && resAss.success && resAss.data) {
+            status = (resAss.data.ass_status || '').toUpperCase();
+            assId = resAss.data.ass_id;
+        }
+
+        if (!status) {
+            const resFunc = await fetch(`${PROXY_URL}?route=funcionarios/${funId}`).then(r => r.json()).catch(() => null);
+            if (resFunc && resFunc.success && resFunc.data) {
+                const f = resFunc.data;
+                status = (f.assinatura_status || (f.ass_senha_hash ? 'ATIVO' : '')).toUpperCase();
+                assId = f.ass_id || f.fun_id;
             }
+        }
+
+        if (status === 'ATIVO') {
+            badge.innerHTML = `
+                <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i> PIN Ativo e Válido</span>
+                <button type="button" class="btn btn-xs btn-outline-primary ms-1" style="font-size: 11px;" onclick="abrirModalPinRapido()">Redefinir</button>
+            `;
+        } else if (status === 'BLOQUEADO') {
+            const idParaDesbloqueio = assId || funId;
+            badge.innerHTML = `
+                <span class="badge bg-danger"><i class="bi bi-lock-fill me-1"></i> PIN Bloqueado</span>
+                <button type="button" class="btn btn-xs btn-outline-danger ms-1" onclick="desbloquearPinColaborador(${idParaDesbloqueio})">Desbloquear</button>
+            `;
         } else {
             badge.innerHTML = `
                 <span class="badge bg-warning text-dark"><i class="bi bi-key me-1"></i> Sem PIN Cadastrado</span>
@@ -1332,16 +1443,26 @@ function abrirModalDevolucaoVinculada(itemId, epiId, epiNome) {
     document.getElementById('modal-dev-epi-id').value = epiId;
     document.getElementById('modal-dev-epi-nome').innerText = `${epiNome} (Item #${itemId})`;
     
-    // Já seleciona o EPI correspondente no catálogo se houver
-    document.getElementById('select-epi-item').value = epiId;
-    document.getElementById('input-motivo-item').value = 'SUBSTITUICAO';
-    aoSelecionarEpiCatalogo(epiId);
+    // Pré-seleciona o EPI no autocomplete do formulário
+    if (epiId && typeof selecionarEpiEntrega === 'function') {
+        selecionarEpiEntrega(epiId);
+    }
+    const inputMotivo = document.getElementById('input-motivo-item');
+    if (inputMotivo) {
+        inputMotivo.value = 'SUBSTITUICAO';
+    }
 
-    new bootstrap.Modal(document.getElementById('modalDevolucaoVinculada')).show();
+    const modalEl = document.getElementById('modalDevolucaoVinculada');
+    if (modalEl) {
+        new bootstrap.Modal(modalEl).show();
+    }
 }
 
 function confirmarSubstituicaoVinculada() {
     const origItemId = parseInt(document.getElementById('modal-dev-item-orig-id').value);
+    const origEpiId = parseInt(document.getElementById('modal-dev-epi-id').value);
+    const rawEpiNome = document.getElementById('modal-dev-epi-nome').innerText;
+    const origEpiNome = rawEpiNome.split(' (Item #')[0];
     const motivoDev = document.getElementById('modal-dev-motivo').value;
     const condicaoDev = document.getElementById('modal-dev-condicao').value;
     const destinoDev = document.getElementById('modal-dev-destino').value;
@@ -1356,10 +1477,49 @@ function confirmarSubstituicaoVinculada() {
         data_devolucao: new Date().toISOString()
     };
 
-    bootstrap.Modal.getInstance(document.getElementById('modalDevolucaoVinculada')).hide();
-    
-    // Adiciona o item ao carrinho com o vínculo de devolução configurado
-    adicionarItemAoCarrinho(devolucaoObj);
+    const modalInst = bootstrap.Modal.getInstance(document.getElementById('modalDevolucaoVinculada'));
+    if (modalInst) {
+        modalInst.hide();
+    }
+
+    // Busca o EPI no catálogo
+    let epi = epiSelecionadoEntrega;
+    if (!epi) {
+        const selectVal = document.getElementById('select-epi-item') ? document.getElementById('select-epi-item').value : null;
+        const targetId = selectVal ? parseInt(selectVal) : origEpiId;
+        epi = listaEpisCatalogo.find(x => parseInt(x.epi_id) === targetId);
+    }
+
+    const tamanhoInput = document.getElementById('input-tamanho-item');
+    const tamanho = tamanhoInput ? tamanhoInput.value : 'Único';
+
+    if (epi) {
+        carrinhoEpi.push({
+            epi_id: parseInt(epi.epi_id),
+            epi_nome: epi.epi_nome,
+            epi_ca: epi.epi_ca || 'Isento',
+            quantidade: 1,
+            tamanho: tamanho,
+            lote: null,
+            motivo_especifico: 'SUBSTITUICAO',
+            tipo_item: (epi.epi_ca && epi.epi_ca !== 'Isento') ? 'EPI_COM_CA' : 'ITEM_SEGURANCA_SEM_CA',
+            devolucao_vinculada: devolucaoObj
+        });
+    } else {
+        carrinhoEpi.push({
+            epi_id: origEpiId,
+            epi_nome: origEpiNome,
+            epi_ca: 'Isento',
+            quantidade: 1,
+            tamanho: tamanho,
+            lote: null,
+            motivo_especifico: 'SUBSTITUICAO',
+            tipo_item: 'EPI_COM_CA',
+            devolucao_vinculada: devolucaoObj
+        });
+    }
+
+    renderizarCarrinho();
 }
 
 /**
@@ -1379,8 +1539,8 @@ async function salvarPinRapido() {
     const pin = document.getElementById('modal-pin-novo').value.trim();
     const conf = document.getElementById('modal-pin-confirma').value.trim();
 
-    if (!pin || pin.length < 4 || pin.length > 6) {
-        alert('O PIN deve conter entre 4 e 6 números!');
+    if (!pin || pin.length < 4 || pin.length > 10) {
+        alert('A senha/PIN deve conter de 4 a 10 caracteres alfanuméricos!');
         return;
     }
     if (pin !== conf) {
@@ -1391,16 +1551,30 @@ async function salvarPinRapido() {
     try {
         const payload = {
             fun_id: colaboradorSelecionado.id,
+            pin: pin,
             ass_senha: pin
         };
-        const res = await fetch(`${PROXY_URL}?route=assinaturas`, {
+        let res = await fetch(`${PROXY_URL}?route=assinaturas`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         }).then(r => r.json());
 
+        // Se falhou indicando que o funcionário já possui PIN, tenta redefinir
+        if (!res.success) {
+            const resRedefinir = await fetch(`${PROXY_URL}?route=assinaturas/redefinir`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(r => r.json());
+
+            if (resRedefinir.success) {
+                res = resRedefinir;
+            }
+        }
+
         if (res.success) {
-            alert('PIN cadastrado com sucesso!');
+            alert('PIN salvo com sucesso!');
             bootstrap.Modal.getInstance(document.getElementById('modalPinRapido')).hide();
             verificarStatusPin(colaboradorSelecionado.id);
             document.getElementById('input-pin-assinatura').value = pin;
@@ -1415,9 +1589,27 @@ async function salvarPinRapido() {
 async function desbloquearPinColaborador(assId) {
     if (!confirm('Deseja desbloquear a assinatura eletrônica deste colaborador?')) return;
     try {
-        const res = await fetch(`${PROXY_URL}?route=assinaturas/desbloquear/${assId}`, {
-            method: 'POST'
-        }).then(r => r.json());
+        const response = await fetch(`${PROXY_URL}?route=assinaturas/desbloquear/${assId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        const rawText = await response.text();
+        console.log('Desbloqueio response status:', response.status, 'body:', rawText);
+
+        let res;
+        try {
+            res = JSON.parse(rawText);
+        } catch (jsonErr) {
+            alert('Resposta inesperada do servidor. Verifique se sua sessão está ativa.');
+            return;
+        }
+
+        if (res.logged_out || res.status_code === 401) {
+            alert('Sua sessão expirou. Faça login novamente.');
+            window.location.href = '../login.php';
+            return;
+        }
 
         if (res.success) {
             alert('PIN desbloqueado com sucesso!');
@@ -1426,6 +1618,7 @@ async function desbloquearPinColaborador(assId) {
             alert('Falha ao desbloquear: ' + (res.message || 'Erro desconhecido'));
         }
     } catch (e) {
+        console.error('Erro no desbloqueio:', e);
         alert('Erro ao conectar: ' + e.message);
     }
 }
@@ -1459,33 +1652,74 @@ async function processarEnvioEntrega() {
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Autenticando Assinatura e Registrando...';
 
     const clientOperationId = gerarUUIDv4();
+    const usuarioLogadoId = <?= json_encode((int)($currentUser['usu_id'] ?? 5)) ?>;
+
     const payload = {
         fun_id: colaboradorSelecionado.id,
+        usu_id: usuarioLogadoId,
         pin: pin,
+        ass_senha: pin,
+        entr_motivo: carrinhoEpi[0].motivo_especifico || 'FORNECIMENTO',
         motivo: carrinhoEpi[0].motivo_especifico || 'FORNECIMENTO',
         metodo_aceite: 'PIN',
         client_operation_id: clientOperationId,
         origem: 'WEB_CONTINGENCIA',
-        itens: carrinhoEpi.map(item => ({
-            epi_id: item.epi_id,
-            quantidade: item.quantidade,
-            tamanho: item.tamanho,
-            lote: item.lote,
-            motivo_especifico: item.motivo_especifico,
-            tipo_item: item.tipo_item,
-            devolucao_vinculada: item.devolucao_vinculada
-        }))
+        itens: carrinhoEpi.map(item => {
+            const itemObj = {
+                epi_id: item.epi_id,
+                quantidade: item.quantidade,
+                item_quantidade: item.quantidade,
+                tamanho: item.tamanho,
+                item_tamanho: item.tamanho,
+                lote: item.lote,
+                item_numero_lote: item.lote,
+                motivo_especifico: item.motivo_especifico,
+                item_motivo_entrega: item.motivo_especifico,
+                tipo_item: item.tipo_item
+            };
+
+            if (item.devolucao_vinculada) {
+                const origId = item.devolucao_vinculada.item_entrega_original_id;
+                itemObj.devolucao_vinculada = {
+                    item_id_anterior: origId,
+                    item_entrega_original_id: origId,
+                    quantidade_devolvida: 1,
+                    motivo: item.devolucao_vinculada.motivo_devolucao || 'SUBSTITUICAO',
+                    motivo_devolucao: item.devolucao_vinculada.motivo_devolucao || 'SUBSTITUICAO',
+                    condicao: item.devolucao_vinculada.condicao || 'DESCARTADO',
+                    destino: item.devolucao_vinculada.destino || 'DESCARTE',
+                    observacao: item.devolucao_vinculada.justificativa || null,
+                    justificativa: item.devolucao_vinculada.justificativa || null,
+                    data_devolucao: item.devolucao_vinculada.data_devolucao || new Date().toISOString()
+                };
+            }
+            return itemObj;
+        })
     };
 
     try {
-        const res = await fetch(`${PROXY_URL}?route=entregas`, {
+        const response = await fetch(`${PROXY_URL}?route=entregas`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
-        }).then(r => r.json());
+        });
+
+        const rawText = await response.text();
+        let res;
+        try {
+            res = JSON.parse(rawText);
+        } catch (jsonErr) {
+            res = { success: false, message: 'A API respondeu em um formato inesperado. Verifique se sua sessão está ativa.' };
+        }
 
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-shield-lock-fill me-2"></i> Assinar e Finalizar Entrega';
+
+        if (res.logged_out || res.status_code === 401) {
+            alert('Sua sessão expirou. Você será redirecionado para a tela de login.');
+            window.location.href = '../login.php';
+            return;
+        }
 
         if (res.success && res.data) {
             ultimaEntregaConcluidaId = res.data.entrega_id;
@@ -1501,7 +1735,7 @@ async function processarEnvioEntrega() {
     } catch (e) {
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-shield-lock-fill me-2"></i> Assinar e Finalizar Entrega';
-        alert('Erro ao comunicar com a API central: ' + e.message);
+        alert('Erro de comunicação: ' + e.message);
     }
 }
 

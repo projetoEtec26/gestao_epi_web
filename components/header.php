@@ -4,7 +4,7 @@ declare(strict_types=1);
 // Garante o fuso horário padrão oficial do Brasil (America/Sao_Paulo - GMT-3)
 date_default_timezone_set('America/Sao_Paulo');
 
-if (session_status() === PHP_SESSION_NONE) {
+if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     session_start();
 }
 

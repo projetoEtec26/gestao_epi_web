@@ -19,7 +19,7 @@ class ApiService {
         $this->appRoot = $config['app_root_url'] ?? '/gestao_epi_web/';
 
         // Garante que a sessão esteja iniciada
-        if (session_status() === PHP_SESSION_NONE) {
+        if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
             session_start();
         }
     }
@@ -58,8 +58,8 @@ class ApiService {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3); // Connect timeout otimizado de 3s
-            curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Response timeout otimizado de 10s
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // Connect timeout otimizado de 5s
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Response timeout de 30s para relatórios pesados e logs de auditoria
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Evita problemas de SSL em localhost/Render de teste
             if ($data !== null && in_array(strtoupper($method), ['POST', 'PUT', 'PATCH'], true)) {
                 $jsonData = json_encode($data);
@@ -79,7 +79,7 @@ class ApiService {
             curl_close($ch);
 
             // Restaura a sessão se estava ativa antes da requisição HTTP para permitir que o script chamador grave $_SESSION
-            if ($wasSessionActive && session_status() !== PHP_SESSION_ACTIVE) {
+            if ($wasSessionActive && session_status() !== PHP_SESSION_ACTIVE && !headers_sent()) {
                 @session_start();
             }
 
@@ -128,6 +128,18 @@ class ApiService {
                 unset($_SESSION['usuario']);
                 
                 $_SESSION['error_message'] = 'Sua sessão expirou ou o acesso é inválido. Por favor, faça login novamente.';
+                
+                $isProxy = defined('IS_API_PROXY') || (basename($_SERVER['SCRIPT_NAME'] ?? '') === 'api_proxy.php');
+                if ($isProxy || headers_sent() || (!empty($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json')) || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')) {
+                    return [
+                        'success' => false,
+                        'message' => 'Sua sessão expirou ou o token é inválido. Por favor, faça login novamente.',
+                        'data' => null,
+                        'status_code' => 401,
+                        'logged_out' => true
+                    ];
+                }
+
                 header('Location: ' . $this->appRoot . 'login.php');
                 exit;
             }

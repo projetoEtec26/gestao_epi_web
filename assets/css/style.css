@@ -509,7 +509,15 @@ body.dark-mode .table-custom tr:hover td {
     background-color: rgba(255, 255, 255, 0.01);
 }
 
-/* Modais Glassmorphism */
+/* Modais Glassmorphism & Ajuste de Z-Index */
+.modal-backdrop {
+    z-index: 1060 !important;
+}
+
+.modal {
+    z-index: 1070 !important;
+}
+
 .modal-content {
     background-color: var(--color-card-bg);
     border: 1px solid var(--color-border);
@@ -531,6 +539,64 @@ body.dark-mode .table-custom tr:hover td {
     border-radius: 8px;
     font-weight: 500;
     transition: var(--transition-smooth);
+}
+
+/* Segmented Control / Alternador de Visão de EPIs (Catálogo / Monitoramento C.A.) */
+.btn-group-toggle-view {
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+    padding: 4px !important;
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+body.dark-mode .btn-group-toggle-view {
+    background-color: #1e293b;
+    border-color: #334155 !important;
+}
+
+.btn-view {
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 7px 16px !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    background-color: transparent !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+}
+
+body.dark-mode .btn-view {
+    color: #94a3b8 !important;
+}
+
+.btn-view:hover {
+    color: #0f172a !important;
+    background-color: rgba(71, 85, 105, 0.08) !important;
+}
+
+body.dark-mode .btn-view:hover {
+    color: #f8fafc !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.btn-view.active {
+    color: #ffffff !important;
+    background-color: #475569 !important;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15) !important;
+}
+
+body.dark-mode .btn-view.active {
+    color: #ffffff !important;
+    background-color: #305BD3 !important;
 }
 
 .btn-primary {
@@ -561,17 +627,54 @@ body.dark-mode .table-custom tr:hover td {
 }
 
 /* Autocomplete em Tempo Real */
+#dropdown-autocomplete-colab,
+#dropdown-autocomplete-epi,
+#dropdown-autocomplete-func,
+#autocomplete-lista,
+.autocomplete-dropdown-container {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 14px 35px -4px rgba(15, 23, 42, 0.25), 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    z-index: 999999 !important;
+}
+
+body.dark-mode #dropdown-autocomplete-colab,
+body.dark-mode #dropdown-autocomplete-epi,
+body.dark-mode #dropdown-autocomplete-func,
+body.dark-mode #autocomplete-lista,
+body.dark-mode .autocomplete-dropdown-container {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+    box-shadow: 0 14px 35px -4px rgba(0, 0, 0, 0.65) !important;
+}
+
 .autocomplete-item {
     cursor: pointer;
     transition: background-color 0.15s ease, border-color 0.15s ease;
     text-decoration: none !important;
     border-left: 4px solid transparent !important;
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+}
+
+body.dark-mode .autocomplete-item {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
 }
 
 .autocomplete-item:hover,
 .autocomplete-item.active {
     background-color: #eff6ff !important;
     border-left-color: #2563eb !important;
+}
+
+body.dark-mode .autocomplete-item:hover,
+body.dark-mode .autocomplete-item.active {
+    background-color: #334155 !important;
+    border-left-color: #38bdf8 !important;
 }
 
 .autocomplete-item:last-child {
@@ -854,6 +957,111 @@ body.dark-mode .speed-dial-action:hover .speed-dial-label {
     font-size: 15px;
     flex-shrink: 0;
 }
+
+/* ========================================================
+   ESTILOS HISTÓRICO DE ENTREGAS (CARD FEED ESTILO APP MOBILE)
+   ======================================================== */
+.card-entrega-app {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-entrega-app:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px rgba(37, 99, 235, 0.12);
+    border-color: #93c5fd;
+}
+
+body.dark-mode .card-entrega-app {
+    background: #111c38;
+    border-color: #1e293b;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .card-entrega-app:hover {
+    border-color: #38bdf8;
+    box-shadow: 0 12px 30px rgba(14, 165, 233, 0.2);
+}
+
+.entrega-app-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2563eb;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.entrega-app-title:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+body.dark-mode .entrega-app-title {
+    color: #38bdf8;
+}
+
+body.dark-mode .entrega-app-title:hover {
+    color: #7dd3fc;
+}
+
+/* Badge de Status Pill tipo Android (Estilo Print) */
+.badge-status-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 14px;
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+.badge-status-pill.finalizada {
+    background-color: #10b981;
+    color: #ffffff;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);
+}
+
+.badge-status-pill.pendente {
+    background-color: #f59e0b;
+    color: #ffffff;
+    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
+}
+
+.badge-status-pill.cancelada {
+    background-color: #ef4444;
+    color: #ffffff;
+    box-shadow: 0 2px 10px rgba(239, 68, 68, 0.35);
+}
+
+.hash-box-app {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 11px;
+    color: #475569;
+}
+
+body.dark-mode .hash-box-app {
+    background-color: rgba(15, 23, 42, 0.6);
+    border-color: #1e293b;
+    color: #94a3b8;
+}
+
 
 
 

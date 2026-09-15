@@ -31,7 +31,7 @@ if (php_sapi_name() === 'cli-server') {
 }
 
 return [
-    'api_base_url' => getenv('API_BASE_URL') ?: 'http://127.0.0.1/gestao_epi_api_7/',
+    'api_base_url' => getenv('API_BASE_URL') ?: 'https://gestao-epi-api.onrender.com/',
     
     // Raiz da aplicação Web-PHP calculada dinamicamente
     'app_root_url' => getenv('APP_ROOT_URL') ?: $appRoot

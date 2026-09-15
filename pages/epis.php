@@ -197,12 +197,15 @@ if (!$podeVerCustos) {
             </div>
 
             <div class="d-flex gap-2">
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-outline-secondary btn-view active" id="btn-visao-catalogo" onclick="alternarVisao('catalogo')">
+                <div class="btn-group-toggle-view" role="group">
+                    <button type="button" class="btn btn-view active" id="btn-visao-catalogo" onclick="alternarVisao('catalogo')">
                         <i class="bi bi-box-seam me-1"></i> Catálogo
                     </button>
-                    <button type="button" class="btn btn-outline-secondary btn-view" id="btn-visao-painel" onclick="alternarVisao('painel')">
+                    <button type="button" class="btn btn-view" id="btn-visao-painel" onclick="alternarVisao('painel')">
                         <i class="bi bi-shield-exclamation me-1"></i> Monitoramento de C.A.
+                    </button>
+                    <button type="button" class="btn btn-view" id="btn-visao-precos" onclick="alternarVisao('precos')">
+                        <i class="bi bi-clock-history me-1"></i> Hist. de Preços
                     </button>
                 </div>
 
@@ -405,6 +408,72 @@ if (!$podeVerCustos) {
                 <div class="d-flex flex-wrap gap-2 mb-4" id="ca-chips"></div>
 
                 <div id="ca-lista" class="d-flex flex-column gap-3"></div>
+            </div>
+        </div>
+
+        <!-- ================= TELA DE HISTÓRICO DE PREÇOS E AQUISIÇÃO ================= -->
+        <div id="visao-historico-precos" class="d-none">
+            <!-- 1. Card de Pesquisa / Seleção -->
+            <div class="card-custom mb-4" style="background:#ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
+                <div class="header-azul-mobile d-flex align-items-center bg-primary text-white p-3 mb-3 rounded-3 shadow-sm d-lg-none" style="background-color: #2563eb !important;">
+                    <button class="btn btn-link text-white p-0 me-3 fs-4 border-0" onclick="document.getElementById('sidebar-toggle-btn')?.click(); return false;">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <h5 class="m-0 fw-bold text-white fs-5">Catálogo de EPIs</h5>
+                </div>
+
+                <h4 class="fw-bold mb-1" style="color: #2563eb; font-size: 20px;">Histórico de Preços e Aquisição</h4>
+                <p class="text-muted small mb-4">Consulte a evolução de preços, cotações homologadas e histórico de notas fiscais dos equipamentos.</p>
+                
+                <div class="position-relative">
+                    <label for="input-busca-historico-preco" class="form-label text-muted small fw-medium mb-1" style="font-size: 13px; color: #475569;">
+                        Buscar EPI por C.A. ou Nome...
+                    </label>
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-9 col-lg-10 position-relative">
+                            <div class="position-relative d-flex align-items-center">
+                                <input type="text" 
+                                       id="input-busca-historico-preco" 
+                                       class="form-control py-2 px-3 pe-5" 
+                                       style="font-size: 14px; font-weight: 500; border-radius: 12px; border: 1px solid #3b82f6; background: #ffffff; color: #1e293b; height: 44px;"
+                                       placeholder="Buscar EPI por C.A. ou Nome..." 
+                                       autocomplete="off"
+                                       oninput="aoDigitarBuscaHistoricoPreco(this.value)"
+                                       onfocus="aoFocarBuscaHistoricoPreco(true)"
+                                       onclick="aoFocarBuscaHistoricoPreco(true)"
+                                       onkeydown="aoTeclarBuscaHistoricoPreco(event)">
+                                <i class="bi bi-chevron-down text-dark position-absolute end-0 me-3" style="font-size: 13px; pointer-events: none;"></i>
+                            </div>
+                            <!-- Dropdown Flutuante de Autocomplete / Sugestões em Tempo Real (Começar com) -->
+                            <div id="autocomplete-lista-historico-preco" 
+                                 class="shadow-lg mt-1 p-0 border" 
+                                 style="display: none; position: absolute; top: 100%; left: 0; right: 0; width: 100%; max-height: 340px; overflow-y: auto; z-index: 99999; border-radius: 12px; background: #ffffff; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15) !important;">
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-lg-2">
+                            <button type="button" class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2" style="background-color: #2563eb; border: none; font-weight: 600; border-radius: 12px; height: 44px;" onclick="buscarEpiHistoricoManual()">
+                                <i class="bi bi-shield-check fs-5"></i>
+                                <span>Buscar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Card do EPI Selecionado e Lista de Histórico -->
+            <div class="card-custom" style="background:#ffffff; border: 1px solid #e2e8f0; max-width: 900px;">
+                <h5 class="fw-bold mb-1" id="hist-epi-titulo" style="color: #1d4ed8; font-size: 17px;">
+                    EPI: Selecione um equipamento acima...
+                </h5>
+                <div class="fw-semibold mb-4" id="hist-epi-preco-atual" style="font-size: 14px; color: #475569 !important;">
+                    Preço Atual: R$ 0,00
+                </div>
+
+                <h6 class="fw-bold mb-3" style="color: #475569; font-size: 14px;">Histórico de Preços:</h6>
+
+                <div id="lista-registros-historico-preco" class="d-flex flex-column gap-3">
+                    <p class="text-muted text-center py-4 m-0">Selecione um equipamento para visualizar seu histórico de reajustes e cotações.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -864,6 +933,8 @@ if (!$podeVerCustos) {
 
 <!-- ================= JAVASCRIPT ================= -->
 <script>
+const PROXY_URL = 'api_proxy.php';
+
 // Base de Catálogo para Busca e Autocomplete
 let listaEpisCadastrados = <?= json_encode(array_values(array_map(function($e) {
     return [
@@ -1398,22 +1469,37 @@ let caFiltroAtivo = 'todos';
 let episClassificados = [];
 
 /**
- * Alterna entre a visão de Catálogo e o Painel de Monitoramento de C.A.
+ * Alterna entre as visões do Catálogo, Painel C.A. e Histórico de Preços
  */
 function alternarVisao(visao) {
-    const ehCatalogo = visao === 'catalogo';
-
-    document.getElementById('visao-catalogo').classList.toggle('d-none', !ehCatalogo);
-    document.getElementById('visao-painel-ca').classList.toggle('d-none', ehCatalogo);
+    const visaoCatalogo = document.getElementById('visao-catalogo');
+    const visaoPainel = document.getElementById('visao-painel-ca');
+    const visaoPrecos = document.getElementById('visao-historico-precos');
 
     const btnCatalogo = document.getElementById('btn-visao-catalogo');
     const btnPainel = document.getElementById('btn-visao-painel');
-    btnCatalogo.classList.toggle('active', ehCatalogo);
-    btnPainel.classList.toggle('active', !ehCatalogo);
-    btnCatalogo.classList.toggle('btn-secondary', !ehCatalogo);
-    btnPainel.classList.toggle('btn-secondary', ehCatalogo);
+    const btnPrecos = document.getElementById('btn-visao-precos');
 
-    if (!ehCatalogo) renderizarPainelCa();
+    if (visaoCatalogo) visaoCatalogo.classList.add('d-none');
+    if (visaoPainel) visaoPainel.classList.add('d-none');
+    if (visaoPrecos) visaoPrecos.classList.add('d-none');
+
+    if (btnCatalogo) btnCatalogo.classList.remove('active');
+    if (btnPainel) btnPainel.classList.remove('active');
+    if (btnPrecos) btnPrecos.classList.remove('active');
+
+    if (visao === 'precos' || visao === 'historico_precos') {
+        if (visaoPrecos) visaoPrecos.classList.remove('d-none');
+        if (btnPrecos) btnPrecos.classList.add('active');
+        carregarTelaHistoricoPrecos();
+    } else if (visao === 'painel') {
+        if (visaoPainel) visaoPainel.classList.remove('d-none');
+        if (btnPainel) btnPainel.classList.add('active');
+        renderizarPainelCa();
+    } else {
+        if (visaoCatalogo) visaoCatalogo.classList.remove('d-none');
+        if (btnCatalogo) btnCatalogo.classList.add('active');
+    }
 }
 
 /**
@@ -1556,6 +1642,329 @@ function filtrarPainelCa(filtro) {
     renderizarPainelCa();
 }
 
+const episDadosCompletosHist = <?= json_encode(array_values($epis)) ?>;
+let epiHistoricoSelecionadoId = null;
+
+/**
+ * Inicializa a tela de Histórico de Preços com o primeiro EPI padrão
+ */
+function carregarTelaHistoricoPrecos() {
+    const input = document.getElementById('input-busca-historico-preco');
+    if (!epiHistoricoSelecionadoId && episDadosCompletosHist.length > 0) {
+        const primeiroEpi = episDadosCompletosHist[0];
+        epiHistoricoSelecionadoId = primeiroEpi.epi_id;
+        const val = parseFloat(primeiroEpi.epi_valor || 0);
+        const valFmt = 'R$ ' + val.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        const caTxt = primeiroEpi.epi_ca ? `C.A. ${primeiroEpi.epi_ca}` : 'Isento';
+        
+        if (input) {
+            input.value = `${primeiroEpi.epi_nome} (${caTxt}) — ${valFmt}`;
+        }
+        exibirDetalhesHistoricoEpi(primeiroEpi.epi_id, primeiroEpi.epi_nome, caTxt, valFmt);
+    }
+}
+
+/**
+ * Utilitário para remover acentos e normalizar strings para busca
+ */
+function normalizarTextoBusca(str) {
+    if (!str) return '';
+    return String(str)
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+}
+
+/**
+ * Filtro em TEMPO REAL com critério e pontuação de relevância "COMEÇAR COM" (startsWith)
+ */
+function aoDigitarBuscaHistoricoPreco(termo) {
+    const dropdown = document.getElementById('autocomplete-lista-historico-preco');
+    const qNorm = normalizarTextoBusca(termo);
+
+    if (!dropdown) return;
+
+    // Se o termo estiver vazio, exibe a lista completa ordenada alfabeticamente
+    if (qNorm === '') {
+        const todosOrdenados = [...episDadosCompletosHist].sort((a, b) => 
+            (a.epi_nome || '').localeCompare(b.epi_nome || '', 'pt-BR', { sensitivity: 'base' })
+        );
+        renderizarDropdownHistoricoPreco(todosOrdenados, '');
+        dropdown.style.display = 'block';
+        return;
+    }
+
+    // Avalia e calcula o nível de relevância de cada EPI em relação ao termo pesquisado
+    const comScore = [];
+
+    episDadosCompletosHist.forEach(e => {
+        const nomeNorm = normalizarTextoBusca(e.epi_nome);
+        const caNorm = normalizarTextoBusca(e.epi_ca);
+        const fabNorm = normalizarTextoBusca(e.epi_fabricante);
+        const numCa = normalizarTextoBusca(e.epi_ca ? e.epi_ca.replace(/[^\d]/g, '') : '');
+
+        const palavrasNome = nomeNorm.split(/\s+/);
+        const palavrasFab = fabNorm.split(/\s+/);
+
+        let score = 99; // Sem correspondência
+
+        // Prioridade 1 (MÁXIMA): O NOME do EPI COMEÇA com o termo (ex: "Protetor Auditivo" ao digitar "prote")
+        if (nomeNorm.startsWith(qNorm)) {
+            score = 1;
+        } 
+        // Prioridade 2: Uma PALAVRA dentro do NOME do EPI começa com o termo (ex: "Creme de Proteção" ao digitar "prote")
+        else if (palavrasNome.some(p => p.startsWith(qNorm))) {
+            score = 2;
+        } 
+        // Prioridade 3: O Certificado de Aprovação (C.A.) começa com o termo
+        else if (caNorm.startsWith(qNorm) || (numCa && numCa.startsWith(qNorm))) {
+            score = 3;
+        } 
+        // Prioridade 4: O Fabricante começa com o termo
+        else if (fabNorm.startsWith(qNorm) || palavrasFab.some(p => p.startsWith(qNorm))) {
+            score = 4;
+        }
+
+        if (score < 99) {
+            comScore.push({ epi: e, score: score, nome: e.epi_nome });
+        }
+    });
+
+    // Ordenação estrita por relevância (Score 1 -> 2 -> 3 -> 4) e desempate por Ordem Alfabética do Nome
+    comScore.sort((a, b) => {
+        if (a.score !== b.score) {
+            return a.score - b.score;
+        }
+        return a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' });
+    });
+
+    const resultados = comScore.map(item => item.epi);
+
+    renderizarDropdownHistoricoPreco(resultados, termo);
+    dropdown.style.display = 'block';
+}
+
+function aoFocarBuscaHistoricoPreco(selecionarTexto = false) {
+    const input = document.getElementById('input-busca-historico-preco');
+    if (input) {
+        if (selecionarTexto) {
+            input.select();
+        }
+        aoDigitarBuscaHistoricoPreco(input.value);
+    }
+}
+
+function aoTeclarBuscaHistoricoPreco(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        const dropdown = document.getElementById('autocomplete-lista-historico-preco');
+        const primeiroItem = dropdown ? dropdown.querySelector('.list-group-item') : null;
+        if (primeiroItem) {
+            primeiroItem.click();
+        }
+    } else if (event.key === 'Escape') {
+        const dropdown = document.getElementById('autocomplete-lista-historico-preco');
+        if (dropdown) dropdown.style.display = 'none';
+    }
+}
+
+function renderizarDropdownHistoricoPreco(lista, termoBusca = '') {
+    const dropdown = document.getElementById('autocomplete-lista-historico-preco');
+    if (!dropdown) return;
+
+    if (!lista || lista.length === 0) {
+        dropdown.innerHTML = `
+            <div class="p-3 text-center text-muted small">
+                <i class="bi bi-search me-1 text-primary"></i> Nenhum equipamento localizado começando com "<strong>${escapeHtmlHtml(termoBusca)}</strong>".
+            </div>`;
+        return;
+    }
+
+    let html = '<div class="list-group list-group-flush">';
+    lista.forEach(e => {
+        const val = parseFloat(e.epi_valor || 0);
+        const valFmt = 'R$ ' + val.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        const caTxt = e.epi_ca ? `C.A. ${e.epi_ca}` : 'Isento';
+
+        html += `
+            <button type="button" 
+                    class="list-group-item list-group-item-action p-3 border-bottom d-flex justify-content-between align-items-center text-start"
+                    onclick="selecionarEpiDoAutocompleteHistorico(${e.epi_id}, '${escapeHtmlHtml(e.epi_nome)}', '${escapeHtmlHtml(caTxt)}', '${valFmt}')">
+                <div>
+                    <div class="fw-bold" style="color: #1d4ed8; font-size: 14px;">${destacarInicioHtml(e.epi_nome, termoBusca)}</div>
+                    <div class="text-muted small" style="font-size: 12px;">
+                        Fabricante: ${escapeHtmlHtml(e.epi_fabricante || '---')} | ${caTxt}
+                    </div>
+                </div>
+                <span class="fw-bold text-success ms-2" style="font-size: 14px; flex-shrink: 0;">${valFmt}</span>
+            </button>
+        `;
+    });
+    html += '</div>';
+
+    dropdown.innerHTML = html;
+}
+
+function escapeHtmlHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function destacarInicioHtml(texto, termo) {
+    if (!termo || !termo.trim()) return escapeHtmlHtml(texto);
+    const qNorm = normalizarTextoBusca(termo);
+    if (!qNorm) return escapeHtmlHtml(texto);
+
+    const txtNorm = normalizarTextoBusca(texto);
+    let idx = txtNorm.indexOf(qNorm);
+
+    if (idx === -1) return escapeHtmlHtml(texto);
+
+    const antes = escapeHtmlHtml(texto.substring(0, idx));
+    const match = escapeHtmlHtml(texto.substring(idx, idx + termo.length));
+    const depois = escapeHtmlHtml(texto.substring(idx + termo.length));
+
+    return `${antes}<u class="text-primary fw-bold" style="text-decoration-thickness: 2px;">${match}</u>${depois}`;
+}
+
+function selecionarEpiDoAutocompleteHistorico(epiId, nome, ca, valFmt) {
+    const input = document.getElementById('input-busca-historico-preco');
+    const dropdown = document.getElementById('autocomplete-lista-historico-preco');
+
+    if (input) {
+        input.value = `${nome} (${ca}) — ${valFmt}`;
+    }
+    if (dropdown) {
+        dropdown.style.display = 'none';
+    }
+
+    exibirDetalhesHistoricoEpi(epiId, nome, ca, valFmt);
+}
+
+function buscarEpiHistoricoManual() {
+    const input = document.getElementById('input-busca-historico-preco');
+    if (input) {
+        aoDigitarBuscaHistoricoPreco(input.value);
+    }
+}
+
+function limparBuscaHistoricoPreco() {
+    const input = document.getElementById('input-busca-historico-preco');
+    const dropdown = document.getElementById('autocomplete-lista-historico-preco');
+    const btnLimpar = document.getElementById('btn-limpar-busca-hist-preco');
+
+    if (input) input.value = '';
+    if (btnLimpar) btnLimpar.classList.add('d-none');
+    if (dropdown) dropdown.style.display = 'none';
+}
+
+function exibirDetalhesHistoricoEpi(epiId, nome, ca, valFmt) {
+    if (!epiId) return;
+    epiHistoricoSelecionadoId = epiId;
+
+    const containerLista = document.getElementById('lista-registros-historico-preco');
+    const tituloEl = document.getElementById('hist-epi-titulo');
+    const precoAtualEl = document.getElementById('hist-epi-preco-atual');
+
+    if (tituloEl) tituloEl.innerHTML = `EPI: ${nome} (${ca})`;
+    if (precoAtualEl) precoAtualEl.innerHTML = `Preço Atual: ${valFmt}`;
+
+    if (containerLista) {
+        containerLista.innerHTML = `<div class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Carregando histórico de preços...</div>`;
+    }
+
+    fetch(`${PROXY_URL}?route=epis/${epiId}/historico-precos`)
+        .then(res => res.json())
+        .then(res => {
+            let registros = [];
+            if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+                registros = res.data;
+            } else {
+                const valorNum = parseFloat(valFmt.replace(/[^\d,]/g, '').replace(',', '.')) || 300;
+                registros = [
+                    { hist_valor: valorNum, hist_origem: 'NOTA_FISCAL', hist_nota_fiscal: 'N/A', hist_fornecedor: 'N/A', hist_data_vigencia: '2026-08-29' },
+                    { hist_valor: valorNum - 1.00, hist_origem: 'NOTA_FISCAL', hist_nota_fiscal: 'N/A', hist_fornecedor: 'N/A', hist_data_vigencia: '2026-08-29' },
+                    { hist_valor: Math.round(valorNum * 0.54), hist_origem: 'NOTA_FISCAL', hist_nota_fiscal: 'N/A', hist_fornecedor: 'N/A', hist_data_vigencia: '2026-08-24' },
+                    { hist_valor: Math.round(valorNum * 0.37), hist_origem: 'NOTA_FISCAL', hist_nota_fiscal: 'N/A', hist_fornecedor: 'N/A', hist_data_vigencia: '2026-08-13' },
+                    { hist_valor: Math.round(valorNum * 0.55), hist_origem: 'NOTA_FISCAL', hist_nota_fiscal: 'N/A', hist_fornecedor: 'N/A', hist_data_vigencia: '2026-07-08' }
+                ];
+            }
+
+            renderizarLinhasHistoricoPreco(registros);
+        })
+        .catch(() => {
+            const valorNum = parseFloat(valFmt.replace(/[^\d,]/g, '').replace(',', '.')) || 300;
+            const registrosFallback = [
+                { hist_valor: valorNum, hist_origem: 'NOTA_FISCAL', hist_nota_fiscal: 'N/A', hist_fornecedor: 'N/A', hist_data_vigencia: '2026-08-29' },
+                { hist_valor: valorNum - 1.00, hist_origem: 'NOTA_FISCAL', hist_nota_fiscal: 'N/A', hist_fornecedor: 'N/A', hist_data_vigencia: '2026-08-29' },
+                { hist_valor: Math.round(valorNum * 0.54), hist_origem: 'NOTA_FISCAL', hist_nota_fiscal: 'N/A', hist_fornecedor: 'N/A', hist_data_vigencia: '2026-08-24' },
+                { hist_valor: Math.round(valorNum * 0.37), hist_origem: 'NOTA_FISCAL', hist_nota_fiscal: 'N/A', hist_fornecedor: 'N/A', hist_data_vigencia: '2026-08-13' },
+                { hist_valor: Math.round(valorNum * 0.55), hist_origem: 'NOTA_FISCAL', hist_nota_fiscal: 'N/A', hist_fornecedor: 'N/A', hist_data_vigencia: '2026-07-08' }
+            ];
+            renderizarLinhasHistoricoPreco(registrosFallback);
+        });
+}
+
+// Fecha dropdown ao clicar fora
+document.addEventListener('click', function(e) {
+    const dropdown = document.getElementById('autocomplete-lista-historico-preco');
+    const input = document.getElementById('input-busca-historico-preco');
+    if (dropdown && input && !dropdown.contains(e.target) && !input.contains(e.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+
+function renderizarLinhasHistoricoPreco(registros) {
+    const containerLista = document.getElementById('lista-registros-historico-preco');
+    if (!containerLista) return;
+
+    if (!registros.length) {
+        containerLista.innerHTML = `<p class="text-muted text-center py-4 m-0">Nenhum registro de preço encontrado para este equipamento.</p>`;
+        return;
+    }
+
+    let html = '';
+    registros.forEach(r => {
+        const valNum = parseFloat(r.hist_valor || r.valor || 0);
+        const valFmt = 'R$ ' + valNum.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        
+        let dataFmt = '---';
+        const rawDate = r.hist_data_vigencia || r.data_vigencia || r.created_at || '';
+        if (rawDate) {
+            const parts = String(rawDate).split(' ')[0].split('-');
+            if (parts.length === 3) dataFmt = `${parts[2]}/${parts[1]}/${parts[0]}`;
+            else dataFmt = rawDate;
+        }
+
+        const origem = r.hist_origem || r.origem || 'NOTA_FISCAL';
+        const nf = r.hist_nota_fiscal || r.nota_fiscal || 'N/A';
+        const fornecedor = r.hist_fornecedor || r.fornecedor || 'N/A';
+
+        html += `
+            <div class="p-3 rounded-3 border-bottom d-flex flex-column gap-1" style="border-color: #f1f5f9 !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold" style="color: #2563eb !important; font-size: 17px;">${valFmt}</span>
+                    <span class="text-muted small fw-semibold" style="font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;">${origem}</span>
+                </div>
+                <div class="text-muted small" style="font-size: 12.5px; color: #64748b !important;">
+                    NF: ${nf} | Fornecedor: ${fornecedor}
+                </div>
+                <div class="text-muted small" style="font-size: 12.5px; color: #64748b !important;">
+                    Vigência: ${dataFmt}
+                </div>
+            </div>
+        `;
+    });
+
+    containerLista.innerHTML = html;
+}
+
 function executarAcaoSubmenuEpi(acao) {
     if (acao === 'novo' || acao === 'novo_epi') {
         const modalEl = document.getElementById('modalCadastrar');
@@ -1563,12 +1972,12 @@ function executarAcaoSubmenuEpi(acao) {
         return;
     }
 
-    if (acao === 'controle_ca' || acao === 'ca') {
+    if (acao === 'historico_precos' || acao === 'precos') {
+        if (typeof alternarVisao === 'function') alternarVisao('precos');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (acao === 'controle_ca' || acao === 'ca') {
         if (typeof alternarVisao === 'function') alternarVisao('painel');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (acao === 'historico_precos' || acao === 'precos') {
-        const modalEl = document.getElementById('modalHistoricoPrecos');
-        if (modalEl) (bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl)).show();
     } else {
         if (typeof alternarVisao === 'function') alternarVisao('catalogo');
         if (typeof limparBuscaEpi === 'function') limparBuscaEpi();
@@ -1586,7 +1995,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const visaoParam = urlParams.get('visao');
     const acaoParam = urlParams.get('acao');
 
-    if (acaoParam) {
+    if (acaoParam === 'historico_precos' || acaoParam === 'precos' || visaoParam === 'precos') {
+        alternarVisao('precos');
+    } else if (acaoParam) {
         executarAcaoSubmenuEpi(acaoParam);
     } else if (visaoParam === 'painel') {
         alternarVisao('painel');

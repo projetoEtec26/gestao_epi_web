@@ -54,24 +54,77 @@ if ($funcionarioId > 0) {
             $resEntregas = $api->get('entregas/funcionario/' . $funcionarioId);
             if (isset($resEntregas['success']) && $resEntregas['success'] && is_array($resEntregas['data'])) {
                 foreach ($resEntregas['data'] as $ent) {
-                    $dtEntregaFormatada = !empty($ent['ent_data_retirada']) 
-                        ? (new DateTime($ent['ent_data_retirada']))->format('d/m/Y') 
-                        : '---';
-                    $dtDevFormatada = !empty($ent['ite_data_devolucao']) 
-                        ? (new DateTime($ent['ite_data_devolucao']))->format('d/m/Y') 
-                        : '---';
+                    $dataRaw = $ent['entr_data_entrega'] ?? $ent['ent_data_retirada'] ?? $ent['data_entrega'] ?? $ent['created_at'] ?? '';
+                    $dtEntregaFormatada = !empty($dataRaw) ? (new DateTime($dataRaw))->format('d/m/Y') : '---';
+                    $operador = $ent['entr_usuario_nome'] ?? $ent['usuario_responsavel'] ?? $ent['usu_nome'] ?? 'almoxarifado';
+                    $motivoGeral = $ent['entr_motivo'] ?? $ent['ent_motivo'] ?? 'FORNECIMENTO';
 
-                    $movimentacoes[] = [
-                        'epi' => $ent['epi_nome'] ?? 'EPI sem identificação',
-                        'ca' => !empty($ent['epi_ca']) ? 'C.A. ' . $ent['epi_ca'] : 'Sem C.A.',
-                        'tamanho' => $ent['ite_tamanho'] ?? $ent['epi_tamanho_padrao'] ?? 'Único',
-                        'quantidade' => (int)($ent['ite_quantidade'] ?? 1),
-                        'data_entrega' => $dtEntregaFormatada,
-                        'motivo' => $ent['ent_motivo'] ?? 'FORNECIMENTO',
-                        'status' => strtoupper($ent['ite_status_item'] ?? $ent['ent_status'] ?? 'EM USO'),
-                        'data_devolucao' => $dtDevFormatada,
-                        'operador' => $ent['usuario_responsavel'] ?? 'almoxarifado'
-                    ];
+                    // Trata array de itens contidos na entrega (estrutura padrão da API)
+                    $itensList = [];
+                    if (!empty($ent['itens']) && is_array($ent['itens'])) {
+                        $itensList = $ent['itens'];
+                    } else {
+                        $itensList = [$ent];
+                    }
+
+                    foreach ($itensList as $item) {
+                        $epiNome = $item['item_epi_nome_snapshot'] 
+                            ?? $item['epi_nome'] 
+                            ?? $ent['epi_nome'] 
+                            ?? 'EPI sem identificação';
+
+                        $caVal = $item['item_epi_ca_snapshot'] 
+                            ?? $item['epi_ca'] 
+                            ?? $ent['epi_ca'] 
+                            ?? '';
+
+                        $caFormat = !empty($caVal) 
+                            ? (str_contains(strtoupper((string)$caVal), 'C.A') ? (string)$caVal : 'C.A. ' . $caVal) 
+                            : 'Sem C.A.';
+
+                        $tamanho = $item['item_tamanho'] 
+                            ?? $item['ite_tamanho'] 
+                            ?? $item['epi_tamanho_padrao'] 
+                            ?? $ent['epi_tamanho_padrao'] 
+                            ?? 'Único';
+
+                        $quantidade = (int)($item['item_quantidade'] 
+                            ?? $item['ite_quantidade'] 
+                            ?? $item['quantidade'] 
+                            ?? 1);
+
+                        $dtDevRaw = $item['item_data_devolucao'] 
+                            ?? $item['ite_data_devolucao'] 
+                            ?? $item['data_devolucao'] 
+                            ?? '';
+
+                        $dtDevFormatada = !empty($dtDevRaw) 
+                            ? (new DateTime($dtDevRaw))->format('d/m/Y') 
+                            : '---';
+
+                        $motivo = $item['item_devolucao_motivo'] 
+                            ?? $item['motivo'] 
+                            ?? $motivoGeral;
+
+                        $status = strtoupper((string)($item['item_status'] 
+                            ?? $item['ite_status_item'] 
+                            ?? $item['status'] 
+                            ?? $ent['entr_status'] 
+                            ?? $ent['ent_status'] 
+                            ?? 'EM USO'));
+
+                        $movimentacoes[] = [
+                            'epi' => $epiNome,
+                            'ca' => $caFormat,
+                            'tamanho' => $tamanho,
+                            'quantidade' => $quantidade,
+                            'data_entrega' => $dtEntregaFormatada,
+                            'motivo' => $motivo,
+                            'status' => $status,
+                            'data_devolucao' => $dtDevFormatada,
+                            'operador' => $operador
+                        ];
+                    }
                 }
             }
         }
@@ -361,7 +414,20 @@ $periodoFim = !empty($dataFim) ? (new DateTime($dataFim))->format('d/m/Y') : (ne
             </div>
             <div class="employee-item">
                 <label>Data Admissão</label>
-                <span><?= !empty($colaborador['fun_data_admissao']) ? (new DateTime($colaborador['fun_data_admissao']))->format('d/m/Y') : 'Não informada' ?></span>
+                <span>
+                    <?php
+                        $dtAdmRaw = $colaborador['fun_dataadmissao'] ?? $colaborador['fun_data_admissao'] ?? $colaborador['fun_admissao'] ?? '';
+                        if (!empty($dtAdmRaw) && $dtAdmRaw !== '0000-00-00') {
+                            try {
+                                echo (new DateTime($dtAdmRaw))->format('d/m/Y');
+                            } catch (\Throwable $e) {
+                                echo htmlspecialchars($dtAdmRaw);
+                            }
+                        } else {
+                            echo 'Não informada';
+                        }
+                    ?>
+                </span>
             </div>
             <div class="employee-item">
                 <label>Cargo / Função</label>

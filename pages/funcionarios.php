@@ -214,59 +214,85 @@ $acao = $_GET['acao'] ?? 'lista';
             </div>
         <?php endif; ?>
 
-        <!-- VIEW 1: LISTA FUNCIONÁRIOS (PADRÃO) -->
-        <div id="view-lista-funcionarios" style="display: <?= ($acao === 'lista' || empty($acao) || $acao === 'novo') ? 'block' : 'none' ?>;">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <div>
-                    <h3 class="fw-bold m-0" style="color: var(--color-primary);">Funcionários</h3>
-                    <p class="text-muted">Gerencie o cadastro, PIN de segurança e histórico de posse de EPIs dos colaboradores.</p>
-                </div>
-                
-                <div class="d-flex gap-2">
-                    <?php if ($podeEditar): ?>
-                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalImportar">
-                            <i class="bi bi-file-earmark-arrow-up me-1"></i> Importar
-                        </button>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCadastrar">
-                            <i class="bi bi-person-plus me-1"></i> Novo Funcionário
-                        </button>
-                    <?php endif; ?>
-                </div>
+        <!-- CABEÇALHO COM BOTÕES DE VISÃO (IDÊNTICO À TELA DE EPIS) -->
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+                <h3 class="fw-bold m-0" style="color: var(--color-primary);">Funcionários</h3>
+                <p class="text-muted">Gerencie o cadastro, PIN de segurança e histórico de posse de EPIs dos colaboradores.</p>
             </div>
 
+            <div class="d-flex gap-2">
+                <div class="btn-group-toggle-view" role="group">
+                    <button type="button" class="btn btn-view <?= ($acao === 'lista' || empty($acao) || $acao === 'novo') ? 'active' : '' ?>" id="btn-func-lista" onclick="alternarVisaoFuncionarios('lista')">
+                        <i class="bi bi-person-lines-fill me-1"></i> Lista Funcionários
+                    </button>
+                    <button type="button" class="btn btn-view <?= ($acao === 'pin' || $acao === 'senha_pin') ? 'active' : '' ?>" id="btn-func-pin" onclick="alternarVisaoFuncionarios('pin')">
+                        <i class="bi bi-shield-lock me-1"></i> Senha/PIN
+                    </button>
+                    <button type="button" class="btn btn-view <?= ($acao === 'pendencias' || $acao === 'pendencia') ? 'active' : '' ?>" id="btn-func-pendencias" onclick="alternarVisaoFuncionarios('pendencias')">
+                        <i class="bi bi-exclamation-triangle me-1"></i> Pendências
+                    </button>
+                </div>
+
+                <?php if ($podeEditar): ?>
+                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalImportar" title="Importar Colaboradores">
+                        <i class="bi bi-file-earmark-arrow-up me-1"></i> Importar
+                    </button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCadastrar">
+                        <i class="bi bi-person-plus me-1"></i> Novo Funcionário
+                    </button>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <script>
+        function alternarVisaoFuncionarios(visao) {
+            if (typeof executarAcaoSubmenu === 'function') {
+                executarAcaoSubmenu(visao);
+            }
+        }
+        window.alternarVisaoFuncionarios = alternarVisaoFuncionarios;
+        </script>
+
+        <!-- VIEW 1: LISTA FUNCIONÁRIOS (PADRÃO) -->
+        <div id="view-lista-funcionarios" style="display: <?= ($acao === 'lista' || empty($acao) || $acao === 'novo') ? 'block' : 'none' ?>;">
+
             <!-- Listagem e Filtro -->
-            <div class="card-custom">
+            <div class="card-custom" style="position: relative; z-index: 1050;">
                 <div class="row g-3 mb-4">
-                    <div class="col-md-6 col-lg-5 position-relative">
+                    <div class="col-md-6 col-lg-5">
                         <label for="busca-input" class="form-label fw-semibold mb-1" style="font-size:12px;">
                             <i class="bi bi-search text-primary me-1"></i> Buscar Colaborador (Tempo Real) *
                         </label>
-                        <div id="srch-box-border-func" style="
-                            display:flex; align-items:center; gap:8px;
-                            background:#fff; border:1.5px solid #d0d5dd;
-                            border-radius:10px; padding:0 12px;
-                            transition:border-color .2s, box-shadow .2s;">
-                            <i class="bi bi-search" style="color:#3b82f6;font-size:15px;flex-shrink:0;"></i>
-                            <input type="text" 
-                                   id="busca-input" 
-                                   autocomplete="off"
-                                   placeholder="Digite nome (ex: Ron...), CPF ou cargo..." 
-                                   style="border:none;outline:none;flex:1;padding:9px 0;font-size:14px;background:transparent;"
-                                   oninput="aoDigitarBuscaFuncionario(this.value)"
-                                   onfocus="this.closest('#srch-box-border-func').style.borderColor='#3b82f6'; this.closest('#srch-box-border-func').style.boxShadow='0 0 0 3px rgba(59,130,246,.15)'; aoFocarBuscaFuncionario();"
-                                   onblur="this.closest('#srch-box-border-func').style.borderColor='#d0d5dd'; this.closest('#srch-box-border-func').style.boxShadow='none';"
-                                   onkeydown="aoTeclarBuscaFuncionario(event)">
-                            <button type="button" 
-                                    id="btn-limpar-busca" 
-                                    title="Limpar busca" 
-                                    onclick="limparBuscaFuncionario()" 
-                                    style="display:none;background:none;border:none;cursor:pointer;color:#9ca3af;font-size:18px;line-height:1;padding:0 2px;">
-                                &times;
-                            </button>
-                        </div>
-                        <!-- Dropdown de Autocomplete / Sugestões em Tempo Real -->
-                        <div id="autocomplete-lista" 
-                             style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; width: 100%; max-height: 340px; overflow-y: auto; z-index: 99999; border-radius: 12px; background: #ffffff; border: 1.5px solid #e2e8f0; box-shadow: 0 12px 32px -4px rgba(0,0,0,0.18), 0 2px 8px -2px rgba(0,0,0,0.08) !important;">
+                        <div class="position-relative">
+                            <div id="srch-box-border-func" style="
+                                display:flex; align-items:center; gap:8px;
+                                background:#fff; border:1.5px solid #d0d5dd;
+                                border-radius:10px; padding:0 12px;
+                                transition:border-color .2s, box-shadow .2s;">
+                                <i class="bi bi-search" style="color:#3b82f6;font-size:15px;flex-shrink:0;"></i>
+                                <input type="text" 
+                                       id="busca-input" 
+                                       autocomplete="off"
+                                       placeholder="Digite nome (ex: Ron...), CPF ou cargo..." 
+                                       style="border:none;outline:none;flex:1;padding:9px 0;font-size:14px;background:transparent;"
+                                       oninput="aoDigitarBuscaFuncionario(this.value)"
+                                       onkeyup="aoDigitarBuscaFuncionario(this.value)"
+                                       onfocus="this.closest('#srch-box-border-func').style.borderColor='#3b82f6'; this.closest('#srch-box-border-func').style.boxShadow='0 0 0 3px rgba(59,130,246,.15)'; aoFocarBuscaFuncionario();"
+                                       onblur="this.closest('#srch-box-border-func').style.borderColor='#d0d5dd'; this.closest('#srch-box-border-func').style.boxShadow='none';"
+                                       onkeydown="aoTeclarBuscaFuncionario(event)">
+                                <button type="button" 
+                                        id="btn-limpar-busca" 
+                                        title="Limpar busca" 
+                                        onclick="limparBuscaFuncionario()" 
+                                        style="display:none;background:none;border:none;cursor:pointer;color:#9ca3af;font-size:18px;line-height:1;padding:0 2px;">
+                                    &times;
+                                </button>
+                            </div>
+                            <!-- Dropdown de Autocomplete / Sugestões em Tempo Real -->
+                            <div id="autocomplete-lista" 
+                                 style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; width: 100%; max-height: 340px; overflow-y: auto; z-index: 99999; border-radius: 12px; background: #ffffff; border: 1.5px solid #e2e8f0; box-shadow: 0 12px 32px -4px rgba(0,0,0,0.18), 0 2px 8px -2px rgba(0,0,0,0.08) !important;">
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-3">
@@ -328,11 +354,12 @@ $acao = $_GET['acao'] ?? 'lista';
                                     ?>
                                     <tr class="func-row" 
                                         data-id="<?= (int)$func['fun_id'] ?>"
-                                        data-nome="<?= htmlspecialchars(strtolower($func['fun_nome'])) ?>"
-                                        data-cpf="<?= htmlspecialchars($func['fun_cpf']) ?>"
-                                        data-cargo="<?= htmlspecialchars(strtolower($func['fun_cargo'])) ?>"
-                                        data-setor="<?= htmlspecialchars($func['fun_departamento']) ?>"
-                                        data-status="<?= htmlspecialchars($func['fun_situacao']) ?>">
+                                        data-nome="<?= htmlspecialchars(mb_strtolower((string)($func['fun_nome'] ?? ''), 'UTF-8')) ?>"
+                                        data-cpf="<?= htmlspecialchars((string)($func['fun_cpf'] ?? '')) ?>"
+                                        data-matricula="<?= htmlspecialchars(mb_strtolower((string)($func['fun_matricula'] ?? (!empty($func['fun_esocial']) ? $func['fun_esocial'] : ('mat-' . str_pad((string)$func['fun_id'], 5, '0', STR_PAD_LEFT)))), 'UTF-8')) ?>"
+                                        data-cargo="<?= htmlspecialchars(mb_strtolower((string)($func['fun_cargo'] ?? ''), 'UTF-8')) ?>"
+                                        data-setor="<?= htmlspecialchars(mb_strtolower((string)($func['fun_departamento'] ?? ''), 'UTF-8')) ?>"
+                                        data-status="<?= htmlspecialchars((string)($func['fun_situacao'] ?? 'ATIVO')) ?>">
                                         
                                         <td class="fw-semibold"><?= htmlspecialchars($func['fun_nome']) ?></td>
                                         <td class="text-muted"><?= htmlspecialchars($cpf) ?></td>
@@ -383,59 +410,93 @@ $acao = $_GET['acao'] ?? 'lista';
 
         <!-- VIEW 2: TELA PENDÊNCIAS ("Funcionários com Senha Pendente") -->
         <div id="view-pendencias-funcionarios" style="display: <?= ($acao === 'pendencias' || $acao === 'pendencia') ? 'block' : 'none' ?>;">
-            <div class="header-azul-mobile d-flex align-items-center bg-primary text-white p-3 mb-3 rounded-3 shadow-sm" style="background-color: #2563eb !important;">
-                <button class="btn btn-link text-white p-0 me-3 fs-4 border-0 d-lg-none" onclick="document.getElementById('sidebar-toggle-btn')?.click(); return false;">
+            <div class="header-azul-mobile d-flex align-items-center bg-primary text-white p-3 mb-3 rounded-3 shadow-sm d-lg-none" style="background-color: #2563eb !important;">
+                <button class="btn btn-link text-white p-0 me-3 fs-4 border-0" onclick="document.getElementById('sidebar-toggle-btn')?.click(); return false;">
                     <i class="bi bi-list"></i>
                 </button>
                 <h5 class="m-0 fw-bold text-white fs-5">Funcionários</h5>
             </div>
             
-            <h6 class="fw-bold mb-3" style="color: #2563eb; font-size: 16px;">Funcionários com Senha Pendente</h6>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h4 class="fw-bold m-0" style="color: #2563eb; font-size: 20px;">Funcionários com Senha Pendente</h4>
+                    <p class="text-muted small m-0 mt-1">Colaboradores que ainda não cadastraram a senha/PIN de assinatura ou possuem pendências funcionais.</p>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mb-4" style="max-width: 900px;">
+                <input type="text" 
+                       id="busca-pendencias-input" 
+                       class="form-control rounded-3 py-2 px-3 shadow-sm" 
+                       placeholder="Buscar pendência por nome, CPF, cargo, setor..."
+                       style="border: 1px solid #d1d5db; font-size: 14px;"
+                       oninput="filtrarCardsPendencias(this.value)"
+                       onkeyup="filtrarCardsPendencias(this.value)">
+                <button type="button" 
+                        class="btn btn-primary rounded-3 px-3 d-flex align-items-center justify-content-center shadow-sm"
+                        style="background-color: #2563eb; border: none; min-width: 48px;"
+                        onclick="filtrarCardsPendencias(document.getElementById('busca-pendencias-input').value)">
+                    <i class="bi bi-search fs-5"></i>
+                </button>
+            </div>
             
-            <div id="lista-cards-pendencias" class="d-flex flex-column gap-3 mb-5">
+            <div id="lista-cards-pendencias" class="d-flex flex-column gap-3 mb-5" style="max-width: 900px;">
                 <?php
                 $pendentesCount = 0;
                 foreach ($funcionarios as $f) {
-                    $pinStatus = $f['assinatura_status'] ?? 'PENDENTE';
-                    $funcStatus = $f['fun_situacao'] ?? 'ATIVO';
-                    $temPend = ($pinStatus === 'PENDENTE' || $pinStatus === 'INATIVO' || $pinStatus === 'NÃO CADASTRADO' || $pinStatus === 'BLOQUEADO' || $funcStatus !== 'ATIVO');
+                    $pinStatus = strtoupper((string)($f['assinatura_status'] ?? 'PENDENTE'));
+                    $funcStatus = strtoupper((string)($f['fun_situacao'] ?? 'ATIVO'));
+                    
+                    $isPinPendente = ($pinStatus === 'PENDENTE' || $pinStatus === 'INATIVO' || $pinStatus === 'NÃO CADASTRADO' || empty($f['assinatura_status']));
+                    $isAfastado = ($funcStatus === 'AFASTADO');
+                    $isBloqueado = ($pinStatus === 'BLOQUEADO');
+                    
+                    $temPend = ($isPinPendente || $isAfastado || $isBloqueado || $funcStatus !== 'ATIVO');
                     if (!$temPend) continue;
 
                     $pendentesCount++;
                     $badgeLabel = 'Senha pendente';
-                    $badgeBg = '#f59e0b';
+                    $badgeBg = '#f59e0b'; // Cor idêntica à referência do Android
 
-                    if ($funcStatus === 'AFASTADO') {
+                    if ($isAfastado) {
                         $badgeLabel = 'Afastado';
                         $badgeBg = '#f59e0b';
-                    } elseif ($funcStatus !== 'ATIVO') {
-                        $badgeLabel = htmlspecialchars($funcStatus);
-                        $badgeBg = '#6b7280';
-                    } elseif ($pinStatus === 'BLOQUEADO') {
+                    } elseif ($isBloqueado) {
                         $badgeLabel = 'PIN Bloqueado';
                         $badgeBg = '#ef4444';
+                    } elseif ($funcStatus !== 'ATIVO') {
+                        $badgeLabel = htmlspecialchars($f['fun_situacao']);
+                        $badgeBg = '#6b7280';
                     }
 
                     $cpfRaw = $f['fun_cpf'] ?? '';
                     $cpfM = (strlen($cpfRaw) === 11) ? (substr($cpfRaw, 0, 3) . '.***.***-' . substr($cpfRaw, 9, 2)) : $cpfRaw;
-                    $matr = !empty($f['fun_matricula']) ? $f['fun_matricula'] : ('MAT-' . str_pad((string)$f['fun_id'], 5, '0', STR_PAD_LEFT));
+                    
+                    $matr = !empty($f['fun_matricula']) 
+                        ? $f['fun_matricula'] 
+                        : (!empty($f['fun_esocial']) ? $f['fun_esocial'] : ('MAT-' . str_pad((string)$f['fun_id'], 5, '0', STR_PAD_LEFT)));
                     ?>
-                    <div class="card border-0 shadow-sm rounded-4 p-3 style-card-pendencia" style="background:#ffffff; cursor:pointer;" onclick="verDetalhes(<?= (int)$f['fun_id'] ?>)">
+                    <div class="card border-0 shadow-sm p-3 style-card-pendencia" 
+                         style="background:#ffffff; border: 1px solid #e2e8f0 !important; border-radius: 14px; transition: transform 0.2s ease, box-shadow 0.2s ease; cursor:pointer;" 
+                         onclick="verDetalhes(<?= (int)$f['fun_id'] ?>)"
+                         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(37,99,235,0.08)';"
+                         onmouseout="this.style.transform='none'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.05)';"
+                         title="Clique para ver a Ficha e Histórico do Colaborador">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="fw-bold fs-6" style="color: #1d4ed8 !important;"><?= htmlspecialchars($f['fun_nome']) ?></span>
-                            <span class="badge" style="background-color: <?= $badgeBg ?>; color: #ffffff; font-size: 11px; padding: 5px 10px; border-radius: 6px; font-weight: 600;"><?= $badgeLabel ?></span>
+                            <span class="fw-bold" style="color: #2563eb !important; font-size: 16px;"><?= htmlspecialchars($f['fun_nome']) ?></span>
+                            <span class="badge" style="background-color: <?= $badgeBg ?>; color: #ffffff; font-size: 11px; padding: 5px 12px; border-radius: 6px; font-weight: 600; text-transform: none;"><?= $badgeLabel ?></span>
                         </div>
-                        <div class="text-muted small mb-1" style="font-size: 13px;">
+                        <div class="text-muted mb-1" style="font-size: 13px; color: #64748b !important;">
                             Matrícula: <?= htmlspecialchars($matr) ?> | CPF: <?= htmlspecialchars($cpfM) ?>
                         </div>
-                        <div class="text-muted small" style="font-size: 13px;">
+                        <div class="text-muted" style="font-size: 13px; color: #64748b !important;">
                             Cargo: <?= htmlspecialchars($f['fun_cargo'] ?? '---') ?> | Setor: <?= htmlspecialchars($f['fun_departamento'] ?? '---') ?>
                         </div>
                     </div>
                     <?php
                 }
                 if ($pendentesCount === 0) {
-                    echo '<div class="alert alert-success text-center py-4 rounded-4 shadow-sm"><i class="bi bi-check-circle me-2"></i>Nenhuma pendência encontrada! Todos os colaboradores estão regulares.</div>';
+                    echo '<div class="alert alert-success text-center py-4 rounded-4 shadow-sm"><i class="bi bi-check-circle me-2 fs-5"></i>Nenhuma pendência encontrada! Todos os colaboradores estão regulares com senha/PIN ativa.</div>';
                 }
                 ?>
             </div>
@@ -458,7 +519,8 @@ $acao = $_GET['acao'] ?? 'lista';
                        class="form-control rounded-3 py-2 px-3 shadow-sm" 
                        placeholder="Buscar por nome, CPF ou ma..."
                        style="border: 1px solid #d1d5db; font-size: 14px;"
-                       oninput="filtrarCardsPin(this.value)">
+                       oninput="filtrarCardsPin(this.value)"
+                       onkeyup="filtrarCardsPin(this.value)">
                 <button type="button" 
                         class="btn btn-primary rounded-3 px-3 d-flex align-items-center justify-content-center shadow-sm"
                         style="background-color: #2563eb; border: none; min-width: 48px;"
@@ -892,8 +954,8 @@ $acao = $_GET['acao'] ?? 'lista';
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label">Defina um PIN (4 a 10 dígitos) *</label>
-                    <input type="password" class="form-control" name="pin" maxlength="10" required>
+                    <label class="form-label">Defina uma senha/PIN (4 a 10 caracteres alfanuméricos) *</label>
+                    <input type="password" class="form-control" name="pin" maxlength="10" placeholder="••••••••" required>
                 </div>
             </div>
             <div class="modal-footer">
@@ -916,8 +978,8 @@ $acao = $_GET['acao'] ?? 'lista';
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label">Defina o novo PIN *</label>
-                    <input type="password" class="form-control" name="pin" maxlength="10" required>
+                    <label class="form-label">Defina o novo PIN (4 a 10 caracteres alfanuméricos) *</label>
+                    <input type="password" class="form-control" name="pin" maxlength="10" placeholder="••••••••" required>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1069,7 +1131,179 @@ $acao = $_GET['acao'] ?? 'lista';
 
 <!-- ================= JAVASCRIPT ================= -->
 <script>
-/* Lógica do Speed Dial definida no final do arquivo */
+// Dados e utilitários globais de suporte para a tela de Funcionários
+const PROXY_URL = 'api_proxy.php';
+
+<?php
+$jsonListaFunc = json_encode(array_values(array_map(function($f) {
+    return [
+        'fun_id' => (int)($f['fun_id'] ?? 0),
+        'fun_nome' => (string)($f['fun_nome'] ?? ''),
+        'fun_cpf' => (string)($f['fun_cpf'] ?? ''),
+        'fun_esocial' => (string)($f['fun_esocial'] ?? ''),
+        'fun_matricula' => (string)($f['fun_matricula'] ?? (!empty($f['fun_esocial']) ? $f['fun_esocial'] : ('MAT-' . str_pad((string)($f['fun_id'] ?? 0), 5, '0', STR_PAD_LEFT)))),
+        'fun_cargo' => (string)($f['fun_cargo'] ?? 'Operacional'),
+        'fun_departamento' => (string)($f['fun_departamento'] ?? 'Geral'),
+        'fun_situacao' => (string)($f['fun_situacao'] ?? 'ATIVO'),
+        'fun_dataadmissao' => (string)($f['fun_dataadmissao'] ?? ''),
+        'fun_qrcode' => (string)($f['fun_qrcode'] ?? ''),
+        'assinatura_status' => (string)($f['assinatura_status'] ?? 'PENDENTE'),
+        'ass_id' => isset($f['ass_id']) ? (int)$f['ass_id'] : null
+    ];
+}, is_array($funcionarios) ? $funcionarios : [])), JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+
+if ($jsonListaFunc === false || $jsonListaFunc === null || $jsonListaFunc === '') {
+    $jsonListaFunc = '[]';
+}
+?>
+var listaFuncionariosCadastrados = <?= $jsonListaFunc ?>;
+
+function mascararCPF(cpf) {
+    if (!cpf) return '';
+    const clean = String(cpf).replace(/\D/g, '');
+    if (clean.length === 11) {
+        return clean.substring(0, 3) + '.***.***-' + clean.substring(9);
+    }
+    return cpf;
+}
+
+function htmlEscape(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function normalizarTexto(str) {
+    if (!str) return '';
+    return String(str).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+function filtrarCardsPin(valor) {
+    const input = document.getElementById('busca-pin-input');
+    const rawQuery = (valor !== undefined ? valor : (input ? input.value : '')).trim();
+    const queryNorm = normalizarTexto(rawQuery);
+
+    const cards = document.querySelectorAll('#lista-cards-pin .style-card-pin');
+    let visiveis = 0;
+    cards.forEach(card => {
+        const textNorm = normalizarTexto(card.textContent || '');
+        const bate = (!queryNorm || textNorm.includes(queryNorm));
+        card.style.display = bate ? 'block' : 'none';
+        if (bate) visiveis++;
+    });
+
+    let semRes = document.getElementById('sem-resultados-pin');
+    if (!semRes) {
+        const container = document.getElementById('lista-cards-pin');
+        if (container) {
+            semRes = document.createElement('div');
+            semRes.id = 'sem-resultados-pin';
+            semRes.className = 'alert alert-light text-center py-4 rounded-4 shadow-sm text-muted mt-2';
+            semRes.innerHTML = '<i class="bi bi-search me-2 text-primary fs-5"></i>Nenhum colaborador localizado para gerenciamento de PIN.';
+            container.appendChild(semRes);
+        }
+    }
+    if (semRes) {
+        semRes.style.display = (visiveis === 0 && cards.length > 0) ? 'block' : 'none';
+    }
+}
+
+/**
+ * Executa a alternância das visões de Funcionários (Lista, Novo, PIN, Pendências)
+ */
+function executarAcaoSubmenu(acao) {
+    try {
+        document.querySelectorAll('.modal.show').forEach(m => {
+            try {
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    const inst = bootstrap.Modal.getInstance(m);
+                    if (inst) inst.hide();
+                }
+            } catch (err) {}
+        });
+        if (typeof limparOverlaysModal === 'function') {
+            limparOverlaysModal();
+        }
+
+        const viewLista = document.getElementById('view-lista-funcionarios');
+        const viewPendencias = document.getElementById('view-pendencias-funcionarios');
+        const viewPin = document.getElementById('view-pin-funcionarios');
+
+        const btnLista = document.getElementById('btn-func-lista');
+        const btnPin = document.getElementById('btn-func-pin');
+        const btnPendencias = document.getElementById('btn-func-pendencias');
+
+        if (btnLista) btnLista.classList.remove('active');
+        if (btnPin) btnPin.classList.remove('active');
+        if (btnPendencias) btnPendencias.classList.remove('active');
+
+        document.querySelectorAll('#sub-func a').forEach(a => a.classList.remove('active-sub'));
+
+        const acaoLower = (acao || '').toLowerCase();
+
+        if (acaoLower === 'pendencias' || acaoLower === 'pendencia') {
+            if (viewLista) viewLista.style.setProperty('display', 'none', 'important');
+            if (viewPin) viewPin.style.setProperty('display', 'none', 'important');
+            if (viewPendencias) viewPendencias.style.setProperty('display', 'block', 'important');
+
+            if (btnPendencias) btnPendencias.classList.add('active');
+
+            const link = document.querySelector('#sub-func a[href*="acao=pendencias"]');
+            if (link) link.classList.add('active-sub');
+
+            try { history.replaceState(null, '', '?acao=pendencias'); } catch (e) {}
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (acaoLower === 'pin' || acaoLower === 'senha' || acaoLower === 'senha_pin' || acaoLower === 'pin_senha') {
+            if (viewLista) viewLista.style.setProperty('display', 'none', 'important');
+            if (viewPendencias) viewPendencias.style.setProperty('display', 'none', 'important');
+            if (viewPin) viewPin.style.setProperty('display', 'block', 'important');
+
+            if (btnPin) btnPin.classList.add('active');
+
+            const link = document.querySelector('#sub-func a[href*="acao=pin"]');
+            if (link) link.classList.add('active-sub');
+
+            try { history.replaceState(null, '', '?acao=pin'); } catch (e) {}
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (acaoLower === 'novo' || acaoLower === 'novo_funcionario') {
+            if (viewPendencias) viewPendencias.style.setProperty('display', 'none', 'important');
+            if (viewPin) viewPin.style.setProperty('display', 'none', 'important');
+            if (viewLista) viewLista.style.setProperty('display', 'block', 'important');
+
+            if (btnLista) btnLista.classList.add('active');
+
+            const link = document.querySelector('#sub-func a[href*="acao=novo"]');
+            if (link) link.classList.add('active-sub');
+
+            try { history.replaceState(null, '', '?acao=novo'); } catch (e) {}
+            
+            const modalEl = document.getElementById('modalCadastrar');
+            if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                (bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl)).show();
+            }
+        } else {
+            if (viewPendencias) viewPendencias.style.setProperty('display', 'none', 'important');
+            if (viewPin) viewPin.style.setProperty('display', 'none', 'important');
+            if (viewLista) viewLista.style.setProperty('display', 'block', 'important');
+
+            if (btnLista) btnLista.classList.add('active');
+
+            const link = document.querySelector('#sub-func a[href*="acao=lista"]');
+            if (link) link.classList.add('active-sub');
+
+            try { history.replaceState(null, '', '?acao=lista'); } catch (e) {}
+        }
+    } catch (err) {
+        console.error('Erro ao executar acao de submenu:', err);
+    }
+}
+
+window.executarAcaoSubmenu = executarAcaoSubmenu;
+window.alternarVisaoFuncionarios = executarAcaoSubmenu;
 
 function renderizarTelaPendencias() {
     const container = document.getElementById('lista-cards-pendencias');
@@ -1131,12 +1365,24 @@ function renderizarTelaPin(filtro = '') {
     if (!container) return;
 
     const termoNorm = normalizarTexto(filtro);
+    const termoCleanCpf = String(filtro || '').replace(/\D/g, '');
+
     const filtrados = listaFuncionariosCadastrados.filter(f => {
         if (!termoNorm) return true;
         const nomeNorm = normalizarTexto(f.fun_nome);
         const cpfNorm = String(f.fun_cpf || '').replace(/\D/g, '');
+        const cpfRaw = normalizarTexto(f.fun_cpf || '');
         const matNorm = normalizarTexto(f.fun_matricula || ('MAT-' + String(f.fun_id).padStart(5, '0')));
-        return nomeNorm.includes(termoNorm) || cpfNorm.includes(termoNorm) || matNorm.includes(termoNorm);
+        const cargoNorm = normalizarTexto(f.fun_cargo || '');
+        const setorNorm = normalizarTexto(f.fun_departamento || '');
+
+        const matchNome = nomeNorm.includes(termoNorm);
+        const matchCpf = (termoCleanCpf.length > 0 && cpfNorm.includes(termoCleanCpf)) || cpfRaw.includes(termoNorm);
+        const matchMat = matNorm.includes(termoNorm);
+        const matchCargo = cargoNorm.includes(termoNorm);
+        const matchSetor = setorNorm.includes(termoNorm);
+
+        return matchNome || matchCpf || matchMat || matchCargo || matchSetor;
     });
 
     if (filtrados.length === 0) {
@@ -1178,8 +1424,36 @@ function renderizarTelaPin(filtro = '') {
     container.innerHTML = html;
 }
 
-function filtrarCardsPin(val) {
-    renderizarTelaPin(val);
+
+
+function filtrarCardsPendencias(valor) {
+    const input = document.getElementById('busca-pendencias-input');
+    const rawQuery = (valor !== undefined ? valor : (input ? input.value : '')).trim();
+    const queryNorm = normalizarTexto(rawQuery);
+
+    const cards = document.querySelectorAll('#lista-cards-pendencias .style-card-pendencia');
+    let visiveis = 0;
+    cards.forEach(card => {
+        const textNorm = normalizarTexto(card.textContent || '');
+        const bate = (!queryNorm || textNorm.includes(queryNorm));
+        card.style.display = bate ? 'block' : 'none';
+        if (bate) visiveis++;
+    });
+
+    let semRes = document.getElementById('sem-resultados-pendencias');
+    if (!semRes) {
+        const container = document.getElementById('lista-cards-pendencias');
+        if (container) {
+            semRes = document.createElement('div');
+            semRes.id = 'sem-resultados-pendencias';
+            semRes.className = 'alert alert-light text-center py-4 rounded-4 shadow-sm text-muted mt-2';
+            semRes.innerHTML = '<i class="bi bi-search me-2 text-primary fs-5"></i>Nenhum colaborador com pendência localizado com os critérios informados.';
+            container.appendChild(semRes);
+        }
+    }
+    if (semRes) {
+        semRes.style.display = (visiveis === 0 && cards.length > 0) ? 'block' : 'none';
+    }
 }
 
 function fecharModalEMostrarDetalhes(idModal, funId) {
@@ -1307,46 +1581,9 @@ function renderizarModalPendencias() {
         tbody.innerHTML = html;
     }
 }
-const PROXY_URL = 'api_proxy.php';
-
-// Base de Colaboradores para Busca e Autocomplete
-let listaFuncionariosCadastrados = <?= json_encode(array_values(array_map(function($f) {
-    return [
-        'fun_id' => (int)$f['fun_id'],
-        'fun_nome' => $f['fun_nome'] ?? '',
-        'fun_cpf' => $f['fun_cpf'] ?? '',
-        'fun_matricula' => $f['fun_matricula'] ?? '',
-        'fun_cargo' => $f['fun_cargo'] ?? 'Operacional',
-        'fun_departamento' => $f['fun_departamento'] ?? 'Geral',
-        'fun_situacao' => $f['fun_situacao'] ?? 'ATIVO',
-        'assinatura_status' => $f['assinatura_status'] ?? 'PENDENTE'
-    ];
-}, $funcionarios)), JSON_UNESCAPED_UNICODE) ?>;
-
 // Estado do Autocomplete
 let sugestoesAtuais = [];
 let indexFocadoAutocomplete = -1;
-
-/**
- * Normaliza strings removendo acentos e espaços extras para comparação
- */
-function normalizarTexto(str) {
-    return String(str || '')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .trim();
-}
-
-function htmlEscape(str) {
-    if (!str) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
 
 function destacarTrecho(texto, query) {
     if (!texto) return '';
@@ -1406,7 +1643,7 @@ function fecharAutocompleteFunc() {
 /**
  * Filtra a tabela e o dropdown de autocomplete em tempo real
  */
-function aplicarFiltrosFuncionario() {
+function aplicarFiltrosFuncionario(skipAutocomplete = false) {
     const busca = document.getElementById('busca-input');
     const filtroSetor = document.getElementById('filtro-setor');
     const filtroStatus = document.getElementById('filtro-status');
@@ -1422,12 +1659,14 @@ function aplicarFiltrosFuncionario() {
     let visiveis = 0;
 
     rows.forEach(row => {
-        const rNome = normalizarTexto(row.getAttribute('data-nome'));
+        const rNome = normalizarTexto(row.getAttribute('data-nome') || '');
         const rCpf = row.getAttribute('data-cpf') || '';
         const rCpfLimpo = rCpf.replace(/\D/g, '');
-        const rCargo = normalizarTexto(row.getAttribute('data-cargo'));
-        const rSetor = row.getAttribute('data-setor') || '';
+        const rMatricula = normalizarTexto(row.getAttribute('data-matricula') || '');
+        const rCargo = normalizarTexto(row.getAttribute('data-cargo') || '');
+        const rSetor = normalizarTexto(row.getAttribute('data-setor') || '');
         const rStatus = row.getAttribute('data-status') || '';
+        const rowText = normalizarTexto(row.textContent || '');
 
         let bateBusca = false;
         if (!queryNorm) {
@@ -1435,13 +1674,16 @@ function aplicarFiltrosFuncionario() {
         } else {
             const matchNome = rNome.includes(queryNorm);
             const matchCargo = rCargo.includes(queryNorm);
+            const matchSetor = rSetor.includes(queryNorm);
+            const matchMatricula = rMatricula.includes(queryNorm);
             const matchCpf = (queryCleanCpf.length > 0 && rCpfLimpo.includes(queryCleanCpf)) || rCpf.includes(rawQuery);
+            const matchRowText = rowText.includes(queryNorm);
 
-            bateBusca = matchNome || matchCargo || matchCpf;
+            bateBusca = matchNome || matchCargo || matchSetor || matchMatricula || matchCpf || matchRowText;
         }
 
-        const bateSetor = (setor === '' || rSetor === setor);
-        const bateStatus = (status === '' || rStatus === status);
+        const bateSetor = (setor === '' || normalizarTexto(row.getAttribute('data-setor') || '') === normalizarTexto(setor));
+        const bateStatus = (status === '' || rStatus.toUpperCase() === status.toUpperCase());
 
         if (bateBusca && bateSetor && bateStatus) {
             row.style.display = '';
@@ -1455,12 +1697,21 @@ function aplicarFiltrosFuncionario() {
         semResultadosRow.style.display = (visiveis === 0 && rows.length > 0) ? '' : 'none';
     }
 
-    renderizarAutocompleteFunc(rawQuery, queryNorm, queryCleanCpf, setor, status);
+    if (skipAutocomplete || !queryNorm || queryNorm.length === 0) {
+        fecharAutocompleteFunc();
+    } else {
+        renderizarAutocompleteFunc(rawQuery, queryNorm, queryCleanCpf, setor, status);
+    }
 }
 
 function renderizarAutocompleteFunc(rawQuery, queryNorm, queryCleanCpf, setor, status) {
     const autoList = document.getElementById('autocomplete-lista');
     if (!autoList) return;
+
+    if (!queryNorm || queryNorm.length === 0) {
+        fecharAutocompleteFunc();
+        return;
+    }
 
     // Filtra colaboradores cadastrados por inclusão (.includes)
     sugestoesAtuais = listaFuncionariosCadastrados.filter(f => {
@@ -1530,11 +1781,13 @@ function renderizarAutocompleteFunc(rawQuery, queryNorm, queryCleanCpf, setor, s
             .join('');
 
         html += `
-            <a href="javascript:void(0)" 
-               class="list-group-item list-group-item-action p-2 px-3 border-0 border-bottom d-flex align-items-center gap-2 autocomplete-item auto-func-item" 
-               id="auto-func-${idx}"
-               onclick="selecionarColaboradorAutocomplete('${f.fun_nome.replace(/'/g, "\\'")}', ${f.fun_id})"
-               onmouseover="destacarItemFunc(${idx})">
+            <div class="list-group-item list-group-item-action p-2 px-3 border-0 border-bottom d-flex align-items-center gap-2 autocomplete-item auto-func-item" 
+                 id="auto-func-${idx}"
+                 data-idx="${idx}"
+                 data-id="${f.fun_id}"
+                 data-nome="${htmlEscape(f.fun_nome)}"
+                 style="cursor: pointer;"
+                 onmouseover="destacarItemFunc(${idx})">
                 <div class="rounded-circle fw-bold d-flex align-items-center justify-content-center flex-shrink-0" 
                      style="width: 38px; height: 38px; font-size: 13px; background: #dbeafe; color: #1d4ed8;">
                     ${iniciais}
@@ -1551,7 +1804,7 @@ function renderizarAutocompleteFunc(rawQuery, queryNorm, queryCleanCpf, setor, s
                         <code style="color: #e11d48; font-family: inherit; font-size: 11px; font-weight: 500;">CPF: ${cpfFmt}</code>
                     </div>
                 </div>
-            </a>
+            </div>
         `;
     });
 
@@ -1613,7 +1866,7 @@ function selecionarColaboradorAutocomplete(nome, funId) {
     const btnLimpar = document.getElementById('btn-limpar-busca');
     if (btnLimpar) btnLimpar.style.display = 'block';
     fecharAutocompleteFunc();
-    aplicarFiltrosFuncionario();
+    aplicarFiltrosFuncionario(true);
 
     if (funId) {
         const row = document.querySelector(`.func-row[data-id="${funId}"]`);
@@ -1636,6 +1889,52 @@ document.addEventListener('click', function(e) {
 
 document.addEventListener('DOMContentLoaded', function() {
     registrarSubmissaoAjax();
+
+    const autoListContainer = document.getElementById('autocomplete-lista');
+    if (autoListContainer) {
+        autoListContainer.addEventListener('mousedown', function(e) {
+            const item = e.target.closest('.auto-func-item');
+            if (item) {
+                e.preventDefault();
+                const idxStr = item.getAttribute('data-idx');
+                const idx = idxStr !== null ? parseInt(idxStr, 10) : -1;
+                if (idx >= 0 && sugestoesAtuais[idx]) {
+                    selecionarColaboradorAutocomplete(sugestoesAtuais[idx].fun_nome, sugestoesAtuais[idx].fun_id);
+                } else {
+                    const funId = item.getAttribute('data-id');
+                    const funNome = item.getAttribute('data-nome');
+                    selecionarColaboradorAutocomplete(funNome, funId);
+                }
+            }
+        });
+    }
+
+    const inputBuscaPin = document.getElementById('busca-pin-input');
+    if (inputBuscaPin) {
+        inputBuscaPin.addEventListener('input', function() {
+            filtrarCardsPin(this.value);
+        });
+        inputBuscaPin.addEventListener('keyup', function() {
+            filtrarCardsPin(this.value);
+        });
+    }
+
+    const inputBuscaPend = document.getElementById('busca-pendencias-input');
+    if (inputBuscaPend) {
+        inputBuscaPend.addEventListener('input', function() {
+            filtrarCardsPendencias(this.value);
+        });
+        inputBuscaPend.addEventListener('keyup', function() {
+            filtrarCardsPendencias(this.value);
+        });
+    }
+
+    const inputBuscaGlobal = document.getElementById('busca-pin-global');
+    if (inputBuscaGlobal) {
+        inputBuscaGlobal.addEventListener('input', function() {
+            filtrarColaboradoresPin(this.value);
+        });
+    }
 
     // Processa ações de submenu ou URL de forma unificada
     const urlParams = new URLSearchParams(window.location.search);
@@ -1736,15 +2035,7 @@ function confirmarExclusao(id, nome) {
     new bootstrap.Modal(document.getElementById('modalExcluir')).show();
 }
 
-/**
- * Mascara o CPF conforme as diretrizes da LGPD (exibe apenas os 3 primeiros e os 2 últimos dígitos)
- */
-function mascararCPF(cpf) {
-    if (!cpf) return '';
-    const limpo = cpf.replace(/\D/g, '');
-    if (limpo.length !== 11) return cpf;
-    return limpo.substring(0, 3) + '.***.***-' + limpo.substring(9, 11);
-}
+
 
 /**
  * Mascara o código do eSocial conforme as diretrizes da LGPD (exibe as 3 primeiras letras e as 2 últimas)
@@ -1825,46 +2116,59 @@ function verDetalhes(funId) {
         });
 }
 
-function consultarAssinatura(funId) {
+async function consultarAssinatura(funId) {
     const pinBadge = document.getElementById('det-pin-status');
     const areaAcoes = document.getElementById('area-acoes-pin');
-    
-    fetch(`${PROXY_URL}?route=assinaturas/funcionario/${funId}`)
-        .then(res => res.json())
-        .then(res => {
-            if (res.success && res.data) {
-                const ass = res.data;
-                const status = ass.ass_status.toUpperCase();
-                pinBadge.className = `status-badge ${status.toLowerCase()}`;
-                pinBadge.innerText = status;
 
-                if (areaAcoes) {
-                    if (status === 'ATIVO') {
-                        areaAcoes.innerHTML = `
-                            <button class="btn btn-sm btn-outline-warning" onclick="prepararBloqueio(${ass.ass_id})"><i class="bi bi-lock me-1"></i>Bloquear Assinatura</button>
-                            <button class="btn btn-sm btn-outline-primary" onclick="prepararRedefinir(${funId})"><i class="bi bi-arrow-repeat me-1"></i>Redefinir PIN</button>
-                        `;
-                    } else if (status === 'BLOQUEADO') {
-                        areaAcoes.innerHTML = `
-                            <button class="btn btn-sm btn-outline-success" onclick="prepararDesbloqueio(${ass.ass_id})"><i class="bi bi-unlock me-1"></i>Desbloquear PIN</button>
-                            <button class="btn btn-sm btn-outline-primary" onclick="prepararRedefinir(${funId})"><i class="bi bi-arrow-repeat me-1"></i>Redefinir PIN</button>
-                        `;
-                    }
-                }
-            } else {
-                pinBadge.className = 'status-badge inativo';
-                pinBadge.innerText = 'NÃO CADASTRADO';
-                if (areaAcoes) {
-                    areaAcoes.innerHTML = `
-                        <button class="btn btn-sm btn-primary" onclick="prepararCadastroPin(${funId})"><i class="bi bi-key me-1"></i>Cadastrar PIN</button>
-                    `;
-                }
+    try {
+        let status = '';
+        let assId = null;
+
+        const resAss = await fetch(`${PROXY_URL}?route=assinaturas/funcionario/${funId}`).then(r => r.json()).catch(() => null);
+        if (resAss && resAss.success && resAss.data) {
+            status = (resAss.data.ass_status || '').toUpperCase();
+            assId = resAss.data.ass_id;
+        }
+
+        if (!status) {
+            const resFunc = await fetch(`${PROXY_URL}?route=funcionarios/${funId}`).then(r => r.json()).catch(() => null);
+            if (resFunc && resFunc.success && resFunc.data) {
+                const f = resFunc.data;
+                status = (f.assinatura_status || (f.ass_senha_hash ? 'ATIVO' : '')).toUpperCase();
+                assId = f.ass_id || f.fun_id;
             }
-        })
-        .catch(() => {
+        }
+
+        if (status === 'ATIVO' || status === 'BLOQUEADO') {
+            pinBadge.className = `status-badge ${status.toLowerCase()}`;
+            pinBadge.innerText = status;
+        } else {
             pinBadge.className = 'status-badge inativo';
-            pinBadge.innerText = 'ERRO';
-        });
+            pinBadge.innerText = 'NÃO CADASTRADO';
+        }
+
+        if (areaAcoes) {
+            const idAcao = assId || funId;
+            if (status === 'ATIVO') {
+                areaAcoes.innerHTML = `
+                    <button class="btn btn-sm btn-outline-warning" onclick="prepararBloqueio(${idAcao})"><i class="bi bi-lock me-1"></i>Bloquear Assinatura</button>
+                    <button class="btn btn-sm btn-outline-primary" onclick="prepararRedefinir(${funId})"><i class="bi bi-arrow-repeat me-1"></i>Redefinir PIN</button>
+                `;
+            } else if (status === 'BLOQUEADO') {
+                areaAcoes.innerHTML = `
+                    <button class="btn btn-sm btn-outline-success" onclick="prepararDesbloqueio(${idAcao})"><i class="bi bi-unlock me-1"></i>Desbloquear PIN</button>
+                    <button class="btn btn-sm btn-outline-primary" onclick="prepararRedefinir(${funId})"><i class="bi bi-arrow-repeat me-1"></i>Redefinir PIN</button>
+                `;
+            } else {
+                areaAcoes.innerHTML = `
+                    <button class="btn btn-sm btn-primary" onclick="prepararCadastroPin(${funId})"><i class="bi bi-key me-1"></i>Cadastrar PIN</button>
+                `;
+            }
+        }
+    } catch (e) {
+        pinBadge.className = 'status-badge inativo';
+        pinBadge.innerText = 'ERRO';
+    }
 }
 
 function consultarEntregas(funId) {
@@ -2148,16 +2452,12 @@ async function executarImportacaoLote() {
  * Garante a limpeza total de overlays de modal e recupera a rolagem e cliques da página
  */
 function limparOverlaysModal() {
-    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-    document.body.classList.remove('modal-open');
-    document.body.style.overflow = '';
-    document.body.style.paddingRight = '';
-    
-    if (window.location.search.indexOf('acao=') !== -1) {
-        try {
-            history.replaceState(null, '', window.location.pathname);
-        } catch (e) {}
-    }
+    try {
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    } catch (e) {}
 }
 
 // Escutador global para quando qualquer modal Bootstrap for escondido
@@ -2165,72 +2465,37 @@ document.addEventListener('hidden.bs.modal', function () {
     limparOverlaysModal();
 });
 
-/**
- * Executa as ações dos 4 submenus sem acúmulo de instâncias nem travamentos
- */
-function executarAcaoSubmenu(acao) {
-    // Fecha qualquer modal aberto previamente
-    document.querySelectorAll('.modal.show').forEach(m => {
-        const inst = bootstrap.Modal.getInstance(m);
-        if (inst) inst.hide();
-    });
-    limparOverlaysModal();
 
-    setTimeout(() => {
-        if (acao === 'novo_funcionario' || acao === 'novo') {
-            const modalEl = document.getElementById('modalCadastrar');
-            if (modalEl) {
-                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                modal.show();
-            }
-        } else if (acao === 'pin') {
-            if (typeof renderizarModalGestaoPinGlobal === 'function') renderizarModalGestaoPinGlobal();
-            const modalEl = document.getElementById('modalGestaoPinGlobal');
-            if (modalEl) {
-                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                modal.show();
-            } else {
-                limparBuscaFuncionario();
-                const inputBusca = document.getElementById('busca-input');
-                if (inputBusca) {
-                    inputBusca.value = 'PIN';
-                    aoDigitarBuscaFuncionario('PIN');
-                }
-            }
-        } else if (acao === 'pendencias') {
-            if (typeof renderizarModalPendencias === 'function') renderizarModalPendencias();
-            const modalEl = document.getElementById('modalPendencias');
-            if (modalEl) {
-                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                modal.show();
-            } else {
-                limparBuscaFuncionario();
-                const selStatus = document.getElementById('filtro-status');
-                if (selStatus) {
-                    selStatus.value = 'AFASTADO';
-                    aplicarFiltrosFuncionario();
-                }
-            }
-        } else if (acao === 'lista_funcionarios' || acao === 'lista') {
-            limparBuscaFuncionario();
-            const selSetor = document.getElementById('filtro-setor');
-            const selStatus = document.getElementById('filtro-status');
-            if (selSetor) selSetor.value = '';
-            if (selStatus) selStatus.value = '';
-            aplicarFiltrosFuncionario();
-            const tabela = document.getElementById('tabela-funcionarios');
-            if (tabela) {
-                tabela.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
-    }, 80);
-}
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Liga os botões diretamente por evento
+    const btnLista = document.getElementById('btn-func-lista');
+    const btnPin = document.getElementById('btn-func-pin');
+    const btnPendencias = document.getElementById('btn-func-pendencias');
+
+    if (btnLista) {
+        btnLista.addEventListener('click', function(e) {
+            e.preventDefault();
+            executarAcaoSubmenu('lista');
+        });
+    }
+    if (btnPin) {
+        btnPin.addEventListener('click', function(e) {
+            e.preventDefault();
+            executarAcaoSubmenu('pin');
+        });
+    }
+    if (btnPendencias) {
+        btnPendencias.addEventListener('click', function(e) {
+            e.preventDefault();
+            executarAcaoSubmenu('pendencias');
+        });
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const acaoParam = urlParams.get('acao');
     if (acaoParam) {
-        setTimeout(() => executarAcaoSubmenu(acaoParam), 300);
+        setTimeout(() => executarAcaoSubmenu(acaoParam), 100);
     }
 });
 </script>

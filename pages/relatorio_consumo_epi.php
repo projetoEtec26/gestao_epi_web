@@ -289,9 +289,11 @@ try {
             font-weight: 600;
             font-size: 8.5px;
             text-transform: uppercase;
+            white-space: nowrap;
         }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
+        .text-nowrap { white-space: nowrap; }
         .footer {
             margin-top: 16px;
             border-top: 1px solid #E2E8F0;
@@ -397,7 +399,7 @@ try {
                 <th style="width: 5%;" class="text-center">Qtd</th>
                 <th style="width: 8%;">Motivo</th>
                 <?php if ($permiteVisualizarCustos): ?>
-                <th style="width: 8%;" class="text-right">Valor Total</th>
+                <th style="width: 10%;" class="text-right text-nowrap">Valor Total</th>
                 <?php endif; ?>
             </tr>
         </thead>
@@ -413,7 +415,7 @@ try {
                 <td class="text-center"><b><?= $reg['quantidade'] ?></b></td>
                 <td><?= htmlspecialchars($reg['motivo']) ?></td>
                 <?php if ($permiteVisualizarCustos): ?>
-                <td class="text-right">R$ <?= number_format($reg['valor_total'], 2, ',', '.') ?></td>
+                <td class="text-right text-nowrap">R$&nbsp;<?= number_format($reg['valor_total'], 2, ',', '.') ?></td>
                 <?php endif; ?>
             </tr>
             <?php endforeach; ?>

@@ -21,7 +21,7 @@ Conforme as diretrizes globais do projeto, toda a aplicação Web e suas documen
 O painel Web foi estruturado com uma arquitetura modular limpa (SoC - *Separation of Concerns*), eliminando acoplamentos diretos com o banco de dados para trafegar 100% dos dados por meio do cliente HTTP `ApiService`:
 
 ```text
-gestao_epi_web_2/
+gestao_epi_web_4/
 │
 ├── index.php                             # Roteador de entrada de sessão (redireciona para Dashboard ou Login)
 ├── login.php                             # Login institucional e redefinição obrigatória no 1º acesso
@@ -86,7 +86,7 @@ gestao_epi_web_2/
 
 ## 3. CONFIGURAÇÃO DA API (AMBIENTE) E RESILIÊNCIA HTTP
 
-A integração HTTP entre o painel Web e o backend é gerenciada pela classe [`services/ApiService.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/services/ApiService.php) e configurada dinamicamente em [`config/api.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/config/api.php).
+A integração HTTP entre o painel Web e o backend é gerenciada pela classe [`services/ApiService.php`](file:///c:/xampp/htdocs/gestao_epi_web_3/services/ApiService.php) e configurada dinamicamente em [`config/api.php`](file:///c:/xampp/htdocs/gestao_epi_web_3/config/api.php).
 
 ### 3.1 Resoluções Dinâmicas de Ambiente
 *   **Nuven / Produção (Render):**
@@ -100,8 +100,9 @@ A integração HTTP entre o painel Web e o backend é gerenciada pela classe [`s
 
 ### 3.2 Política de Retry e Timeouts
 O `ApiService` implementa resiliência nativa contra oscilações de rede:
-*   **Connect Timeout:** `3 segundos` (evita travamentos longos na tentativa de conexão).
-*   **Response Timeout:** `10 segundos` (tempo máximo de espera pelo corpo da resposta).
+*   **Connect Timeout:** `5 segundos` (evita travamentos longos na tentativa de conexão).
+*   **Response Timeout:** `30 segundos` (tempo estendido para garantir a recepção segura de relatórios pesados e grandes volumes de dados como +2.900 logs de auditoria).
+*   **Blindagem de Sessão:** Checagem defensiva `!headers_sent()` antes de qualquer chamada a `session_start()`, prevenindo warnings PHP ao manipular dados HTTP pós-renderização.
 *   **Política de Retry:** Em caso de erros temporários de gateway (`502 Bad Gateway`, `503 Service Unavailable`), o cliente realiza automaticamente até **1 tentativa adicional de retry** após 1 segundo.
 
 ---
@@ -134,7 +135,7 @@ O sistema possui um controle rigoroso de autorização baseado em papéis (**RBA
 
 ## 5. MENU LATERAL E SUBMENUS EXPANSÍVEIS (SENIOR ERP STYLE)
 
-**Arquivo:** [`components/sidebar.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/components/sidebar.php)
+**Arquivo:** [`components/sidebar.php`](file:///c:/xampp/htdocs/gestao_epi_web_3/components/sidebar.php)
 
 O menu lateral adota o padrão visual **Senior ERP Style com expansão retrátil por botão `+`**, combinando elegância moderna com acesso rápido em um clique:
 
@@ -171,10 +172,10 @@ O painel integra um mecanismo de busca por autocomplete em tempo real de altíss
 
 ### 6.2 Módulos Integrados com Autocomplete
 
-1.  **Funcionários ([`pages/funcionarios.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/pages/funcionarios.php)):** Localização imediata de fichas de colaboradores por nome, CPF ou matrícula.
-2.  **Catálogo de EPIs ([`pages/epis.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/pages/epis.php)):** Busca por nome do equipamento, número de C.A., fabricante ou categoria.
-3.  **Devoluções de EPIs ([`pages/devolucoes.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/pages/devolucoes.php)):** Seleção ágil do colaborador para carregar os EPIs pendentes sob sua posse.
-4.  **Filtro de Relatórios ([`pages/relatorios.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/pages/relatorios.php)):** Autocomplete no filtro de colaborador do relatório de Entregas Gerais, incluindo opção final para selecionar *"Todos os Funcionários"*.
+1.  **Funcionários ([`pages/funcionarios.php`](file:///c:/xampp/htdocs/gestao_epi_web_3/pages/funcionarios.php)):** Localização imediata de fichas de colaboradores por nome, CPF ou matrícula.
+2.  **Catálogo de EPIs ([`pages/epis.php`](file:///c:/xampp/htdocs/gestao_epi_web_3/pages/epis.php)):** Busca por nome do equipamento, número de C.A., fabricante ou categoria.
+3.  **Devoluções de EPIs ([`pages/devolucoes.php`](file:///c:/xampp/htdocs/gestao_epi_web_3/pages/devolucoes.php)):** Seleção ágil do colaborador para carregar os EPIs pendentes sob sua posse.
+4.  **Filtro de Relatórios ([`pages/relatorios.php`](file:///c:/xampp/htdocs/gestao_epi_web_3/pages/relatorios.php)):** Autocomplete no filtro de colaborador do relatório de Entregas Gerais, incluindo opção final para selecionar *"Todos os Funcionários"*.
 
 ---
 
@@ -182,12 +183,12 @@ O painel integra um mecanismo de busca por autocomplete em tempo real de altíss
 
 O módulo de relatórios é composto por relatórios especializados que cobrem auditoria, custos, estoque e conformidade trabalhista:
 
-1.  **Relatório Geral de Entregas ([`pages/relatorio_geral.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/pages/relatorio_geral.php)):** Listagem paginada com histórico completo de fornecimentos, colaborador, EPI, quantidade e data de entrega.
-2.  **Relatório Financeiro de Custos ([`pages/relatorio_financeiro.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/pages/relatorio_financeiro.php)):** Demonstrativo mensal de investimentos em EPIs por departamento/centro de custo com valores formatados em **R$**.
-3.  **Relatório de Consumo de EPIs ([`pages/relatorio_consumo_epi.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/pages/relatorio_consumo_epi.php)):** Quantitativo de itens entregues agrupados por tipo, categoria e fabricante no período selecionado.
-4.  **Relatório de Validade de C.A. ([`pages/relatorio_validade_ca.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/pages/relatorio_validade_ca.php)):** Rastreabilidade rigorosa dos Certificados de Aprovação (NR-6), destacando EPIs com C.A. vencido ou a vencer nos próximos 30/60/90 dias.
-5.  **Relatório de Auditoria de Logs ([`pages/relatorio_auditoria_logs.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/pages/relatorio_auditoria_logs.php)):** Histórico de operações realizadas no sistema com visualizador interativo de payloads em JSON.
-6.  **Modelo de Impressão A4 Paisagem ([`pages/relatorio_auditoria_impressao.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/pages/relatorio_auditoria_impressao.php)):** Layout profissional pré-formatado para impressão física ou geração de PDF oficial para fiscalizações do Trabalho/SST.
+1.  **Relatório Geral de Entregas ([`pages/relatorio_geral.php`](file:///c:/xampp/htdocs/gestao_epi_web_3/pages/relatorio_geral.php)):** Listagem paginada com histórico completo de fornecimentos, colaborador, EPI, quantidade e data de entrega.
+2.  **Relatório Financeiro de Custos ([`pages/relatorio_financeiro.php`](file:///c:/xampp/htdocs/gestao_epi_web_3/pages/relatorio_financeiro.php)):** Demonstrativo mensal de investimentos em EPIs por departamento/centro de custo com valores formatados em **R$**.
+3.  **Relatório de Consumo de EPIs ([`pages/relatorio_consumo_epi.php`](file:///c:/xampp/htdocs/gestao_epi_web_3/pages/relatorio_consumo_epi.php)):** Quantitativo de itens entregues agrupados por tipo, categoria e fabricante no período selecionado.
+4.  **Relatório de Validade de C.A. ([`pages/relatorio_validade_ca.php`](file:///c:/xampp/htdocs/gestao_epi_web_3/pages/relatorio_validade_ca.php)):** Rastreabilidade rigorosa dos Certificados de Aprovação (NR-6), destacando EPIs com C.A. vencido ou a vencer nos próximos 30/60/90 dias.
+5.  **Relatório de Auditoria de Logs ([`pages/relatorio_auditoria_logs.php`](file:///c:/xampp/htdocs/gestao_epi_web_3/pages/relatorio_auditoria_logs.php)):** Histórico de operações realizadas no sistema com visualizador interativo de payloads em JSON.
+6.  **Modelo de Impressão A4 Paisagem ([`pages/relatorio_auditoria_impressao.php`](file:///c:/xampp/htdocs/gestao_epi_web_3/pages/relatorio_auditoria_impressao.php)):** Layout profissional pré-formatado para impressão física ou geração de PDF oficial para fiscalizações do Trabalho/SST.
 
 ### 7.1 Conformidade e Governança LGPD nas Exportações
 Toda exportação de relatórios (seja para formato **PDF** ou **CSV**) dispara automaticamente um log de auditoria em background para o endpoint `/logs/registrar-exportacao`. Esse registro grava o ID do operador, IP de origem, fuso horário (`America/Sao_Paulo`), tipo de relatório e parâmetros de filtro aplicados, garantindo total rastreabilidade.
@@ -206,6 +207,42 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
 
+### 📅 Versão 3.5.0 (14/09/2026) – Submenus de Relatórios, Filtro de Período Financeiro, KPIs, Gráficos Analíticos, Busca em Tempo Real e Formatação de Moeda
+*   **Submenu Expansível de Relatórios (`components/sidebar.php`):** Reorganizado o submenu de Relatórios para exibir estritamente os 4 itens oficiais na ordem solicitada: *Rel. Geral EPIs* (`?tipo=geral`), *Rel. Financeiro* (`?tipo=financeiro`), *Rel. EPI* (`?tipo=epis-vencidos`), *Rel. Funcionário* (`?tipo=entregas`).
+*   **Seletor de Visão Superior (Segmented Control `btn-group-toggle-view`):** Adicionada a barra superior de alternância de modelo no painel principal de relatórios ([`pages/relatorios.php`](file:///c:/xampp/htdocs/gestao_epi_web_5/pages/relatorios.php)), alinhada ao design da tela de Funcionários.
+*   **Busca em Tempo Real & Autopreenchimento no Relatório Geral (`pages/relatorios.php`):** Implementada a busca por autocomplete de colaboradores no filtro do Relatório Geral, com preenchimento automático instantâneo dos campos *Setor/Departamento* e *Cargo/Função*.
+*   **Relatório Financeiro Completo com Filtros, KPIs e Gráficos (`pages/relatorios.php`, `pages/relatorio_financeiro.php`):**
+    - **Filtros de Período & Escopo:** Adicionados os campos de data inicial, data final, departamento/setor e funcionário/colaborador no painel web e na barra superior de impressão.
+    - **KPIs Financeiros:** Apresentação consolidada de *Custo Bruto Fornecido*, *Estornos / Devoluções*, *Descartes / Inservíveis* e *Custo Líquido Efetivo*.
+    - **Gráficos Analíticos:** Gráficos interativos em Chart.js (Donut para Distribuição por Setor e Barras para Top EPIs por Custo) na Web, e barras visuais de proporção percentual CSS para renderização perfeita em PDF/Impressão A4.
+    - **Mapeamento de Parâmetros na API:** Corrigida a integração com o endpoint `/relatorios/epis/geral` enviando `data_inicial` e `data_final`, garantindo carregamento de dados e eliminação do aviso de datas obrigatórias.
+    - **Tratamento Nulo Seguro PHP 8:** Tratamento com nullish coalescing encadeado para prevenção total de PHP warnings (`Undefined array key`).
+*   **Formatação Monetária em Única Linha (`R$ 55,00`):** Aplicação de `white-space: nowrap;` (`text-nowrap`) e espaço inquebrável (`&nbsp;` / `\u00a0`) em todas as tabelas de relatórios, impedindo a quebra de linha entre o símbolo `R$` e o valor numérico.
+*   **Correção na Busca em Tempo Real da Nova Entrega (`pages/nova_entrega.php`):** Corrigido o erro de referência a variáveis indefinidas (`termoDigitado`) e adicionada a função `destacarTrecho()` para busca em tempo real com destaque visual no autocomplete de colaboradores e EPIs.
+*   **Garantia de Infraestrutura em Nuvem / Produção:** Conexão permanente e estável com o banco de dados Aiven Cloud (`db-gestao-epi-gestaoepi.a.aivencloud.com`) e API REST na Render (`https://gestao-epi-api.onrender.com/`).
+
+### 📅 Versão 3.4.0 (12/09/2026) – Estabilização da Busca em Tempo Real, Autocomplete de Funcionários & Correções de Escopo JS
+*   **Correção de Sintaxe JS em Funcionários (`pages/funcionarios.php`):** Eliminado fechamento incorreto de chave (`Uncaught SyntaxError: Unexpected token '}'`) que interrompia silenciosamente a execução de scripts do cliente, reestabelecendo a montagem do escopo de manipuladores e escutadores da página.
+*   **Serialização JSON Defensiva (`pages/funcionarios.php`):** Codificação da matriz global `listaFuncionariosCadastrados` em PHP utilizando `JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE` com verificação de nulo/vazio `[]`, garantindo ausência de erros de sintaxe no carregamento da página.
+*   **Controle de Estado do Autocomplete (`pages/funcionarios.php`):** Atualizada a função `selecionarColaboradorAutocomplete()` com o parâmetro `skipAutocomplete = true` em `aplicarFiltrosFuncionario()`, prevenindo que a lista flutuante de sugestões reabra indevidamente sobre a barra de busca após a seleção de um colaborador.
+*   **Vinculação Dupla de Eventos de Digitação (`pages/funcionarios.php`):** Adicionados os manipuladores `oninput` e `onkeyup` nos campos `#busca-input`, `#busca-pendencias-input` e `#busca-pin-input`, garantindo a filtragem imediata em qualquer navegador e tipo de entrada de texto.
+*   **Elevação de Estilo no CSS (`assets/css/style.css`):** Adicionado o seletor `#autocomplete-lista` ao agrupamento de regras CSS com `z-index: 999999 !important` e suporte nativo ao Modo Escuro (Dark Mode).
+*   **Unificação de Alternância de Abas (`pages/funcionarios.php`):** Consolidadas as chamadas de alternância de visão (`alternarVisaoFuncionarios()` e `executarAcaoSubmenu()`) com visibilidade CSS `!important`.
+
+### 📅 Versão 3.3.0 (12/09/2026) – Otimização Assíncrona do Dashboard, Histórico de Preços, Autocomplete por Prefixo & Alinhamento de Submenus
+*   **Correção e Ativação do Histórico de Preços (`pages/epis.php`):** Definida a constante global `const PROXY_URL = 'api_proxy.php';` no script de `epis.php`, resolvendo a exceção `ReferenceError` e permitindo a renderização instantânea da linha do tempo de cotações, notas fiscais, fornecedores e vigência em Reais (`R$`).
+*   **Otimização Assíncrona de Modais no Dashboard (`pages/dashboard.php`):** Otimizado o tempo de renderização do PHP inicial do Dashboard para **~67ms**. Os modais de detalhamento dos cards SST (C.A. Vencidos, C.A. a Vencer, Func. sem PIN e EPIs em Posse) agora carregam os dados sob demanda via requisições assíncronas em segundo plano.
+*   **Carregamento Paralelo de EPIs em Posse (`pages/dashboard.php`):** Substituída a busca global síncrona de entregas (que causava timeout de 30s) por requisições paralelas por colaborador (`route=entregas/funcionario/${id}`). Garantiu o carregamento em **~200ms** dos exatamente **46 EPIs em posse** por colaborador.
+*   **Correção do KPI "Func. sem PIN" (`pages/dashboard.php`):** Atualizada a nomenclatura do card e gráfico de `PIN BLOQUEADOS` para **`Func. sem PIN`**, ajustando o cálculo PHP para incluir colaboradores com status `PENDENTE`, `INATIVO` ou `BLOQUEADO` (exibindo o total real de **7 colaboradores** no card, no gráfico e no modal).
+*   **Autocomplete com Filtro por Prefixo "Começar com" (`pages/epis.php`):** Aprimorada a busca em tempo real com pontuação de relevância multi-nível (Prioridade 1: Nome começa com a busca; Prioridade 2: Palavra do nome começa com a busca; Prioridade 3: C.A.; Prioridade 4: Fabricante), com normalização de acentos.
+*   **Navegação e Reordenação de Submenus (`components/sidebar.php`, `pages/epis.php`, `pages/funcionarios.php`):** Ajustados os botões principais de EPIs e Funcionários na topbar/sidebar para alternar visões diretamente ao clicar, e reordenados os dropdowns de Funcionários (*Lista Funcionários*, *Senha/PIN*, *Pendências*, *Novo Funcionário*) e EPIs (*Lista de EPIs*, *Controle de C.A.*, *Hist. de Preços*, *Novo EPI*).
+
+### 📅 Versão 3.2.0 (11/09/2026) – Otimização Batch Query de Entregas (Anti-N+1), Ampliação de Timeout cURL & Blindagem de Sessão PHP
+*   **Otimização Batch Query em Histórico de Entregas (`gestao_epi_api_7`):** Eliminado o gargalo de consultas N+1 na API REST (`EntregasController::index()` e `showByFuncionario()`). Implementado o método `ItemEntrega::findByEntregaIds()` que substitui 103 requisições SQL individuais por 1 consulta otimizada em lote `WHERE entr_id IN (...)`, reduzindo o tempo de resposta de **+35 segundos (timeout)** para apenas **7.5 segundos com resposta HTTP 200 OK**.
+*   **Eliminação do Warning `session_start()` (`components/`, `services/ApiService.php`):** Solucionado o aviso de tentativa de início de sessão após envio de cabeçalhos HTTP (`headers_sent()`). Adicionada a validação defensiva `if (session_status() === PHP_SESSION_NONE && !headers_sent())` nos componentes [`topbar.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_3/components/topbar.php), [`sidebar.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_3/components/sidebar.php), [`header.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_3/components/header.php) e em [`ApiService.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_3/services/ApiService.php).
+*   **Ampliação do Response Timeout cURL (`services/ApiService.php`):** Elevado o limite de timeout de `10s` para `30s` no client HTTP, eliminando erros de desconexão (`Operation timed out after 10003 milliseconds`) ao consultar endpoints volumosos como a Trilha de Auditoria (+2.900 registros).
+*   **Homologação do Histórico de Entregas e Auditoria (`pages/entregas.php`, `pages/auditoria.php`):** Carregamento fluido da listagem de entregas e auditoria de logs com decodificador JSON interativo, ordenação e filtros avançados sem estouro de tempo ou quedas de sessão.
+
 ### 📅 Versão 3.1.0 (11/09/2026) – Resiliência cURL, Suíte Completa de Relatórios PHP, Autenticação & Estabilização de UX
 *   **Correção da Persistência de Sessão e Autenticação (`login.php`, `services/ApiService.php`, `components/header.php`):** Solucionado o problema de travamento e perda de sessão no login com credenciais homologadas (`admin` / `admin123`). O `ApiService` foi ajustado para restaurar a sessão via `@session_start()` pós-cURL, prevenindo perda de `$_SESSION` e loops de redirecionamento, além de sincronizar o `localStorage` (`token` e `usuario`) e logs de status no console.
 *   **Política de Retry e Resiliência da API (`services/ApiService.php`):** Implementada política de retry automático contra erros de Gateway (`502 Bad Gateway`, `503 Service Unavailable`) com timeout adaptativo, garantindo reconexão transparente ao ambiente em nuvem (Render Free Tier) sem interrupção para o operador.
@@ -215,16 +252,16 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 *   **Conformidade Brasil Habilitada Globalmente:** Validação da obrigatoriedade do fuso horário `America/Sao_Paulo` (GMT-3) e formatação de moeda em Real Brasileiro (`BRL / R$`) em todos os componentes e templates.
 
 ### 📅 Versão 2.8.0 (10/09/2026) – Submenus Expansíveis de EPIs (Controle C.A.) & Speed Dial FAB
-*   **Submenus Expansíveis de EPIs no Menu Lateral:** Implementados os 4 submenus retráteis com botão expansor `+` em [`components/sidebar.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/components/sidebar.php): *Lista de EPIs* (`?acao=lista`), *Novo EPI* (`?acao=novo`), *Controle C.A.* (`?acao=controle_ca`) e *Hist. de Preços* (`?acao=historico_precos`).
-*   **Menu Flutuante Speed Dial (FAB) de EPIs:** Implementado o botão circular azul flutuante em [`pages/epis.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/pages/epis.php) com transição `+` / `X` e menu empilhado com as 4 ações exatas da referência visual (*Hist. de Preços*, *Controle C.A.*, *Novo EPI*, *Lista de EPIs*).
+*   **Submenus Expansíveis de EPIs no Menu Lateral:** Implementados os 4 submenus retráteis com botão expansor `+` em [`components/sidebar.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_3/components/sidebar.php): *Lista de EPIs* (`?acao=lista`), *Novo EPI* (`?acao=novo`), *Controle C.A.* (`?acao=controle_ca`) e *Hist. de Preços* (`?acao=historico_precos`).
+*   **Menu Flutuante Speed Dial (FAB) de EPIs:** Implementado o botão circular azul flutuante em [`pages/epis.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_3/pages/epis.php) com transição `+` / `X` e menu empilhado com as 4 ações exatas da referência visual (*Hist. de Preços*, *Controle C.A.*, *Novo EPI*, *Lista de EPIs*).
 *   **Modal de Histórico de Cotações de Preço:** Adicionado o modal `#modalHistoricoPrecos` para visualização e auditoria de preços homologados e origem de cotação dos EPIs.
 
 ### 📅 Versão 2.7.0 (10/09/2026) – Integração com gestao_epi_api_7, Telas Dedicadas de "Senha/PIN" e "Pendências", FAB e Navegação Mobile
 *   **Integração Total com `gestao_epi_api_7`:** Conectado o painel aos contratos de dados da API v7 (`http://127.0.0.1/gestao_epi_api_7/`), consumindo endpoints de funcionários (`/funcionarios`), assinaturas (`/assinaturas`, `/assinaturas/redefinir`, `/assinaturas/bloquear/{id}`, `/assinaturas/desbloquear/{id}`) e métricas de pendências.
 *   **Telas Dedicadas de "Senha/PIN" e "Pendências":** Implementadas as interfaces visuais dedicadas para os submenus "Funcionários com Senha Pendente" (cards brancos com borda arredondada, badges em laranja/âmbar, matrícula e CPF mascarado) e "Gerenciar Senha/PIN do Colaborador" (com campo de busca arredondado e botão integrado com ícone de usuário).
 *   **Botão Flutuante (FAB) & Barra de Navegação Inferior (Mobile):** Adicionados o botão flutuante circular azul (FAB) com ícone de `+` no canto inferior direito e a barra de navegação inferior mobile (5 abas: `ENTREGAS`, `EPI'S`, `RELATÓRIOS`, `DASHBOARD`, `MAIS`).
-*   **Correção de Navegação e Estabilização dos Submenus:** Corrigido o fluxo do menu lateral em [`components/sidebar.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/components/sidebar.php) e a desacoplagem de instâncias do Bootstrap Modal para eliminar travamentos e erros de JS (`TypeError: Cannot read properties of null`).
-*   **Mapeamento de Status de Assinatura:** Incluída a propriedade `'assinatura_status'` e `'fun_matricula'` no objeto JavaScript `listaFuncionariosCadastrados` em [`pages/funcionarios.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_2/pages/funcionarios.php), permitindo leitura exata do status do PIN em tempo real.
+*   **Correção de Navegação e Estabilização dos Submenus:** Corrigido o fluxo do menu lateral em [`components/sidebar.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_3/components/sidebar.php) e a desacoplagem de instâncias do Bootstrap Modal para eliminar travamentos e erros de JS (`TypeError: Cannot read properties of null`).
+*   **Mapeamento de Status de Assinatura:** Incluída a propriedade `'assinatura_status'` e `'fun_matricula'` no objeto JavaScript `listaFuncionariosCadastrados` em [`pages/funcionarios.php`](file:///c:/Users/Ronaldo/Documents/ANTIGRAVITY/gestao_epi_web_3/pages/funcionarios.php), permitindo leitura exata do status do PIN em tempo real.
 
 ### 📅 Versão 2.6.0 (10/09/2026) – Importação de Schema v7 & Correção de Mapeamento SQL de Substituições
 *   **Sincronização do Banco de Dados Schema v7:** Importado o arquivo `database_schema_v7.sql` (10/09/2026) no MySQL/MariaDB XAMPP (`database_schema`), atualizando a base com 91 entregas, 32 EPIs e 23 colaboradores.
@@ -281,13 +318,13 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 
 1.  Clone ou copie o repositório para o diretório `htdocs` do XAMPP:
     ```bash
-    C:\xampp\htdocs\gestao_epi_web_2
+    C:\xampp\htdocs\gestao_epi_web_3
     ```
 2.  Certifique-se de que a API do ecossistema esteja em execução (localmente em `http://127.0.0.1/gestao_epi_api_7/` ou na nuvem em `https://gestao-epi-api.onrender.com/`).
 3.  Inicie o servidor Apache via **XAMPP Control Panel**.
 4.  Acesse a aplicação no navegador:
     ```text
-    http://localhost/gestao_epi_web_2/
+    http://localhost/gestao_epi_web_3/
     ```
 5.  Utilize qualquer um dos [Perfis de Teste Homologados](#42-credenciais-homologadas-para-teste) para navegar pelo painel.
 

@@ -31,14 +31,18 @@ $tzBrasil = new DateTimeZone('America/Sao_Paulo');
 $dataAtual = new DateTime('now', $tzBrasil);
 $dataEmissao = $dataAtual->format('d/m/Y H:i');
 
-$dataInicio = trim($_GET['data_inicio'] ?? $dataAtual->format('Y-m-01'));
-$dataFim = trim($_GET['data_fim'] ?? $dataAtual->format('Y-m-d'));
-$setor = trim($_GET['setor'] ?? '');
+$dataInicioRaw = trim($_GET['data_inicial'] ?? $_GET['data_inicio'] ?? $dataAtual->format('Y-m-01'));
+$dataFimRaw = trim($_GET['data_final'] ?? $_GET['data_fim'] ?? $dataAtual->format('Y-m-d'));
+
+$dataInicio = explode(' ', $dataInicioRaw)[0];
+$dataFim = explode(' ', $dataFimRaw)[0];
+
+$setor = trim($_GET['setor'] ?? $_GET['departamento'] ?? '');
 $funcionario = trim($_GET['funcionario'] ?? '');
 
 $queryParams = [
-    'data_inicio' => $dataInicio,
-    'data_fim' => $dataFim
+    'data_inicial' => $dataInicio . ' 00:00:00',
+    'data_final' => $dataFim . ' 23:59:59'
 ];
 if ($setor !== '') $queryParams['departamento'] = $setor;
 if ($funcionario !== '') $queryParams['funcionario'] = $funcionario;
@@ -67,10 +71,21 @@ try {
         foreach ($itens as $item) {
             $val = (float)($item['valor_total'] ?? $item['ite_custo_total'] ?? 0);
             $status = strtoupper((string)($item['status'] ?? $item['ite_status_item'] ?? $item['ent_status'] ?? 'EM USO'));
-            $motivo = strtoupper((string)($item['motivo'] ?? $item['ent_motivo'] ?? ''));
+            $motivo = strtoupper((string)($item['motivo'] ?? $item['ent_motivo'] ?? $item['item_motivo_entrega'] ?? ''));
             $colabNome = $item['funcionario'] ?? $item['fun_nome'] ?? 'Não identificado';
             $setorNome = $item['setor'] ?? $item['fun_departamento'] ?? 'Geral';
-            $qtd = (int)($item['quantidade'] ?? $item['ite_quantidade'] ?? 1);
+            $qtd = (int)($item['quantidade'] ?? $item['ite_quantidade'] ?? $item['item_quantidade'] ?? 1);
+            $epiNome = $item['epi_nome'] ?? $item['epi'] ?? 'EPI';
+            $caNum = !empty($item['epi_ca'] ?? $item['ca'] ?? null) ? ($item['epi_ca'] ?? $item['ca']) : 'Isento';
+
+            $dataRaw = $item['entr_data_entrega'] ?? $item['data'] ?? $item['ent_data_retirada'] ?? $item['data_entrega'] ?? '';
+            $dataFmt = '---';
+            if (!empty($dataRaw)) {
+                try {
+                    $dt = new DateTime((string)$dataRaw);
+                    $dataFmt = $dt->format('d/m/Y');
+                } catch (\Throwable $e) {}
+            }
 
             $custoBruto += $val;
 
@@ -95,12 +110,12 @@ try {
             $setorTotais[$setorNome]['total'] += $val;
 
             $movimentacoes[] = [
-                'data' => !empty($item['data'] ?? $item['ent_data_retirada']) ? (new DateTime($item['data'] ?? $item['ent_data_retirada']))->format('d/m/Y') : '---',
+                'data' => $dataFmt,
                 'colaborador' => $colabNome,
-                'epi' => $item['epi'] ?? $item['epi_nome'] ?? 'EPI',
-                'ca' => $item['ca'] ?? $item['epi_ca'] ?? '---',
+                'epi' => $epiNome,
+                'ca' => $caNum,
                 'quantidade' => $qtd,
-                'motivo' => $item['motivo'] ?? $item['ent_motivo'] ?? 'FORNECIMENTO',
+                'motivo' => !empty($motivo) ? $motivo : 'FORNECIMENTO',
                 'status' => $status,
                 'valor_total' => $val
             ];
@@ -281,9 +296,11 @@ try {
             font-weight: 700;
             font-size: 8.5px;
             text-transform: uppercase;
+            white-space: nowrap;
         }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
+        .text-nowrap { white-space: nowrap; }
         
         .managerial-grid {
             display: grid;
@@ -320,11 +337,23 @@ try {
 </head>
 <body>
 
-<div class="action-bar no-print">
+<div class="action-bar no-print flex-wrap gap-2">
     <div class="brand">
         <i class="bi bi-cash-stack text-primary"></i>
-        <span>Gestão EPI — Relatório Financeiro e Custos com EPIs</span>
+        <span>Gestão EPI — Relatório Financeiro e Custos</span>
     </div>
+    <form method="GET" action="relatorio_financeiro.php" class="d-flex align-items-center gap-2 m-0 flex-wrap">
+        <span class="text-white fw-medium" style="font-size:11px;">Início:</span>
+        <input type="date" name="data_inicio" value="<?= htmlspecialchars($dataInicio) ?>" class="form-control form-control-sm py-1 px-2" style="width: auto; font-size: 11px;">
+        
+        <span class="text-white fw-medium" style="font-size:11px;">Fim:</span>
+        <input type="date" name="data_fim" value="<?= htmlspecialchars($dataFim) ?>" class="form-control form-control-sm py-1 px-2" style="width: auto; font-size: 11px;">
+        
+        <input type="text" name="setor" value="<?= htmlspecialchars($setor) ?>" placeholder="Setor" class="form-control form-control-sm py-1 px-2" style="width: 110px; font-size: 11px;">
+        <input type="text" name="funcionario" value="<?= htmlspecialchars($funcionario) ?>" placeholder="Funcionário" class="form-control form-control-sm py-1 px-2" style="width: 120px; font-size: 11px;">
+        
+        <button type="submit" class="btn btn-sm btn-primary py-1 px-3" style="font-size: 11px;"><i class="bi bi-search me-1"></i> Filtrar</button>
+    </form>
     <div class="buttons">
         <button type="button" class="btn-action btn-print" onclick="window.print()">
             <i class="bi bi-printer-fill"></i> Imprimir / Salvar PDF
@@ -380,7 +409,7 @@ try {
                 <th style="width: 6%;" class="text-center">Qtd</th>
                 <th style="width: 12%;">Motivo</th>
                 <th style="width: 8%;">Status</th>
-                <th style="width: 8%;" class="text-right">Valor Total</th>
+                <th style="width: 10%;" class="text-right text-nowrap">Valor Total</th>
             </tr>
         </thead>
         <tbody>
@@ -393,7 +422,7 @@ try {
                 <td class="text-center"><b><?= $mov['quantidade'] ?></b></td>
                 <td><?= htmlspecialchars($mov['motivo']) ?></td>
                 <td><?= htmlspecialchars($mov['status']) ?></td>
-                <td class="text-right"><b>R$ <?= number_format($mov['valor_total'], 2, ',', '.') ?></b></td>
+                <td class="text-right text-nowrap"><b>R$&nbsp;<?= number_format($mov['valor_total'], 2, ',', '.') ?></b></td>
             </tr>
             <?php endforeach; ?>
         </tbody>
@@ -407,19 +436,26 @@ try {
                 <thead>
                     <tr>
                         <th>Colaborador</th>
-                        <th class="text-center" style="width: 22%;">Qtd Itens</th>
-                        <th class="text-right" style="width: 28%;">Custo Total</th>
+                        <th class="text-center" style="width: 20%;">Qtd Itens</th>
+                        <th class="text-right text-nowrap" style="width: 30%;">Custo Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($custoPorColaborador)): ?>
                         <tr><td colspan="3" class="text-center" style="color: #94A3B8;">Sem dados</td></tr>
                     <?php else: ?>
-                        <?php foreach ($custoPorColaborador as $c): ?>
+                        <?php foreach ($custoPorColaborador as $c): 
+                            $pctC = $custoBruto > 0 ? min(100, round(($c['total'] / $custoBruto) * 100, 1)) : 0;
+                        ?>
                         <tr>
-                            <td><b><?= htmlspecialchars($c['nome']) ?></b></td>
+                            <td>
+                                <b><?= htmlspecialchars($c['nome']) ?></b>
+                                <div style="background: #E2E8F0; height: 3px; border-radius: 2px; margin-top: 2px; overflow: hidden;">
+                                    <div style="background: #305BD3; height: 100%; width: <?= $pctC ?>%;"></div>
+                                </div>
+                            </td>
                             <td class="text-center"><?= $c['qtd'] ?> un</td>
-                            <td class="text-right">R$ <?= number_format($c['total'], 2, ',', '.') ?></td>
+                            <td class="text-right text-nowrap">R$&nbsp;<?= number_format($c['total'], 2, ',', '.') ?></td>
                         </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -433,19 +469,26 @@ try {
                 <thead>
                     <tr>
                         <th>Setor</th>
-                        <th class="text-center" style="width: 22%;">Qtd Itens</th>
-                        <th class="text-right" style="width: 28%;">Custo Total</th>
+                        <th class="text-center" style="width: 20%;">Qtd Itens</th>
+                        <th class="text-right text-nowrap" style="width: 30%;">Custo Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($custoPorSetor)): ?>
                         <tr><td colspan="3" class="text-center" style="color: #94A3B8;">Sem dados</td></tr>
                     <?php else: ?>
-                        <?php foreach ($custoPorSetor as $s): ?>
+                        <?php foreach ($custoPorSetor as $s): 
+                            $pctS = $custoBruto > 0 ? min(100, round(($s['total'] / $custoBruto) * 100, 1)) : 0;
+                        ?>
                         <tr>
-                            <td><b><?= htmlspecialchars($s['setor']) ?></b></td>
+                            <td>
+                                <b><?= htmlspecialchars($s['setor']) ?></b>
+                                <div style="background: #E2E8F0; height: 3px; border-radius: 2px; margin-top: 2px; overflow: hidden;">
+                                    <div style="background: #10B981; height: 100%; width: <?= $pctS ?>%;"></div>
+                                </div>
+                            </td>
                             <td class="text-center"><?= $s['qtd'] ?> un</td>
-                            <td class="text-right">R$ <?= number_format($s['total'], 2, ',', '.') ?></td>
+                            <td class="text-right text-nowrap">R$&nbsp;<?= number_format($s['total'], 2, ',', '.') ?></td>
                         </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>

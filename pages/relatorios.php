@@ -36,57 +36,61 @@ try {
 $podeVerCustos = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR'], true);
 $podeVerEntregasGerais = in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'GESTOR'], true);
 $podeVerAuditoria = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR', 'TECNICO_SST'], true);
+
+$tipoParam = $_GET['tipo'] ?? '';
+$tipoInicial = 'geral';
+if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
+    $tipoInicial = 'custos';
+} elseif ($tipoParam === 'epi' || $tipoParam === 'epis-vencidos') {
+    $tipoInicial = 'epis-vencidos';
+} elseif ($tipoParam === 'ca-vencidos') {
+    $tipoInicial = 'ca-vencidos';
+} elseif ($tipoParam === 'funcionario' || $tipoParam === 'entregas') {
+    $tipoInicial = 'entregas';
+} elseif ($tipoParam === 'geral') {
+    $tipoInicial = 'geral';
+} elseif ($tipoParam === 'auditoria') {
+    $tipoInicial = 'auditoria';
+} elseif ($podeVerEntregasGerais && empty($tipoParam)) {
+    $tipoInicial = 'geral';
+}
 ?>
 
 <div id="main-content">
     <?php require_once __DIR__ . '/../components/topbar.php'; ?>
     
     <div class="content-body no-print">
-        <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
             <div>
                 <h3 class="fw-bold m-0" style="color: var(--color-primary);">Relatórios Gerenciais</h3>
-                <p class="text-muted">Gere relatórios de auditoria, custos consolidados, conformidade e vencimentos de Certificados de Aprovação (C.A.).</p>
+                <p class="text-muted m-0">Gere relatórios de auditoria, custos consolidados, conformidade e vencimentos de Certificados de Aprovação (C.A.).</p>
+            </div>
+
+            <div class="btn-group-toggle-view" role="group" id="lista-tipos-relatorios">
+                <button type="button" data-tipo="geral" data-painel="geral" class="btn btn-view <?= $tipoInicial === 'geral' ? 'active' : '' ?>" onclick="mostrarPainelRelatorio('geral', this)">
+                    <i class="bi bi-clipboard-data me-1"></i> Rel. Geral EPIs
+                </button>
+                <?php if ($podeVerCustos): ?>
+                    <button type="button" data-tipo="financeiro" data-painel="custos" class="btn btn-view <?= $tipoInicial === 'custos' ? 'active' : '' ?>" onclick="mostrarPainelRelatorio('custos', this)">
+                        <i class="bi bi-currency-dollar me-1"></i> Rel. Financeiro
+                    </button>
+                <?php endif; ?>
+                <?php if ($podeVerEntregasGerais): ?>
+                    <button type="button" data-tipo="epi" data-painel="epis-vencidos" class="btn btn-view <?= $tipoInicial === 'epis-vencidos' ? 'active' : '' ?>" onclick="mostrarPainelRelatorio('epis-vencidos', this)">
+                        <i class="bi bi-shield-check me-1"></i> Rel. EPI
+                    </button>
+                    <button type="button" data-tipo="funcionario" data-painel="entregas" class="btn btn-view <?= $tipoInicial === 'entregas' ? 'active' : '' ?>" onclick="mostrarPainelRelatorio('entregas', this)">
+                        <i class="bi bi-person-badge me-1"></i> Rel. Funcionário
+                    </button>
+                <?php endif; ?>
             </div>
         </div>
 
         <div class="row g-4">
-            <!-- Coluna de Opções de Relatório -->
-            <div class="col-lg-3">
-                <div class="card-custom">
-                    <h6 class="fw-bold mb-3"><i class="bi bi-file-earmark-text me-1 text-primary"></i>Tipo de Relatório</h6>
-                    <div class="list-group" id="lista-tipos-relatorios">
-                        <button type="button" class="list-group-item list-group-item-action py-3 <?= $podeVerEntregasGerais ? '' : 'active' ?>" onclick="mostrarPainelRelatorio('geral', this)">
-                            <i class="bi bi-clipboard-data me-2"></i>Rel. Geral de Fornecimento
-                        </button>
-                        <?php if ($podeVerEntregasGerais): ?>
-                            <button type="button" class="list-group-item list-group-item-action py-3 active" onclick="mostrarPainelRelatorio('entregas', this)">
-                                <i class="bi bi-journal-text me-2"></i>Entregas Gerais
-                            </button>
-                            <button type="button" class="list-group-item list-group-item-action py-3" onclick="mostrarPainelRelatorio('epis-vencidos', this)">
-                                <i class="bi bi-clock-history me-2"></i>EPIs Vencidos em Posse
-                            </button>
-                            <button type="button" class="list-group-item list-group-item-action py-3" onclick="mostrarPainelRelatorio('ca-vencidos', this)">
-                                <i class="bi bi-shield-exclamation me-2"></i>Vencimentos de C.A.
-                            </button>
-                        <?php endif; ?>
-                        <?php if ($podeVerCustos): ?>
-                            <button type="button" class="list-group-item list-group-item-action py-3" onclick="mostrarPainelRelatorio('custos', this)">
-                                <i class="bi bi-currency-dollar me-2"></i>Relatório de Custos
-                            </button>
-                        <?php endif; ?>
-                        <?php if ($podeVerAuditoria): ?>
-                            <button type="button" class="list-group-item list-group-item-action py-3" onclick="mostrarPainelRelatorio('auditoria', this)">
-                                <i class="bi bi-fingerprint me-2"></i>Auditoria de Logs (v2)
-                            </button>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Coluna de Configuração e Resultados -->
-            <div class="col-lg-9">
+            <!-- Coluna Principal de Resultados (100% de Largura) -->
+            <div class="col-12">
                 <!-- Relatório 0: Relatório Geral de Fornecimento de EPIs -->
-                <div class="card-custom painel-relatorio <?= $podeVerEntregasGerais ? 'd-none' : '' ?>" id="painel-geral">
+                <div class="card-custom painel-relatorio <?= $tipoInicial === 'geral' ? '' : 'd-none' ?>" id="painel-geral">
                     <h5 class="fw-bold mb-3 text-color-primary">Relatório Geral de Fornecimento de EPIs</h5>
                     <p class="text-muted" style="font-size: 13px;">Consolidação gerencial de todos os fornecimentos de EPIs realizados no período, com indicadores, agrupamentos e registros detalhados.</p>
 
@@ -101,7 +105,34 @@ $podeVerAuditoria = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR', 'TECNICO_
                         </div>
                         <div class="col-md-3">
                             <label class="form-label" style="font-size:12px;">Funcionário</label>
-                            <input type="text" id="geral-funcionario" class="form-control" placeholder="Nome ou &quot;todos&quot;">
+                            <input type="hidden" id="geral-funcionario-id" value="">
+                            <div class="position-relative" id="wrapper-busca-rel-geral">
+                                <div id="srch-rel-geral-border" style="
+                                    display:flex;align-items:center;gap:6px;
+                                    background:#fff;border:1.5px solid #d0d5dd;
+                                    border-radius:8px;padding:0 10px;
+                                    height:38px;
+                                    transition:border-color .2s,box-shadow .2s;">
+                                    <i class="bi bi-search" style="color:#3b82f6;font-size:14px;flex-shrink:0;"></i>
+                                    <input type="text"
+                                           id="geral-funcionario"
+                                           autocomplete="off"
+                                           placeholder="Nome ou &quot;todos&quot;"
+                                           style="border:none;outline:none;flex:1;padding:6px 0;font-size:13px;background:transparent;"
+                                           oninput="buscarRelGeral(this.value)"
+                                           onfocus="this.closest('[id=srch-rel-geral-border]').style.borderColor='#3b82f6';this.closest('[id=srch-rel-geral-border]').style.boxShadow='0 0 0 3px rgba(59,130,246,.15)';"
+                                           onblur="setTimeout(()=>{this.closest('[id=srch-rel-geral-border]').style.borderColor='#d0d5dd';this.closest('[id=srch-rel-geral-border]').style.boxShadow='none';},150)"
+                                           onkeydown="teclarRelGeral(event)">
+                                    <button type="button" id="btn-limpar-rel-geral" title="Limpar"
+                                            onclick="limparRelGeral()"
+                                            style="display:none;background:none;border:none;cursor:pointer;color:#9ca3af;font-size:16px;line-height:1;padding:0 2px;">&times;</button>
+                                </div>
+                                <div id="dropdown-rel-geral" style="
+                                    display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
+                                    background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;
+                                    box-shadow:0 12px 32px -4px rgba(0,0,0,.18),0 2px 8px -2px rgba(0,0,0,.08);
+                                    overflow:hidden;max-height:300px;overflow-y:auto;z-index:99999;"></div>
+                            </div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label" style="font-size:12px;">Setor / Departamento</label>
@@ -113,7 +144,16 @@ $podeVerAuditoria = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR', 'TECNICO_
                         </div>
                         <div class="col-md-3">
                             <label class="form-label" style="font-size:12px;">Motivo da Entrega</label>
-                            <input type="text" id="geral-motivo" class="form-control" placeholder="Ex: SUBSTITUICAO">
+                            <select id="geral-motivo" class="form-select">
+                                <option value="">Todos os Motivos</option>
+                                <option value="ADMISSAO">Admissão</option>
+                                <option value="SUBSTITUICAO">Substituição</option>
+                                <option value="VENCIMENTO">Vencimento</option>
+                                <option value="PERDA">Perda</option>
+                                <option value="DANO">Dano / Avaria</option>
+                                <option value="TROCA_FUNCAO">Troca de Função</option>
+                                <option value="OUTROS">Outros</option>
+                            </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label" style="font-size:12px;">Categoria do Item</label>
@@ -146,8 +186,8 @@ $podeVerAuditoria = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR', 'TECNICO_
                     </div>
                 </div>
 
-                <!-- Relatório 1: Entregas Gerais -->
-                <div class="card-custom painel-relatorio" id="painel-entregas">
+                <!-- Relatório 1: Entregas Gerais (Rel. Funcionário) -->
+                <div class="card-custom painel-relatorio <?= $tipoInicial === 'entregas' ? '' : 'd-none' ?>" id="painel-entregas">
                     <h5 class="fw-bold mb-3 text-color-primary">Histórico Geral de Entregas</h5>
                     <div class="row g-3 mb-4">
                         <div class="col-md-5">
@@ -187,8 +227,8 @@ $podeVerAuditoria = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR', 'TECNICO_
                     </div>
                 </div>
 
-                <!-- Relatório 2: EPIs Vencidos em Posse -->
-                <div class="card-custom painel-relatorio d-none" id="painel-epis-vencidos">
+                <!-- Relatório 2: EPIs Vencidos em Posse (Rel. EPI) -->
+                <div class="card-custom painel-relatorio <?= $tipoInicial === 'epis-vencidos' ? '' : 'd-none' ?>" id="painel-epis-vencidos">
                     <h5 class="fw-bold mb-3 text-color-primary">EPIs com Validade de Uso Expirada</h5>
                     <p class="text-muted" style="font-size: 13px;">Lista colaboradores que estão portando EPIs cujo prazo recomendado de uso/descarte recomendado pela NR-6 foi ultrapassado.</p>
                     <div class="d-flex gap-2 col-md-8 mb-4">
@@ -198,7 +238,7 @@ $podeVerAuditoria = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR', 'TECNICO_
                 </div>
 
                 <!-- Relatório 3: C.A. Vencidos -->
-                <div class="card-custom painel-relatorio d-none" id="painel-ca-vencidos">
+                <div class="card-custom painel-relatorio <?= $tipoInicial === 'ca-vencidos' ? '' : 'd-none' ?>" id="painel-ca-vencidos">
                     <h5 class="fw-bold mb-3 text-color-primary">EPIs com C.A. Vencido no Catálogo</h5>
                     <p class="text-muted" style="font-size: 13px;">Identifica equipamentos de proteção cuja validade do Certificado de Aprovação (C.A.) no Ministério do Trabalho expirou, impossibilitando novos fornecimentos.</p>
                     <div class="d-flex gap-2 col-md-8 mb-4">
@@ -207,18 +247,88 @@ $podeVerAuditoria = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR', 'TECNICO_
                     </div>
                 </div>
 
-                <!-- Relatório 4: Custos Consolidados -->
-                <div class="card-custom painel-relatorio d-none" id="painel-custos">
-                    <h5 class="fw-bold mb-3 text-color-primary">Demonstrativo Mensal de Custos</h5>
-                    <p class="text-muted" style="font-size: 13px;">Consolidação financeira detalhada de EPIs homologados por centro de custos, departamentos e valores médios mensais.</p>
-                    <div class="d-flex gap-2 col-md-8 mb-4">
-                        <button class="btn btn-primary" onclick="gerarRelatorioCustos()"><i class="bi bi-play-fill me-1"></i> Carregar Relatório</button>
-                        <button class="btn btn-outline-primary" onclick="abrirModeloOficial('custos')"><i class="bi bi-printer me-1"></i> Imprimir Demonstrativo A4</button>
+                <!-- Relatório 4: Custos Consolidados (Rel. Financeiro) -->
+                <div class="card-custom painel-relatorio <?= $tipoInicial === 'custos' ? '' : 'd-none' ?>" id="painel-custos">
+                    <h5 class="fw-bold mb-2 text-color-primary"><i class="bi bi-currency-dollar me-2 text-success"></i>Demonstrativo Financeiro e Custos com EPIs</h5>
+                    <p class="text-muted" style="font-size: 13px;">Consolidação financeira detalhada de investimentos em EPIs por centro de custos, departamentos e valores médios com gráficos analíticos.</p>
+
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label" style="font-size:12px;">Data Início *</label>
+                            <input type="date" id="custos-data-inicio" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" style="font-size:12px;">Data Fim *</label>
+                            <input type="date" id="custos-data-fim" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" style="font-size:12px;">Setor / Departamento</label>
+                            <input type="text" id="custos-departamento" class="form-control" placeholder="Ex: Manutenção">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" style="font-size:12px;">Funcionário / Colaborador</label>
+                            <input type="text" id="custos-funcionario" class="form-control" placeholder="Ex: João Silva">
+                        </div>
+                        <div class="col-md-12 d-flex gap-2 justify-content-end mt-3">
+                            <button class="btn btn-primary px-4" onclick="gerarRelatorioCustos()"><i class="bi bi-play-fill me-1"></i> Consultar Relatório Financeiro</button>
+                            <button class="btn btn-outline-primary text-nowrap" onclick="abrirModeloOficial('custos')"><i class="bi bi-printer me-1"></i> Imprimir Demonstrativo A4</button>
+                        </div>
+                    </div>
+
+                    <!-- Resumo Gerencial com KPIs e Gráficos Financeiros -->
+                    <div id="custos-resumo-kpis" class="d-none mt-4 pt-3 border-top">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-calculator me-1 text-primary"></i>Resumo Financeiro do Período</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <div class="card p-3 border-0 bg-light text-center">
+                                    <small class="text-muted fw-bold text-uppercase" style="font-size:11px;">Custo Bruto Fornecido</small>
+                                    <h4 class="fw-bold text-primary m-0 mt-1" id="kpi-custo-bruto">R$&nbsp;0,00</h4>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card p-3 border-0 bg-light text-center">
+                                    <small class="text-muted fw-bold text-uppercase" style="font-size:11px;">Estornos / Devoluções</small>
+                                    <h4 class="fw-bold text-success m-0 mt-1" id="kpi-estornos">R$&nbsp;0,00</h4>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card p-3 border-0 bg-light text-center">
+                                    <small class="text-muted fw-bold text-uppercase" style="font-size:11px;">Descartes / Inservíveis</small>
+                                    <h4 class="fw-bold text-danger m-0 mt-1" id="kpi-descartes">R$&nbsp;0,00</h4>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card p-3 border-0 bg-light text-center">
+                                    <small class="text-muted fw-bold text-uppercase" style="font-size:11px;">Custo Líquido Efetivo</small>
+                                    <h4 class="fw-bold text-dark m-0 mt-1" id="kpi-custo-liquido">R$&nbsp;0,00</h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold mb-3"><i class="bi bi-pie-chart-fill me-1 text-primary"></i>Análise Gráfica de Custos</h6>
+                        <div class="row g-3 mb-2">
+                            <div class="col-md-6">
+                                <div class="card border p-3">
+                                    <h6 class="fw-bold text-muted mb-3" style="font-size: 13px;"><i class="bi bi-pie-chart me-1 text-primary"></i> Distribuição de Custos por Setor</h6>
+                                    <div style="height: 240px; position: relative;">
+                                        <canvas id="chartCustosSetor"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border p-3">
+                                    <h6 class="fw-bold text-muted mb-3" style="font-size: 13px;"><i class="bi bi-bar-chart-line me-1 text-primary"></i> Top EPIs por Impacto Financeiro</h6>
+                                    <div style="height: 240px; position: relative;">
+                                        <canvas id="chartCustosEpis"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Relatório 5: Auditoria de Logs de Sistema (Modelo v2) -->
-                <div class="card-custom painel-relatorio d-none" id="painel-auditoria">
+                <div class="card-custom painel-relatorio <?= $tipoInicial === 'auditoria' ? '' : 'd-none' ?>" id="painel-auditoria">
                     <h5 class="fw-bold mb-2 text-color-primary">Relatório de Auditoria de Logs de Sistema</h5>
                     <p class="text-muted" style="font-size: 13px;">Geração e exportação do relatório oficial de auditoria, rastreando operações, usuários, entidades e descrições detalhadas (Modelo v2 em A4 Paisagem).</p>
 
@@ -358,7 +468,7 @@ $podeVerAuditoria = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR', 'TECNICO_
 <script>
 const PROXY_URL = 'api_proxy.php';
 
-let relatorioAtivo = <?= $podeVerEntregasGerais ? "'entregas'" : "'geral'" ?>;
+let relatorioAtivo = '<?= $tipoInicial ?>';
 let dadosAtivos = []; // Cache dos dados carregados
 let colunasAtivas = []; // Nomes das colunas para exportação
 let filtrosAtivosString = '';
@@ -375,16 +485,37 @@ const GERAL_LIMITE_PAGINA = 25;
 function mostrarPainelRelatorio(tipo, btn) {
     relatorioAtivo = tipo;
 
-    // Altera active na lista lateral
+    // Altera active na lista lateral de tipos de relatórios
     document.querySelectorAll('#lista-tipos-relatorios button').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
+    if (btn) {
+        btn.classList.add('active');
+    } else {
+        const targetBtn = document.querySelector(`#lista-tipos-relatorios button[data-painel="${tipo}"], #lista-tipos-relatorios button[data-tipo="${tipo}"]`);
+        if (targetBtn) targetBtn.classList.add('active');
+    }
 
     // Esconde todos os painéis e exibe o correto
     document.querySelectorAll('.painel-relatorio').forEach(p => p.classList.add('d-none'));
-    document.getElementById(`painel-${tipo}`).classList.remove('d-none');
+    const targetPainel = document.getElementById(`painel-${tipo}`);
+    if (targetPainel) targetPainel.classList.remove('d-none');
 
     // Oculta resultados anteriores
-    document.getElementById('bloco-resultados').classList.add('d-none');
+    const blocoRes = document.getElementById('bloco-resultados');
+    if (blocoRes) blocoRes.classList.add('d-none');
+
+    // Sincroniza o destaque ativo no submenu da sidebar
+    const mapaPainelTipo = {
+        'custos': 'financeiro',
+        'epis-vencidos': 'epi',
+        'entregas': 'funcionario',
+        'geral': 'geral'
+    };
+    const tipoSub = mapaPainelTipo[tipo];
+    if (tipoSub) {
+        document.querySelectorAll('#sub-relatorios a').forEach(a => a.classList.remove('active-sub'));
+        const subLink = document.querySelector(`#sub-relatorios a[href*="tipo=${tipoSub}"]`);
+        if (subLink) subLink.classList.add('active-sub');
+    }
 }
 
 /**
@@ -567,51 +698,162 @@ function gerarRelatorioCaVencidos() {
     .catch(() => exibirErro('Erro na chamada.'));
 }
 
+let chartInstanceSetor = null;
+let chartInstanceEpis = null;
+
 /**
- * RELATÓRIO 4: Custos Consolidados
+ * RELATÓRIO 4: Custos Consolidados com Filtro de Datas e Gráficos
  */
 function gerarRelatorioCustos() {
-    filtrosAtivosString = 'Filtro: Demonstrativo mensal de custos corporativos';
+    const dataInicio = document.getElementById('custos-data-inicio')?.value || '';
+    const dataFim = document.getElementById('custos-data-fim')?.value || '';
+    const setor = document.getElementById('custos-departamento')?.value.trim() || '';
+    const funcionario = document.getElementById('custos-funcionario')?.value.trim() || '';
+
+    if (!dataInicio || !dataFim) {
+        alert('Informe as datas de início e fim para a consulta financeira.');
+        return;
+    }
+    if (new Date(dataInicio) > new Date(dataFim)) {
+        alert('A data inicial não pode ser maior que a data final.');
+        return;
+    }
+
+    const params = new URLSearchParams();
+    params.append('data_inicial', `${dataInicio} 00:00:00`);
+    params.append('data_final', `${dataFim} 23:59:59`);
+    if (setor) params.append('departamento', setor);
+    if (funcionario) params.append('funcionario', funcionario);
+
+    filtrosAtivosString = `Filtro Financeiro: ${dataInicio} a ${dataFim}` + (setor ? `; Setor=${setor}` : '') + (funcionario ? `; Func=${funcionario}` : '');
+
     exibirLoading();
 
-    fetch(`${PROXY_URL}?route=relatorios/custo-mensal`)
+    fetch(`${PROXY_URL}?route=relatorios/epis/geral&${params.toString()}`)
     .then(res => res.json())
     .then(res => {
         if (res.success && res.data) {
-            dadosAtivos = res.data;
-            colunasAtivas = ['Ano / Mês', 'Total Unidades Fornecidas', 'Custo Total'];
-            
-            let html = `
-                <table class="table table-striped border align-middle" id="tabela-relatorio-gerado" style="font-size: 13px;">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Ano / Mês</th>
-                            <th class="text-center">Quantidade Entregue</th>
-                            <th class="text-end">Valor Total de Consumo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            const registros = res.data.registros || res.data.itens || (Array.isArray(res.data) ? res.data : []);
+            dadosAtivos = registros;
 
-            res.data.forEach(row => {
-                const custoTotal = parseFloat(row.custo_total);
-                const valorFloat = isNaN(custoTotal) ? 0 : custoTotal;
-                html += `
-                    <tr>
-                        <td class="fw-bold">${row.mes}</td>
-                        <td class="text-center">${row.total_itens_entregues}</td>
-                        <td class="text-end fw-bold text-success">${valorFloat.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-                    </tr>
-                `;
+            let custoBruto = 0;
+            let estornos = 0;
+            let descartes = 0;
+
+            const setoresMap = {};
+            const episMap = {};
+
+            registros.forEach(r => {
+                const val = parseFloat(r.valor_total || r.ite_custo_total || 0);
+                const status = String(r.status || r.ite_status_item || r.entr_motivo || '').toUpperCase();
+                const mot = String(r.item_motivo_entrega || r.entr_motivo || '').toUpperCase();
+                const setNome = r.fun_departamento || r.setor || 'Geral';
+                const epiNome = r.epi_nome || r.epi || 'EPI';
+
+                custoBruto += val;
+                if (status.includes('DEVOLVIDO') || mot.includes('DEVOLUCAO')) {
+                    estornos += val;
+                } else if (status.includes('DESCARTE') || status.includes('DANIFICADO') || mot.includes('DANO') || mot.includes('PERDA')) {
+                    descartes += val;
+                }
+
+                setoresMap[setNome] = (setoresMap[setNome] || 0) + val;
+                episMap[epiNome] = (episMap[epiNome] || 0) + val;
             });
 
-            html += '</tbody></table>';
-            renderizarResultados('Demonstrativo Mensal de Custos', html);
+            const custoLiquido = custoBruto - estornos;
+
+            document.getElementById('kpi-custo-bruto').innerText = custoBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }).replace(/\s/g, '\u00a0');
+            document.getElementById('kpi-estornos').innerText = estornos.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }).replace(/\s/g, '\u00a0');
+            document.getElementById('kpi-descartes').innerText = descartes.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }).replace(/\s/g, '\u00a0');
+            document.getElementById('kpi-custo-liquido').innerText = custoLiquido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }).replace(/\s/g, '\u00a0');
+
+            const blocoKpis = document.getElementById('custos-resumo-kpis');
+            if (blocoKpis) blocoKpis.classList.remove('d-none');
+
+            // Atualiza Gráficos
+            renderizarGraficosFinanceiros(setoresMap, episMap);
+
+            // Renderiza Tabela no bloco de resultados
+            renderizarTabelaRegistrosGeral(registros);
+            document.getElementById('bloco-resultados').classList.remove('d-none');
+            document.getElementById('titulo-resultados').innerText = 'Demonstrativo Financeiro de Custos com EPIs';
         } else {
-            exibirErro(res.message || 'Sem movimentações ou custos computados.');
+            exibirErro(res.message || 'Nenhum registro financeiro encontrado no período.');
         }
     })
-    .catch(() => exibirErro('Erro na cotação financeira.'));
+    .catch(err => {
+        exibirErro('Erro ao carregar dados financeiros: ' + err.message);
+    });
+}
+
+window.carregarRelatorioCustos = gerarRelatorioCustos;
+
+function renderizarGraficosFinanceiros(setoresMap, episMap) {
+    const setoresSorted = Object.entries(setoresMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6);
+    
+    const labelsSetor = setoresSorted.map(item => item[0]);
+    const valoresSetor = setoresSorted.map(item => item[1]);
+
+    const episSorted = Object.entries(episMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6);
+    
+    const labelsEpi = episSorted.map(item => item[0]);
+    const valoresEpi = episSorted.map(item => item[1]);
+
+    const ctxSetor = document.getElementById('chartCustosSetor');
+    if (ctxSetor && typeof Chart !== 'undefined') {
+        if (chartInstanceSetor) chartInstanceSetor.destroy();
+        chartInstanceSetor = new Chart(ctxSetor, {
+            type: 'doughnut',
+            data: {
+                labels: labelsSetor.length ? labelsSetor : ['Sem dados'],
+                datasets: [{
+                    data: valoresSetor.length ? valoresSetor : [0],
+                    backgroundColor: ['#305BD3', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' }
+                }
+            }
+        });
+    }
+
+    const ctxEpi = document.getElementById('chartCustosEpis');
+    if (ctxEpi && typeof Chart !== 'undefined') {
+        if (chartInstanceEpis) chartInstanceEpis.destroy();
+        chartInstanceEpis = new Chart(ctxEpi, {
+            type: 'bar',
+            data: {
+                labels: labelsEpi.length ? labelsEpi : ['Sem dados'],
+                datasets: [{
+                    label: 'Investimento (R$)',
+                    data: valoresEpi.length ? valoresEpi : [0],
+                    backgroundColor: '#305BD3',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { ticks: { callback: v => 'R$ ' + v } }
+                }
+            }
+        });
+    }
 }
 
 /**
@@ -736,7 +978,17 @@ function abrirModeloOficial(tipo) {
     } else if (tipo === 'ca') {
         window.open('relatorio_validade_ca.php', '_blank');
     } else if (tipo === 'custos') {
-        window.open('relatorio_financeiro.php', '_blank');
+        const dataInicio = document.getElementById('custos-data-inicio')?.value || '';
+        const dataFim = document.getElementById('custos-data-fim')?.value || '';
+        const setor = document.getElementById('custos-departamento')?.value || '';
+        const func = document.getElementById('custos-funcionario')?.value || '';
+        const params = new URLSearchParams();
+        if (dataInicio) params.append('data_inicio', dataInicio);
+        if (dataFim) params.append('data_fim', dataFim);
+        if (setor) params.append('setor', setor);
+        if (func) params.append('funcionario', func);
+        const query = params.toString();
+        window.open('relatorio_financeiro.php' + (query ? '?' + query : ''), '_blank');
     } else if (tipo === 'consumo') {
         window.open('relatorio_consumo_epi.php', '_blank');
     }
@@ -778,6 +1030,11 @@ function formatarDataHoraBR(valor) {
         const campoFim = document.getElementById('geral-data-fim');
         if (campoInicio && !campoInicio.value) campoInicio.value = toInput(inicio);
         if (campoFim && !campoFim.value) campoFim.value = toInput(hoje);
+
+        const custInicio = document.getElementById('custos-data-inicio');
+        const custFim = document.getElementById('custos-data-fim');
+        if (custInicio && !custInicio.value) custInicio.value = toInput(inicio);
+        if (custFim && !custFim.value) custFim.value = toInput(hoje);
     });
 })();
 
@@ -982,7 +1239,7 @@ function renderizarTabelaRegistrosGeral(registros) {
                     <th>Tam</th>
                     <th>Qtd</th>
                     <th>Motivo</th>
-                    ${permiteCustos ? '<th class="text-end">Valor Total</th>' : ''}
+                    ${permiteCustos ? '<th class="text-end text-nowrap">Valor Total</th>' : ''}
                 </tr>
             </thead>
             <tbody>`;
@@ -993,8 +1250,8 @@ function renderizarTabelaRegistrosGeral(registros) {
 
     registros.forEach(r => {
         const valorTotal = r.valor_total !== null && r.valor_total !== undefined
-            ? `<td class="text-end fw-semibold">${parseFloat(r.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>`
-            : (permiteCustos ? '<td class="text-end text-muted">---</td>' : '');
+            ? `<td class="text-end fw-semibold text-nowrap">${parseFloat(r.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }).replace(/\s/g, '\u00a0')}</td>`
+            : (permiteCustos ? '<td class="text-end text-muted text-nowrap">---</td>' : '');
         html += `
             <tr>
                 <td>${formatarDataHoraBR(r.entr_data_entrega)}</td>
@@ -1276,7 +1533,7 @@ async function imprimirRelatorioGeral() {
                     <tr>
                         <th>Data</th><th>Funcionário</th><th>Setor</th><th>EPI</th><th>C.A.</th>
                         <th>Tam</th><th>Qtd</th><th>Motivo</th><th>Responsável</th>
-                        ${permiteCustos ? '<th class="text-end">Valor Total</th>' : ''}
+                        ${permiteCustos ? '<th class="text-end text-nowrap">Valor Total</th>' : ''}
                     </tr>
                 </thead>
                 <tbody>`;
@@ -1292,7 +1549,7 @@ async function imprimirRelatorioGeral() {
                     <td>${r.item_quantidade ?? 1}</td>
                     <td>${traduzirMotivo(r.item_motivo_entrega || r.entr_motivo)}</td>
                     <td>${r.usu_login || '---'}</td>
-                    ${permiteCustos ? `<td class="text-end">${r.valor_total !== null && r.valor_total !== undefined ? parseFloat(r.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '---'}</td>` : ''}
+                    ${permiteCustos ? `<td class="text-end text-nowrap">${r.valor_total !== null && r.valor_total !== undefined ? parseFloat(r.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }).replace(/\s/g, '\u00a0') : '---'}</td>` : ''}
                 </tr>`;
         });
         tabelaHtml += '</tbody></table>';
@@ -1434,9 +1691,118 @@ function limparRelEntregas(){
     fecharDdRelEntregas();
 }
 
+// ========== AUTOCOMPLETE DO FILTRO DE COLABORADOR (Relatório Geral EPIs) ==========
+let relGeralResultados = [];
+let relGeralIdx = -1;
+let relGeralNomeSelecionado = '';
+
+function fecharDdRelGeral(){
+    const dd = document.getElementById('dropdown-rel-geral');
+    if(dd){ dd.style.display = 'none'; dd.innerHTML = ''; }
+    relGeralIdx = -1; relGeralResultados = [];
+}
+
+function buscarRelGeral(termo){
+    relGeralIdx = -1;
+    const btn = document.getElementById('btn-limpar-rel-geral');
+    if(btn) btn.style.display = termo.length > 0 ? 'block' : 'none';
+
+    const hiddenId = document.getElementById('geral-funcionario-id');
+    if(hiddenId) hiddenId.value = '';
+    relGeralNomeSelecionado = '';
+
+    const tn = _rlNorm(termo);
+    const cpfD = termo.replace(/\D/g, '');
+    if(tn.length < 2){ fecharDdRelGeral(); return; }
+
+    relGeralResultados = FUNC_LIST_REL.filter(f => {
+        const n = _rlNorm(f.fun_nome), ca = _rlNorm(f.fun_cargo), dp = _rlNorm(f.fun_departamento), cp = String(f.fun_cpf||'').replace(/\D/g,'');
+        return n.includes(tn) || n.split(/\s+/).some(p => p.startsWith(tn)) || ca.includes(tn) || dp.includes(tn) || (cpfD.length > 0 && cp.includes(cpfD));
+    });
+    renderDdRelGeral(termo);
+}
+
+function renderDdRelGeral(termo){
+    const dd = document.getElementById('dropdown-rel-geral');
+    if(!dd) return;
+    if(relGeralResultados.length === 0){
+        dd.innerHTML = '<div style="padding:12px;text-align:center;color:#64748b;font-size:12px;"><i class="bi bi-search" style="margin-right:6px;"></i>Nenhum colaborador encontrado com "<strong>'+_rlEsc(termo)+'</strong>"</div>';
+        dd.style.display = 'block'; return;
+    }
+    const total = relGeralResultados.length;
+    const itens = relGeralResultados.slice(0, 8);
+    let html = '<div style="padding:6px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:6px;font-size:11px;color:#64748b;"><i class="bi bi-people-fill" style="color:#3b82f6;"></i><strong style="color:#1e293b;">'+total+'</strong>&nbsp;colaborador(es) encontrado(s)</div>';
+    itens.forEach((f, idx) => {
+        const cor = _rlCor(f.fun_nome), ini = _rlIni(f.fun_nome), nHL = _rlHL(f.fun_nome, termo), cargo = _rlEsc(f.fun_cargo||'Sem Cargo'), depto = _rlEsc(f.fun_departamento||'');
+        const nomeEsc = f.fun_nome.replace(/'/g, "\\'");
+        const deptoEsc = (f.fun_departamento || '').replace(/'/g, "\\'");
+        const cargoEsc = (f.fun_cargo || '').replace(/'/g, "\\'");
+
+        html += '<div class="dd-rel-item" id="dd-rel-g-'+idx+'" onclick="escolherRelGeral('+f.fun_id+',\''+nomeEsc+'\',\''+deptoEsc+'\',\''+cargoEsc+'\')" onmouseover="focarRelGeralItem('+idx+')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid #f1f5f9;transition:background .12s;"><div style="width:34px;height:34px;border-radius:50%;background:'+cor+';color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+ini+'</div><div style="flex:1;min-width:0;line-height:1.3;"><div style="display:flex;align-items:center;justify-content:space-between;gap:6px;"><span style="font-weight:600;color:#1e293b;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+nHL+'</span><span style="background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600;">#'+f.fun_id+'</span></div><div style="font-size:11px;color:#64748b;"><i class="bi bi-briefcase" style="font-size:10px;"></i> '+cargo+(depto?' <span style="color:#cbd5e1;">•</span> '+depto:'')+'</div></div></div>';
+    });
+    html += '<div class="dd-rel-item" onclick="limparRelGeral()" style="display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;background:#f8fafc;border-top:1px solid #e2e8f0;"><div style="width:34px;height:34px;border-radius:50%;background:#94a3b8;color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-people"></i></div><div style="font-weight:600;color:#1e293b;font-size:13px;">Todos os Funcionários</div></div>';
+    dd.innerHTML = html;
+    dd.style.display = 'block';
+}
+
+function focarRelGeralItem(idx){
+    relGeralIdx = idx;
+    document.querySelectorAll('#dropdown-rel-geral .dd-rel-item').forEach((el, i) => { el.style.background = i === idx ? '#eff6ff' : ''; });
+}
+
+function teclarRelGeral(e){
+    const dd = document.getElementById('dropdown-rel-geral');
+    if(!dd || dd.style.display === 'none') return;
+    if(e.key === 'ArrowDown'){ e.preventDefault(); relGeralIdx = (relGeralIdx + 1) % Math.min(relGeralResultados.length, 8); focarRelGeralItem(relGeralIdx); const el = document.getElementById('dd-rel-g-' + relGeralIdx); if(el) el.scrollIntoView({block:'nearest'}); }
+    else if(e.key === 'ArrowUp'){ e.preventDefault(); relGeralIdx = (relGeralIdx - 1 + Math.min(relGeralResultados.length, 8)) % Math.min(relGeralResultados.length, 8); focarRelGeralItem(relGeralIdx); const el = document.getElementById('dd-rel-g-' + relGeralIdx); if(el) el.scrollIntoView({block:'nearest'}); }
+    else if(e.key === 'Enter'){ e.preventDefault(); const item = relGeralIdx >= 0 ? relGeralResultados[relGeralIdx] : (relGeralResultados.length === 1 ? relGeralResultados[0] : null); if(item) escolherRelGeral(item.fun_id, item.fun_nome, item.fun_departamento, item.fun_cargo); }
+    else if(e.key === 'Escape'){ fecharDdRelGeral(); }
+}
+
+function escolherRelGeral(funId, nome, depto, cargo){
+    const hiddenId = document.getElementById('geral-funcionario-id');
+    if(hiddenId) hiddenId.value = funId;
+    const inp = document.getElementById('geral-funcionario');
+    if(inp) inp.value = nome;
+    relGeralNomeSelecionado = nome;
+
+    // Autopreenchimento dos campos Setor/Departamento e Cargo/Função
+    const campoDepto = document.getElementById('geral-departamento');
+    if (campoDepto && depto !== undefined) {
+        campoDepto.value = depto || '';
+    }
+    const campoCargo = document.getElementById('geral-cargo');
+    if (campoCargo && cargo !== undefined) {
+        campoCargo.value = cargo || '';
+    }
+
+    const btn = document.getElementById('btn-limpar-rel-geral');
+    if(btn) btn.style.display = 'block';
+    fecharDdRelGeral();
+}
+
+function limparRelGeral(){
+    const hiddenId = document.getElementById('geral-funcionario-id');
+    if(hiddenId) hiddenId.value = '';
+    const inp = document.getElementById('geral-funcionario');
+    if(inp){ inp.value = ''; inp.focus(); }
+
+    const campoDepto = document.getElementById('geral-departamento');
+    if (campoDepto) campoDepto.value = '';
+    const campoCargo = document.getElementById('geral-cargo');
+    if (campoCargo) campoCargo.value = '';
+
+    relGeralNomeSelecionado = '';
+    const btn = document.getElementById('btn-limpar-rel-geral');
+    if(btn) btn.style.display = 'none';
+    fecharDdRelGeral();
+}
+
 document.addEventListener('click',function(e){
-    const w=document.getElementById('wrapper-busca-rel-entregas');
-    if(w&&!w.contains(e.target))fecharDdRelEntregas();
+    const w1 = document.getElementById('wrapper-busca-rel-entregas');
+    if(w1 && !w1.contains(e.target)) fecharDdRelEntregas();
+    const w2 = document.getElementById('wrapper-busca-rel-geral');
+    if(w2 && !w2.contains(e.target)) fecharDdRelGeral();
 });
 </script>
 

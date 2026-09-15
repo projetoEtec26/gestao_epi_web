@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-if (session_status() === PHP_SESSION_NONE) {
+if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     session_start();
 }
 
@@ -33,7 +33,7 @@ if (!function_exists('hasPermission')) {
     }
 }
 ?>
-<div id="sidebar" style="z-index: 1060;">
+<div id="sidebar">
     <div class="brand">
         <i class="bi bi-shield-check"></i>
         <span>Gestão de EPI</span>
@@ -69,12 +69,6 @@ if (!function_exists('hasPermission')) {
                         </a>
                     </li>
                     <li>
-                        <a href="<?= APP_ROOT ?>pages/funcionarios.php?acao=novo" onclick="onSubmenuItemClick(event, 'novo')" class="<?= isset($_GET['acao']) && $_GET['acao'] === 'novo' ? 'active-sub' : '' ?>" style="display:flex; align-items:center; gap:8px; padding:6px 10px; font-size:13px; color:#94a3b8; text-decoration:none; border-radius:6px;">
-                            <i class="bi bi-person-plus-fill me-1" style="font-size:14px;"></i>
-                            <span>Novo Funcionário</span>
-                        </a>
-                    </li>
-                    <li>
                         <a href="<?= APP_ROOT ?>pages/funcionarios.php?acao=pin" onclick="onSubmenuItemClick(event, 'pin')" class="<?= isset($_GET['acao']) && $_GET['acao'] === 'pin' ? 'active-sub' : '' ?>" style="display:flex; align-items:center; gap:8px; padding:6px 10px; font-size:13px; color:#94a3b8; text-decoration:none; border-radius:6px;">
                             <i class="bi bi-shield-lock-fill me-1" style="font-size:14px;"></i>
                             <span>Senha / PIN</span>
@@ -84,6 +78,12 @@ if (!function_exists('hasPermission')) {
                         <a href="<?= APP_ROOT ?>pages/funcionarios.php?acao=pendencias" onclick="onSubmenuItemClick(event, 'pendencias')" class="<?= isset($_GET['acao']) && $_GET['acao'] === 'pendencias' ? 'active-sub' : '' ?>" style="display:flex; align-items:center; gap:8px; padding:6px 10px; font-size:13px; color:#94a3b8; text-decoration:none; border-radius:6px;">
                             <i class="bi bi-exclamation-triangle-fill me-1" style="font-size:14px;"></i>
                             <span>Pendências</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?= APP_ROOT ?>pages/funcionarios.php?acao=novo" onclick="onSubmenuItemClick(event, 'novo')" class="<?= isset($_GET['acao']) && $_GET['acao'] === 'novo' ? 'active-sub' : '' ?>" style="display:flex; align-items:center; gap:8px; padding:6px 10px; font-size:13px; color:#94a3b8; text-decoration:none; border-radius:6px;">
+                            <i class="bi bi-person-plus-fill me-1" style="font-size:14px;"></i>
+                            <span>Novo Funcionário</span>
                         </a>
                     </li>
                 </ul>
@@ -115,12 +115,6 @@ if (!function_exists('hasPermission')) {
                         </a>
                     </li>
                     <li>
-                        <a href="<?= APP_ROOT ?>pages/epis.php?acao=novo" onclick="onSubmenuItemEpiClick(event, 'novo')" class="<?= isset($_GET['acao']) && $_GET['acao'] === 'novo' ? 'active-sub' : '' ?>" style="display:flex; align-items:center; gap:8px; padding:6px 10px; font-size:13px; color:#94a3b8; text-decoration:none; border-radius:6px;">
-                            <i class="bi bi-plus-lg me-1" style="font-size:14px;"></i>
-                            <span>Novo EPI</span>
-                        </a>
-                    </li>
-                    <li>
                         <a href="<?= APP_ROOT ?>pages/epis.php?acao=controle_ca" onclick="onSubmenuItemEpiClick(event, 'controle_ca')" class="<?= isset($_GET['acao']) && ($_GET['acao'] === 'controle_ca' || $_GET['acao'] === 'ca') ? 'active-sub' : '' ?>" style="display:flex; align-items:center; gap:8px; padding:6px 10px; font-size:13px; color:#94a3b8; text-decoration:none; border-radius:6px;">
                             <i class="bi bi-exclamation-triangle-fill me-1" style="font-size:14px;"></i>
                             <span>Controle C.A.</span>
@@ -132,6 +126,12 @@ if (!function_exists('hasPermission')) {
                             <span>Hist. de Preços</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="<?= APP_ROOT ?>pages/epis.php?acao=novo" onclick="onSubmenuItemEpiClick(event, 'novo')" class="<?= isset($_GET['acao']) && $_GET['acao'] === 'novo' ? 'active-sub' : '' ?>" style="display:flex; align-items:center; gap:8px; padding:6px 10px; font-size:13px; color:#94a3b8; text-decoration:none; border-radius:6px;">
+                            <i class="bi bi-plus-lg me-1" style="font-size:14px;"></i>
+                            <span>Novo EPI</span>
+                        </a>
+                    </li>
                 </ul>
             </li>
         <?php endif; ?>
@@ -139,7 +139,7 @@ if (!function_exists('hasPermission')) {
         <?php if (hasPermission('entregas', $perfil)): ?>
             <li class="nav-item has-submenu <?= in_array($active, ['entregas', 'devolucoes', 'nova_entrega'], true) ? 'active open' : '' ?>" id="menu-item-entregas">
                 <div class="nav-item-submenu-header" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
-                    <a href="<?= APP_ROOT ?>pages/entregas.php" onclick="onEntregasMenuClick(event)" style="flex-grow:1; border:none; background:transparent;">
+                    <a href="<?= APP_ROOT ?>pages/nova_entrega.php" onclick="onEntregasMenuClick(event)" style="flex-grow:1; border:none; background:transparent;">
                         <span class="icon-box"><i class="bi bi-truck"></i></span>
                         <span>Entregas & Devoluções</span>
                     </a>
@@ -171,11 +171,42 @@ if (!function_exists('hasPermission')) {
         <?php endif; ?>
         
         <?php if (hasPermission('relatorios', $perfil)): ?>
-            <li class="nav-item <?= in_array($active, ['relatorios', 'relatorio_geral', 'relatorio_financeiro', 'relatorio_consumo_epi', 'relatorio_validade_ca', 'relatorio_auditoria_logs', 'relatorio_auditoria_impressao'], true) ? 'active' : '' ?>">
-                <a href="<?= APP_ROOT ?>pages/relatorios.php">
-                    <span class="icon-box"><i class="bi bi-file-earmark-bar-graph"></i></span>
-                    <span>Relatórios</span>
-                </a>
+            <li class="nav-item has-submenu <?= in_array($active, ['relatorios', 'relatorio_geral', 'relatorio_financeiro', 'relatorio_consumo_epi', 'relatorio_validade_ca', 'relatorio_auditoria_logs', 'relatorio_auditoria_impressao'], true) ? 'active open' : '' ?>" id="menu-item-relatorios">
+                <div class="nav-item-submenu-header" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                    <a href="<?= APP_ROOT ?>pages/relatorios.php?tipo=geral" onclick="onRelatoriosMenuClick(event)" style="flex-grow:1; border:none; background:transparent;">
+                        <span class="icon-box"><i class="bi bi-file-earmark-bar-graph"></i></span>
+                        <span>Relatórios</span>
+                    </a>
+                    <button type="button" class="submenu-toggle-btn" onclick="toggleSubmenu(event, 'sub-relatorios')" title="Expandir submenus" style="background:transparent; border:none; cursor:pointer; color:#94a3b8; padding:6px 10px; font-size:15px; border-radius:6px; transition:all 0.2s ease;">
+                        <i class="bi <?= in_array($active, ['relatorios', 'relatorio_geral', 'relatorio_financeiro', 'relatorio_consumo_epi', 'relatorio_validade_ca', 'relatorio_auditoria_logs', 'relatorio_auditoria_impressao'], true) ? 'bi-dash-lg' : 'bi-plus-lg' ?>" id="icon-sub-relatorios"></i>
+                    </button>
+                </div>
+                <ul class="sidebar-submenu-list <?= in_array($active, ['relatorios', 'relatorio_geral', 'relatorio_financeiro', 'relatorio_consumo_epi', 'relatorio_validade_ca', 'relatorio_auditoria_logs', 'relatorio_auditoria_impressao'], true) ? 'open' : '' ?>" id="sub-relatorios" style="list-style:none; padding-left:28px; margin:4px 0 8px 0; display:<?= in_array($active, ['relatorios', 'relatorio_geral', 'relatorio_financeiro', 'relatorio_consumo_epi', 'relatorio_validade_ca', 'relatorio_auditoria_logs', 'relatorio_auditoria_impressao'], true) ? 'block' : 'none' ?>;">
+                    <li>
+                        <a href="<?= APP_ROOT ?>pages/relatorios.php?tipo=geral" onclick="onSubmenuItemRelatorioClick(event, 'geral')" class="<?= (isset($_GET['tipo']) && $_GET['tipo'] === 'geral') || (!isset($_GET['tipo']) && $active === 'relatorios') ? 'active-sub' : '' ?>" style="display:flex; align-items:center; gap:8px; padding:6px 10px; font-size:13px; color:#94a3b8; text-decoration:none; border-radius:6px;">
+                            <i class="bi bi-clipboard-data me-1" style="font-size:14px;"></i>
+                            <span>Rel. Geral EPIs</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?= APP_ROOT ?>pages/relatorios.php?tipo=financeiro" onclick="onSubmenuItemRelatorioClick(event, 'financeiro')" class="<?= isset($_GET['tipo']) && $_GET['tipo'] === 'financeiro' ? 'active-sub' : '' ?>" style="display:flex; align-items:center; gap:8px; padding:6px 10px; font-size:13px; color:#94a3b8; text-decoration:none; border-radius:6px;">
+                            <i class="bi bi-currency-dollar me-1" style="font-size:14px;"></i>
+                            <span>Rel. Financeiro</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?= APP_ROOT ?>pages/relatorios.php?tipo=epi" onclick="onSubmenuItemRelatorioClick(event, 'epi')" class="<?= isset($_GET['tipo']) && $_GET['tipo'] === 'epi' ? 'active-sub' : '' ?>" style="display:flex; align-items:center; gap:8px; padding:6px 10px; font-size:13px; color:#94a3b8; text-decoration:none; border-radius:6px;">
+                            <i class="bi bi-shield-check me-1" style="font-size:14px;"></i>
+                            <span>Rel. EPI</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?= APP_ROOT ?>pages/relatorios.php?tipo=funcionario" onclick="onSubmenuItemRelatorioClick(event, 'funcionario')" class="<?= isset($_GET['tipo']) && $_GET['tipo'] === 'funcionario' ? 'active-sub' : '' ?>" style="display:flex; align-items:center; gap:8px; padding:6px 10px; font-size:13px; color:#94a3b8; text-decoration:none; border-radius:6px;">
+                            <i class="bi bi-person-badge me-1" style="font-size:14px;"></i>
+                            <span>Rel. Funcionário</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
         <?php endif; ?>
         
@@ -251,14 +282,17 @@ function toggleSubmenu(e, targetId) {
 }
 
 function onFuncionariosMenuClick(e) {
-    if (window.location.pathname.indexOf('funcionarios.php') !== -1) {
-        e.preventDefault();
-        toggleSubmenu(e, 'sub-func');
+    toggleSubmenu(null, 'sub-func');
+    if (window.location.pathname.indexOf('funcionarios.php') !== -1 || window.location.search.indexOf('route=funcionarios') !== -1) {
+        if (e) e.preventDefault();
+        if (typeof executarAcaoSubmenu === 'function') {
+            executarAcaoSubmenu('lista');
+        }
     }
 }
 
 function onSubmenuItemClick(e, acao) {
-    if (window.location.pathname.indexOf('funcionarios.php') !== -1) {
+    if (window.location.pathname.indexOf('funcionarios.php') !== -1 || window.location.search.indexOf('route=funcionarios') !== -1) {
         if (e) e.preventDefault();
         if (typeof executarAcaoSubmenu === 'function') {
             executarAcaoSubmenu(acao);
@@ -269,9 +303,14 @@ function onSubmenuItemClick(e, acao) {
 }
 
 function onEpisMenuClick(e) {
+    toggleSubmenu(null, 'sub-epis');
     if (window.location.pathname.indexOf('epis.php') !== -1) {
-        e.preventDefault();
-        toggleSubmenu(e, 'sub-epis');
+        if (e) e.preventDefault();
+        if (typeof executarAcaoSubmenuEpi === 'function') {
+            executarAcaoSubmenuEpi('catalogo');
+        } else if (typeof alternarVisao === 'function') {
+            alternarVisao('catalogo');
+        }
     }
 }
 
@@ -285,17 +324,72 @@ function onSubmenuItemEpiClick(e, acao) {
 }
 
 function onEntregasMenuClick(e) {
-    if (window.location.pathname.indexOf('entregas.php') !== -1 || window.location.pathname.indexOf('devolucoes.php') !== -1 || window.location.pathname.indexOf('nova_entrega.php') !== -1) {
-        e.preventDefault();
-        toggleSubmenu(e, 'sub-entregas');
+    toggleSubmenu(null, 'sub-entregas');
+    if (window.location.pathname.indexOf('nova_entrega.php') !== -1) {
+        if (e) e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        if (e) e.preventDefault();
+        window.location.href = '<?= APP_ROOT ?>pages/nova_entrega.php';
     }
 }
 
 function onSubmenuItemEntregaClick(e, acao) {
-    if (window.location.pathname.indexOf('entregas.php') !== -1 || window.location.pathname.indexOf('devolucoes.php') !== -1 || window.location.pathname.indexOf('nova_entrega.php') !== -1) {
-        if (typeof executarAcaoSubmenuEntrega === 'function') {
-            if (e) e.preventDefault();
-            executarAcaoSubmenuEntrega(acao);
+    if (typeof executarAcaoSubmenuEntrega === 'function') {
+        if (e) e.preventDefault();
+        executarAcaoSubmenuEntrega(acao);
+    } else {
+        if (e) e.preventDefault();
+        if (acao === 'historico') {
+            window.location.href = '<?= APP_ROOT ?>pages/entregas.php';
+        } else if (acao === 'devolucao' || acao === 'devolucoes') {
+            window.location.href = '<?= APP_ROOT ?>pages/devolucoes.php';
+        } else if (acao === 'nova_entrega' || acao === 'nova') {
+            window.location.href = '<?= APP_ROOT ?>pages/nova_entrega.php';
+        }
+    }
+}
+
+function onRelatoriosMenuClick(e) {
+    const list = document.getElementById('sub-relatorios');
+    const icon = document.getElementById('icon-sub-relatorios');
+    const parentLi = document.getElementById('menu-item-relatorios');
+    if (list) {
+        list.style.display = 'block';
+        list.classList.add('open');
+        if (parentLi) parentLi.classList.add('open');
+        if (icon) icon.className = 'bi bi-dash-lg';
+    }
+
+    if (window.location.pathname.indexOf('relatorios.php') !== -1) {
+        if (e) e.preventDefault();
+        if (typeof mostrarPainelRelatorio === 'function') {
+            const btn = document.querySelector('#lista-tipos-relatorios button[data-tipo="geral"], #lista-tipos-relatorios button[data-painel="geral"]');
+            mostrarPainelRelatorio('geral', btn);
+        }
+    }
+}
+
+function onSubmenuItemRelatorioClick(e, tipo) {
+    const mapaTipoPainel = {
+        'financeiro': 'custos',
+        'epi': 'epis-vencidos',
+        'funcionario': 'entregas',
+        'geral': 'geral'
+    };
+
+    if (window.location.pathname.indexOf('relatorios.php') !== -1) {
+        if (e) e.preventDefault();
+        const painelAlvo = mapaTipoPainel[tipo] || tipo;
+        if (typeof mostrarPainelRelatorio === 'function') {
+            const btn = document.querySelector(`#lista-tipos-relatorios button[data-tipo="${tipo}"], #lista-tipos-relatorios button[data-painel="${painelAlvo}"]`);
+            mostrarPainelRelatorio(painelAlvo, btn);
+        } else {
+            window.location.href = '<?= APP_ROOT ?>pages/relatorios.php?tipo=' + tipo;
+        }
+        document.querySelectorAll('#sub-relatorios a').forEach(a => a.classList.remove('active-sub'));
+        if (e && e.currentTarget) {
+            e.currentTarget.classList.add('active-sub');
         }
     }
 }

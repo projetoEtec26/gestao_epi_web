@@ -33,25 +33,42 @@ $tzBrasil = new DateTimeZone('America/Sao_Paulo');
 $dataAtual = new DateTime('now', $tzBrasil);
 $dataEmissao = $dataAtual->format('d/m/Y H:i');
 
-// Filtros
-$dataInicio = trim($_GET['data_inicio'] ?? $dataAtual->format('Y-m-01'));
-$dataFim = trim($_GET['data_fim'] ?? $dataAtual->format('Y-m-d'));
-$funcionario = trim($_GET['funcionario'] ?? '');
+// Filtros com suporte flexível aos nomes de parâmetros da API e da URL
+$rawInicio = $_GET['data_inicial'] ?? ($_GET['data_inicio'] ?? '');
+$rawFim = $_GET['data_final'] ?? ($_GET['data_fim'] ?? '');
+
+$dataInicio = trim(explode(' ', (string)$rawInicio)[0]);
+$dataFim = trim(explode(' ', (string)$rawFim)[0]);
+
+if (empty($dataInicio)) {
+    $dataInicio = $dataAtual->format('Y-m-01');
+}
+if (empty($dataFim)) {
+    $dataFim = $dataAtual->format('Y-m-d');
+}
+
+$funcionario = trim($_GET['funcionario_nome'] ?? ($_GET['funcionario'] ?? ''));
 $departamento = trim($_GET['departamento'] ?? '');
 $cargo = trim($_GET['cargo'] ?? '');
 $motivo = trim($_GET['motivo'] ?? '');
 $categoria = trim($_GET['categoria'] ?? '');
-$comCa = trim($_GET['com_ca'] ?? '');
+$comCa = trim($_GET['item_com_ca'] ?? ($_GET['com_ca'] ?? ''));
+$limite = (int)($_GET['limite'] ?? 1000);
 
 $queryParams = [
-    'data_inicio' => $dataInicio,
-    'data_fim' => $dataFim
+    'data_inicial' => $dataInicio . ' 00:00:00',
+    'data_final' => $dataFim . ' 23:59:59',
+    'status_entrega' => 'FINALIZADA',
+    'ordenacao' => 'data_desc',
+    'pagina' => 1,
+    'limite' => $limite > 0 ? $limite : 1000
 ];
+
 $filtrosFormatadosArray = [];
 $filtrosFormatadosArray[] = 'Período: ' . (new DateTime($dataInicio))->format('d/m/Y') . ' a ' . (new DateTime($dataFim))->format('d/m/Y');
 
 if ($funcionario !== '' && strtolower($funcionario) !== 'todos') {
-    $queryParams['funcionario'] = $funcionario;
+    $queryParams['funcionario_nome'] = $funcionario;
     $filtrosFormatadosArray[] = 'Funcionário: ' . htmlspecialchars($funcionario);
 }
 if ($departamento !== '') {
@@ -71,7 +88,7 @@ if ($categoria !== '') {
     $filtrosFormatadosArray[] = 'Categoria: ' . htmlspecialchars($categoria);
 }
 if ($comCa !== '') {
-    $queryParams['com_ca'] = $comCa;
+    $queryParams['item_com_ca'] = $comCa;
     $filtrosFormatadosArray[] = $comCa === '1' ? 'Com C.A.' : 'Sem C.A.';
 }
 
@@ -98,8 +115,9 @@ try {
         $dados = $response['data'];
         $registros = $dados['registros'] ?? $dados['itens'] ?? (is_array($dados) && isset($dados[0]) ? $dados : []);
         
-        if (isset($dados['kpis']) && is_array($dados['kpis'])) {
-            $indicadores = array_merge($indicadores, $dados['kpis']);
+        $indRetornados = $dados['indicadores'] ?? ($dados['kpis'] ?? null);
+        if (is_array($indRetornados)) {
+            $indicadores = array_merge($indicadores, $indRetornados);
         } else {
             // Calcular indicadores a partir dos registros se não vierem agrupados
             $funcSet = [];
@@ -111,7 +129,7 @@ try {
             $totCusto = 0.0;
 
             foreach ($registros as $r) {
-                $qtd = (int)($r['quantidade'] ?? $r['ite_quantidade'] ?? 1);
+                $qtd = (int)($r['quantidade'] ?? $r['item_quantidade'] ?? $r['ite_quantidade'] ?? 1);
                 $totUnidades += $qtd;
                 if (!empty($r['funcionario'] ?? $r['fun_nome'])) {
                     $funcSet[$r['funcionario'] ?? $r['fun_nome']] = true;
@@ -119,7 +137,7 @@ try {
                 if (!empty($r['epi'] ?? $r['epi_nome'])) {
                     $epiSet[$r['epi'] ?? $r['epi_nome']] = true;
                 }
-                $mot = strtoupper((string)($r['motivo'] ?? $r['ent_motivo'] ?? ''));
+                $mot = strtoupper((string)($r['motivo'] ?? $r['item_motivo_entrega'] ?? $r['entr_motivo'] ?? ''));
                 if (str_contains($mot, 'SUBSTITU')) {
                     $totSubstituicoes += $qtd;
                 }
@@ -306,9 +324,11 @@ try {
             font-weight: 600;
             font-size: 8.5px;
             text-transform: uppercase;
+            white-space: nowrap;
         }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
+        .text-nowrap { white-space: nowrap; }
         .footer {
             margin-top: 16px;
             border-top: 1px solid #E2E8F0;
@@ -416,22 +436,22 @@ try {
                 <th style="width: 10%;">Motivo</th>
                 <th style="width: <?= $permiteVisualizarCustos ? '8%' : '12%' ?>;">Responsável</th>
                 <?php if ($permiteVisualizarCustos): ?>
-                <th style="width: 9%;" class="text-right">Valor Total</th>
+                <th style="width: 10%;" class="text-right text-nowrap">Valor Total</th>
                 <?php endif; ?>
             </tr>
         </thead>
         <tbody>
             <?php foreach ($registros as $reg): 
-                $dataItem = $reg['data'] ?? $reg['ent_data_retirada'] ?? '';
+                $dataItem = $reg['entr_data_entrega'] ?? $reg['data'] ?? $reg['ent_data_retirada'] ?? '';
                 $dataFmt = !empty($dataItem) ? (new DateTime($dataItem))->format('d/m/Y H:i') : '---';
-                $funcNome = $reg['funcionario'] ?? $reg['fun_nome'] ?? '---';
-                $setorNome = $reg['setor'] ?? $reg['fun_departamento'] ?? '---';
-                $epiNome = $reg['epi'] ?? $reg['epi_nome'] ?? '---';
-                $caNumero = $reg['ca'] ?? $reg['epi_ca'] ?? '---';
-                $tamItem = $reg['tamanho'] ?? $reg['ite_tamanho'] ?? 'Único';
-                $qtdItem = (int)($reg['quantidade'] ?? $reg['ite_quantidade'] ?? 1);
-                $motivoItem = $reg['motivo'] ?? $reg['ent_motivo'] ?? 'FORNECIMENTO';
-                $respItem = $reg['responsavel'] ?? $reg['usuario_responsavel'] ?? 'almoxarifado';
+                $funcNome = $reg['fun_nome'] ?? $reg['funcionario'] ?? '---';
+                $setorNome = $reg['fun_departamento'] ?? $reg['setor'] ?? '---';
+                $epiNome = $reg['epi_nome'] ?? $reg['epi'] ?? '---';
+                $caNumero = !empty($reg['epi_ca']) ? $reg['epi_ca'] : (!empty($reg['ca']) ? $reg['ca'] : 'Isento');
+                $tamItem = !empty($reg['item_tamanho']) ? $reg['item_tamanho'] : (!empty($reg['tamanho']) ? $reg['tamanho'] : (!empty($reg['ite_tamanho']) ? $reg['ite_tamanho'] : '---'));
+                $qtdItem = (int)($reg['item_quantidade'] ?? $reg['quantidade'] ?? $reg['ite_quantidade'] ?? 1);
+                $motivoItem = $reg['item_motivo_entrega'] ?? $reg['entr_motivo'] ?? $reg['motivo'] ?? 'FORNECIMENTO';
+                $respItem = $reg['usu_login'] ?? $reg['responsavel'] ?? $reg['usuario_responsavel'] ?? '---';
                 $valTotal = (float)($reg['valor_total'] ?? $reg['ite_custo_total'] ?? 0);
             ?>
             <tr>
@@ -445,7 +465,7 @@ try {
                 <td><?= htmlspecialchars($motivoItem) ?></td>
                 <td><?= htmlspecialchars($respItem) ?></td>
                 <?php if ($permiteVisualizarCustos): ?>
-                <td class="text-right">R$ <?= number_format($valTotal, 2, ',', '.') ?></td>
+                <td class="text-right text-nowrap">R$&nbsp;<?= number_format($valTotal, 2, ',', '.') ?></td>
                 <?php endif; ?>
             </tr>
             <?php endforeach; ?>

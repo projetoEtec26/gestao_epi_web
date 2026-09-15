@@ -70,10 +70,25 @@ $coresAvatar = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#ec
     <?php require_once __DIR__ . '/../components/topbar.php'; ?>
     
     <div class="content-body">
-        <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
                 <h3 class="fw-bold m-0" style="color: var(--color-primary);">Controle de Devoluções</h3>
-                <p class="text-muted">Gerencie a devolução, substituição, extravio e condições de retorno dos EPIs dos funcionários.</p>
+                <p class="text-muted mb-0">Gerencie a devolução, substituição, extravio e condições de retorno dos EPIs dos funcionários.</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <div class="btn-group-toggle-view" role="group">
+                    <a href="entregas.php" class="btn btn-view">
+                        <i class="bi bi-clock-history me-1"></i> Histórico
+                    </a>
+                    <a href="devolucoes.php" class="btn btn-view active">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Devolução
+                    </a>
+                </div>
+                <?php if ($podeDevolver): ?>
+                    <a href="nova_entrega.php" class="btn btn-primary px-3 py-2 fw-semibold rounded-3 shadow-sm">
+                        <i class="bi bi-plus-lg me-1"></i> Nova Entrega
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
 
