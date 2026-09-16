@@ -161,16 +161,6 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                                 <option value="">Todos</option>
                                 <option value="EPI_COM_CA">Com_C.A.</option>
                                 <option value="ITEM_SEGURANCA_SEM_CA">Sem_C.A.</option>
-                                <option value="UNIFORME">Uniforme</option>
-                                <option value="OUTRO">Outro</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label" style="font-size:12px;">Item com C.A.?</label>
-                            <select id="geral-com-ca" class="form-select">
-                                <option value="">Todos</option>
-                                <option value="1">Com_C.A.</option>
-                                <option value="0">Sem_C.A.</option>
                             </select>
                         </div>
                         <div class="col-md-3 d-flex gap-2 align-items-end">
@@ -1064,11 +1054,12 @@ function montarQueryGeral(limite) {
         ['departamento', 'geral-departamento'],
         ['cargo', 'geral-cargo'],
         ['motivo', 'geral-motivo'],
-        ['categoria', 'geral-categoria'],
-        ['item_com_ca', 'geral-com-ca']
+        ['categoria', 'geral-categoria']
     ];
     campos.forEach(([param, id]) => {
-        let valor = document.getElementById(id).value.trim();
+        const el = document.getElementById(id);
+        if (!el) return;
+        let valor = el.value.trim();
         if (id === 'geral-categoria') {
             if (valor === 'Com_C.A.' || valor === 'COM_CA') valor = 'EPI_COM_CA';
             if (valor === 'Sem_C.A.' || valor === 'SEM_CA') valor = 'ITEM_SEGURANCA_SEM_CA';
