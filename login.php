@@ -56,6 +56,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
                 $_SESSION['usuario'] = $data['usuario'];
                 $_SESSION['exige_troca_senha'] = $data['exige_troca_senha'] ?? false;
 
+                // Enriquece a sessão do usuário com auth/me para garantir usu_aceite_termos e usu_data_aceite_termos
+                try {
+                    $meRes = $api->get('auth/me');
+                    if (isset($meRes['success']) && $meRes['success'] && is_array($meRes['data'])) {
+                        $_SESSION['usuario'] = array_merge($_SESSION['usuario'], $meRes['data']);
+                    }
+                } catch (\Throwable $e) {}
+
                 // Garante a gravação imediata da sessão PHP em disco
                 session_write_close();
 

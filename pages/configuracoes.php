@@ -57,6 +57,15 @@ try {
     $configApiUrl = $configData['api_base_url'] ?? $configApiUrl;
 } catch (\Throwable $e) {}
 
+// Sincroniza os dados atualizados do usuário autenticado (incluindo status de aceite dos termos)
+try {
+    $meRes = $api->get('auth/me');
+    if (isset($meRes['success']) && $meRes['success'] && is_array($meRes['data'])) {
+        $_SESSION['usuario'] = array_merge($_SESSION['usuario'] ?? [], $meRes['data']);
+        $currentUser = $_SESSION['usuario'];
+    }
+} catch (\Throwable $e) {}
+
 $perfisMap = [
     'ADMINISTRADOR' => 'Administrador do Sistema',
     'RH_ADMINISTRATIVO' => 'RH Administrativo',
