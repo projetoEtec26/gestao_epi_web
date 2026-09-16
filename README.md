@@ -21,7 +21,7 @@ Conforme as diretrizes globais do projeto, toda a aplicação Web e suas documen
 O painel Web foi estruturado com uma arquitetura modular limpa (SoC - *Separation of Concerns*), eliminando acoplamentos diretos com o banco de dados para trafegar 100% dos dados por meio do cliente HTTP `ApiService`:
 
 ```text
-gestao_epi_web_4/
+gestao_epi_web_5/
 │
 ├── index.php                             # Roteador de entrada de sessão (redireciona para Dashboard ou Login)
 ├── login.php                             # Login institucional e redefinição obrigatória no 1º acesso
@@ -207,7 +207,10 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
 
-### 📅 Versão 3.5.0 (14/09/2026) – Submenus de Relatórios, Filtro de Período Financeiro, KPIs, Gráficos Analíticos, Busca em Tempo Real e Formatação de Moeda
+### 📅 Versão 3.5.0 (15/09/2026) – Submenus de Relatórios, Filtro Categoria EPI, KPIs, Sincronização dos Termos de Uso e Push Protection
+*   **Ajuste do Filtro de Categoria EPI (`pages/relatorios.php`):** Rótulo atualizado para **Categoria EPI** e menu de opções simplificado para **`Todos`**, **`Com_C.A.`** e **`Sem_C.A.`**, com remoção do filtro redundante *Item com C.A.?* e perfeita distribuição em grid Bootstrap (12 colunas).
+*   **Sincronização de Aceite dos Termos de Uso (`login.php`, `pages/configuracoes.php`):** Integração da sessão com a rota `auth/me` no login e na página de configurações, garantindo a exibição imediata do selo verde de confirmação com a data e hora exatas do registro (`✓ Aceitos em DD/MM/AAAA às HH:mm`).
+*   **Conformidade com GitHub Push Protection & Remoção de Hardcoded Secrets (`pages/api_proxy.php`):** Refatorada a inicialização de conexão PDO em `api_proxy.php` para carregar senhas via arquivo de configuração local ou variáveis de ambiente (`DB_PASS` / `DB_PASSWORD`), satisfazendo as políticas de segurança do GitHub Secret Scanning.
 *   **Submenu Expansível de Relatórios (`components/sidebar.php`):** Reorganizado o submenu de Relatórios para exibir estritamente os 4 itens oficiais na ordem solicitada: *Rel. Geral EPIs* (`?tipo=geral`), *Rel. Financeiro* (`?tipo=financeiro`), *Rel. EPI* (`?tipo=epis-vencidos`), *Rel. Funcionário* (`?tipo=entregas`).
 *   **Seletor de Visão Superior (Segmented Control `btn-group-toggle-view`):** Adicionada a barra superior de alternância de modelo no painel principal de relatórios ([`pages/relatorios.php`](file:///c:/xampp/htdocs/gestao_epi_web_5/pages/relatorios.php)), alinhada ao design da tela de Funcionários.
 *   **Busca em Tempo Real & Autopreenchimento no Relatório Geral (`pages/relatorios.php`):** Implementada a busca por autocomplete de colaboradores no filtro do Relatório Geral, com preenchimento automático instantâneo dos campos *Setor/Departamento* e *Cargo/Função*.
@@ -216,9 +219,7 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
     - **KPIs Financeiros:** Apresentação consolidada de *Custo Bruto Fornecido*, *Estornos / Devoluções*, *Descartes / Inservíveis* e *Custo Líquido Efetivo*.
     - **Gráficos Analíticos:** Gráficos interativos em Chart.js (Donut para Distribuição por Setor e Barras para Top EPIs por Custo) na Web, e barras visuais de proporção percentual CSS para renderização perfeita em PDF/Impressão A4.
     - **Mapeamento de Parâmetros na API:** Corrigida a integração com o endpoint `/relatorios/epis/geral` enviando `data_inicial` e `data_final`, garantindo carregamento de dados e eliminação do aviso de datas obrigatórias.
-    - **Tratamento Nulo Seguro PHP 8:** Tratamento com nullish coalescing encadeado para prevenção total de PHP warnings (`Undefined array key`).
 *   **Formatação Monetária em Única Linha (`R$ 55,00`):** Aplicação de `white-space: nowrap;` (`text-nowrap`) e espaço inquebrável (`&nbsp;` / `\u00a0`) em todas as tabelas de relatórios, impedindo a quebra de linha entre o símbolo `R$` e o valor numérico.
-*   **Correção na Busca em Tempo Real da Nova Entrega (`pages/nova_entrega.php`):** Corrigido o erro de referência a variáveis indefinidas (`termoDigitado`) e adicionada a função `destacarTrecho()` para busca em tempo real com destaque visual no autocomplete de colaboradores e EPIs.
 *   **Garantia de Infraestrutura em Nuvem / Produção:** Conexão permanente e estável com o banco de dados Aiven Cloud (`db-gestao-epi-gestaoepi.a.aivencloud.com`) e API REST na Render (`https://gestao-epi-api.onrender.com/`).
 
 ### 📅 Versão 3.4.0 (12/09/2026) – Estabilização da Busca em Tempo Real, Autocomplete de Funcionários & Correções de Escopo JS
