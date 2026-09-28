@@ -60,29 +60,31 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
     <?php require_once __DIR__ . '/../components/topbar.php'; ?>
     
     <div class="content-body no-print">
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap flex-md-nowrap">
             <div>
                 <h3 class="fw-bold m-0" style="color: var(--color-primary);">Relatórios Gerenciais</h3>
-                <p class="text-muted m-0">Gere relatórios de auditoria, custos consolidados, conformidade e vencimentos de Certificados de Aprovação (C.A.).</p>
+                <p class="text-muted mb-0">Gere relatórios de auditoria, custos consolidados, conformidade e vencimentos de Certificados de Aprovação (C.A.).</p>
             </div>
 
-            <div class="btn-group-toggle-view" role="group" id="lista-tipos-relatorios">
-                <button type="button" data-tipo="geral" data-painel="geral" class="btn btn-view <?= $tipoInicial === 'geral' ? 'active' : '' ?>" onclick="mostrarPainelRelatorio('geral', this)">
-                    <i class="bi bi-clipboard-data me-1"></i> Rel. Geral EPIs
-                </button>
-                <?php if ($podeVerCustos): ?>
-                    <button type="button" data-tipo="financeiro" data-painel="custos" class="btn btn-view <?= $tipoInicial === 'custos' ? 'active' : '' ?>" onclick="mostrarPainelRelatorio('custos', this)">
-                        <i class="bi bi-currency-dollar me-1"></i> Rel. Financeiro
+            <div class="d-flex align-items-center gap-2 flex-wrap mt-2 mt-md-0">
+                <div class="btn-group-toggle-view" role="group" id="lista-tipos-relatorios">
+                    <button type="button" data-tipo="geral" data-painel="geral" class="btn btn-view <?= $tipoInicial === 'geral' ? 'active' : '' ?>" onclick="mostrarPainelRelatorio('geral', this)">
+                        <i class="bi bi-clipboard-data me-1"></i> Rel. Geral EPIs
                     </button>
-                <?php endif; ?>
-                <?php if ($podeVerEntregasGerais): ?>
-                    <button type="button" data-tipo="epi" data-painel="epis-vencidos" class="btn btn-view <?= $tipoInicial === 'epis-vencidos' ? 'active' : '' ?>" onclick="mostrarPainelRelatorio('epis-vencidos', this)">
-                        <i class="bi bi-shield-check me-1"></i> Rel. EPI
-                    </button>
-                    <button type="button" data-tipo="funcionario" data-painel="entregas" class="btn btn-view <?= $tipoInicial === 'entregas' ? 'active' : '' ?>" onclick="mostrarPainelRelatorio('entregas', this)">
-                        <i class="bi bi-person-badge me-1"></i> Rel. Funcionário
-                    </button>
-                <?php endif; ?>
+                    <?php if ($podeVerCustos): ?>
+                        <button type="button" data-tipo="financeiro" data-painel="custos" class="btn btn-view <?= $tipoInicial === 'custos' ? 'active' : '' ?>" onclick="mostrarPainelRelatorio('custos', this)">
+                            <i class="bi bi-currency-dollar me-1"></i> Rel. Financeiro
+                        </button>
+                    <?php endif; ?>
+                    <?php if ($podeVerEntregasGerais): ?>
+                        <button type="button" data-tipo="epi" data-painel="epis-vencidos" class="btn btn-view <?= $tipoInicial === 'epis-vencidos' ? 'active' : '' ?>" onclick="mostrarPainelRelatorio('epis-vencidos', this)">
+                            <i class="bi bi-shield-check me-1"></i> Rel. EPI
+                        </button>
+                        <button type="button" data-tipo="funcionario" data-painel="entregas" class="btn btn-view <?= $tipoInicial === 'entregas' ? 'active' : '' ?>" onclick="mostrarPainelRelatorio('entregas', this)">
+                            <i class="bi bi-person-badge me-1"></i> Rel. Funcionário
+                        </button>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
 
@@ -163,9 +165,19 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                                 <option value="ITEM_SEGURANCA_SEM_CA">Sem_C.A.</option>
                             </select>
                         </div>
-                        <div class="col-md-3 d-flex gap-2 align-items-end">
-                            <button class="btn btn-primary w-100" onclick="carregarRelatorioGeral(1)" title="Consultar"><i class="bi bi-play-fill me-1"></i> Consultar</button>
-                            <button class="btn btn-outline-primary" onclick="abrirModeloOficial('geral')" title="Abrir Modelo Oficial A4"><i class="bi bi-printer"></i></button>
+                        <div class="col-12 d-flex gap-2 justify-content-end align-items-center mt-2 flex-wrap" id="grupo-botoes-acoes-geral">
+                            <button type="button" class="btn btn-rel-acao active" id="btn-acao-geral-consultar" onclick="ativarBotaoAcaoRelGeral(this); carregarRelatorioGeral(1);">
+                                <i class="bi bi-search"></i> CONSULTAR
+                            </button>
+                            <button type="button" class="btn btn-rel-acao" id="btn-acao-geral-csv" onclick="ativarBotaoAcaoRelGeral(this); exportarCSV();">
+                                <i class="bi bi-file-earmark-excel"></i> EXPORTAR EXCEL / CSV
+                            </button>
+                            <button type="button" class="btn btn-rel-acao" id="btn-acao-geral-pdf" onclick="ativarBotaoAcaoRelGeral(this); imprimirRelatorioGeral();">
+                                <i class="bi bi-clipboard-check"></i> EXPORTAR PDF
+                            </button>
+                            <button type="button" class="btn btn-rel-acao" id="btn-acao-geral-imprimir" onclick="ativarBotaoAcaoRelGeral(this); abrirModeloOficial('geral');">
+                                <i class="bi bi-printer"></i> Imprimir Modelo Oficial
+                            </button>
                         </div>
                     </div>
 
@@ -176,25 +188,25 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                     </div>
                 </div>
 
-                <!-- Relatório 1: Entregas Gerais (Rel. Funcionário) -->
+                <!-- Relatório 1: Entregas Gerais (Rel. Funcionário / Ficha Individual de EPIs) -->
                 <div class="card-custom painel-relatorio <?= $tipoInicial === 'entregas' ? '' : 'd-none' ?>" id="painel-entregas">
-                    <h5 class="fw-bold mb-3 text-color-primary">Histórico Geral de Entregas</h5>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-5">
-                            <label class="form-label" style="font-size:12px;">Filtrar por Colaborador</label>
+                    <h5 class="fw-bold mb-3 text-color-primary">Ficha Individual de EPIs (Ficha de Entrega) — Histórico Geral</h5>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6 col-lg-6">
+                            <label class="form-label fw-semibold" style="font-size:12px;">Filtrar por Colaborador</label>
                             <input type="hidden" id="entregas-func-id" value="">
                             <div class="position-relative" id="wrapper-busca-rel-entregas">
                                 <div id="srch-rel-entregas-border" style="
                                     display:flex;align-items:center;gap:8px;
                                     background:#fff;border:1.5px solid #d0d5dd;
-                                    border-radius:10px;padding:0 12px;
+                                    border-radius:10px;padding:0 12px;height:42px;
                                     transition:border-color .2s,box-shadow .2s;">
                                     <i class="bi bi-search" style="color:#3b82f6;font-size:15px;flex-shrink:0;"></i>
                                     <input type="text"
                                            id="input-busca-rel-entregas"
                                            autocomplete="off"
-                                           placeholder="Todos os Funcionários"
-                                           style="border:none;outline:none;flex:1;padding:10px 0;font-size:14px;background:transparent;"
+                                           placeholder="Buscar por nome, CPF ou matrícula..."
+                                           style="border:none;outline:none;flex:1;padding:8px 0;font-size:13.5px;background:transparent;"
                                            oninput="buscarRelEntregas(this.value)"
                                            onfocus="this.closest('[id=srch-rel-entregas-border]').style.borderColor='#3b82f6';this.closest('[id=srch-rel-entregas-border]').style.boxShadow='0 0 0 3px rgba(59,130,246,.15)';"
                                            onblur="setTimeout(()=>{this.closest('[id=srch-rel-entregas-border]').style.borderColor='#d0d5dd';this.closest('[id=srch-rel-entregas-border]').style.boxShadow='none';},150)"
@@ -210,21 +222,125 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                                     overflow:hidden;max-height:340px;overflow-y:auto;z-index:99999;"></div>
                             </div>
                         </div>
-                        <div class="col-md-7 d-flex gap-2 align-items-end">
-                            <button class="btn btn-primary w-100" onclick="gerarRelatorioEntregas()"><i class="bi bi-play-fill me-1"></i> Carregar Relatório</button>
-                            <button class="btn btn-outline-primary text-nowrap" onclick="abrirModeloOficial('ficha')"><i class="bi bi-file-earmark-person me-1"></i> Ficha NR-06</button>
+
+                        <div class="col-md-3 col-lg-3">
+                            <label class="form-label fw-semibold" style="font-size:12px;">Data Início *</label>
+                            <input type="date" id="entregas-data-inicio" class="form-control" style="height:42px; border-radius:10px;">
                         </div>
+
+                        <div class="col-md-3 col-lg-3">
+                            <label class="form-label fw-semibold" style="font-size:12px;">Data Fim *</label>
+                            <input type="date" id="entregas-data-fim" class="form-control" style="height:42px; border-radius:10px;">
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 justify-content-end align-items-center mt-3 flex-wrap">
+                        <button type="button" class="btn btn-primary px-4 py-2 fw-semibold" style="height:42px; border-radius:10px;" onclick="gerarRelatorioEntregas()">
+                            <i class="bi bi-play-fill me-1"></i> Carregar Relatório
+                        </button>
+                        <button type="button" class="btn btn-outline-primary px-4 py-2 fw-semibold text-nowrap" style="height:42px; border-radius:10px;" onclick="abrirModeloOficial('ficha')">
+                            <i class="bi bi-file-earmark-person me-1"></i> Ficha NR-06 (Modelo Oficial)
+                        </button>
                     </div>
                 </div>
 
-                <!-- Relatório 2: EPIs Vencidos em Posse (Rel. EPI) -->
-                <div class="card-custom painel-relatorio <?= $tipoInicial === 'epis-vencidos' ? '' : 'd-none' ?>" id="painel-epis-vencidos">
-                    <h5 class="fw-bold mb-3 text-color-primary">EPIs com Validade de Uso Expirada</h5>
-                    <p class="text-muted" style="font-size: 13px;">Lista colaboradores que estão portando EPIs cujo prazo recomendado de uso/descarte recomendado pela NR-6 foi ultrapassado.</p>
-                    <div class="d-flex gap-2 col-md-8 mb-4">
-                        <button class="btn btn-primary" onclick="gerarRelatorioEpisVencidos()"><i class="bi bi-play-fill me-1"></i> Carregar Relatório</button>
-                        <button class="btn btn-outline-primary" onclick="abrirModeloOficial('ca')"><i class="bi bi-printer me-1"></i> Imprimir Modelo Oficial</button>
+                <!-- Relatório 2: Relatório de Consumo por Equipamento (EPI) (Rel. EPI) -->
+                <div class="card-custom painel-relatorio <?= $tipoInicial === 'epis-vencidos' || $tipoInicial === 'epi' ? '' : 'd-none' ?>" id="painel-epis-vencidos">
+                    <h5 class="fw-bold mb-2 text-color-primary"><i class="bi bi-shield-check me-2 text-primary"></i>Relatório de Consumo por Equipamento (EPI)</h5>
+                    <p class="text-muted mb-4" style="font-size: 13px;">Consulte o consumo detalhado e o histórico de fornecimento de equipamentos por item individual ou visão geral consolidada.</p>
+
+                    <!-- Selecione o tipo de relatório -->
+                    <label class="form-label fw-bold mb-2" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b;">Selecione o tipo de relatório</label>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="card p-3 border modo-card active-modo" id="card-modo-especifico" onclick="selecionarModoEpi('especifico')" style="border-radius:12px; cursor:pointer; transition:all 0.2s ease;">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle icon-avatar d-flex align-items-center justify-content-center" style="width:46px; height:46px; flex-shrink:0;">
+                                        <i class="bi bi-box-seam fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1 m-0">EPI Específico</h6>
+                                        <small class="text-muted d-block">Relatório detalhado de um único equipamento</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card p-3 border modo-card" id="card-modo-todos" onclick="selecionarModoEpi('todos')" style="border-radius:12px; cursor:pointer; transition:all 0.2s ease;">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle icon-avatar d-flex align-items-center justify-content-center" style="width:46px; height:46px; flex-shrink:0;">
+                                        <i class="bi bi-layers fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1 m-0">Todos os EPIs</h6>
+                                        <small class="text-muted d-block">Visão consolidada geral de todos os equipamentos</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- Campos de Filtro -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6" id="wrapper-filtro-epi-especifico">
+                            <label class="form-label" style="font-size:12px;">Buscar EPI por nome ou C.A. *</label>
+                            <input type="hidden" id="epi-consumo-id" value="">
+                            <div class="position-relative" id="wrapper-busca-rel-epi">
+                                <div id="srch-rel-epi-border" style="
+                                    display:flex;align-items:center;gap:8px;
+                                    background:#fff;border:1.5px solid #d0d5dd;
+                                    border-radius:10px;padding:0 12px;height:42px;
+                                    transition:border-color .2s,box-shadow .2s;">
+                                    <i class="bi bi-search" style="color:#3b82f6;font-size:15px;flex-shrink:0;"></i>
+                                    <input type="text"
+                                           id="input-busca-rel-epi"
+                                           autocomplete="off"
+                                           placeholder="Digite o nome ou C.A. do EPI..."
+                                           style="border:none;outline:none;flex:1;padding:8px 0;font-size:13.5px;background:transparent;"
+                                           oninput="buscarRelEpi(this.value)"
+                                           onfocus="this.closest('[id=srch-rel-epi-border]').style.borderColor='#3b82f6';this.closest('[id=srch-rel-epi-border]').style.boxShadow='0 0 0 3px rgba(59,130,246,.15)';"
+                                           onblur="setTimeout(()=>{this.closest('[id=srch-rel-epi-border]').style.borderColor='#d0d5dd';this.closest('[id=srch-rel-epi-border]').style.boxShadow='none';},150)"
+                                           onkeydown="teclarRelEpi(event)">
+                                    <button type="button" id="btn-limpar-rel-epi" title="Limpar"
+                                            onclick="limparRelEpi()"
+                                            style="display:none;background:none;border:none;cursor:pointer;color:#9ca3af;font-size:18px;line-height:1;padding:0 2px;">&times;</button>
+                                </div>
+                                <div id="dropdown-rel-epi" style="
+                                    display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
+                                    background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;
+                                    box-shadow:0 12px 32px -4px rgba(0,0,0,.18),0 2px 8px -2px rgba(0,0,0,.08);
+                                    overflow:hidden;max-height:300px;overflow-y:auto;z-index:99999;"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label" style="font-size:12px;">Data Início *</label>
+                            <input type="date" id="epi-consumo-data-inicio" class="form-control" style="height:42px;">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label" style="font-size:12px;">Data Fim *</label>
+                            <input type="date" id="epi-consumo-data-fim" class="form-control" style="height:42px;">
+                        </div>
+
+                        <div class="col-12 d-flex gap-2 justify-content-end align-items-center mt-2 flex-wrap" id="grupo-botoes-acoes-epi">
+                            <button type="button" class="btn btn-rel-acao active" id="btn-acao-consultar" onclick="ativarBotaoAcaoRel(this); gerarRelatorioConsumoEpi();">
+                                <i class="bi bi-search"></i> CONSULTAR
+                            </button>
+                            <button type="button" class="btn btn-rel-acao" id="btn-acao-csv" onclick="ativarBotaoAcaoRel(this); acaoExportarCSVConsumoEpi();">
+                                <i class="bi bi-file-earmark-excel"></i> EXPORTAR EXCEL / CSV
+                            </button>
+                            <button type="button" class="btn btn-rel-acao" id="btn-acao-pdf" onclick="ativarBotaoAcaoRel(this); acaoExportarPdfConsumoEpi();">
+                                <i class="bi bi-clipboard-check"></i> EXPORTAR PDF
+                            </button>
+                            <button type="button" class="btn btn-rel-acao" id="btn-acao-imprimir" onclick="ativarBotaoAcaoRel(this); acaoImprimirModeloConsumoEpi();">
+                                <i class="bi bi-printer"></i> Imprimir Modelo Oficial
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Bloco de Resultados Exclusivo do Consumo por EPI -->
+                    <div id="bloco-resultados-epi-consumo" class="d-none mt-4"></div>
                 </div>
 
                 <!-- Relatório 3: C.A. Vencidos -->
@@ -239,7 +355,7 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
 
                 <!-- Relatório 4: Custos Consolidados (Rel. Financeiro) -->
                 <div class="card-custom painel-relatorio <?= $tipoInicial === 'custos' ? '' : 'd-none' ?>" id="painel-custos">
-                    <h5 class="fw-bold mb-2 text-color-primary"><i class="bi bi-currency-dollar me-2 text-success"></i>Demonstrativo Financeiro e Custos com EPIs</h5>
+                    <h5 class="fw-bold mb-2 text-color-primary"><i class="bi bi-currency-dollar me-2 text-success"></i>Relatório Financeiro de EPIs por Período</h5>
                     <p class="text-muted" style="font-size: 13px;">Consolidação financeira detalhada de investimentos em EPIs por centro de custos, departamentos e valores médios com gráficos analíticos.</p>
 
                     <div class="row g-3">
@@ -257,7 +373,34 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                         </div>
                         <div class="col-md-3">
                             <label class="form-label" style="font-size:12px;">Funcionário / Colaborador</label>
-                            <input type="text" id="custos-funcionario" class="form-control" placeholder="Ex: João Silva">
+                            <input type="hidden" id="custos-funcionario-id" value="">
+                            <div class="position-relative" id="wrapper-busca-rel-custos">
+                                <div id="srch-rel-custos-border" style="
+                                    display:flex;align-items:center;gap:6px;
+                                    background:#fff;border:1.5px solid #d0d5dd;
+                                    border-radius:8px;padding:0 10px;
+                                    height:38px;
+                                    transition:border-color .2s,box-shadow .2s;">
+                                    <i class="bi bi-search" style="color:#3b82f6;font-size:14px;flex-shrink:0;"></i>
+                                    <input type="text"
+                                           id="custos-funcionario"
+                                           autocomplete="off"
+                                           placeholder="Ex: João Silva"
+                                           style="border:none;outline:none;flex:1;padding:6px 0;font-size:13px;background:transparent;"
+                                           oninput="buscarRelCustos(this.value)"
+                                           onfocus="this.closest('[id=srch-rel-custos-border]').style.borderColor='#3b82f6';this.closest('[id=srch-rel-custos-border]').style.boxShadow='0 0 0 3px rgba(59,130,246,.15)';"
+                                           onblur="setTimeout(()=>{this.closest('[id=srch-rel-custos-border]').style.borderColor='#d0d5dd';this.closest('[id=srch-rel-custos-border]').style.boxShadow='none';},150)"
+                                           onkeydown="teclarRelCustos(event)">
+                                    <button type="button" id="btn-limpar-rel-custos" title="Limpar"
+                                            onclick="limparRelCustos()"
+                                            style="display:none;background:none;border:none;cursor:pointer;color:#9ca3af;font-size:16px;line-height:1;padding:0 2px;">&times;</button>
+                                </div>
+                                <div id="dropdown-rel-custos" style="
+                                    display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
+                                    background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;
+                                    box-shadow:0 12px 32px -4px rgba(0,0,0,.18),0 2px 8px -2px rgba(0,0,0,.08);
+                                    overflow:hidden;max-height:300px;overflow-y:auto;z-index:99999;"></div>
+                            </div>
                         </div>
                         <div class="col-md-12 d-flex gap-2 justify-content-end mt-3">
                             <button class="btn btn-primary px-4" onclick="gerarRelatorioCustos()"><i class="bi bi-play-fill me-1"></i> Consultar Relatório Financeiro</button>
@@ -382,9 +525,13 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                 <div class="card-custom mt-4 d-none" id="bloco-resultados">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold m-0" id="titulo-resultados">Resultados do Relatório</h6>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-outline-success" onclick="exportarCSV()"><i class="bi bi-file-earmark-excel me-1"></i> CSV / Excel</button>
-                            <button class="btn btn-sm btn-outline-primary" onclick="imprimirRelatorio()"><i class="bi bi-printer me-1"></i> Imprimir PDF</button>
+                        <div class="d-flex gap-2 align-items-center">
+                            <button type="button" class="btn btn-rel-acao" onclick="exportarCSV()">
+                                <i class="bi bi-file-earmark-excel"></i> EXPORTAR EXCEL / CSV
+                            </button>
+                            <button type="button" class="btn btn-rel-acao" onclick="imprimirRelatorio()">
+                                <i class="bi bi-printer"></i> Imprimir PDF
+                            </button>
                         </div>
                     </div>
 
@@ -500,25 +647,55 @@ function mostrarPainelRelatorio(tipo, btn) {
         'entregas': 'funcionario',
         'geral': 'geral'
     };
-    const tipoSub = mapaPainelTipo[tipo];
-    if (tipoSub) {
-        document.querySelectorAll('#sub-relatorios a').forEach(a => a.classList.remove('active-sub'));
-        const subLink = document.querySelector(`#sub-relatorios a[href*="tipo=${tipoSub}"]`);
-        if (subLink) subLink.classList.add('active-sub');
-    }
+    const tipoSub = mapaPainelTipo[tipo] || tipo;
+    document.querySelectorAll('#sub-relatorios a').forEach(a => a.classList.remove('active-sub'));
+    const subLink = document.querySelector(`#sub-relatorios a[href*="tipo=${tipoSub}"]`);
+    if (subLink) subLink.classList.add('active-sub');
 }
+window.mostrarPainelRelatorio = mostrarPainelRelatorio;
+
+function executarAcaoSubmenuRelatorio(tipo) {
+    const mapaTipoPainel = {
+        'financeiro': 'custos',
+        'custos': 'custos',
+        'epi': 'epis-vencidos',
+        'epis-vencidos': 'epis-vencidos',
+        'funcionario': 'entregas',
+        'entregas': 'entregas',
+        'geral': 'geral'
+    };
+    const painelAlvo = mapaTipoPainel[tipo] || 'geral';
+    mostrarPainelRelatorio(painelAlvo);
+}
+window.executarAcaoSubmenuRelatorio = executarAcaoSubmenuRelatorio;
 
 /**
- * RELATÓRIO 1: Histórico Geral de Entregas
+ * RELATÓRIO 1: Histórico Geral de Entregas / Ficha Individual
  */
 function gerarRelatorioEntregas() {
     const funcId = document.getElementById('entregas-func-id').value;
+    const dataInicioInput = document.getElementById('entregas-data-inicio');
+    const dataFimInput = document.getElementById('entregas-data-fim');
+    const dataInicio = dataInicioInput ? dataInicioInput.value : '';
+    const dataFim = dataFimInput ? dataFimInput.value : '';
+    const inputNome = document.getElementById('input-busca-rel-entregas');
+    const textoBusca = inputNome ? inputNome.value.trim() : '';
+
     let endpoint = 'relatorios/entregas';
-    filtrosAtivosString = 'Filtro: Todos os funcionários';
-    
+    let queryParams = [];
+
+    if (dataInicio) queryParams.push(`data_inicio=${dataInicio}`);
+    if (dataFim) queryParams.push(`data_fim=${dataFim}`);
+
     if (funcId !== '') {
         endpoint = `relatorios/entregas/funcionario/${funcId}`;
         filtrosAtivosString = `Filtro: ${relEntregasNomeSelecionado || 'Funcionário ID '+funcId}`;
+    } else {
+        filtrosAtivosString = 'Filtro: Todos os funcionários';
+    }
+
+    if (queryParams.length > 0) {
+        endpoint += (endpoint.includes('?') ? '&' : '?') + queryParams.join('&');
     }
 
     exibirLoading();
@@ -534,6 +711,31 @@ function gerarRelatorioEntregas() {
             } else if (res.data && Array.isArray(res.data.entregas)) {
                 listaEntregas = res.data.entregas;
                 nomeFuncionarioFiltrado = res.data.funcionario ? res.data.funcionario.fun_nome : '';
+            }
+
+            // Filtro local por período de datas (Data Início / Data Fim)
+            if (dataInicio) {
+                listaEntregas = listaEntregas.filter(row => {
+                    const dStr = (row.entr_data_entrega || '').substring(0, 10);
+                    return dStr >= dataInicio;
+                });
+            }
+            if (dataFim) {
+                listaEntregas = listaEntregas.filter(row => {
+                    const dStr = (row.entr_data_entrega || '').substring(0, 10);
+                    return dStr <= dataFim;
+                });
+            }
+
+            // Filtro local por busca textual (Nome, CPF ou Matrícula) se ID não foi selecionado via autocomplete
+            if (!funcId && textoBusca && textoBusca.toLowerCase() !== 'todos os funcionários') {
+                const tb = textoBusca.toLowerCase();
+                listaEntregas = listaEntregas.filter(row => {
+                    const funNome = (row.fun_nome || '').toLowerCase();
+                    const funCpf = (row.fun_cpf || '').toLowerCase();
+                    const funMat = (row.fun_matricula || '').toLowerCase();
+                    return funNome.includes(tb) || funCpf.includes(tb) || funMat.includes(tb);
+                });
             }
 
             dadosAtivos = listaEntregas;
@@ -555,23 +757,41 @@ function gerarRelatorioEntregas() {
                     <tbody>
             `;
 
-            listaEntregas.forEach(row => {
-                const dataFormat = new Date(row.entr_data_entrega).toLocaleDateString('pt-BR');
-                const itens = row.itens || [];
-                itens.forEach(item => {
-                    html += `
-                        <tr>
-                            <td>${dataFormat}</td>
-                            <td class="fw-semibold">${row.fun_nome || nomeFuncionarioFiltrado || 'Não Informado'}</td>
-                            <td class="fw-semibold">${item.item_epi_nome_snapshot || item.epi_nome || 'EPI'}</td>
-                            <td>${item.item_epi_ca_snapshot || item.epi_ca || '---'}</td>
-                            <td>${item.item_quantidade || 1}</td>
-                            <td><span class="badge bg-light text-dark border">${row.entr_motivo}</span></td>
-                            <td class="text-muted">${row.usu_login}</td>
-                        </tr>
-                    `;
+            if (listaEntregas.length === 0) {
+                html += `<tr><td colspan="7" class="text-center text-muted py-4">Nenhum registro de entrega localizado para os filtros selecionados.</td></tr>`;
+            } else {
+                listaEntregas.forEach(row => {
+                    const dataFormat = row.entr_data_entrega ? new Date(row.entr_data_entrega).toLocaleDateString('pt-BR') : '---';
+                    const itens = row.itens || [];
+                    if (itens.length === 0) {
+                        html += `
+                            <tr>
+                                <td>${dataFormat}</td>
+                                <td class="fw-semibold">${row.fun_nome || nomeFuncionarioFiltrado || 'Não Informado'}</td>
+                                <td class="fw-semibold">EPI (Sem Detalhe)</td>
+                                <td>---</td>
+                                <td>1</td>
+                                <td><span class="badge bg-light text-dark border">${row.entr_motivo || 'FORNECIMENTO'}</span></td>
+                                <td class="text-muted">${row.usu_login || 'admin'}</td>
+                            </tr>
+                        `;
+                    } else {
+                        itens.forEach(item => {
+                            html += `
+                                <tr>
+                                    <td>${dataFormat}</td>
+                                    <td class="fw-semibold">${row.fun_nome || nomeFuncionarioFiltrado || 'Não Informado'}</td>
+                                    <td class="fw-semibold">${item.item_epi_nome_snapshot || item.epi_nome || 'EPI'}</td>
+                                    <td>${item.item_epi_ca_snapshot || item.epi_ca || '---'}</td>
+                                    <td>${item.item_quantidade || 1}</td>
+                                    <td><span class="badge bg-light text-dark border">${row.entr_motivo || 'FORNECIMENTO'}</span></td>
+                                    <td class="text-muted">${row.usu_login || 'admin'}</td>
+                                </tr>
+                            `;
+                        });
+                    }
                 });
-            });
+            }
 
             html += '</tbody></table>';
             renderizarResultados('Relatório Geral de Entregas', html);
@@ -583,55 +803,363 @@ function gerarRelatorioEntregas() {
 }
 
 /**
- * RELATÓRIO 2: EPIs Vencidos em Posse
+ * RELATÓRIO 2: Relatório de Consumo por Equipamento (EPI)
  */
-function gerarRelatorioEpisVencidos() {
-    filtrosAtivosString = 'Filtro: EPIs vencidos em posse dos colaboradores';
+let modoEpiAtual = 'especifico';
+let listaEpisGlobal = [];
+
+function selecionarModoEpi(modo) {
+    modoEpiAtual = modo;
+    const cardEsp = document.getElementById('card-modo-especifico');
+    const cardTodos = document.getElementById('card-modo-todos');
+    const wrapperEpi = document.getElementById('wrapper-filtro-epi-especifico');
+
+    if (modo === 'especifico') {
+        if (cardEsp) cardEsp.classList.add('active-modo');
+        if (cardTodos) cardTodos.classList.remove('active-modo');
+        if (wrapperEpi) wrapperEpi.classList.remove('d-none');
+    } else {
+        if (cardTodos) cardTodos.classList.add('active-modo');
+        if (cardEsp) cardEsp.classList.remove('active-modo');
+        if (wrapperEpi) wrapperEpi.classList.add('d-none');
+        const inputId = document.getElementById('epi-consumo-id');
+        const inputNome = document.getElementById('input-busca-rel-epi');
+        if (inputId) inputId.value = '';
+        if (inputNome) inputNome.value = '';
+    }
+}
+
+function buscarRelEpi(termo) {
+    const dropdown = document.getElementById('dropdown-rel-epi');
+    const btnLimpar = document.getElementById('btn-limpar-rel-epi');
+    
+    if (btnLimpar) btnLimpar.style.display = (termo && termo.length > 0) ? 'inline-block' : 'none';
+    if (!termo || termo.trim().length === 0) {
+        if (dropdown) dropdown.style.display = 'none';
+        return;
+    }
+
+    const t = termo.toLowerCase().trim();
+
+    const filtrarE = () => {
+        const matches = listaEpisGlobal.filter(e => 
+            (e.epi_nome && e.epi_nome.toLowerCase().includes(t)) ||
+            (e.epi_ca && String(e.epi_ca).includes(t)) ||
+            (e.epi_fabricante && e.epi_fabricante.toLowerCase().includes(t))
+        ).slice(0, 10);
+
+        if (matches.length === 0) {
+            dropdown.innerHTML = '<div style="padding:12px;text-align:center;color:#94a3b8;font-size:13px;">Nenhum EPI localizado</div>';
+        } else {
+            dropdown.innerHTML = matches.map(e => `
+                <div onclick="selecionarRelEpi(${e.epi_id}, '${(e.epi_nome || '').replace(/'/g, "\\'")}', '${e.epi_ca || ''}', '${(e.epi_fabricante || '').replace(/'/g, "\\'")}')"
+                     style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;"
+                     onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <div>
+                        <strong style="font-size:13.5px;color:#1e293b;display:block;">${e.epi_nome}</strong>
+                        <small style="color:#64748b;font-size:11.5px;">Fabricante: ${e.epi_fabricante || 'N/A'}</small>
+                    </div>
+                    <span class="badge bg-primary-light text-primary" style="font-size:11px;">C.A. ${e.epi_ca || 'Isento'}</span>
+                </div>
+            `).join('');
+        }
+        dropdown.style.display = 'block';
+    };
+
+    if (listaEpisGlobal.length > 0) {
+        filtrarE();
+    } else {
+        fetch(`${PROXY_URL}?route=epis`)
+        .then(res => res.json())
+        .then(res => {
+            if (res.success && Array.isArray(res.data)) {
+                listaEpisGlobal = res.data;
+                filtrarE();
+            }
+        });
+    }
+}
+
+function teclarRelEpi(e) {
+    if (e.key === 'Escape') {
+        const dropdown = document.getElementById('dropdown-rel-epi');
+        if (dropdown) dropdown.style.display = 'none';
+    }
+}
+
+function selecionarRelEpi(id, nome, ca, fabricante) {
+    const inputId = document.getElementById('epi-consumo-id');
+    const inputNome = document.getElementById('input-busca-rel-epi');
+    if (inputId) inputId.value = id;
+    if (inputNome) inputNome.value = `${nome} (C.A. ${ca || 'Isento'})`;
+    const dropdown = document.getElementById('dropdown-rel-epi');
+    if (dropdown) dropdown.style.display = 'none';
+}
+
+function limparRelEpi() {
+    const inputId = document.getElementById('epi-consumo-id');
+    const inputNome = document.getElementById('input-busca-rel-epi');
+    if (inputId) inputId.value = '';
+    if (inputNome) inputNome.value = '';
+    const dropdown = document.getElementById('dropdown-rel-epi');
+    if (dropdown) dropdown.style.display = 'none';
+    const btnLimpar = document.getElementById('btn-limpar-rel-epi');
+    if (btnLimpar) btnLimpar.style.display = 'none';
+}
+
+async function gerarRelatorioConsumoEpi() {
+    const epiIdInput = document.getElementById('epi-consumo-id');
+    const dataInicioInput = document.getElementById('epi-consumo-data-inicio');
+    const dataFimInput = document.getElementById('epi-consumo-data-fim');
+    const inputNome = document.getElementById('input-busca-rel-epi');
+    
+    let epiId = epiIdInput ? epiIdInput.value : '';
+    const dataInicio = dataInicioInput ? dataInicioInput.value : '';
+    const dataFim = dataFimInput ? dataFimInput.value : '';
+    const textoBusca = inputNome ? inputNome.value.trim() : '';
+
+    if (modoEpiAtual === 'especifico' && !epiId && textoBusca) {
+        if (typeof listaEpisGlobal === 'undefined' || listaEpisGlobal.length === 0) {
+            try {
+                const res = await fetch(`${PROXY_URL}?route=epis`).then(r => r.json());
+                if (res.success && Array.isArray(res.data)) {
+                    listaEpisGlobal = res.data;
+                }
+            } catch(e) {}
+        }
+
+        if (typeof listaEpisGlobal !== 'undefined' && listaEpisGlobal.length > 0) {
+            const match = listaEpisGlobal.find(e => 
+                (e.epi_ca && String(e.epi_ca).length > 2 && textoBusca.includes(String(e.epi_ca))) ||
+                (e.epi_nome && (textoBusca.toLowerCase().includes(e.epi_nome.toLowerCase()) || e.epi_nome.toLowerCase().includes(textoBusca.toLowerCase())))
+            );
+            if (match) {
+                epiId = match.epi_id;
+                if (epiIdInput) epiIdInput.value = match.epi_id;
+            }
+        }
+    }
+
+    if (modoEpiAtual === 'especifico' && !epiId) {
+        exibirErro('Por favor, busque e selecione um EPI específico ou altere o modo para "Todos os EPIs".');
+        return false;
+    }
+
     exibirLoading();
 
-    fetch(`${PROXY_URL}?route=relatorios/epis-vencidos`)
+    let query = `data_inicial=${dataInicio}&data_final=${dataFim}&data_inicio=${dataInicio}&data_fim=${dataFim}`;
+    if (modoEpiAtual === 'especifico' && epiId) {
+        query += `&epi_id=${epiId}`;
+    }
+
+    return fetch(`${PROXY_URL}?route=relatorios/epis/geral&${query}`)
     .then(res => res.json())
     .then(res => {
         if (res.success && res.data) {
-            dadosAtivos = res.data;
-            colunasAtivas = ['EPI', 'Fabricante', 'C.A.', 'Vencimento C.A.', 'Vida Útil Recomendada', 'Status'];
+            const dados = res.data;
+            const registros = dados.registros || dados.itens || (Array.isArray(dados) ? dados : []);
+            dadosAtivos = registros;
+            colunasAtivas = ['Data/Hora', 'Colaborador', 'Setor / Depto', 'EPI', 'C.A.', 'Qtd', 'Motivo', 'Responsável', 'Status'];
             
-            let html = `
-                <table class="table table-striped border align-middle" id="tabela-relatorio-gerado" style="font-size: 13px;">
-                    <thead class="table-light">
-                        <tr>
-                            <th>EPI</th>
-                            <th>Fabricante</th>
-                            <th>C.A.</th>
-                            <th>Vencimento do C.A.</th>
-                            <th>Vida Útil Recomendada</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            let totUnidades = 0;
+            let totEmUso = 0;
+            let totDevolvidos = 0;
 
-            res.data.forEach(row => {
-                const dataFormat = new Date(row.epi_vencimento_ca).toLocaleDateString('pt-BR');
-                html += `
-                    <tr>
-                        <td class="fw-semibold">${row.epi_nome}</td>
-                        <td>${row.epi_fabricante || '---'}</td>
-                        <td class="fw-bold">${row.epi_ca || 'Isento'}</td>
-                        <td class="text-danger fw-semibold">${dataFormat}</td>
-                        <td>${row.epi_validade_uso_dias || 0} dias</td>
-                        <td><span class="status-badge vencido">${row.epi_status}</span></td>
-                    </tr>
-                `;
+            registros.forEach(r => {
+                const qtd = parseInt(r.quantidade || r.ite_quantidade || 1);
+                const st = String(r.status || r.ite_status_item || r.ent_status || '').toUpperCase();
+                totUnidades += qtd;
+                if (st.includes('DEVOLVIDO')) {
+                    totDevolvidos += qtd;
+                } else {
+                    totEmUso += qtd;
+                }
             });
 
-            html += '</tbody></table>';
-            renderizarResultados('EPIs com Validade de Uso Expirada', html);
+            let epiInfoStr = '';
+            if (modoEpiAtual === 'especifico') {
+                const inputVal = document.getElementById('input-busca-rel-epi') ? document.getElementById('input-busca-rel-epi').value : '';
+                epiInfoStr = inputVal || 'EPI Selecionado';
+            } else {
+                epiInfoStr = 'Visão Consolidada de Todos os EPIs';
+            }
+
+            let html = `
+                <div class="card p-3 mb-4 border" style="border-radius:12px; background: var(--color-card-bg);">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <div>
+                            <h5 class="fw-bold text-primary m-0">${epiInfoStr}</h5>
+                            <small class="text-muted">Período: ${dataInicio ? new Date(dataInicio).toLocaleDateString('pt-BR') : '---'} a ${dataFim ? new Date(dataFim).toLocaleDateString('pt-BR') : '---'}</small>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="p-3 rounded border text-center bg-light">
+                                <span class="text-muted d-block small text-uppercase fw-bold">Total Fornecido</span>
+                                <h3 class="fw-bold text-dark m-0 mt-1">${totUnidades} <small style="font-size:14px;">un</small></h3>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 rounded border text-center bg-light">
+                                <span class="text-muted d-block small text-uppercase fw-bold">Ativos (em uso)</span>
+                                <h3 class="fw-bold text-primary m-0 mt-1">${totEmUso} <small style="font-size:14px;">un</small></h3>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 rounded border text-center bg-light">
+                                <span class="text-muted d-block small text-uppercase fw-bold">Devolvidos</span>
+                                <h3 class="fw-bold text-success m-0 mt-1">${totDevolvidos} <small style="font-size:14px;">un</small></h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-1 text-primary"></i>Histórico de Fornecimento</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle" style="font-size:13px;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Colaborador</th>
+                                <th>Setor / Depto</th>
+                                <th>EPI (C.A.)</th>
+                                <th>Qtd</th>
+                                <th>Motivo</th>
+                                <th>Responsável</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            if (registros.length === 0) {
+                html += `<tr><td colspan="8" class="text-center text-muted py-4">Nenhum registro de consumo encontrado para este equipamento no período selecionado.</td></tr>`;
+            } else {
+                registros.forEach(r => {
+                    const dt = (r.data || r.ent_data_retirada) ? new Date(r.data || r.ent_data_retirada).toLocaleDateString('pt-BR') : '---';
+                    const st = String(r.status || r.ite_status_item || r.ent_status || 'EM USO').toUpperCase();
+                    const isDevolvido = st.includes('DEVOLVIDO');
+                    const badgeClass = isDevolvido ? 'bg-success' : 'bg-primary';
+
+                    html += `
+                        <tr>
+                            <td>${dt}</td>
+                            <td class="fw-semibold">${r.funcionario || r.fun_nome || '---'}</td>
+                            <td>${r.setor || r.fun_departamento || '---'}</td>
+                            <td>${r.epi || r.epi_nome || '---'} <small class="text-muted">(C.A. ${r.ca || r.epi_ca || 'N/A'})</small></td>
+                            <td>${r.quantidade || r.ite_quantidade || 1}</td>
+                            <td><span class="badge bg-light text-dark border">${r.motivo || r.ent_motivo || 'FORNECIMENTO'}</span></td>
+                            <td><small class="text-muted">${r.responsavel || r.usuario_responsavel || 'almoxarifado'}</small></td>
+                            <td>
+                                <span class="badge ${badgeClass}">${st}</span>
+                                ${isDevolvido && r.data_devolucao ? `<small class="d-block text-muted" style="font-size:10px;">Devolvido em ${new Date(r.data_devolucao).toLocaleDateString('pt-BR')}</small>` : ''}
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            html += `</tbody></table></div>`;
+
+            const bloco = document.getElementById('bloco-resultados-epi-consumo');
+            if (bloco) {
+                bloco.innerHTML = html;
+                bloco.classList.remove('d-none');
+            }
+            const blocoGlobal = document.getElementById('bloco-resultados');
+            if (blocoGlobal) blocoGlobal.classList.add('d-none');
         } else {
-            exibirErro(res.message || 'Nenhum EPI vencido em posse no momento.');
+            exibirErro(res.message || 'Nenhum registro de consumo encontrado.');
         }
     })
-    .catch(() => exibirErro('Erro ao processar chamada.'));
+    .catch(err => exibirErro('Erro ao carregar relatório de consumo: ' + err.message));
+}
+
+function ativarBotaoAcaoRel(btn) {
+    document.querySelectorAll('#grupo-botoes-acoes-epi .btn-rel-acao').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+}
+
+function ativarBotaoAcaoRelGeral(btn) {
+    document.querySelectorAll('#grupo-botoes-acoes-geral .btn-rel-acao').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+}
+
+function exportarPdfConsumoEpi() {
+    abrirModeloConsumoEpi(true);
+}
+
+async function acaoExportarCSVConsumoEpi() {
+    const res = await gerarRelatorioConsumoEpi();
+    if (res !== false) {
+        exportarCSV();
+    }
+}
+
+async function acaoExportarPdfConsumoEpi() {
+    const res = await gerarRelatorioConsumoEpi();
+    if (res !== false) {
+        exportarPdfConsumoEpi();
+    }
+}
+
+async function acaoImprimirModeloConsumoEpi() {
+    const res = await gerarRelatorioConsumoEpi();
+    if (res !== false) {
+        abrirModeloConsumoEpi();
+    }
+}
+
+async function abrirModeloConsumoEpi(autoprint = false) {
+    let epiIdInput = document.getElementById('epi-consumo-id');
+    const dataInicioInput = document.getElementById('epi-consumo-data-inicio');
+    const dataFimInput = document.getElementById('epi-consumo-data-fim');
+    const inputNome = document.getElementById('input-busca-rel-epi');
+    
+    let epiId = epiIdInput ? epiIdInput.value : '';
+    const dataInicio = dataInicioInput ? dataInicioInput.value : '';
+    const dataFim = dataFimInput ? dataFimInput.value : '';
+    const textoBusca = inputNome ? inputNome.value.trim() : '';
+
+    if (modoEpiAtual === 'especifico' && !epiId && textoBusca) {
+        if (typeof listaEpisGlobal === 'undefined' || listaEpisGlobal.length === 0) {
+            try {
+                const res = await fetch(`${PROXY_URL}?route=epis`).then(r => r.json());
+                if (res.success && Array.isArray(res.data)) {
+                    listaEpisGlobal = res.data;
+                }
+            } catch(e) {}
+        }
+
+        if (typeof listaEpisGlobal !== 'undefined' && listaEpisGlobal.length > 0) {
+            const match = listaEpisGlobal.find(e => 
+                (e.epi_ca && String(e.epi_ca).length > 2 && textoBusca.includes(String(e.epi_ca))) ||
+                (e.epi_nome && (textoBusca.toLowerCase().includes(e.epi_nome.toLowerCase()) || e.epi_nome.toLowerCase().includes(textoBusca.toLowerCase())))
+            );
+            if (match) {
+                epiId = match.epi_id;
+                if (epiIdInput) epiIdInput.value = match.epi_id;
+            }
+        }
+    }
+
+    if (modoEpiAtual === 'especifico' && !epiId) {
+        alert('Por favor, busque e selecione um EPI específico ou altere o modo para "Todos os EPIs".');
+        return;
+    }
+    
+    let url = `${APP_ROOT}pages/relatorio_consumo_epi.php?data_inicial=${dataInicio}&data_final=${dataFim}&data_inicio=${dataInicio}&data_fim=${dataFim}`;
+    if (modoEpiAtual === 'especifico' && epiId) {
+        url += `&epi_id=${epiId}`;
+    }
+    if (autoprint) {
+        url += `&autoprint=1`;
+    }
+    window.open(url, '_blank');
+}
+
+function gerarRelatorioEpisVencidos() {
+    gerarRelatorioConsumoEpi();
 }
 
 /**
@@ -767,7 +1295,7 @@ function gerarRelatorioCustos() {
             // Renderiza Tabela no bloco de resultados
             renderizarTabelaRegistrosGeral(registros);
             document.getElementById('bloco-resultados').classList.remove('d-none');
-            document.getElementById('titulo-resultados').innerText = 'Demonstrativo Financeiro de Custos com EPIs';
+            document.getElementById('titulo-resultados').innerText = 'Relatório Financeiro de EPIs por Período';
         } else {
             exibirErro(res.message || 'Nenhum registro financeiro encontrado no período.');
         }
@@ -907,7 +1435,7 @@ function gerarRelatorioAuditoria() {
                     if (row.log_datahora) {
                         try {
                             const dt = new Date(String(row.log_datahora).replace(' ', 'T') + 'Z');
-                            dataFormat = isNaN(dt.getTime()) ? row.log_datahora : dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                            dataFormat = isNaN(dt.getTime()) ? row.log_datahora : dt.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) + ' ' + dt.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
                         } catch (e) {
                             dataFormat = row.log_datahora;
                         }
@@ -1004,9 +1532,18 @@ function traduzirMotivo(motivo) {
 
 function formatarDataHoraBR(valor) {
     if (!valor) return '---';
-    const d = new Date(String(valor).replace(' ', 'T'));
+    let s = String(valor).trim();
+    if (!s.includes('T') && s.includes(' ')) s = s.replace(' ', 'T');
+    const d = new Date(s);
     if (isNaN(d.getTime())) return '---';
-    return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 }
 
 // Define período padrão (últimos 30 dias) na primeira abertura do painel
@@ -1015,11 +1552,16 @@ function formatarDataHoraBR(valor) {
         const hoje = new Date();
         const inicio = new Date();
         inicio.setDate(hoje.getDate() - 30);
-        const toInput = d => d.toISOString().split('T')[0];
+        const toInput = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         const campoInicio = document.getElementById('geral-data-inicio');
         const campoFim = document.getElementById('geral-data-fim');
         if (campoInicio && !campoInicio.value) campoInicio.value = toInput(inicio);
         if (campoFim && !campoFim.value) campoFim.value = toInput(hoje);
+
+        const entrInicio = document.getElementById('entregas-data-inicio');
+        const entrFim = document.getElementById('entregas-data-fim');
+        if (entrInicio && !entrInicio.value) entrInicio.value = toInput(inicio);
+        if (entrFim && !entrFim.value) entrFim.value = toInput(hoje);
 
         const custInicio = document.getElementById('custos-data-inicio');
         const custFim = document.getElementById('custos-data-fim');
@@ -1219,7 +1761,7 @@ function mostrarAgrupamento(aba, btn) {
 function renderizarTabelaRegistrosGeral(registros) {
     const permiteCustos = geralUltimaResposta?.permite_visualizar_custos === true;
     dadosAtivos = registros;
-    colunasAtivas = ['Data', 'Funcionário', 'Setor', 'EPI', 'C.A.', 'Tam', 'Qtd', 'Motivo'];
+    colunasAtivas = ['Data', 'Funcionário', 'Setor', 'EPI', 'C.A.', 'Tam', 'Qtd', 'Motivo', 'Responsável'];
     if (permiteCustos) colunasAtivas.push('Valor Total');
 
     let html = `
@@ -1234,6 +1776,7 @@ function renderizarTabelaRegistrosGeral(registros) {
                     <th>Tam</th>
                     <th>Qtd</th>
                     <th>Motivo</th>
+                    <th>Responsável</th>
                     ${permiteCustos ? '<th class="text-end text-nowrap">Valor Total</th>' : ''}
                 </tr>
             </thead>
@@ -1247,6 +1790,7 @@ function renderizarTabelaRegistrosGeral(registros) {
         const valorTotal = r.valor_total !== null && r.valor_total !== undefined
             ? `<td class="text-end fw-semibold text-nowrap">${parseFloat(r.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }).replace(/\s/g, '\u00a0')}</td>`
             : (permiteCustos ? '<td class="text-end text-muted text-nowrap">---</td>' : '');
+        const responsavel = r.usu_login || r.responsavel || r.usuario_responsavel || '---';
         html += `
             <tr>
                 <td>${formatarDataHoraBR(r.entr_data_entrega)}</td>
@@ -1257,6 +1801,7 @@ function renderizarTabelaRegistrosGeral(registros) {
                 <td>${r.item_tamanho || '---'}</td>
                 <td>${r.item_quantidade ?? 1}</td>
                 <td><span class="badge bg-light text-dark border">${traduzirMotivo(r.item_motivo_entrega || r.entr_motivo)}</span></td>
+                <td>${responsavel}</td>
                 ${valorTotal}
             </tr>`;
     });
@@ -1321,9 +1866,16 @@ async function exportarCSV() {
         return;
     }
 
-    if (dadosAtivos.length === 0) return;
+    if ((relatorioAtivo === 'epis-vencidos' || relatorioAtivo === 'epi') && dadosAtivos.length === 0) {
+        await gerarRelatorioConsumoEpi();
+    }
 
-    let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM para acentuação no Excel BR
+    if (dadosAtivos.length === 0) {
+        alert('Nenhum registro encontrado no período selecionado para exportar.');
+        return;
+    }
+
+    let csvContent = "\uFEFF"; // UTF-8 BOM para acentuação correta no Microsoft Excel
     
     // 1. Cabeçalho
     csvContent += colunasAtivas.join(";") + "\n";
@@ -1347,14 +1899,19 @@ async function exportarCSV() {
             });
         } else {
             let linha = [];
-            if (relatorioAtivo === 'epis-vencidos') {
+            if (relatorioAtivo === 'epis-vencidos' || relatorioAtivo === 'epi') {
+                const dt = (row.data || row.ent_data_retirada) ? new Date(row.data || row.ent_data_retirada).toLocaleDateString('pt-BR') : (row.epi_vencimento_ca ? new Date(row.epi_vencimento_ca).toLocaleDateString('pt-BR') : '---');
+                const st = String(row.status || row.ite_status_item || row.ent_status || row.epi_status || 'EM USO').toUpperCase();
                 linha = [
-                    row.epi_nome,
-                    row.epi_fabricante || '---',
-                    row.epi_ca || 'Isento',
-                    new Date(row.epi_vencimento_ca).toLocaleDateString('pt-BR'),
-                    row.epi_validade_uso_dias || 0,
-                    row.epi_status
+                    dt,
+                    row.funcionario || row.fun_nome || row.epi_nome || '---',
+                    row.setor || row.fun_departamento || row.epi_fabricante || '---',
+                    row.epi || row.epi_nome || '---',
+                    row.ca || row.epi_ca || 'Isento',
+                    row.quantidade || row.ite_quantidade || 1,
+                    row.motivo || row.ent_motivo || 'FORNECIMENTO',
+                    row.responsavel || row.usuario_responsavel || 'almoxarifado',
+                    st
                 ];
             } else if (relatorioAtivo === 'ca-vencidos') {
                 linha = [
@@ -1376,7 +1933,7 @@ async function exportarCSV() {
                 try {
                     const dt = new Date(String(row.log_datahora).replace(' ', 'T') + 'Z');
                     if (!isNaN(dt.getTime())) {
-                        dataFormat = dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                        dataFormat = dt.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) + ' ' + dt.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
                     }
                 } catch(e) {}
 
@@ -1403,14 +1960,16 @@ async function exportarCSV() {
         }
     });
 
-    // Dispara download
-    const encodedUri = encodeURI(csvContent);
+    // Dispara download via Blob e ObjectURL
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
+    link.setAttribute("href", url);
     link.setAttribute("download", `relatorio_${relatorioAtivo}_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 
     // Grava log de auditoria
     registrarExportacaoAuditoria('CSV');
@@ -1432,7 +1991,7 @@ async function exportarCSVRelatorioGeral() {
         const permiteCustos = res.data.permite_visualizar_custos === true;
 
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-        const cabecalho = ['Data', 'Funcionário', 'Setor', 'EPI', 'C.A.', 'Tam', 'Qtd', 'Motivo'];
+        const cabecalho = ['Data', 'Funcionário', 'Setor', 'EPI', 'C.A.', 'Tam', 'Qtd', 'Motivo', 'Responsável'];
         if (permiteCustos) cabecalho.push('Valor Total');
         csvContent += cabecalho.join(";") + "\n";
 
@@ -1445,7 +2004,8 @@ async function exportarCSVRelatorioGeral() {
                 r.epi_ca || 'Isento',
                 r.item_tamanho || '',
                 r.item_quantidade ?? 1,
-                traduzirMotivo(r.item_motivo_entrega || r.entr_motivo)
+                traduzirMotivo(r.item_motivo_entrega || r.entr_motivo),
+                r.usu_login || r.responsavel || r.usuario_responsavel || ''
             ];
             if (permiteCustos) linha.push((r.valor_total ?? 0).toString().replace('.', ','));
             csvContent += linha.map(v => `"${(v || '').toString().replace(/"/g, '""')}"`).join(";") + "\n";
@@ -1793,11 +2353,137 @@ function limparRelGeral(){
     fecharDdRelGeral();
 }
 
+// ========== AUTOCOMPLETE DO FILTRO DE COLABORADOR (Relatório Financeiro) ==========
+let relCustosResultados = [];
+let relCustosIdx = -1;
+let relCustosNomeSelecionado = '';
+
+function fecharDdRelCustos(){
+    const dd = document.getElementById('dropdown-rel-custos');
+    if(dd){ dd.style.display = 'none'; dd.innerHTML = ''; }
+    relCustosIdx = -1; relCustosResultados = [];
+}
+
+function buscarRelCustos(termo){
+    relCustosIdx = -1;
+    const btn = document.getElementById('btn-limpar-rel-custos');
+    if(btn) btn.style.display = termo.length > 0 ? 'block' : 'none';
+
+    const hiddenId = document.getElementById('custos-funcionario-id');
+    if(hiddenId) hiddenId.value = '';
+    relCustosNomeSelecionado = '';
+
+    const tn = _rlNorm(termo);
+    const cpfD = termo.replace(/\D/g, '');
+    if(tn.length < 2){ fecharDdRelCustos(); return; }
+
+    relCustosResultados = FUNC_LIST_REL.filter(f => {
+        const n = _rlNorm(f.fun_nome), ca = _rlNorm(f.fun_cargo), dp = _rlNorm(f.fun_departamento), cp = String(f.fun_cpf||'').replace(/\D/g,'');
+        return n.includes(tn) || n.split(/\s+/).some(p => p.startsWith(tn)) || ca.includes(tn) || dp.includes(tn) || (cpfD.length > 0 && cp.includes(cpfD));
+    });
+    renderDdRelCustos(termo);
+}
+
+function renderDdRelCustos(termo){
+    const dd = document.getElementById('dropdown-rel-custos');
+    if(!dd) return;
+    if(relCustosResultados.length === 0){
+        dd.innerHTML = '<div style="padding:12px;text-align:center;color:#64748b;font-size:12px;"><i class="bi bi-search" style="margin-right:6px;"></i>Nenhum colaborador encontrado com "<strong>'+_rlEsc(termo)+'</strong>"</div>';
+        dd.style.display = 'block'; return;
+    }
+    const total = relCustosResultados.length;
+    const itens = relCustosResultados.slice(0, 8);
+    let html = '<div style="padding:6px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:6px;font-size:11px;color:#64748b;"><i class="bi bi-people-fill" style="color:#3b82f6;"></i><strong style="color:#1e293b;">'+total+'</strong>&nbsp;colaborador(es) encontrado(s)</div>';
+    itens.forEach((f, idx) => {
+        const cor = _rlCor(f.fun_nome), ini = _rlIni(f.fun_nome), nHL = _rlHL(f.fun_nome, termo), cargo = _rlEsc(f.fun_cargo||'Sem Cargo'), depto = _rlEsc(f.fun_departamento||'');
+        const nomeEsc = f.fun_nome.replace(/'/g, "\\'");
+        const deptoEsc = (f.fun_departamento || '').replace(/'/g, "\\'");
+
+        html += '<div class="dd-rel-item" id="dd-rel-c-'+idx+'" onclick="escolherRelCustos('+f.fun_id+',\''+nomeEsc+'\',\''+deptoEsc+'\')" onmouseover="focarRelCustosItem('+idx+')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid #f1f5f9;transition:background .12s;"><div style="width:34px;height:34px;border-radius:50%;background:'+cor+';color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+ini+'</div><div style="flex:1;min-width:0;line-height:1.3;"><div style="display:flex;align-items:center;justify-content:space-between;gap:6px;"><span style="font-weight:600;color:#1e293b;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+nHL+'</span><span style="background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600;">#'+f.fun_id+'</span></div><div style="font-size:11px;color:#64748b;"><i class="bi bi-briefcase" style="font-size:10px;"></i> '+cargo+(depto?' <span style="color:#cbd5e1;">•</span> '+depto:'')+'</div></div></div>';
+    });
+    html += '<div class="dd-rel-item" onclick="limparRelCustos()" style="display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;background:#f8fafc;border-top:1px solid #e2e8f0;"><div style="width:34px;height:34px;border-radius:50%;background:#94a3b8;color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-people"></i></div><div style="font-weight:600;color:#1e293b;font-size:13px;">Todos os Funcionários</div></div>';
+    dd.innerHTML = html;
+    dd.style.display = 'block';
+}
+
+function focarRelCustosItem(idx){
+    relCustosIdx = idx;
+    document.querySelectorAll('#dropdown-rel-custos .dd-rel-item').forEach((el, i) => { el.style.background = i === idx ? '#eff6ff' : ''; });
+}
+
+function teclarRelCustos(e){
+    const dd = document.getElementById('dropdown-rel-custos');
+    if(!dd || dd.style.display === 'none') return;
+    if(e.key === 'ArrowDown'){ e.preventDefault(); relCustosIdx = (relCustosIdx + 1) % Math.min(relCustosResultados.length, 8); focarRelCustosItem(relCustosIdx); const el = document.getElementById('dd-rel-c-' + relCustosIdx); if(el) el.scrollIntoView({block:'nearest'}); }
+    else if(e.key === 'ArrowUp'){ e.preventDefault(); relCustosIdx = (relCustosIdx - 1 + Math.min(relCustosResultados.length, 8)) % Math.min(relCustosResultados.length, 8); focarRelCustosItem(relCustosIdx); const el = document.getElementById('dd-rel-c-' + relCustosIdx); if(el) el.scrollIntoView({block:'nearest'}); }
+    else if(e.key === 'Enter'){ e.preventDefault(); const item = relCustosIdx >= 0 ? relCustosResultados[relCustosIdx] : (relCustosResultados.length === 1 ? relCustosResultados[0] : null); if(item) escolherRelCustos(item.fun_id, item.fun_nome, item.fun_departamento); }
+    else if(e.key === 'Escape'){ fecharDdRelCustos(); }
+}
+
+function escolherRelCustos(funId, nome, depto){
+    const hiddenId = document.getElementById('custos-funcionario-id');
+    if(hiddenId) hiddenId.value = funId;
+    const inp = document.getElementById('custos-funcionario');
+    if(inp) inp.value = nome;
+    relCustosNomeSelecionado = nome;
+
+    // Autopreenchimento do Setor/Departamento
+    const campoDepto = document.getElementById('custos-departamento');
+    if (campoDepto && depto !== undefined) {
+        campoDepto.value = depto || '';
+    }
+
+    const btn = document.getElementById('btn-limpar-rel-custos');
+    if(btn) btn.style.display = 'block';
+    fecharDdRelCustos();
+}
+
+function limparRelCustos(){
+    const hiddenId = document.getElementById('custos-funcionario-id');
+    if(hiddenId) hiddenId.value = '';
+    const inp = document.getElementById('custos-funcionario');
+    if(inp){ inp.value = ''; inp.focus(); }
+
+    const campoDepto = document.getElementById('custos-departamento');
+    if (campoDepto) campoDepto.value = '';
+
+    relCustosNomeSelecionado = '';
+    const btn = document.getElementById('btn-limpar-rel-custos');
+    if(btn) btn.style.display = 'none';
+    fecharDdRelCustos();
+}
+
 document.addEventListener('click',function(e){
     const w1 = document.getElementById('wrapper-busca-rel-entregas');
     if(w1 && !w1.contains(e.target)) fecharDdRelEntregas();
     const w2 = document.getElementById('wrapper-busca-rel-geral');
     if(w2 && !w2.contains(e.target)) fecharDdRelGeral();
+    const w3 = document.getElementById('wrapper-busca-rel-custos');
+    if(w3 && !w3.contains(e.target)) fecharDdRelCustos();
+    const w4 = document.getElementById('wrapper-busca-rel-epi');
+    if(w4 && !w4.contains(e.target)) {
+        const dd = document.getElementById('dropdown-rel-epi');
+        if(dd) dd.style.display = 'none';
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const agora = new Date();
+    const hoje = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
+    const primeiroDia = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-01`;
+
+    const ini = document.getElementById('epi-consumo-data-inicio');
+    const fim = document.getElementById('epi-consumo-data-fim');
+    if (ini && !ini.value) ini.value = primeiroDia;
+    if (fim && !fim.value) fim.value = hoje;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tipoParam = urlParams.get('tipo');
+    if (tipoParam) {
+        setTimeout(() => {
+            executarAcaoSubmenuRelatorio(tipoParam);
+        }, 50);
+    }
 });
 </script>
 

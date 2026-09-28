@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-$page_title = 'Gerenciamento de Usuários';
+$page_title = 'Usuários e Permissões';
 $active_menu = 'usuarios';
 $page_roles = ['ADMINISTRADOR']; // Apenas administradores do sistema possuem acesso
 
@@ -144,7 +144,7 @@ $perfisMap = [
     <div class="content-body">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <div>
-                <h3 class="fw-bold m-0" style="color: var(--color-primary);">Gerenciamento de Usuários</h3>
+                <h3 class="fw-bold m-0" style="color: var(--color-primary);">Usuários e Permissões</h3>
                 <p class="text-muted">Cadastre e gerencie operadores do sistema e atribua níveis de acesso (RBAC) conforme o perfil funcional.</p>
             </div>
             
@@ -216,7 +216,7 @@ $perfisMap = [
                                 <?php
                                 $situClass = strtolower($usu['usu_status'] ?? 'ativo');
                                 $perfilLabel = $perfisMap[$usu['usu_perfil']] ?? $usu['usu_perfil'];
-                                $ultimaConexao = !empty($usu['usu_ultimo_login']) ? date('d/m/Y H:i', strtotime($usu['usu_ultimo_login'])) : 'Nunca conectado';
+                                $ultimaConexao = !empty($usu['usu_ultimo_login']) ? formatarDataHoraBr($usu['usu_ultimo_login'], 'd/m/Y H:i') : 'Nunca conectado';
                                 ?>
                                 <tr class="usu-row" 
                                     data-login="<?= htmlspecialchars(strtolower($usu['usu_login'])) ?>"

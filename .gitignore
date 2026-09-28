@@ -1,0 +1,12 @@
+# Ignorar arquivos temporários e logs de teste
+cookie.txt
+cookie_session.txt
+output.html
+scratch/
+
+# IDE e sistema operacional
+.idea/
+.vscode/
+Thumbs.db
+Desktop.ini
+.DS_Store

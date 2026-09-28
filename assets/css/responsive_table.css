@@ -1,0 +1,6 @@
+/* Add custom responsive table handling */
+.table-responsive-custom {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}

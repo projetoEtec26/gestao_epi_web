@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+// Garante o fuso horário padrão oficial do Brasil (America/Sao_Paulo - GMT-3)
+date_default_timezone_set('America/Sao_Paulo');
+
 require_once __DIR__ . '/services/ApiService.php';
 
 use Services\ApiService;

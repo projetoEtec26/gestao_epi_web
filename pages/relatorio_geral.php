@@ -443,7 +443,12 @@ try {
         <tbody>
             <?php foreach ($registros as $reg): 
                 $dataItem = $reg['entr_data_entrega'] ?? $reg['data'] ?? $reg['ent_data_retirada'] ?? '';
-                $dataFmt = !empty($dataItem) ? (new DateTime($dataItem))->format('d/m/Y H:i') : '---';
+                try {
+                    $dtObj = !empty($dataItem) ? new DateTime((string)$dataItem) : null;
+                    $dataFmt = $dtObj ? $dtObj->setTimezone($tzBrasil)->format('d/m/Y H:i') : '---';
+                } catch (Throwable $e) {
+                    $dataFmt = '---';
+                }
                 $funcNome = $reg['fun_nome'] ?? $reg['funcionario'] ?? '---';
                 $setorNome = $reg['fun_departamento'] ?? $reg['setor'] ?? '---';
                 $epiNome = $reg['epi_nome'] ?? $reg['epi'] ?? '---';

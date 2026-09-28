@@ -15,13 +15,45 @@ header("Expires: 0");
 
 $config = require __DIR__ . '/../config/api.php';
 if (!defined('APP_ROOT')) {
-    define('APP_ROOT', $config['app_root_url'] ?? '/gestao_epi_web/');
+    define('APP_ROOT', $config['app_root_url'] ?? '/');
 }
 
 // Função helper global para formatação de moeda brasileira (R$) sem dependência da extensão 'intl'
 if (!function_exists('formatarValorMonetario')) {
     function formatarValorMonetario(float $valor): string {
         return 'R$ ' . number_format($valor, 2, ',', '.');
+    }
+}
+
+// Funções helper globais para conversão automática de datas e horários em UTC para São Paulo/Brasil (America/Sao_Paulo)
+if (!function_exists('formatarDataHoraBr')) {
+    function formatarDataHoraBr(?string $datetimeStr, string $format = 'd/m/Y H:i'): string {
+        if (empty($datetimeStr) || $datetimeStr === '0000-00-00 00:00:00') {
+            return '---';
+        }
+        try {
+            $dt = new DateTime((string)$datetimeStr, new DateTimeZone('UTC'));
+            $dt->setTimezone(new DateTimeZone('America/Sao_Paulo'));
+            return $dt->format($format);
+        } catch (\Throwable $e) {
+            $ts = strtotime((string)$datetimeStr);
+            return $ts ? date($format, $ts) : (string)$datetimeStr;
+        }
+    }
+}
+
+if (!function_exists('formatarDataBr')) {
+    function formatarDataBr(?string $dateStr): string {
+        if (empty($dateStr) || $dateStr === '0000-00-00') {
+            return '---';
+        }
+        try {
+            $dt = new DateTime((string)$dateStr, new DateTimeZone('America/Sao_Paulo'));
+            return $dt->format('d/m/Y');
+        } catch (\Throwable $e) {
+            $ts = strtotime((string)$dateStr);
+            return $ts ? date('d/m/Y', $ts) : (string)$dateStr;
+        }
     }
 }
 
@@ -50,6 +82,8 @@ if (isset($page_roles) && is_array($page_roles)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($page_title) ? $page_title . ' - Gestão EPI' : 'Gestão EPI' ?></title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="<?= APP_ROOT ?>assets/favicon.svg">
     <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
@@ -69,8 +103,8 @@ if (isset($page_roles) && is_array($page_roles)) {
     <script>
         console.log('[AUTH SESSION ACTIVE] Status HTTP 200 - Usuário: <?= htmlspecialchars($currentUser['usu_login'] ?? '') ?> | Perfil: <?= htmlspecialchars($userProfile) ?>');
         try {
-            localStorage.setItem('token', <?= json_encode($_SESSION['token'] ?? '') ?>);
-            localStorage.setItem('usuario', JSON.stringify(<?= json_encode($_SESSION['usuario'] ?? []) ?>));
+            localStorage.setItem('token', <?= json_encode((string)($_SESSION['token'] ?? '')) ?>);
+            localStorage.setItem('usuario', <?= json_encode(json_encode($_SESSION['usuario'] ?? [])) ?>);
         } catch (e) {
             console.error('[AUTH ERROR] Erro ao sincronizar localStorage:', e);
         }

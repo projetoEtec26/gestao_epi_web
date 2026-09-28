@@ -45,10 +45,10 @@ try {
     
     <div class="content-body">
         <!-- Header da Página -->
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap flex-md-nowrap">
             <div>
                 <div class="d-flex align-items-center gap-2">
-                    <h3 class="fw-bold m-0" style="color: var(--color-primary);">Nova Entrega de EPI</h3>
+                    <h3 class="fw-bold m-0" style="color: var(--color-primary);">Entregas &amp; Devoluções</h3>
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1" style="font-size: 11px;">
                         <i class="bi bi-shield-check me-1"></i> Contingência Operacional
                     </span>
@@ -57,7 +57,7 @@ try {
                     Registro oficial de fornecimento de EPIs, substituições com devolução vinculada e coleta de assinatura eletrônica por PIN.
                 </p>
             </div>
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2 text-nowrap flex-nowrap">
                 <div class="btn-group-toggle-view" role="group">
                     <a href="entregas.php" class="btn btn-view">
                         <i class="bi bi-clock-history me-1"></i> Histórico
@@ -66,7 +66,7 @@ try {
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Devolução
                     </a>
                 </div>
-                <a href="nova_entrega.php" class="btn btn-primary px-3 py-2 fw-semibold rounded-3 shadow-sm">
+                <a href="nova_entrega.php" class="btn btn-primary text-nowrap px-3 py-2 fw-semibold rounded-3 shadow-sm">
                     <i class="bi bi-plus-lg me-1"></i> Nova Entrega
                 </a>
             </div>
@@ -643,7 +643,7 @@ if (!listaFuncionarios || listaFuncionarios.length === 0) {
 let listaEpisCatalogo = <?= json_encode(array_values(array_map(function($e) {
     $caDesc = !empty($e['epi_ca']) ? 'C.A. ' . $e['epi_ca'] : 'Sem C.A.';
     $vencCa = !empty($e['epi_validade_ca']) ? date('d/m/Y', strtotime($e['epi_validade_ca'])) : '---';
-    $isVencido = (!empty($e['epi_validade_ca']) && strtotime($e['epi_validade_ca']) < time());
+    $isVencido = (!empty($e['epi_validade_ca']) && date('Y-m-d', strtotime($e['epi_validade_ca'])) < date('Y-m-d'));
     return [
         'epi_id' => (int)$e['epi_id'],
         'epi_nome' => $e['epi_nome'] ?? '',
@@ -954,10 +954,11 @@ function renderizarDropdownAutocompleteEpi(termoDigitado) {
 
         let statusCaHtml = '';
         if (e.epi_validade_ca) {
-            const dataVenc = new Date(e.epi_validade_ca);
-            const hoje = new Date();
+            const vencStr = e.epi_validade_ca.split(' ')[0].split('T')[0];
+            const agora = new Date();
+            const hojeStr = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
             const dataFmt = e.epi_validade_ca.split('-').reverse().join('/');
-            if (dataVenc < hoje) {
+            if (vencStr < hojeStr) {
                 statusCaHtml = `<span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1" style="font-size: 10px;"><i class="bi bi-exclamation-triangle me-1"></i>C.A. Vencido (${dataFmt})</span>`;
             } else {
                 statusCaHtml = `<span class="text-muted ms-1" style="font-size: 10px;"><i class="bi bi-calendar-check me-1"></i>Val: ${dataFmt}</span>`;

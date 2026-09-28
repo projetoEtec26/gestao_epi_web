@@ -34,9 +34,11 @@ $dataAtual = new DateTime('now', $tzBrasil);
 $dataEmissao = $dataAtual->format('d/m/Y H:i');
 
 $epiId = isset($_GET['epi_id']) ? (int)$_GET['epi_id'] : 0;
-$dataInicio = trim($_GET['data_inicio'] ?? $dataAtual->format('Y-m-01'));
-$dataFim = trim($_GET['data_fim'] ?? $dataAtual->format('Y-m-d'));
-$setor = trim($_GET['setor'] ?? '');
+$dataInicioRaw = trim($_GET['data_inicio'] ?? $_GET['data_inicial'] ?? $dataAtual->format('Y-m-01'));
+$dataFimRaw = trim($_GET['data_fim'] ?? $_GET['data_final'] ?? $dataAtual->format('Y-m-d'));
+$dataInicio = explode(' ', $dataInicioRaw)[0];
+$dataFim = explode(' ', $dataFimRaw)[0];
+$setor = trim($_GET['setor'] ?? $_GET['departamento'] ?? '');
 
 $modoEspecifico = false;
 $nomeEpiSelecionado = 'Geral de EPIs';
@@ -63,8 +65,10 @@ try {
     }
 
     $queryParams = [
-        'data_inicio' => $dataInicio,
-        'data_fim' => $dataFim
+        'data_inicial' => $dataInicio . ' 00:00:00',
+        'data_final'   => $dataFim . ' 23:59:59',
+        'status_entrega' => 'FINALIZADA',
+        'limite'       => 5000
     ];
     if ($setor !== '') $queryParams['departamento'] = $setor;
     if ($modoEspecifico) $queryParams['epi_id'] = $epiId;
@@ -82,18 +86,25 @@ try {
         $totCusto = 0.0;
 
         foreach ($itens as $item) {
-            // Se estiver em modo específico, filtra caso a API não tenha filtrado no backend
-            if ($modoEspecifico && !empty($nomeEpiSelecionado)) {
-                $itemEpiNome = $item['epi'] ?? $item['epi_nome'] ?? '';
-                if ($itemEpiNome !== '' && stripos($itemEpiNome, $nomeEpiSelecionado) === false) {
-                    continue;
+            // Se estiver em modo específico, filtra por ID ou por nome (bidirecional)
+            if ($modoEspecifico) {
+                $itemEpiId = (int)($item['epi_id'] ?? $item['item_epi_id'] ?? $item['ite_epi_id'] ?? 0);
+                if ($itemEpiId > 0 && $epiId > 0) {
+                    if ($itemEpiId !== $epiId) {
+                        continue;
+                    }
+                } elseif (!empty($nomeEpiSelecionado)) {
+                    $itemEpiNome = $item['epi'] ?? $item['epi_nome'] ?? '';
+                    if ($itemEpiNome !== '' && stripos($itemEpiNome, $nomeEpiSelecionado) === false && stripos($nomeEpiSelecionado, $itemEpiNome) === false) {
+                        continue;
+                    }
                 }
             }
 
-            $qtd = (int)($item['quantidade'] ?? $item['ite_quantidade'] ?? 1);
+            $qtd = (int)($item['quantidade'] ?? $item['ite_quantidade'] ?? $item['item_quantidade'] ?? 1);
             $val = (float)($item['valor_total'] ?? $item['ite_custo_total'] ?? 0);
             $status = strtoupper((string)($item['status'] ?? $item['ite_status_item'] ?? $item['ent_status'] ?? 'EM USO'));
-            $motivo = strtoupper((string)($item['motivo'] ?? $item['ent_motivo'] ?? ''));
+            $motivo = strtoupper((string)($item['motivo'] ?? $item['ent_motivo'] ?? $item['item_motivo_entrega'] ?? ''));
 
             $totUnidades += $qtd;
             $totCusto += $val;
@@ -105,15 +116,15 @@ try {
             }
 
             $registros[] = [
-                'data' => !empty($item['data'] ?? $item['ent_data_retirada']) ? (new DateTime($item['data'] ?? $item['ent_data_retirada']))->format('d/m/Y H:i') : '---',
+                'data' => !empty($item['data'] ?? $item['ent_data_retirada'] ?? $item['entr_data_entrega']) ? (new DateTime((string)($item['data'] ?? $item['ent_data_retirada'] ?? $item['entr_data_entrega'])))->format('d/m/Y H:i') : '---',
                 'funcionario' => $item['funcionario'] ?? $item['fun_nome'] ?? '---',
                 'setor' => $item['setor'] ?? $item['fun_departamento'] ?? '---',
                 'epi' => $item['epi'] ?? $item['epi_nome'] ?? $nomeEpiSelecionado,
                 'ca' => $item['ca'] ?? $item['epi_ca'] ?? $caEpiSelecionado,
-                'tamanho' => $item['tamanho'] ?? $item['ite_tamanho'] ?? 'Único',
+                'tamanho' => $item['tamanho'] ?? $item['ite_tamanho'] ?? $item['item_tamanho'] ?? 'Único',
                 'quantidade' => $qtd,
-                'motivo' => $item['motivo'] ?? $item['ent_motivo'] ?? 'FORNECIMENTO',
-                'responsavel' => $item['responsavel'] ?? $item['usuario_responsavel'] ?? 'almoxarifado',
+                'motivo' => $item['motivo'] ?? $item['ent_motivo'] ?? $item['item_motivo_entrega'] ?? 'FORNECIMENTO',
+                'responsavel' => $item['responsavel'] ?? $item['usuario_responsavel'] ?? $item['usu_login'] ?? 'almoxarifado',
                 'valor_total' => $val
             ];
         }
@@ -429,5 +440,14 @@ try {
     </div>
 </div>
 
+<?php if (isset($_GET['autoprint']) && ($_GET['autoprint'] === '1' || $_GET['autoprint'] === 'true')): ?>
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        window.print();
+    }, 400);
+});
+</script>
+<?php endif; ?>
 </body>
 </html>

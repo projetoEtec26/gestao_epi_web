@@ -350,7 +350,13 @@ $acao = $_GET['acao'] ?? 'lista';
                                     $statusPinClass = strtolower(str_replace(' ', '-', $statusPin));
                                     $situacaoClass = strtolower($func['fun_situacao']);
                                     $dataAdmissao = $func['fun_dataadmissao'] ?? '';
-                                    $dataAdmissaoFormatada = !empty($dataAdmissao) ? date('d/m/Y', strtotime($dataAdmissao)) : '---';
+                                    $dataAdmissaoFormatada = '---';
+                                    if (!empty($dataAdmissao) && $dataAdmissao !== '0000-00-00' && $dataAdmissao !== '0000-00-00 00:00:00') {
+                                        $ts = strtotime($dataAdmissao);
+                                        if ($ts && $ts > 0) {
+                                            $dataAdmissaoFormatada = date('d/m/Y', $ts);
+                                        }
+                                    }
                                     ?>
                                     <tr class="func-row" 
                                         data-id="<?= (int)$func['fun_id'] ?>"
@@ -2320,16 +2326,49 @@ function lerArquivoImportacao(input) {
         const firstLine = lines[0];
         const delim = firstLine.includes(';') ? ';' : ',';
 
+        // Detecta índices de colunas pelo cabeçalho (linha 0)
+        const headerCols = lines[0].split(delim).map(c => c.trim().replace(/^"|"$/g, '').toLowerCase());
+        
+        let idxNome = headerCols.findIndex(c => c.includes('nome'));
+        let idxCpf = headerCols.findIndex(c => c.includes('cpf'));
+        let idxEsocial = headerCols.findIndex(c => c.includes('esocial') || c.includes('matricula') || c.includes('matrícula') || c.includes('codigo') || c.includes('código'));
+        let idxDepto = headerCols.findIndex(c => c.includes('departamento') || c.includes('depto') || c.includes('setor'));
+        let idxCargo = headerCols.findIndex(c => c.includes('cargo') || c.includes('funcao') || c.includes('função'));
+        let idxDataAdm = headerCols.findIndex(c => c.includes('admissao') || c.includes('admissão') || c.includes('data'));
+
+        // Fallbacks para posições padrão caso o cabeçalho não corresponda exatamente aos nomes esperados
+        if (idxNome === -1) idxNome = 0;
+        if (idxCpf === -1) idxCpf = 1;
+        if (idxEsocial === -1) idxEsocial = headerCols.length > 5 ? 2 : 4;
+        if (idxDepto === -1) idxDepto = 3;
+        if (idxCargo === -1) idxCargo = headerCols.length > 5 ? 4 : 2;
+        if (idxDataAdm === -1) idxDataAdm = 5;
+
+        const normalizarDataIso = function(str) {
+            if (!str) return '';
+            const clean = String(str).trim();
+            const matchBr = clean.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+            if (matchBr) {
+                const dia = matchBr[1].padStart(2, '0');
+                const mes = matchBr[2].padStart(2, '0');
+                const ano = matchBr[3];
+                return `${ano}-${mes}-${dia}`;
+            }
+            if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) return clean;
+            return clean;
+        };
+
         // Skip header (line 0), parse data rows
         let validos = 0;
         for (let i = 1; i < lines.length; i++) {
             const cols = lines[i].split(delim).map(c => c.trim().replace(/^"|"$/g, ''));
-            const nome = cols[0] || '';
-            const cpf = (cols[1] || '').replace(/\D/g, '');
-            const cargo = cols[2] || '';
-            const depto = cols[3] || '';
-            const esocial = cols[4] || '';
-            const dataAdm = cols[5] || '';
+            const nome = cols[idxNome] || cols[0] || '';
+            const cpf = (cols[idxCpf] || cols[1] || '').replace(/\D/g, '');
+            const cargo = cols[idxCargo] || '';
+            const depto = cols[idxDepto] || '';
+            const esocial = cols[idxEsocial] || '';
+            const rawDataAdm = cols[idxDataAdm] || '';
+            const dataAdmIso = normalizarDataIso(rawDataAdm);
 
             const ok = nome.length >= 3 && cpf.length === 11;
 
@@ -2339,7 +2378,7 @@ function lerArquivoImportacao(input) {
                 fun_cargo: cargo,
                 fun_departamento: depto,
                 fun_esocial: esocial,
-                fun_dataadmissao: dataAdm,
+                fun_dataadmissao: dataAdmIso,
                 fun_situacao: 'ATIVO',
                 valido: ok
             });

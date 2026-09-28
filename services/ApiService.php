@@ -5,18 +5,22 @@ namespace Services;
 
 use Exception;
 
+// Garante o fuso horário padrão oficial do Brasil (America/Sao_Paulo - GMT-3)
+date_default_timezone_set('America/Sao_Paulo');
+
 class ApiService {
     private string $baseUrl;
     private string $appRoot;
 
     public function __construct() {
+        date_default_timezone_set('America/Sao_Paulo');
         $configFile = dirname(__DIR__) . '/config/api.php';
         if (!file_exists($configFile)) {
             throw new Exception("Arquivo de configuração da API não encontrado.");
         }
         $config = require $configFile;
         $this->baseUrl = rtrim($config['api_base_url'], '/') . '/';
-        $this->appRoot = $config['app_root_url'] ?? '/gestao_epi_web/';
+        $this->appRoot = $config['app_root_url'] ?? '/gestao_epi_web_8/';
 
         // Garante que a sessão esteja iniciada
         if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
@@ -34,16 +38,6 @@ class ApiService {
 
         while ($attempt <= $maxRetries) {
             $url = $this->baseUrl . ltrim($endpoint, '/');
-            $ch = curl_init($url);
-
-            if ($ch === false) {
-                return [
-                    'success' => false,
-                    'message' => 'Não foi possível inicializar a conexão com a API.',
-                    'data' => null,
-                    'status_code' => 500
-                ];
-            }
 
             $headers = [
                 'Content-Type: application/json',
@@ -55,21 +49,35 @@ class ApiService {
                 $headers[] = 'Authorization: Bearer ' . $_SESSION['token'];
             }
 
+            // Libera a trava do arquivo de sessão no PHP antes de iniciar a conexão HTTP para evitar deadlocks no Apache/localhost
+            $wasSessionActive = (session_status() === PHP_SESSION_ACTIVE);
+            if ($wasSessionActive) {
+                session_write_close();
+            }
+
+            $ch = curl_init($url);
+
+            if ($ch === false) {
+                if ($wasSessionActive && session_status() !== PHP_SESSION_ACTIVE && !headers_sent()) {
+                    @session_start();
+                }
+                return [
+                    'success' => false,
+                    'message' => 'Não foi possível inicializar a conexão com a API.',
+                    'data' => null,
+                    'status_code' => 500
+                ];
+            }
+
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // Connect timeout otimizado de 5s
-            curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Response timeout de 30s para relatórios pesados e logs de auditoria
+            curl_setopt($ch, CURLOPT_TIMEOUT, 60); // Response timeout de 30s para relatórios pesados e logs de auditoria
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Evita problemas de SSL em localhost/Render de teste
             if ($data !== null && in_array(strtoupper($method), ['POST', 'PUT', 'PATCH'], true)) {
                 $jsonData = json_encode($data);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-            }
-
-            // Libera a trava do arquivo de sessão no PHP para evitar deadlocks no Apache/localhost
-            $wasSessionActive = (session_status() === PHP_SESSION_ACTIVE);
-            if ($wasSessionActive) {
-                session_write_close();
             }
 
             $response = curl_exec($ch);
@@ -94,9 +102,12 @@ class ApiService {
             }
 
             if ($response === false) {
-                $msgErro = 'Não foi possível conectar ao servidor de API local. Verifique se o Apache e o MySQL do XAMPP estão ativos.';
+                $isCloud = str_contains($this->baseUrl, 'onrender.com');
+                $msgErro = $isCloud 
+                    ? 'Não foi possível conectar ao servidor de API na nuvem (Render). Verifique a conexão com a internet.'
+                    : 'Não foi possível conectar ao servidor de API local. Verifique se a API local está ativa.';
                 if ($errno === CURLE_OPERATION_TIMEDOUT) {
-                    $msgErro = 'Tempo limite de resposta excedido (Timeout). Verifique o servidor Apache ou a conexão com o banco de dados.';
+                    $msgErro = 'Tempo limite de resposta excedido (Timeout) na comunicação com a API.';
                 }
                 return [
                     'success' => false,

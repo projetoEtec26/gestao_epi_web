@@ -46,15 +46,13 @@ $userProfile = $_SESSION['usuario']['usu_perfil'] ?? '';
         </div>
 
         <!-- Cabeçalho da Página -->
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap flex-md-nowrap">
             <div>
-                <h3 class="fw-bold m-0" style="color: var(--color-primary);">
-                    <i class="bi bi-clock-history me-2"></i>Histórico Geral de Entregas
-                </h3>
+                <h3 class="fw-bold m-0" style="color: var(--color-primary);">Entregas &amp; Devoluções</h3>
                 <p class="text-muted mb-0">Consulte o feed completo de fornecimento de EPIs com assinaturas eletrônicas e hashes de integridade.</p>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <!-- Barra de Navegação Estilo Pill -->
+
+            <div class="d-flex align-items-center gap-2 text-nowrap flex-nowrap">
                 <div class="btn-group-toggle-view" role="group">
                     <a href="entregas.php" class="btn btn-view active">
                         <i class="bi bi-clock-history me-1"></i> Histórico
@@ -64,18 +62,17 @@ $userProfile = $_SESSION['usuario']['usu_perfil'] ?? '';
                     </a>
                 </div>
 
-                <!-- Seletor de Modo de Visualização -->
-                <div class="btn-group" role="group" aria-label="Modo de visualização">
-                    <button type="button" class="btn btn-outline-primary active" id="btn-view-cards" onclick="alternarVisaoEntregas('cards')" title="Visão em Cards (Estilo App Mobile)">
+                <div class="btn-group-toggle-view" role="group" aria-label="Modo de visualização">
+                    <button type="button" class="btn btn-view active" id="btn-view-cards" onclick="alternarVisaoEntregas('cards')" title="Visão em Cards (Estilo App Mobile)">
                         <i class="bi bi-grid-fill me-1"></i> Cards (App)
                     </button>
-                    <button type="button" class="btn btn-outline-primary" id="btn-view-table" onclick="alternarVisaoEntregas('tabela')" title="Visão em Tabela Tradicional">
+                    <button type="button" class="btn btn-view" id="btn-view-table" onclick="alternarVisaoEntregas('tabela')" title="Visão em Tabela Tradicional">
                         <i class="bi bi-table me-1"></i> Tabela
                     </button>
                 </div>
 
                 <?php if (in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR'], true)): ?>
-                    <a href="nova_entrega.php" class="btn btn-primary px-3 py-2 fw-semibold rounded-3 shadow-sm">
+                    <a href="nova_entrega.php" class="btn btn-primary text-nowrap px-3 py-2 fw-semibold rounded-3 shadow-sm">
                         <i class="bi bi-plus-lg me-1"></i> Nova Entrega
                     </a>
                 <?php endif; ?>
@@ -91,8 +88,12 @@ $userProfile = $_SESSION['usuario']['usu_perfil'] ?? '';
 
         <!-- Listagem e Filtro -->
         <div class="card-custom">
-            <div class="row g-3 mb-4 align-items-center">
+            <h5 class="fw-bold mb-3" style="color: var(--color-primary);"><i class="bi bi-clock-history me-2"></i>Histórico Geral de Entregas</h5>
+            <div class="row g-3 mb-4 align-items-end">
                 <div class="col-md-6 col-lg-5">
+                    <label for="busca-input" class="form-label fw-semibold mb-1" style="font-size: 12px;">
+                        <i class="bi bi-search text-primary me-1"></i> Buscar Colaborador (Tempo Real) *
+                    </label>
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" id="busca-input" class="form-control border-start-0" placeholder="Buscar por colaborador, EPI, motivo, ID ou Hash...">
@@ -158,7 +159,7 @@ $userProfile = $_SESSION['usuario']['usu_perfil'] ?? '';
                                                 Entrega #<?= sprintf('%05d', (int)$entr['entr_id']) ?>
                                             </a>
                                             <div class="text-muted mt-1" style="font-size: 11px;">
-                                                <i class="bi bi-clock me-1"></i><?= date('d/m/Y H:i:s', strtotime($entr['entr_data_entrega'])) ?>
+                                                <i class="bi bi-clock me-1"></i><?= formatarDataHoraBr($entr['entr_data_entrega'] ?? null, 'd/m/Y H:i:s') ?>
                                             </div>
                                         </div>
                                         <div>
@@ -283,7 +284,7 @@ $userProfile = $_SESSION['usuario']['usu_perfil'] ?? '';
                                     
                                     <td>
                                         <div class="fw-bold">#<?= sprintf('%05d', (int)$entr['entr_id']) ?></div>
-                                        <div class="text-muted" style="font-size: 11px;"><?= date('d/m/Y H:i', strtotime($entr['entr_data_entrega'])) ?></div>
+                                        <div class="text-muted" style="font-size: 11px;"><?= formatarDataHoraBr($entr['entr_data_entrega'] ?? null, 'd/m/Y H:i') ?></div>
                                     </td>
                                     <td>
                                         <div class="fw-semibold"><?= htmlspecialchars($entr['fun_nome'] ?? '---') ?></div>

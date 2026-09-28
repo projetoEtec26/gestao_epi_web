@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-$page_title = 'Controle de Devoluções';
+$page_title = 'Entregas & Devoluções';
 $active_menu = 'devolucoes';
 $page_roles = ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR', 'GESTOR'];
 
@@ -70,12 +70,12 @@ $coresAvatar = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#ec
     <?php require_once __DIR__ . '/../components/topbar.php'; ?>
     
     <div class="content-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap flex-md-nowrap">
             <div>
-                <h3 class="fw-bold m-0" style="color: var(--color-primary);">Controle de Devoluções</h3>
+                <h3 class="fw-bold m-0" style="color: var(--color-primary);">Entregas &amp; Devoluções</h3>
                 <p class="text-muted mb-0">Gerencie a devolução, substituição, extravio e condições de retorno dos EPIs dos funcionários.</p>
             </div>
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2 text-nowrap flex-nowrap">
                 <div class="btn-group-toggle-view" role="group">
                     <a href="entregas.php" class="btn btn-view">
                         <i class="bi bi-clock-history me-1"></i> Histórico
@@ -85,7 +85,7 @@ $coresAvatar = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#ec
                     </a>
                 </div>
                 <?php if ($podeDevolver): ?>
-                    <a href="nova_entrega.php" class="btn btn-primary px-3 py-2 fw-semibold rounded-3 shadow-sm">
+                    <a href="nova_entrega.php" class="btn btn-primary text-nowrap px-3 py-2 fw-semibold rounded-3 shadow-sm">
                         <i class="bi bi-plus-lg me-1"></i> Nova Entrega
                     </a>
                 <?php endif; ?>
@@ -110,7 +110,7 @@ $coresAvatar = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#ec
             <!-- Coluna Esquerda: Seleção de Funcionário -->
             <div class="col-lg-4">
                 <div class="card-custom h-100">
-                    <h5 class="fw-bold mb-3" style="color: var(--color-primary);"><i class="bi bi-people me-2"></i>Selecione o Colaborador</h5>
+                    <h5 class="fw-bold mb-3" style="color: var(--color-primary);"><i class="bi bi-people me-2"></i>Devolução de EPI</h5>
 
                     <!-- ===== CAMPO DE BUSCA COM AUTOCOMPLETE ===== -->
                     <label class="form-label fw-semibold mb-1" style="font-size:12px;">

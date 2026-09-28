@@ -4,6 +4,11 @@ document.addEventListener('DOMContentLoaded', function() {
     initDarkMode();
     initSidebarToggle();
     initInputsMasks();
+
+    // Notifica automaticamente o Dashboard sempre que qualquer alteração/sucesso for realizada no sistema
+    if (document.querySelector('.alert-success')) {
+        window.notificarAtualizacaoSistema();
+    }
 });
 
 /**
@@ -165,3 +170,18 @@ function dateBrToSql(dateBr) {
     if (parts.length !== 3) return null;
     return `${parts[2]}-${parts[1]}-${parts[0]}`;
 }
+
+/**
+ * Notifica outras abas e a página do Dashboard em tempo real sobre entregas, devoluções ou cadastros alterados
+ */
+window.notificarAtualizacaoSistema = function() {
+    if ('BroadcastChannel' in window) {
+        try {
+            new BroadcastChannel('gestao_epi_realtime').postMessage({ type: 'UPDATE_DASHBOARD' });
+        } catch (e) {}
+    }
+    try {
+        localStorage.setItem('gestao_epi_last_update', Date.now().toString());
+    } catch (e) {}
+};
+

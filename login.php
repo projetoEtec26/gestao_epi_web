@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+// Garante o fuso horário padrão oficial do Brasil (America/Sao_Paulo - GMT-3)
+date_default_timezone_set('America/Sao_Paulo');
+
 require_once __DIR__ . '/services/ApiService.php';
 
 use Services\ApiService;
@@ -11,13 +14,24 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $config = require __DIR__ . '/config/api.php';
 if (!defined('APP_ROOT')) {
-    define('APP_ROOT', $config['app_root_url'] ?? '/gestao_epi_web/');
+    define('APP_ROOT', $config['app_root_url'] ?? '/gestao_epi_web_12/');
 }
 
-// Se o usuário já estiver logado com token válido e não exigir troca de senha, redireciona para a dashboard
+// Se o usuário já estiver logado com token válido e não exigir troca de senha, valida o token na API e redireciona para a dashboard
 if (isset($_SESSION['token']) && $_SESSION['token'] !== '' && isset($_SESSION['usuario']) && !($_SESSION['exige_troca_senha'] ?? false)) {
-    header('Location: ' . APP_ROOT . 'pages/dashboard.php');
-    exit;
+    try {
+        $apiVal = new ApiService();
+        $meVal = $apiVal->get('auth/me');
+        if (isset($meVal['success']) && $meVal['success']) {
+            header('Location: ' . APP_ROOT . 'pages/dashboard.php');
+            exit;
+        } else {
+            // Token expirado ou inválido na nuvem: limpa para forçar nova autenticação
+            unset($_SESSION['token'], $_SESSION['usuario']);
+        }
+    } catch (\Throwable $e) {
+        unset($_SESSION['token'], $_SESSION['usuario']);
+    }
 }
 
 $erro = null;
