@@ -13,7 +13,7 @@ jobs:
       - name: Baixar código do GitHub
         uses: actions/checkout@v4
 
-      - name: Enviar arquivos para o InfinityFree
+      - name: Enviar aplicação PHP para InfinityFree
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.INFINITY_FTP_SERVER }}
@@ -21,8 +21,18 @@ jobs:
           password: ${{ secrets.INFINITY_FTP_PASSWORD }}
           protocol: ftp
           port: 21
+
+          local-dir: ./
           server-dir: /htdocs/
+
           exclude: |
             **/.git*
             **/.git*/**
             **/.github/**
+            **/.agents/**
+            **/node_modules/**
+            Dockerfile
+            README.md
+            database_backup.sql
+            database_schema_v7.sql
+            prompt inicial para criação we*
