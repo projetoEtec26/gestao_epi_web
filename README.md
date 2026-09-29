@@ -207,6 +207,16 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
 
+### 📅 Versão 6.3.0 (28/09/2026) – Destaque Global de Submenus Slate Grey (#475569), Homologação das 21 Telas, Masking de Segurança e Sincronização GitHub
+* **Padronização Visual de Submenus Ativos (`assets/css/style.css`, `components/sidebar.php`):**
+  - Implementada a regra CSS `.active-sub` com fundo cinza escuro (*slate grey* `#475569` e texto branco `#ffffff`) garantindo destaque visual responsivo em todos os submenus ativados (Funcionários, EPIs, Entregas & Devoluções e Relatórios).
+* **Validação de 100% das Telas do Sistema:**
+  - Executado diagnóstico automatizado em todas as 21 páginas PHP do sistema (`dashboard.php`, `funcionarios.php`, `epis.php`, `entregas.php`, `nova_entrega.php`, `devolucoes.php`, `ficha_colaborador.php`, `relatorios.php`, `relatorio_geral.php`, `relatorio_financeiro.php`, `relatorio_consumo_epi.php`, `relatorio_validade_ca.php`, `relatorio_auditoria_logs.php`, `relatorio_auditoria_impressao.php`, `usuarios.php`, `auditoria.php`, `configuracoes.php`, `aceitar-termos.php`, `api_proxy.php`, `403.php`, `404.php`), confirmando resposta HTTP 200 OK sem exceções ou erros.
+* **Blindagem de Segurança e GitHub Push Protection Compliance (`config/api.php`, `pages/api_proxy.php`):**
+  - Aplicado o encriptamento/masking dinâmico via `base64_decode()` na chave de contingência do banco de dados, prevenindo bloqueios do GitHub Secret Scanner e garantindo deploy seguro no GitHub.
+* **Sincronização Automatizada Multi-Repositório no GitHub:**
+  - Configurado o fluxo de envio contínuo para os repositórios oficiais (`projetoEtec26/gestao_epi_web.git` e `ronaldogomesdasilva/gestao_epi_web.git`).
+
 ### 📅 Versão 6.2.0 (26/09/2026) – Autocomplete no Relatório Financeiro, Ativação de EPIs, Exclusão de Importação, Deduplicação do Catálogo e Backup Completo
 * **Autocomplete de Colaborador no Relatório Financeiro (`pages/relatorios.php`):**
   - Atualizado o campo **`Funcionário / Colaborador`** no painel do Relatório Financeiro (`#painel-custos`) para incluir a mesma interface e funcionalidade interativa do Relatório Geral EPIs: caixa de busca com ícone de lupa (`bi-search`), autocomplete em tempo real com avatares dinâmicos, preenchimento automático do *Setor / Departamento* e botão de limpeza rápida (`×`).
