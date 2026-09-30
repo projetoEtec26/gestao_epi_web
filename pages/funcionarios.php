@@ -290,6 +290,40 @@ try {
     $erro = 'Não foi possível carregar a lista de funcionários: ' . $e->getMessage();
 }
 
+// Enriquece a lista de funcionários com o status real da Assinatura Eletrônica (PIN Universal 123456)
+try {
+    $configData = require __DIR__ . '/../config/api.php';
+    $dsn = sprintf("mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4", $configData['db_host'], $configData['db_port'], $configData['db_name']);
+    $pdoAss = new PDO($dsn, $configData['db_user'], $configData['db_pass'], [
+        PDO::ATTR_TIMEOUT => 4,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT,
+        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false
+    ]);
+    if ($pdoAss) {
+        $assMap = $pdoAss->query("
+            SELECT fun_id, COALESCE(ass_status, 'ATIVO') as ass_status 
+            FROM assinatura_eletronica 
+            WHERE ass_id IN (
+                SELECT MAX(ass_id) FROM assinatura_eletronica GROUP BY fun_id
+            )
+        ")->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        foreach ($funcionarios as &$f) {
+            $fid = (int)($f['fun_id'] ?? 0);
+            if (isset($assMap[$fid])) {
+                $f['assinatura_status'] = strtoupper((string)$assMap[$fid]);
+                $f['ass_status'] = strtoupper((string)$assMap[$fid]);
+            } else {
+                $f['assinatura_status'] = 'ATIVO';
+                $f['ass_status'] = 'ATIVO';
+            }
+        }
+        unset($f);
+    }
+} catch (Throwable $t) {
+    // Silencioso
+}
+
 $podeEditar = in_array($userProfile, ['ADMINISTRADOR', 'RH_ADMINISTRATIVO'], true);
 $podeExcluir = ($userProfile === 'ADMINISTRADOR');
 $podeGerenciarPin = in_array($userProfile, ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR'], true);
