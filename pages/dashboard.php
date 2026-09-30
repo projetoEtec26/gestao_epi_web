@@ -386,11 +386,26 @@ try {
         ")->fetchAll(PDO::FETCH_ASSOC);
 
         $caAVencerList = $pdo->query("
-            SELECT epi_nome, epi_fabricante, epi_ca, epi_vencimento_ca,
+            SELECT f.fun_nome, f.fun_cargo, ep.epi_nome, ep.epi_ca, ep.epi_fabricante, e.entr_data_entrega, ep.epi_validade_uso_dias,
+                   DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) as data_vencimento,
+                   DATEDIFF(DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY), CURDATE()) as dias_restantes
+            FROM itens_entrega i
+            JOIN entrega_epis e ON i.entr_id = e.entr_id
+            JOIN funcionarios f ON e.fun_id = f.fun_id
+            JOIN epis ep ON i.epi_id = ep.epi_id
+            WHERE (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE')
+              AND ep.epi_validade_uso_dias > 0
+              AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+            
+            UNION ALL
+
+            SELECT '' as fun_nome, '' as fun_cargo, epi_nome, epi_ca, epi_fabricante, NULL as entr_data_entrega, NULL as epi_validade_uso_dias,
+                   epi_vencimento_ca as data_vencimento,
                    DATEDIFF(epi_vencimento_ca, CURDATE()) as dias_restantes
             FROM epis 
             WHERE epi_tipo_item = 'EPI_COM_CA' AND epi_vencimento_ca >= CURDATE() AND epi_vencimento_ca <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)
-            ORDER BY epi_nome ASC
+            
+            ORDER BY dias_restantes ASC, epi_nome ASC
         ")->fetchAll(PDO::FETCH_ASSOC);
 
         $entregasHojeList = $pdo->query("
@@ -525,17 +540,22 @@ if (!function_exists('renderModalVidaUtilVencidaHtml')) {
 if (!function_exists('renderModalCaAVencerHtml')) {
     function renderModalCaAVencerHtml(array $list): string {
         if (empty($list)) {
-            return '<div class="alert alert-success text-center py-4 rounded-3 m-0"><i class="bi bi-check-circle-fill me-2 fs-5"></i>Nenhum EPI prestes a vencer nos próximos 30 dias.</div>';
+            return '<div class="alert alert-success text-center py-4 rounded-3 m-0"><i class="bi bi-check-circle-fill me-2 fs-5"></i>Nenhum EPI com troca ou vencimento próximo nos próximos 30 dias.</div>';
         }
-        $html = '<div class="table-responsive"><table class="table table-hover align-middle mb-0" style="font-size: 13.5px;"><thead class="table-light"><tr><th>Item / Equipamento</th><th>Fabricante</th><th>C.A.</th><th>Vencimento</th><th>Previsão</th></tr></thead><tbody>';
+        $html = '<div class="table-responsive"><table class="table table-hover align-middle mb-0" style="font-size: 13.5px;"><thead class="table-light"><tr><th>Colaborador / Destino</th><th>Item / Equipamento</th><th>C.A.</th><th>Limite / Vencimento</th><th>Previsão</th></tr></thead><tbody>';
         foreach ($list as $item) {
-            $venc = !empty($item['epi_vencimento_ca']) ? date('d/m/Y', strtotime($item['epi_vencimento_ca'])) : '---';
+            $dtVenc = !empty($item['data_vencimento']) ? $item['data_vencimento'] : ($item['epi_vencimento_ca'] ?? null);
+            $venc = !empty($dtVenc) ? date('d/m/Y', strtotime((string)$dtVenc)) : '---';
             $dias = (int)($item['dias_restantes'] ?? 0);
+            $funInfo = !empty($item['fun_nome']) 
+                ? ('<div class="fw-bold text-primary">' . htmlspecialchars((string)$item['fun_nome']) . '</div><small class="text-muted">' . htmlspecialchars((string)($item['fun_cargo'] ?: '---')) . '</small>') 
+                : '<span class="badge bg-light text-dark border">Estoque Geral</span>';
+
             $html .= '<tr>'
+                . '<td>' . $funInfo . '</td>'
                 . '<td class="fw-bold text-dark">' . htmlspecialchars((string)($item['epi_nome'] ?? '')) . '</td>'
-                . '<td>' . htmlspecialchars((string)($item['epi_fabricante'] ?: '---')) . '</td>'
                 . '<td class="fw-bold text-primary">' . htmlspecialchars((string)($item['epi_ca'] ?: 'Isento')) . '</td>'
-                . '<td>' . $venc . '</td>'
+                . '<td class="fw-bold text-warning-emphasis">' . $venc . '</td>'
                 . '<td><span class="badge bg-warning text-dark">Em ' . $dias . ' dia(s)</span></td>'
                 . '</tr>';
         }
