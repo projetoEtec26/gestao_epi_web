@@ -527,7 +527,8 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
     - Ajustado o quantitativo exibido no banner de **4** para **3 funcionário(s) com EPI(s) vencidos**, mantendo simetria com os **5 EPI(s) em uso com vida útil vencida** e alinhamento às regras de negócio.
 *   **Unificação do Modal de Troca Próxima (`pages/dashboard.php`):**
     - Corrigido o modal `#modalCaAVencer` acionado ao clicar em `• 3 EPI(s) em uso com troca próxima`, integrando via consulta `UNION ALL` os itens em uso prestes a atingir o limite de troca nos próximos 30 dias com os itens em estoque.
-    - Exibição completa das informações do colaborador, cargo, equipamento, C.A., data limite de substituição e dias restantes.
+*   **Ajuste do Mapeamento dos Modais dos Alertas do Banner (`pages/dashboard.php`):**
+    - Corrigido o direcionamento dos alvos dos modais (`data-bs-target`) nos itens do banner de alertas: ao clicar em `• 2 funcionário(s) com EPI(s) próximos da troca` o sistema passa a direcionar para o modal específico `#modalCaAVencer` e ao clicar em `• 3 funcionário(s) com EPI(s) vencidos` direciona para `#modalEpisVidaUtilVencida`, eliminando o direcionamento genérico anterior para `#modalEpisEmPosse`.
 
 ### 📅 Versão 3.1.0 (30/09/2026) – Unificação da Central de Pendências e Padronização da Senha Universal (123456)
 *   **Central de Pendências Unificada no Dashboard (`pages/dashboard.php`):**

@@ -1286,8 +1286,8 @@ require_once __DIR__ . '/../components/sidebar.php';
                     <li id="alert-ca-vencidos" data-bs-toggle="modal" data-bs-target="#modalCaVencidos">• <?= $alerts['ca_vencidos'] ?> EPI(s) com C.A. vencido.</li>
                     <li id="alert-vida-util" data-bs-toggle="modal" data-bs-target="#modalEpisVidaUtilVencida">• <?= $alerts['vida_util_vencida'] ?> EPI(s) em uso com vida útil vencida.</li>
                     <li id="alert-troca-proxima" data-bs-toggle="modal" data-bs-target="#modalCaAVencer">• <?= $alerts['troca_proxima'] ?> EPI(s) em uso com troca próxima.</li>
-                    <li id="alert-func-vencidos" data-bs-toggle="modal" data-bs-target="#modalEpisEmPosse">• <?= $alerts['func_vencidos'] ?> funcionário(s) com EPI(s) vencidos.</li>
-                    <li id="alert-func-troca" data-bs-toggle="modal" data-bs-target="#modalEpisEmPosse">• <?= $alerts['func_troca'] ?> funcionário(s) com EPI(s) próximos da troca.</li>
+                    <li id="alert-func-vencidos" data-bs-toggle="modal" data-bs-target="#modalEpisVidaUtilVencida">• <?= $alerts['func_vencidos'] ?> funcionário(s) com EPI(s) vencidos.</li>
+                    <li id="alert-func-troca" data-bs-toggle="modal" data-bs-target="#modalCaAVencer">• <?= $alerts['func_troca'] ?> funcionário(s) com EPI(s) próximos da troca.</li>
                 </ul>
             </div>
         </div>
