@@ -565,10 +565,10 @@ if (!function_exists('renderModalEntregasHojeHtml')) {
     }
 }
 
-if (!function_exists('renderModalPinBloqueadosHtml')) {
-    function renderModalPinBloqueadosHtml(array $list): string {
+if (!function_exists('renderTabelaSemPinAux')) {
+    function renderTabelaSemPinAux(array $list): string {
         if (empty($list)) {
-            return '<div class="alert alert-success text-center py-4 rounded-3 m-0"><i class="bi bi-check-circle-fill me-2 fs-5"></i>Todos os colaboradores ativos possuem PIN cadastrado e ativo!</div>';
+            return '<div class="alert alert-success py-2 px-3 small rounded-3 m-0">Nenhum colaborador com PIN pendente.</div>';
         }
         $html = '<div class="table-responsive"><table class="table table-hover align-middle mb-0" style="font-size: 13.5px;"><thead class="table-light"><tr><th>Colaborador</th><th>CPF</th><th>Departamento</th><th>Cargo</th><th>Status PIN/Senha</th></tr></thead><tbody>';
         foreach ($list as $item) {
@@ -583,6 +583,94 @@ if (!function_exists('renderModalPinBloqueadosHtml')) {
                 . '</tr>';
         }
         $html .= '</tbody></table></div>';
+        return $html;
+    }
+}
+
+if (!function_exists('renderTabelaCaVencidosAux')) {
+    function renderTabelaCaVencidosAux(array $list): string {
+        if (empty($list)) {
+            return '<div class="alert alert-success py-2 px-3 small rounded-3 m-0">Nenhum EPI com C.A. vencido.</div>';
+        }
+        $html = '<div class="table-responsive"><table class="table table-hover align-middle mb-0" style="font-size: 13.5px;"><thead class="table-light"><tr><th>Item / Equipamento</th><th>Fabricante</th><th>C.A.</th><th>Data Vencimento</th><th>Situação</th></tr></thead><tbody>';
+        foreach ($list as $item) {
+            $venc = !empty($item['epi_vencimento_ca']) ? date('d/m/Y', strtotime($item['epi_vencimento_ca'])) : '---';
+            $html .= '<tr>'
+                . '<td class="fw-bold text-dark">' . htmlspecialchars((string)($item['epi_nome'] ?? '')) . '</td>'
+                . '<td>' . htmlspecialchars((string)($item['epi_fabricante'] ?: '---')) . '</td>'
+                . '<td class="fw-bold text-primary">' . htmlspecialchars((string)($item['epi_ca'] ?: 'Isento')) . '</td>'
+                . '<td class="fw-bold text-danger">' . $venc . '</td>'
+                . '<td><span class="badge bg-danger">C.A. Vencido</span></td>'
+                . '</tr>';
+        }
+        $html .= '</tbody></table></div>';
+        return $html;
+    }
+}
+
+if (!function_exists('renderModalPinBloqueadosHtml')) {
+    function renderModalPinBloqueadosHtml(array $list, array $caVencidosList = []): string {
+        $totSemPin = count($list);
+        $totCaVencidos = count($caVencidosList);
+        $totalPendencias = $totSemPin + $totCaVencidos;
+
+        if ($totalPendencias === 0) {
+            return '<div class="alert alert-success text-center py-4 rounded-3 m-0"><i class="bi bi-check-circle-fill me-2 fs-5"></i>Nenhuma pendência registrada no momento!</div>';
+        }
+
+        $html = '<ul class="nav nav-pills nav-fill mb-3 gap-2" id="pills-tab-pendencias" role="tablist" style="font-size: 13px;">';
+        
+        $html .= '<li class="nav-item" role="presentation">';
+        $html .= '<button class="nav-link active fw-bold py-2 rounded-3" id="pills-todas-tab" data-bs-toggle="pill" data-bs-target="#pills-todas" type="button" role="tab"><i class="bi bi-layers-fill me-1"></i>Todas (' . $totalPendencias . ')</button>';
+        $html .= '</li>';
+
+        $html .= '<li class="nav-item" role="presentation">';
+        $html .= '<button class="nav-link fw-bold py-2 rounded-3 text-danger" id="pills-ca-tab" data-bs-toggle="pill" data-bs-target="#pills-ca" type="button" role="tab"><i class="bi bi-shield-x me-1"></i>EPIs Vencidos (' . $totCaVencidos . ') — CRÍTICO</button>';
+        $html .= '</li>';
+
+        $html .= '<li class="nav-item" role="presentation">';
+        $html .= '<button class="nav-link fw-bold py-2 rounded-3 text-warning-emphasis" id="pills-pin-tab" data-bs-toggle="pill" data-bs-target="#pills-pin" type="button" role="tab"><i class="bi bi-person-fill-exclamation me-1"></i>Sem PIN (' . $totSemPin . ')</button>';
+        $html .= '</li>';
+
+        $html .= '</ul>';
+
+        $html .= '<div class="tab-content" id="pills-tabContent-pendencias">';
+
+        // Tab 1: Todas (CRÍTICO EM PRIMEIRO LUGAR)
+        $html .= '<div class="tab-pane fade show active" id="pills-todas" role="tabpanel">';
+        
+        // 1. Seção EPIs Vencidos (CRÍTICO - PRIMEIRO LUGAR NO TOPO)
+        if ($totCaVencidos > 0) {
+            $html .= '<div class="d-flex align-items-center justify-content-between mb-2 mt-1 alert alert-danger py-2 px-3 border-danger rounded-3 m-0 mb-2">';
+            $html .= '<span class="fw-bold text-danger" style="font-size: 13.5px;"><i class="bi bi-exclamation-octagon-fill me-2 fs-6"></i>Equipamentos (EPIs) com C.A. Vencido (' . $totCaVencidos . ') — CRÍTICO</span>';
+            $html .= '<a href="epis.php?acao=controle_ca" class="btn btn-sm btn-danger py-1 px-3 fw-bold rounded-2" style="font-size: 11.5px;">Ir para Controle C.A.</a>';
+            $html .= '</div>';
+            $html .= renderTabelaCaVencidosAux($caVencidosList);
+        }
+
+        // 2. Seção Colaboradores sem PIN (SEGUNDO LUGAR)
+        if ($totSemPin > 0) {
+            $html .= '<div class="d-flex align-items-center justify-content-between mb-2 ' . ($totCaVencidos > 0 ? 'mt-4' : 'mt-1') . '">';
+            $html .= '<span class="fw-bold text-primary" style="font-size: 13.5px;"><i class="bi bi-person-badge me-1"></i>Colaboradores com Assinatura / PIN Pendente (' . $totSemPin . ')</span>';
+            $html .= '<a href="funcionarios.php?acao=pin" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;">Gerenciar PINs</a>';
+            $html .= '</div>';
+            $html .= renderTabelaSemPinAux($list);
+        }
+
+        $html .= '</div>';
+
+        // Tab 2: Apenas EPIs Vencidos (CRÍTICO)
+        $html .= '<div class="tab-pane fade" id="pills-ca" role="tabpanel">';
+        $html .= renderTabelaCaVencidosAux($caVencidosList);
+        $html .= '</div>';
+
+        // Tab 3: Apenas Sem PIN
+        $html .= '<div class="tab-pane fade" id="pills-pin" role="tabpanel">';
+        $html .= renderTabelaSemPinAux($list);
+        $html .= '</div>';
+
+        $html .= '</div>';
+
         return $html;
     }
 }
@@ -670,7 +758,7 @@ if (isset($_GET['ajax']) || (isset($_GET['action']) && $_GET['action'] === 'real
         'modalVidaUtilVencidaHtml' => renderModalVidaUtilVencidaHtml($vidaUtilVencidaList),
         'modalCaAVencerHtml' => renderModalCaAVencerHtml($caAVencerList),
         'modalEntregasHojeHtml' => renderModalEntregasHojeHtml($entregasHojeList),
-        'modalPinBloqueadosHtml' => renderModalPinBloqueadosHtml($semPinList),
+        'modalPinBloqueadosHtml' => renderModalPinBloqueadosHtml($semPinList, $caVencidosList),
         'modalEpisEmPosseHtml' => renderModalEpisEmPosseHtml($episEmPosseList),
         'modalTodasAtividadesHtml' => renderModalTodasAtividadesHtml($ultimasAtividades)
     ], JSON_UNESCAPED_UNICODE);
@@ -1446,25 +1534,26 @@ require_once __DIR__ . '/../components/sidebar.php';
     </div>
 </div>
 
-<!-- 5. Modal PIN Bloqueados / Senha Pendente -->
+<!-- 5. Modal PIN Bloqueados / Central de Pendências do Sistema -->
 <div class="modal fade" id="modalPinBloqueados" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4 border-0 shadow-lg">
             <div class="modal-header border-bottom-0 pb-2">
                 <div>
                     <h5 class="modal-title fw-bold text-primary" id="modal-title-pin-bloqueados">
-                        <i class="bi bi-shield-lock-fill me-2"></i>Colaboradores Sem PIN / Pendências (<?= $custos['sem_pin'] ?>)
+                        <i class="bi bi-clipboard-data-fill me-2"></i>Central de Pendências do Sistema (<?= $kpis['pendencias'] ?>)
                     </h5>
-                    <p class="text-muted small m-0">Lista de colaboradores com pendências de PIN de assinatura ou senha bloqueada.</p>
+                    <p class="text-muted small m-0">Consolidação de colaboradores sem PIN (<?= $custos['sem_pin'] ?>) e equipamentos com C.A. vencido (<?= $alerts['ca_vencidos'] ?>).</p>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body pt-2" id="body-modal-pin-bloqueados">
-                <?= renderModalPinBloqueadosHtml($semPinList) ?>
+                <?= renderModalPinBloqueadosHtml($semPinList, $caVencidosList) ?>
             </div>
             <div class="modal-footer border-top-0 pt-0">
                 <button type="button" class="btn btn-light border rounded-3" data-bs-dismiss="modal">Fechar</button>
-                <a href="funcionarios.php?acao=pin" class="btn btn-primary rounded-3">Gerenciar Senhas/PINs</a>
+                <a href="funcionarios.php?acao=pin" class="btn btn-primary rounded-3 me-2">Gerenciar PINs</a>
+                <a href="epis.php?acao=controle_ca" class="btn btn-danger rounded-3">Ir para Controle C.A.</a>
             </div>
         </div>
     </div>
@@ -1651,7 +1740,7 @@ function atualizarDashboardDOM(data) {
         if (titleEntregasHoje) titleEntregasHoje.innerHTML = `<i class="bi bi-journal-check me-2"></i>Entregas Realizadas Hoje (${data.kpis.entregas_hoje})`;
 
         const titlePinBloqueados = document.getElementById('modal-title-pin-bloqueados');
-        if (titlePinBloqueados) titlePinBloqueados.innerHTML = `<i class="bi bi-shield-lock-fill me-2"></i>Colaboradores Sem PIN / Pendências (${data.custos.sem_pin})`;
+        if (titlePinBloqueados) titlePinBloqueados.innerHTML = `<i class="bi bi-clipboard-data-fill me-2"></i>Central de Pendências do Sistema (${data.kpis.pendencias})`;
     }
 
     // 3. Cards do Resumo

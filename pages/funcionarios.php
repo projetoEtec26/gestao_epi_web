@@ -15,6 +15,84 @@ $api = new ApiService();
 $erro = null;
 $sucesso = null;
 
+if (!function_exists('garantirPinPadraoFuncionario')) {
+    function garantirPinPadraoFuncionario(int $funId, string $pinPadrao = '123456'): void {
+        if ($funId <= 0) return;
+        try {
+            $configData = require __DIR__ . '/../config/api.php';
+            $dsn = sprintf("mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4", $configData['db_host'], $configData['db_port'], $configData['db_name']);
+            $pdo = new PDO($dsn, $configData['db_user'], $configData['db_pass'], [
+                PDO::ATTR_TIMEOUT => 4,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT,
+                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false
+            ]);
+            if (!$pdo) return;
+
+            $stmtCheck = $pdo->prepare("SELECT ass_id, ass_status FROM assinatura_eletronica WHERE fun_id = :fid ORDER BY ass_id DESC LIMIT 1");
+            $stmtCheck->execute([':fid' => $funId]);
+            $row = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+
+            $salt = bin2hex(random_bytes(16));
+            $hash = hash('sha256', $salt . $pinPadrao);
+
+            if (!$row) {
+                $stmtInsert = $pdo->prepare("INSERT INTO assinatura_eletronica (fun_id, usu_id, ass_senha_hash, ass_salt, ass_status, ass_data_cadastro, ass_tentativas_falha) VALUES (:fid, 1, :hash, :salt, 'ATIVO', NOW(), 0)");
+                $stmtInsert->execute([':fid' => $funId, ':hash' => $hash, ':salt' => $salt]);
+            } elseif (strtoupper((string)$row['ass_status']) !== 'ATIVO') {
+                $stmtUpdate = $pdo->prepare("UPDATE assinatura_eletronica SET ass_senha_hash = :hash, ass_salt = :salt, ass_status = 'ATIVO', ass_tentativas_falha = 0, ass_data_bloqueio = NULL WHERE ass_id = :aid");
+                $stmtUpdate->execute([':aid' => (int)$row['ass_id'], ':hash' => $hash, ':salt' => $salt]);
+            }
+        } catch (Throwable $t) {
+            // Silencioso
+        }
+    }
+}
+
+if (!function_exists('garantirPinsPadraoTodosFuncionarios')) {
+    function garantirPinsPadraoTodosFuncionarios(string $pinPadrao = '123456'): void {
+        try {
+            $configData = require __DIR__ . '/../config/api.php';
+            $dsn = sprintf("mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4", $configData['db_host'], $configData['db_port'], $configData['db_name']);
+            $pdo = new PDO($dsn, $configData['db_user'], $configData['db_pass'], [
+                PDO::ATTR_TIMEOUT => 4,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT,
+                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false
+            ]);
+            if (!$pdo) return;
+
+            $sql = "SELECT f.fun_id 
+                    FROM funcionarios f 
+                    LEFT JOIN assinatura_eletronica a ON f.fun_id = a.fun_id 
+                    WHERE f.fun_situacao = 'ATIVO' 
+                      AND (a.ass_status IS NULL OR a.ass_status IN ('PENDENTE', 'BLOQUEADO', 'INATIVO'))";
+            $missing = $pdo->query($sql)->fetchAll(PDO::FETCH_COLUMN);
+
+            if (empty($missing)) return;
+
+            $stmtCheck = $pdo->prepare("SELECT ass_id FROM assinatura_eletronica WHERE fun_id = :fid ORDER BY ass_id DESC LIMIT 1");
+            $stmtInsert = $pdo->prepare("INSERT INTO assinatura_eletronica (fun_id, usu_id, ass_senha_hash, ass_salt, ass_status, ass_data_cadastro, ass_tentativas_falha) VALUES (:fid, 1, :hash, :salt, 'ATIVO', NOW(), 0)");
+            $stmtUpdate = $pdo->prepare("UPDATE assinatura_eletronica SET ass_senha_hash = :hash, ass_salt = :salt, ass_status = 'ATIVO', ass_tentativas_falha = 0, ass_data_bloqueio = NULL WHERE ass_id = :aid");
+
+            foreach ($missing as $fid) {
+                $fid = (int)$fid;
+                $stmtCheck->execute([':fid' => $fid]);
+                $assId = (int)$stmtCheck->fetchColumn();
+
+                $salt = bin2hex(random_bytes(16));
+                $hash = hash('sha256', $salt . $pinPadrao);
+
+                if ($assId > 0) {
+                    $stmtUpdate->execute([':aid' => $assId, ':hash' => $hash, ':salt' => $salt]);
+                } else {
+                    $stmtInsert->execute([':fid' => $fid, ':hash' => $hash, ':salt' => $salt]);
+                }
+            }
+        } catch (Throwable $t) {
+            // Silencioso
+        }
+    }
+}
+
 // Lida com formulários de alteração de dados (PHP POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
     $acao = $_POST['acao'];
@@ -42,6 +120,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
 
             if (isset($response['success']) && $response['success']) {
                 $sucesso = 'Funcionário ' . htmlspecialchars($nome) . ' cadastrado com sucesso!';
+                
+                $pinInformado = trim($_POST['fun_pin'] ?? $_POST['pin'] ?? '');
+                $pinParaCadastrar = ($pinInformado !== '') ? $pinInformado : '123456';
+
+                $newFunId = (int)($response['data']['fun_id'] ?? $response['fun_id'] ?? 0);
+                if ($newFunId <= 0 && !empty($cpf)) {
+                    try {
+                        $configData = require __DIR__ . '/../config/api.php';
+                        $dsn = sprintf("mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4", $configData['db_host'], $configData['db_port'], $configData['db_name']);
+                        $pdoSearch = new PDO($dsn, $configData['db_user'], $configData['db_pass'], [PDO::ATTR_TIMEOUT => 4, PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT]);
+                        $st = $pdoSearch->prepare("SELECT fun_id FROM funcionarios WHERE fun_cpf = :cpf ORDER BY fun_id DESC LIMIT 1");
+                        $st->execute([':cpf' => $cpf]);
+                        $newFunId = (int)$st->fetchColumn();
+                    } catch (Throwable $t) {}
+                }
+
+                if ($newFunId > 0) {
+                    garantirPinPadraoFuncionario($newFunId, $pinParaCadastrar);
+                }
             } else {
                 $erro = $response['message'] ?? 'Falha ao cadastrar funcionário.';
             }
@@ -178,6 +275,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
         }
     }
 }
+
+// Garante que qualquer funcionário ativo sem PIN receba a senha universal 123456
+garantirPinsPadraoTodosFuncionarios('123456');
 
 // Carrega listagem de funcionários
 $funcionarios = [];

@@ -521,6 +521,16 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 *   **Mecanismo de Autocomplete Client-Side:** Implementação da busca inteligente com avatares dinâmicos, destaques de busca, navegação por teclado e mascaramento de CPF.
 *   **Padronização do Design System:** Atualização das variáveis HSL em `assets/css/style.css` para suporte aprimorado a Light Mode e Dark Mode.
 
+### 📅 Versão 3.1.0 (29/09/2026) – Unificação da Central de Pendências e Padronização da Senha Universal (123456)
+*   **Central de Pendências Unificada no Dashboard (`pages/dashboard.php`):**
+    - Resolução da divergência de dados entre o Card de Resumo (26 Pendências) e o modal detalhado (`#modalPinBloqueados`).
+    - **Priorização de Itens Críticos:** Posicionamento no topo do modal da seção **Equipamentos (EPIs) com C.A. Vencido** com destaque visual em vermelho (`CRÍTICO`), antecedendo a lista de colaboradores com PIN pendente.
+    - **Navegação por Abas:** Organização em 3 abas responsivas: *Todas (26)*, *EPIs Vencidos (2) — CRÍTICO* e *Sem PIN (24)*.
+*   **Senha Universal Padrão (`123456`) e Assinatura Eletrônica Automática (`pages/funcionarios.php`):**
+    - **Migração de Senhas Pendentes:** Atualização de todos os colaboradores ativos com pendências de assinatura para a senha inicial universal **`123456`** (hash `sha256(salt + '123456')`) e status `ATIVO`.
+    - **Geração Automática na Criação de Funcionários:** Implementado o manipulador `garantirPinPadraoFuncionario()` que atribui automaticamente a senha universal `123456` a qualquer novo colaborador cadastrado sem PIN preenchido.
+    - **Verificação Preventiva Global:** Integração de `garantirPinsPadraoTodosFuncionarios()` para evitar a ocorrência de colaboradores sem assinatura ou com pendências órfãs.
+
 ### 📅 Versão 3.0.0 (10/09/2026) – Unificação de Submenus Expansíveis & Speed Dial FAB Multi-Módulo
 *   **Submenus Expansíveis Padronizados (`components/sidebar.php`):** Implementação e alinhamento dos submenus retráteis `+` / `-` para os três módulos corporativos:
     - **Funcionários:** `Lista Funcionários`, `Novo Funcionário`, `Senha / PIN` e `Pendências`.
