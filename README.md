@@ -529,7 +529,7 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
     - Corrigido o modal `#modalCaAVencer` acionado ao clicar em `• 3 EPI(s) em uso com troca próxima`, integrando via consulta `UNION ALL` os itens em uso prestes a atingir o limite de troca nos próximos 30 dias com os itens em estoque.
     - Exibição completa das informações do colaborador, cargo, equipamento, C.A., data limite de substituição e dias restantes.
 
-### 📅 Versão 3.1.0 (29/09/2026) – Unificação da Central de Pendências e Padronização da Senha Universal (123456)
+### 📅 Versão 3.1.0 (30/09/2026) – Unificação da Central de Pendências e Padronização da Senha Universal (123456)
 *   **Central de Pendências Unificada no Dashboard (`pages/dashboard.php`):**
     - Resolução da divergência de dados entre o Card de Resumo (26 Pendências) e o modal detalhado (`#modalPinBloqueados`).
     - **Priorização de Itens Críticos:** Posicionamento no topo do modal da seção **Equipamentos (EPIs) com C.A. Vencido** com destaque visual em vermelho (`CRÍTICO`), antecedendo a lista de colaboradores com PIN pendente.
