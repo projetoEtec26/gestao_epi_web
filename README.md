@@ -21,7 +21,7 @@ Conforme as diretrizes globais do projeto, toda a aplicação Web e suas documen
 O painel Web foi estruturado com uma arquitetura modular limpa (SoC - *Separation of Concerns*), eliminando acoplamentos diretos com o banco de dados para trafegar 100% dos dados por meio do cliente HTTP `ApiService`:
 
 ```text
-gestao_epi_web_12/
+gestao_epi_web/
 │
 ├── index.php                             # Roteador de entrada de sessão (redireciona para Dashboard ou Login)
 ├── login.php                             # Login institucional e redefinição obrigatória no 1º acesso
@@ -86,7 +86,7 @@ gestao_epi_web_12/
 
 ## 3. CONFIGURAÇÃO DA API (AMBIENTE) E RESILIÊNCIA HTTP
 
-A integração HTTP entre o painel Web e o backend é gerenciada pela classe [`services/ApiService.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_11/services/ApiService.php) e configurada dinamicamente em [`config/api.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_11/config/api.php).
+A integração HTTP entre o painel Web e o backend é gerenciada pela classe [`services/ApiService.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web/services/ApiService.php) e configurada dinamicamente em [`config/api.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web/config/api.php).
 
 ### 3.1 Resoluções Dinâmicas de Ambiente
 *   **Nuven / Produção (Render):**
@@ -583,13 +583,13 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 #### Opção B: Servidor Apache via XAMPP
 1. Posicione o projeto no diretório `htdocs` do XAMPP:
     ```bash
-    C:\xampp\htdocs\OLD\gestao_epi_web_12
+    C:\xampp\htdocs\gestao_epi_web
     ```
 2. Certifique-se de que a API do ecossistema esteja em execução (localmente ou na nuvem em `https://gestao-epi-api.onrender.com/`).
 3. Inicie o servidor Apache via **XAMPP Control Panel**.
 4. Acesse a aplicação no navegador:
     ```text
-    http://localhost/OLD/gestao_epi_web_12/
+    http://localhost/gestao_epi_web/
     ```
 5. Utilize qualquer um dos [Perfis de Teste Homologados](#42-credenciais-homologadas-para-teste) para navegar pelo painel.
 
