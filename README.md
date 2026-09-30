@@ -521,6 +521,14 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 *   **Mecanismo de Autocomplete Client-Side:** Implementação da busca inteligente com avatares dinâmicos, destaques de busca, navegação por teclado e mascaramento de CPF.
 *   **Padronização do Design System:** Atualização das variáveis HSL em `assets/css/style.css` para suporte aprimorado a Light Mode e Dark Mode.
 
+### 📅 Versão 3.2.0 (30/09/2026) – Sincronização dos Alertas de EPIs e Vida Útil no Dashboard
+*   **Ajuste Métrico de Funcionários com EPIs Vencidos (`pages/dashboard.php`):**
+    - Corrigida a consulta da métrica `$alerts['func_vencidos']` (`fV`) no banner de alertas do Dashboard para contabilizar estritamente os colaboradores ativos que possuem EPIs em uso com **vida útil vencida** (`epi_validade_uso_dias`).
+    - Ajustado o quantitativo exibido no banner de **4** para **3 funcionário(s) com EPI(s) vencidos**, mantendo simetria com os **5 EPI(s) em uso com vida útil vencida** e alinhamento às regras de negócio.
+*   **Unificação do Modal de Troca Próxima (`pages/dashboard.php`):**
+    - Corrigido o modal `#modalCaAVencer` acionado ao clicar em `• 3 EPI(s) em uso com troca próxima`, integrando via consulta `UNION ALL` os itens em uso prestes a atingir o limite de troca nos próximos 30 dias com os itens em estoque.
+    - Exibição completa das informações do colaborador, cargo, equipamento, C.A., data limite de substituição e dias restantes.
+
 ### 📅 Versão 3.1.0 (29/09/2026) – Unificação da Central de Pendências e Padronização da Senha Universal (123456)
 *   **Central de Pendências Unificada no Dashboard (`pages/dashboard.php`):**
     - Resolução da divergência de dados entre o Card de Resumo (26 Pendências) e o modal detalhado (`#modalPinBloqueados`).
