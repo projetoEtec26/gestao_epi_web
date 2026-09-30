@@ -527,8 +527,9 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
     - **Priorização de Itens Críticos:** Posicionamento no topo do modal da seção **Equipamentos (EPIs) com C.A. Vencido** com destaque visual em vermelho (`CRÍTICO`), antecedendo a lista de colaboradores com PIN pendente.
     - **Navegação por Abas:** Organização em 3 abas responsivas: *Todas (26)*, *EPIs Vencidos (2) — CRÍTICO* e *Sem PIN (24)*.
 *   **Senha Universal Padrão (`123456`) e Assinatura Eletrônica Automática (`pages/funcionarios.php`):**
-    - **Migração de Senhas Pendentes:** Atualização de todos os colaboradores ativos com pendências de assinatura para a senha inicial universal **`123456`** (hash `sha256(salt + '123456')`) e status `ATIVO`.
+    - **Migração de Senhas Pendentes:** Atualização de todos os colaboradores ativos (incluindo o lote importado em 26/09/2026) com pendências de assinatura para a senha inicial universal **`123456`** (hash `sha256(salt + '123456')`) e status `ATIVO`.
     - **Geração Automática na Criação de Funcionários:** Implementado o manipulador `garantirPinPadraoFuncionario()` que atribui automaticamente a senha universal `123456` a qualquer novo colaborador cadastrado sem PIN preenchido.
+    - **Enriquecimento Dinâmico das Visões de Funcionários:** Implementada a injeção síncrona da situação da `assinatura_eletronica` na lista `$funcionarios`, sincronizando os badges para `ATIVO` nas visões *Lista Funcionários*, *Senha/PIN* e removendo cadastros regularizados da visão *Pendências*.
     - **Verificação Preventiva Global:** Integração de `garantirPinsPadraoTodosFuncionarios()` para evitar a ocorrência de colaboradores sem assinatura ou com pendências órfãs.
 
 ### 📅 Versão 3.0.0 (10/09/2026) – Unificação de Submenus Expansíveis & Speed Dial FAB Multi-Módulo
