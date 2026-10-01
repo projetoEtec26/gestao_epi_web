@@ -34,7 +34,8 @@ gestao_epi_web/
 │   └── api.php                           # Centralização da URL base da API, fuso America/Sao_Paulo e APP_ROOT dinâmico
 │
 ├── services/
-│   └── ApiService.php                    # Client HTTP cURL centralizado com gestão JWT, retry e resiliência a timeouts
+│   ├── ApiService.php                    # Client HTTP cURL centralizado com gestão JWT, retry e resiliência a timeouts
+│   └── SecurityService.php               # Serviço de Segurança: AES-256-GCM, Bcrypt, SHA-256+Salt, RBAC e Cookies HTTPS
 │
 ├── components/
 │   ├── header.php                        # Cabeçalho HTML, importação do Design System, RBAC e fuso horário
@@ -79,6 +80,7 @@ gestao_epi_web/
     ├── test_db_speed.php                # Teste comparativo de velocidade de consultas SQL
     ├── test_entregas_fast.php           # Teste de otimização da busca em lote de itens de entrega
     ├── test_login_entregas.php          # Teste de autenticação JWT e obtenção de entregas
+    ├── test_security_service.php        # Validação do SecurityService (AES-256-GCM, Bcrypt, SHA-256, RBAC)
     └── update_api.php                   # Script utilitário para atualização/validação de endpoints
 ```
 
@@ -104,6 +106,15 @@ O `ApiService` implementa resiliência nativa contra oscilações de rede:
 *   **Response Timeout:** `30 segundos` (tempo estendido para garantir a recepção segura de relatórios pesados e grandes volumes de dados como +2.900 logs de auditoria).
 *   **Blindagem de Sessão:** Checagem defensiva `!headers_sent()` antes de qualquer chamada a `session_start()`, prevenindo warnings PHP ao manipular dados HTTP pós-renderização.
 *   **Política de Retry:** Em caso de erros temporários de gateway (`502 Bad Gateway`, `503 Service Unavailable`), o cliente realiza automaticamente até **1 tentativa adicional de retry** após 1 segundo.
+
+### 3.3 Arquitetura Unificada de Segurança da Informação (`SecurityService.php`)
+Como a aplicação Web-PHP e o aplicativo Android compartilham o mesmo banco de dados MySQL, as rotinas criptográficas e de hashing seguem rigorosamente o mesmo padrão técnico:
+*   **Criptografia de Dados Pessoais (AES-256-GCM - LGPD):** Proteção reversível para CPF (`fun_cpf_enc`) e eSocial (`fun_esocial_enc`) com chave de 256 bits (`$_ENV['AES_SECRET_KEY']`), IV de 12 bytes (96 bits) e Tag GCM de 16 bytes (128 bits). Inclui o hash de busca indexada HMAC-SHA256 (`fun_cpf_lookup`) para consultas diretas no banco sem necessidade de descriptografar toda a tabela.
+*   **Mascaramento Preventivo no Frontend:** Por padrão, a interface exibe CPFs mascarados (`***.456.789-**`). A descriptografia via `openssl_decrypt()` é liberada estritamente para perfis autorizados (`ADMINISTRADOR`, `RH_ADMINISTRATIVO`, `TECNICO_SST`).
+*   **Hashing de Senhas e PINs (Compatibilidade Android Room/HashUtils):**
+    *   **Senhas:** `password_hash($senha, PASSWORD_BCRYPT, ['cost' => 10])` e validação com `password_verify()`.
+    *   **PINs de Assinatura:** Salt hexadecimal de 16 bytes (`bin2hex(random_bytes(16))`) e hash `hash('sha256', $pin . $salt)` em hexadecimal minúsculo (64 caracteres), mantendo 100% de compatibilidade com a classe `HashUtils.java` do app Android.
+*   **Segurança de Transporte e Sessão (HTTPS / Cookies):** Configuração de `session_set_cookie_params` (`secure`, `httponly`, `samesite=Strict`) e `session_regenerate_id(true)` no `SecurityService::initSecureSession()`.
 
 ---
 
@@ -520,6 +531,19 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 ### 📅 Versão 2.3.0 (08/09/2026) – Autocomplete Avançado Multi-campo & Design System
 *   **Mecanismo de Autocomplete Client-Side:** Implementação da busca inteligente com avatares dinâmicos, destaques de busca, navegação por teclado e mascaramento de CPF.
 *   **Padronização do Design System:** Atualização das variáveis HSL em `assets/css/style.css` para suporte aprimorado a Light Mode e Dark Mode.
+
+### 📅 Versão 3.3.0 (30/09/2026) – Arquitetura Unificada de Segurança (AES-256-GCM / SHA-256 / Bcrypt), Rótulos de EPIs e Legibilidade dos Temas
+*   **Implementação do Serviço Central de Segurança da Informação ([`services/SecurityService.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_13/services/SecurityService.php)):**
+    - **Criptografia Bidirecional AES-256-GCM (LGPD):** Cifragem dos dados de CPF e eSocial com IV de 12 bytes (96 bits) e Tag GCM de 16 bytes (128 bits), e suporte a Hash Lookup HMAC-SHA256 (`fun_cpf_lookup`) para buscas otimizadas no MySQL.
+    - **Hashing de PINs de Assinatura (Compatível Android Room `HashUtils.java`):** Geração de Salt hexadecimal de 16 bytes e Hash SHA-256 em 64 caracteres minúsculos, com sigilo absoluto (sem gravação em logs ou JSON).
+    - **Hashing de Senhas Bcrypt (Cost 10):** Validação unificada de login Web/Mobile via `password_hash()` e `password_verify()`.
+    - **Middleware RBAC & Cookies HTTPS:** Implementação de `SecurityService::checkAccess()` com interceptação de rotas/API (HTTP 403 / `403.php`) e cookies seguros `HttpOnly` com `SameSite=Strict`.
+    - **Suíte de Testes Automatizada ([`scratch/test_security_service.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_13/scratch/test_security_service.php)):** Validação completa de cifragem, hashes e mascaramento com 100% de sucesso.
+*   **Padronização dos Rótulos dos Formulários de EPIs ([`pages/epis.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_13/pages/epis.php)):**
+    - Atualização dos termos nos modais de *Cadastro*, *Edição* e *Detalhes*: `Controle da Vida Útil`, `Unidade *`, `Vida Útil *`, `Localização Almoxarifado` e `Alerta de Troca (dias antes) *`.
+*   **Ajuste de Legibilidade do Autocomplete nos Temas Claro e Escuro ([`assets/css/style.css`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_13/assets/css/style.css)):**
+    - Correção do erro de sintaxe no fechamento de bloco de CSS em `body.dark-mode .text-dark`.
+    - Remoção de cores fixas hardcoded em [`pages/nova_entrega.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_13/pages/nova_entrega.php), [`pages/devolucoes.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_13/pages/devolucoes.php), [`pages/funcionarios.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_13/pages/funcionarios.php) e [`pages/relatorios.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_13/pages/relatorios.php), permitindo que os nomes de funcionários e cargos adotem alto contraste dinâmico em ambos os temas.
 
 ### 📅 Versão 3.2.0 (30/09/2026) – Sincronização dos Alertas de EPIs e Vida Útil no Dashboard
 *   **Ajuste Métrico de Funcionários com EPIs Vencidos (`pages/dashboard.php`):**

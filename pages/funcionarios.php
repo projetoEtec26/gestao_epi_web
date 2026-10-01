@@ -1934,7 +1934,7 @@ function renderizarAutocompleteFunc(rawQuery, queryNorm, queryCleanCpf, setor, s
                 </div>
                 <div class="flex-grow-1 min-w-0" style="line-height: 1.3;">
                     <div class="d-flex align-items-center justify-content-between gap-2">
-                        <span class="fw-semibold text-dark text-truncate" style="font-size: 13px;">${nomeDestacado}</span>
+                        <span class="fw-semibold text-truncate" style="font-size: 13px;">${nomeDestacado}</span>
                         <span class="badge bg-light text-secondary border flex-shrink-0" style="font-size: 10px; padding: 3px 8px; border-radius: 6px;">ID #${f.fun_id}</span>
                     </div>
                     <div class="text-muted d-flex flex-wrap align-items-center gap-1 mt-1" style="font-size: 11px;">

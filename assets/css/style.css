@@ -1208,6 +1208,7 @@ body.dark-mode .text-muted {
 }
 body.dark-mode .text-dark {
     color: var(--color-text-primary) !important;
+}
 
 /* Premium KPI Card Styles */
 .kpi-grid {

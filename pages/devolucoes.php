@@ -492,14 +492,14 @@ function renderDropdown(termo) {
                             justify-content:center;flex-shrink:0;">${iniciais}</div>
                 <div style="flex:1;min-width:0;line-height:1.35;">
                     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-                        <span style="font-weight:600;color:#1e293b;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${nomeHL}</span>
+                        <span class="dd-item-title" style="font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${nomeHL}</span>
                         <span style="background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:6px;
                                      padding:1px 8px;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;">ID #${f.fun_id}</span>
                     </div>
-                    <div style="font-size:12px;color:#64748b;margin-top:2px;">
-                        <i class="bi bi-briefcase" style="font-size:11px;"></i> ${cargo}${depto ? ' <span style="color:#cbd5e1;">•</span> <i class="bi bi-building" style="font-size:11px;"></i> '+depto : ''}
+                    <div style="font-size:12px;margin-top:2px;" class="text-muted">
+                        <i class="bi bi-briefcase" style="font-size:11px;"></i> ${cargo}${depto ? ' <span style="opacity:0.5;">•</span> <i class="bi bi-building" style="font-size:11px;"></i> '+depto : ''}
                     </div>
-                    <div style="font-size:12px;color:#e11d48;font-weight:500;margin-top:1px;">CPF: ${cpfM}</div>
+                    <div style="font-size:12px;font-weight:500;margin-top:1px;" class="text-muted">CPF: ${cpfM}</div>
                 </div>
             </div>`;
     });

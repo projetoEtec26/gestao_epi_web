@@ -951,7 +951,7 @@ require_once __DIR__ . '/../components/sidebar.php';
                         <input type="text" class="form-control" name="epi_fabricante" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Localização no Estoque</label>
+                        <label class="form-label">Localização Almoxarifado</label>
                         <input type="text" class="form-control" name="epi_localizacao" placeholder="Ex: Prateleira B2">
                     </div>
                 </div>
@@ -982,18 +982,18 @@ require_once __DIR__ . '/../components/sidebar.php';
                 <!-- Vida Útil -->
                 <div class="row">
                     <div class="col-md-4 mb-3">
-                        <label class="form-label">Tipo de Controle de Vida Útil</label>
+                        <label class="form-label">Controle da Vida Útil</label>
                         <select class="form-select" name="epi_vida_util_tipo" id="cad-vida-util-tipo" onchange="toggleVidaUtil('cad')">
                             <option value="CONTROLADO">Controlado</option>
                             <option value="ILIMITADO">Ilimitado / Não controlado</option>
                         </select>
                     </div>
                     <div class="col-md-4 mb-3" id="cad-grupo-vida-util-valor">
-                        <label class="form-label">Período de Vida Útil *</label>
+                        <label class="form-label">Vida Útil *</label>
                         <input type="number" class="form-control" name="epi_vida_util" id="cad-input-vida-util" min="1" required>
                     </div>
                     <div class="col-md-4 mb-3" id="cad-grupo-vida-util-unidade">
-                        <label class="form-label">Unidade de Período *</label>
+                        <label class="form-label">Unidade *</label>
                         <select class="form-select" name="epi_vida_util_unidade" id="cad-input-vida-util-unidade" required>
                             <option value="DIAS">Dias</option>
                             <option value="MESES">Meses</option>
@@ -1004,7 +1004,7 @@ require_once __DIR__ . '/../components/sidebar.php';
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Validade Recomendada de Uso (Dias) *</label>
+                        <label class="form-label">Alerta de Troca (dias antes) *</label>
                         <input type="number" class="form-control" name="epi_validade_uso_dias" value="365" min="0" required>
                         <small class="text-muted">Prazo recomendado de descarte após entrega ( NR-6 ).</small>
                     </div>
@@ -1085,7 +1085,7 @@ require_once __DIR__ . '/../components/sidebar.php';
                         <input type="text" class="form-control" id="edit-epi-fabricante" name="epi_fabricante" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Localização no Estoque</label>
+                        <label class="form-label">Localização Almoxarifado</label>
                         <input type="text" class="form-control" id="edit-epi-localizacao" name="epi_localizacao">
                     </div>
                 </div>
@@ -1116,18 +1116,18 @@ require_once __DIR__ . '/../components/sidebar.php';
                 <!-- Vida Útil -->
                 <div class="row">
                     <div class="col-md-4 mb-3">
-                        <label class="form-label">Tipo de Controle de Vida Útil</label>
+                        <label class="form-label">Controle da Vida Útil</label>
                         <select class="form-select" name="epi_vida_util_tipo" id="edit-vida-util-tipo" onchange="toggleVidaUtil('edit')">
                             <option value="CONTROLADO">Controlado</option>
                             <option value="ILIMITADO">Ilimitado / Não controlado</option>
                         </select>
                     </div>
                     <div class="col-md-4 mb-3" id="edit-grupo-vida-util-valor">
-                        <label class="form-label">Período de Vida Útil *</label>
+                        <label class="form-label">Vida Útil *</label>
                         <input type="number" class="form-control" name="epi_vida_util" id="edit-input-vida-util" min="1" required>
                     </div>
                     <div class="col-md-4 mb-3" id="edit-grupo-vida-util-unidade">
-                        <label class="form-label">Unidade de Período *</label>
+                        <label class="form-label">Unidade *</label>
                         <select class="form-select" name="epi_vida_util_unidade" id="edit-input-vida-util-unidade" required>
                             <option value="DIAS">Dias</option>
                             <option value="MESES">Meses</option>
@@ -1138,7 +1138,7 @@ require_once __DIR__ . '/../components/sidebar.php';
 
                 <div class="row">
                     <div class="col-md-4 mb-3">
-                        <label class="form-label">Validade Recomendada de Uso (Dias) *</label>
+                        <label class="form-label">Alerta de Troca (dias antes) *</label>
                         <input type="number" class="form-control" id="edit-epi-validade-uso" name="epi_validade_uso_dias" min="0" required>
                     </div>
                     <div class="col-md-4 mb-3">
@@ -1231,7 +1231,7 @@ require_once __DIR__ . '/../components/sidebar.php';
                         <span class="fw-semibold" id="det-exige-tam"></span>
                     </div>
                     <div class="d-flex justify-content-between border-bottom py-2">
-                        <span class="text-muted">Localização Física no Estoque:</span>
+                        <span class="text-muted">Localização Almoxarifado:</span>
                         <span class="fw-semibold text-muted" id="det-localizacao"></span>
                     </div>
 
@@ -1251,7 +1251,7 @@ require_once __DIR__ . '/../components/sidebar.php';
                     </div>
                     
                     <div class="d-flex justify-content-between border-bottom py-2">
-                        <span class="text-muted">Validade Recomendada de Uso:</span>
+                        <span class="text-muted">Alerta de Troca (dias antes):</span>
                         <span class="fw-semibold" id="det-validade-uso"></span>
                     </div>
 

@@ -800,15 +800,15 @@ function renderizarDropdownAutocomplete(termoDigitado) {
                 </div>
                 <div class="flex-grow-1 min-w-0" style="line-height: 1.25;">
                     <div class="d-flex align-items-center justify-content-between">
-                        <span class="fw-semibold text-body text-truncate" style="font-size: 13px;">${destacarTrecho(f.fun_nome, termoDigitado)}</span>
+                        <span class="fw-semibold text-truncate" style="font-size: 13px;">${destacarTrecho(f.fun_nome, termoDigitado)}</span>
                         <span class="badge bg-light text-secondary border ms-1" style="font-size: 10px;">ID #${f.fun_id}</span>
                     </div>
                     <div class="text-muted d-flex flex-wrap align-items-center gap-1 mt-1" style="font-size: 11px;">
-                        <span class="text-primary-emphasis"><i class="bi bi-briefcase me-1"></i>${htmlEscape(f.fun_cargo)}</span>
+                        <span><i class="bi bi-briefcase me-1"></i>${htmlEscape(f.fun_cargo)}</span>
                         <span>•</span>
                         <span><i class="bi bi-building me-1"></i>${htmlEscape(f.fun_departamento)}</span>
                         <span>•</span>
-                        <code>CPF: ${cpfFmt}</code>
+                        <span class="text-muted">CPF: ${cpfFmt}</span>
                     </div>
                 </div>
             </a>
