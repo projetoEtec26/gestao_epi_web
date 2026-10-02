@@ -1,4 +1,4 @@
-name: Deploy para InfinityFree
+name: Deploy WEB-PHP to Locaweb
 
 on:
   push:
@@ -7,32 +7,27 @@ on:
 
 jobs:
   deploy:
+    name: Deploy WEB-PHP
     runs-on: ubuntu-latest
-
     steps:
-      - name: Baixar código do GitHub
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Enviar aplicação PHP para InfinityFree
-        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+      - name: FTP Deploy Locaweb
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.INFINITY_FTP_SERVER }}
-          username: ${{ secrets.INFINITY_FTP_USERNAME }}
-          password: ${{ secrets.INFINITY_FTP_PASSWORD }}
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftp
           port: 21
-
           local-dir: ./
-          server-dir: /htdocs/
-
+          server-dir: public_html/
           exclude: |
             **/.git*
             **/.git*/**
             **/.github/**
             **/.agents/**
             **/node_modules/**
-            Dockerfile
-            README.md
             database_backup.sql
             database_schema_v7.sql
-            prompt inicial para criação we*
