@@ -218,6 +218,21 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
 
+### 📅 Versão 6.4.0 (02/10/2026) – Paridade 100% Web x Android (Cards, Modais Interativos e Banco de Dados Locaweb)
+* **Paridade de Métricas e Regras de Negócio (`pages/dashboard.php`):**
+  - **Card 1 (EPIs Vencidos - Vermelho):** Unificada a contagem do card para contabilizar a soma consolidada de `C.A. Vencidos + Vida Útil Vencida` (`8` itens).
+  - **Card 2 (A Vencer - Amarelo):** Atualizado para contabilizar `C.A. a Vencer + Troca Próxima` (`3` itens).
+  - **Card 3 (Entregas Hoje - Verde):** Sincronizado para contabilizar entregas ativas no fuso `America/Sao_Paulo` (`0` itens).
+  - **Card 4 (Pendências - Azul):** Consolidada a métrica de colaboradores sem PIN + C.A. vencidos (`2` pendências).
+  - **Custo Acumulado:** Traduzido via SQL MySQL (`SUM(item_quantidade * epi_valor)` onde `entr_status = 'FINALIZADA'`), retornando `R$ 60.599,60` em perfeita paridade com o aplicativo Android.
+* **Criação de Modais Dedicados e Sistema de Abas Interativas (`pages/dashboard.php`):**
+  - **Modal `#modalCaVencidos`:** Estruturado com 3 abas de navegação rápida: *Todos (8)*, *C.A. Vencidos (2)* e *Vida Útil Vencida (6)*.
+  - **Modal `#modalFuncVencidos`:** Criado modal exclusivo para a linha de alerta `• 4 funcionário(s) com EPI(s) vencidos`, listando os 4 colaboradores distintos afetados, seus cargos, quantidade de itens expirados e detalhamento dos EPIs.
+  - **Modal `#modalFuncTroca`:** Criado modal exclusivo para a linha `• 2 funcionário(s) com EPI(s) próximos da troca`, listando os colaboradores com substituições programadas.
+  - **Modal `#modalEpisVidaUtilVencida`:** Sincronizado para exibir os 6 equipamentos em uso com vida útil expirada ao clicar no alerta de EPIs vencidos.
+* **Conexão Oficial Locaweb (`config/api.php`):**
+  - Homologada a conexão direta com a base MySQL remota da Locaweb (`db_gestao_epi.mysql.dbaas.com.br`), garantindo paridade instantânea entre o ambiente local de testes e o servidor de produção na nuvem.
+
 ### 📅 Versão 6.3.0 (28/09/2026) – Destaque Global de Submenus Slate Grey (#475569), Homologação das 21 Telas, Masking de Segurança e Sincronização GitHub
 * **Padronização Visual de Submenus Ativos (`assets/css/style.css`, `components/sidebar.php`):**
   - Implementada a regra CSS `.active-sub` com fundo cinza escuro (*slate grey* `#475569` e texto branco `#ffffff`) garantindo destaque visual responsivo em todos os submenus ativados (Funcionários, EPIs, Entregas & Devoluções e Relatórios).

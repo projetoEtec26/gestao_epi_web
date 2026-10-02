@@ -116,24 +116,24 @@ $configData = require __DIR__ . '/../config/api.php';
 $dsn = sprintf("mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4", $configData['db_host'], $configData['db_port'], $configData['db_name']);
 
 $alerts = [
-    'ca_vencidos' => 3,
-    'vida_util_vencida' => 5,
+    'ca_vencidos' => 2,
+    'vida_util_vencida' => 6,
     'troca_proxima' => 3,
     'func_vencidos' => 4,
     'func_troca' => 2
 ];
 
 $kpis = [
-    'epis_vencidos' => 3,
-    'a_vencer_7d' => 0,
-    'entregas_hoje' => 2,
-    'pendencias' => 9
+    'epis_vencidos' => 8,
+    'a_vencer_7d' => 3,
+    'entregas_hoje' => 0,
+    'pendencias' => 2
 ];
 
 $custos = [
-    'mensal' => 'R$ 48.030,28',
-    'acumulado' => 'R$ 55.930,30',
-    'sem_pin' => 6
+    'mensal' => 'R$ 0,00',
+    'acumulado' => 'R$ 60.599,60',
+    'sem_pin' => 0
 ];
 
 $conformidade = [
@@ -196,9 +196,9 @@ try {
           (SELECT COUNT(*) FROM epis WHERE epi_tipo_item = 'EPI_COM_CA' AND epi_vencimento_ca >= CURDATE() AND epi_vencimento_ca <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)) AS aV7,
           (SELECT COUNT(*) FROM entrega_epis WHERE DATE(DATE_SUB(entr_data_entrega, INTERVAL 3 HOUR)) = CURDATE()) AS entH,
           (SELECT COUNT(*) FROM funcionarios f LEFT JOIN assinatura_eletronica a ON f.fun_id = a.fun_id WHERE f.fun_situacao = 'ATIVO' AND (a.ass_status IS NULL OR a.ass_status IN ('PENDENTE', 'BLOQUEADO', 'INATIVO'))) AS sPin,
-          (SELECT COALESCE(SUM(i.item_quantidade * i.item_epi_valor_snapshot), 0) FROM itens_entrega i JOIN entrega_epis e ON i.entr_id = e.entr_id WHERE MONTH(DATE_SUB(e.entr_data_entrega, INTERVAL 3 HOUR)) = MONTH(CURDATE()) AND YEAR(DATE_SUB(e.entr_data_entrega, INTERVAL 3 HOUR)) = YEAR(CURDATE())) AS cM,
-          (SELECT COALESCE(SUM(i.item_quantidade * i.item_epi_valor_snapshot), 0) FROM itens_entrega i JOIN entrega_epis e ON i.entr_id = e.entr_id) AS cA,
-          (SELECT COUNT(*) FROM funcionarios WHERE fun_situacao = 'ATIVO') AS tFunc";
+          (SELECT COALESCE(SUM(i.item_quantidade * ep.epi_valor), 0) FROM itens_entrega i INNER JOIN epis ep ON i.epi_id = ep.epi_id INNER JOIN entrega_epis ent ON i.entr_id = ent.entr_id WHERE ent.entr_status = 'FINALIZADA' AND MONTH(ent.entr_data_entrega) = MONTH(CURDATE()) AND YEAR(ent.entr_data_entrega) = YEAR(CURDATE())) AS cM,
+          (SELECT COALESCE(SUM(i.item_quantidade * ep.epi_valor), 0) FROM itens_entrega i INNER JOIN epis ep ON i.epi_id = ep.epi_id INNER JOIN entrega_epis ent ON i.entr_id = ent.entr_id WHERE ent.entr_status = 'FINALIZADA') AS cA,
+          (SELECT COUNT(*) FROM funcionarios) AS tFunc";
 
         $stats = $pdo->query($sqlConsolidado)->fetch(PDO::FETCH_ASSOC);
 
@@ -220,9 +220,9 @@ try {
         $alerts['func_vencidos'] = $fV;
         $alerts['func_troca'] = $fT;
 
-        // 2. KPIs
-        $kpis['epis_vencidos'] = $caV;
-        $kpis['a_vencer_7d'] = $aV7;
+        // 2. KPIs (Fiel ao Android Print 2)
+        $kpis['epis_vencidos'] = $caV + $vuV;
+        $kpis['a_vencer_7d'] = $aV7 + $tpP;
         $kpis['entregas_hoje'] = $entH;
         $custos['sem_pin'] = $sPin;
         $kpis['pendencias'] = $sPin + $caV;
@@ -424,16 +424,36 @@ try {
             ORDER BY f.fun_nome ASC
         ")->fetchAll(PDO::FETCH_ASSOC);
 
-        $episEmPosseList = $pdo->query("
-            SELECT f.fun_nome, f.fun_cargo, f.fun_departamento, COALESCE(i.item_epi_nome_snapshot, ep.epi_nome) as epi_nome,
-                   COALESCE(i.item_epi_ca_snapshot, ep.epi_ca) as epi_ca, e.entr_data_entrega, i.item_quantidade
+        $funcVencidosList = $pdo->query("
+            SELECT f.fun_id, f.fun_nome, f.fun_cargo, f.fun_departamento,
+                   COUNT(DISTINCT i.item_id) as qtd_epis,
+                   GROUP_CONCAT(DISTINCT ep.epi_nome SEPARATOR ', ') as epis_lista
             FROM itens_entrega i
             JOIN entrega_epis e ON i.entr_id = e.entr_id
             JOIN funcionarios f ON e.fun_id = f.fun_id
-            LEFT JOIN epis ep ON i.epi_id = ep.epi_id
-            WHERE (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE')
-            ORDER BY epi_nome ASC
-            LIMIT 30
+            JOIN epis ep ON i.epi_id = ep.epi_id
+            WHERE f.fun_situacao = 'ATIVO'
+              AND (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE')
+              AND ep.epi_validade_uso_dias > 0
+              AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) < CURDATE()
+            GROUP BY f.fun_id, f.fun_nome, f.fun_cargo, f.fun_departamento
+            ORDER BY f.fun_nome ASC
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
+        $funcTrocaList = $pdo->query("
+            SELECT f.fun_id, f.fun_nome, f.fun_cargo, f.fun_departamento,
+                   COUNT(DISTINCT i.item_id) as qtd_epis,
+                   GROUP_CONCAT(DISTINCT ep.epi_nome SEPARATOR ', ') as epis_lista
+            FROM itens_entrega i
+            JOIN entrega_epis e ON i.entr_id = e.entr_id
+            JOIN funcionarios f ON e.fun_id = f.fun_id
+            JOIN epis ep ON i.epi_id = ep.epi_id
+            WHERE f.fun_situacao = 'ATIVO'
+              AND (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE')
+              AND ep.epi_validade_uso_dias > 0
+              AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+            GROUP BY f.fun_id, f.fun_nome, f.fun_cargo, f.fun_departamento
+            ORDER BY f.fun_nome ASC
         ")->fetchAll(PDO::FETCH_ASSOC);
 
         // Aplica ordenação alfabética com remoção de acentos para garantir a paridade A-Z
@@ -476,6 +496,16 @@ try {
                 return strcmp(normalizarParaOrdenacaoPHP($a['epi_nome'] ?? ''), normalizarParaOrdenacaoPHP($b['epi_nome'] ?? ''));
             });
         }
+        if (!empty($funcVencidosList)) {
+            usort($funcVencidosList, static function(array $a, array $b): int {
+                return strcmp(normalizarParaOrdenacaoPHP($a['fun_nome'] ?? ''), normalizarParaOrdenacaoPHP($b['fun_nome'] ?? ''));
+            });
+        }
+        if (!empty($funcTrocaList)) {
+            usort($funcTrocaList, static function(array $a, array $b): int {
+                return strcmp(normalizarParaOrdenacaoPHP($a['fun_nome'] ?? ''), normalizarParaOrdenacaoPHP($b['fun_nome'] ?? ''));
+            });
+        }
     }
 } catch (Throwable $e) {
     // Mantém fallbacks se a conexão falhar
@@ -494,22 +524,67 @@ if (empty($ultimasAtividades)) {
 
 // Renderizadores HTML dos modais para carga inicial e atualizações AJAX em tempo real
 if (!function_exists('renderModalCaVencidosHtml')) {
-    function renderModalCaVencidosHtml(array $list): string {
-        if (empty($list)) {
-            return '<div class="alert alert-success text-center py-4 rounded-3 m-0"><i class="bi bi-check-circle-fill me-2 fs-5"></i>Nenhum EPI com C.A. vencido no momento.</div>';
+    function renderModalCaVencidosHtml(array $caVencidosList, array $vidaUtilVencidaList = []): string {
+        $totCa = count($caVencidosList);
+        $totVu = count($vidaUtilVencidaList);
+        $totalVencidos = $totCa + $totVu;
+
+        if ($totalVencidos === 0) {
+            return '<div class="alert alert-success text-center py-4 rounded-3 m-0"><i class="bi bi-check-circle-fill me-2 fs-5"></i>Nenhum EPI vencido no momento.</div>';
         }
-        $html = '<div class="table-responsive"><table class="table table-hover align-middle mb-0" style="font-size: 13.5px;"><thead class="table-light"><tr><th>Item / Equipamento</th><th>Fabricante</th><th>C.A.</th><th>Data Vencimento</th><th>Situação</th></tr></thead><tbody>';
-        foreach ($list as $item) {
-            $venc = !empty($item['epi_vencimento_ca']) ? date('d/m/Y', strtotime($item['epi_vencimento_ca'])) : '---';
-            $html .= '<tr>'
-                . '<td class="fw-bold text-dark">' . htmlspecialchars((string)($item['epi_nome'] ?? '')) . '</td>'
-                . '<td>' . htmlspecialchars((string)($item['epi_fabricante'] ?: '---')) . '</td>'
-                . '<td class="fw-bold text-primary">' . htmlspecialchars((string)($item['epi_ca'] ?: 'Isento')) . '</td>'
-                . '<td class="fw-bold text-danger">' . $venc . '</td>'
-                . '<td><span class="badge bg-danger">Vencido</span></td>'
-                . '</tr>';
+
+        if ($totVu === 0) {
+            return renderTabelaCaVencidosAux($caVencidosList);
         }
-        $html .= '</tbody></table></div>';
+
+        $html = '<ul class="nav nav-pills nav-fill mb-3 gap-2" id="pills-tab-vencidos" role="tablist" style="font-size: 13px;">';
+        
+        $html .= '<li class="nav-item" role="presentation">';
+        $html .= '<button class="nav-link active fw-bold py-2 rounded-3" id="pills-vencidos-todos-tab" data-bs-toggle="pill" data-bs-target="#pills-vencidos-todos" type="button" role="tab"><i class="bi bi-layers-fill me-1"></i>Todos (' . $totalVencidos . ')</button>';
+        $html .= '</li>';
+
+        $html .= '<li class="nav-item" role="presentation">';
+        $html .= '<button class="nav-link fw-bold py-2 rounded-3 text-danger" id="pills-vencidos-ca-tab" data-bs-toggle="pill" data-bs-target="#pills-vencidos-ca" type="button" role="tab"><i class="bi bi-shield-x me-1"></i>C.A. Vencidos (' . $totCa . ')</button>';
+        $html .= '</li>';
+
+        $html .= '<li class="nav-item" role="presentation">';
+        $html .= '<button class="nav-link fw-bold py-2 rounded-3 text-warning-emphasis" id="pills-vencidos-vu-tab" data-bs-toggle="pill" data-bs-target="#pills-vencidos-vu" type="button" role="tab"><i class="bi bi-exclamation-triangle-fill me-1"></i>Vida Útil Vencida (' . $totVu . ')</button>';
+        $html .= '</li>';
+
+        $html .= '</ul>';
+
+        $html .= '<div class="tab-content" id="pills-tabContent-vencidos">';
+
+        $html .= '<div class="tab-pane fade show active" id="pills-vencidos-todos" role="tabpanel">';
+        
+        if ($totCa > 0) {
+            $html .= '<div class="d-flex align-items-center justify-content-between mb-2 mt-1 alert alert-danger py-2 px-3 border-danger rounded-3 m-0 mb-2">';
+            $html .= '<span class="fw-bold text-danger" style="font-size: 13.5px;"><i class="bi bi-shield-x me-2 fs-6"></i>Equipamentos com C.A. Vencido (' . $totCa . ') — Catálogo / Estoque</span>';
+            $html .= '<a href="epis.php?acao=controle_ca" class="btn btn-sm btn-danger py-1 px-3 fw-bold rounded-2" style="font-size: 11.5px;">Controle C.A.</a>';
+            $html .= '</div>';
+            $html .= renderTabelaCaVencidosAux($caVencidosList);
+        }
+
+        if ($totVu > 0) {
+            $html .= '<div class="d-flex align-items-center justify-content-between mb-2 ' . ($totCa > 0 ? 'mt-4' : 'mt-1') . ' alert alert-warning py-2 px-3 border-warning rounded-3 m-0 mb-2">';
+            $html .= '<span class="fw-bold text-dark" style="font-size: 13.5px;"><i class="bi bi-exclamation-triangle-fill me-2 fs-6"></i>EPIs em Uso com Vida Útil Vencida (' . $totVu . ') — Em Posse</span>';
+            $html .= '<a href="entregas.php" class="btn btn-sm btn-warning text-dark py-1 px-3 fw-bold rounded-2" style="font-size: 11.5px;">Gerenciar Trocas</a>';
+            $html .= '</div>';
+            $html .= renderModalVidaUtilVencidaHtml($vidaUtilVencidaList);
+        }
+
+        $html .= '</div>';
+
+        $html .= '<div class="tab-pane fade" id="pills-vencidos-ca" role="tabpanel">';
+        $html .= renderTabelaCaVencidosAux($caVencidosList);
+        $html .= '</div>';
+
+        $html .= '<div class="tab-pane fade" id="pills-vencidos-vu" role="tabpanel">';
+        $html .= renderModalVidaUtilVencidaHtml($vidaUtilVencidaList);
+        $html .= '</div>';
+
+        $html .= '</div>';
+
         return $html;
     }
 }
@@ -717,6 +792,46 @@ if (!function_exists('renderModalEpisEmPosseHtml')) {
     }
 }
 
+if (!function_exists('renderModalFuncVencidosHtml')) {
+    function renderModalFuncVencidosHtml(array $list): string {
+        if (empty($list)) {
+            return '<div class="alert alert-success text-center py-4 rounded-3 m-0"><i class="bi bi-check-circle-fill me-2 fs-5"></i>Nenhum funcionário com EPI vencido no momento.</div>';
+        }
+        $html = '<div class="table-responsive"><table class="table table-hover align-middle mb-0" style="font-size: 13.5px;"><thead class="table-light"><tr><th>Colaborador</th><th>Cargo / Setor</th><th>Qtd Vencidos</th><th>Equipamentos Expirados</th><th>Situação</th></tr></thead><tbody>';
+        foreach ($list as $item) {
+            $html .= '<tr>'
+                . '<td><div class="fw-bold text-primary">' . htmlspecialchars((string)($item['fun_nome'] ?? '')) . '</div><small class="text-muted">ID: #' . (int)($item['fun_id'] ?? 0) . '</small></td>'
+                . '<td>' . htmlspecialchars((string)($item['fun_cargo'] ?: '---')) . '<br><small class="text-muted">Setor: ' . htmlspecialchars((string)($item['fun_departamento'] ?: '---')) . '</small></td>'
+                . '<td><span class="badge bg-danger fs-6">' . (int)($item['qtd_epis'] ?? 1) . ' EPI(s)</span></td>'
+                . '<td class="fw-bold text-dark">' . htmlspecialchars((string)($item['epis_lista'] ?: '---')) . '</td>'
+                . '<td><span class="badge bg-danger">Troca Pendente</span></td>'
+                . '</tr>';
+        }
+        $html .= '</tbody></table></div>';
+        return $html;
+    }
+}
+
+if (!function_exists('renderModalFuncTrocaHtml')) {
+    function renderModalFuncTrocaHtml(array $list): string {
+        if (empty($list)) {
+            return '<div class="alert alert-success text-center py-4 rounded-3 m-0"><i class="bi bi-check-circle-fill me-2 fs-5"></i>Nenhum funcionário próximo da troca de EPI.</div>';
+        }
+        $html = '<div class="table-responsive"><table class="table table-hover align-middle mb-0" style="font-size: 13.5px;"><thead class="table-light"><tr><th>Colaborador</th><th>Cargo / Setor</th><th>Qtd A Vencer</th><th>Equipamentos a Substituir</th><th>Previsão</th></tr></thead><tbody>';
+        foreach ($list as $item) {
+            $html .= '<tr>'
+                . '<td><div class="fw-bold text-primary">' . htmlspecialchars((string)($item['fun_nome'] ?? '')) . '</div><small class="text-muted">ID: #' . (int)($item['fun_id'] ?? 0) . '</small></td>'
+                . '<td>' . htmlspecialchars((string)($item['fun_cargo'] ?: '---')) . '<br><small class="text-muted">Setor: ' . htmlspecialchars((string)($item['fun_departamento'] ?: '---')) . '</small></td>'
+                . '<td><span class="badge bg-warning text-dark fs-6">' . (int)($item['qtd_epis'] ?? 1) . ' EPI(s)</span></td>'
+                . '<td class="fw-bold text-dark">' . htmlspecialchars((string)($item['epis_lista'] ?: '---')) . '</td>'
+                . '<td><span class="badge bg-warning text-dark">Troca Próxima</span></td>'
+                . '</tr>';
+        }
+        $html .= '</tbody></table></div>';
+        return $html;
+    }
+}
+
 if (!function_exists('renderModalTodasAtividadesHtml')) {
     function renderModalTodasAtividadesHtml(array $list): string {
         if (empty($list)) {
@@ -774,12 +889,14 @@ if (isset($_GET['ajax']) || (isset($_GET['action']) && $_GET['action'] === 'real
         'top5EpisMensalHtml' => renderTop5EpisHtml($top5EpisMensal),
         'entregas7Dias' => $entregas7Dias,
         'entregasMensal' => $entregasMensal,
-        'modalCaVencidosHtml' => renderModalCaVencidosHtml($caVencidosList),
+        'modalCaVencidosHtml' => renderModalCaVencidosHtml($caVencidosList, $vidaUtilVencidaList),
         'modalVidaUtilVencidaHtml' => renderModalVidaUtilVencidaHtml($vidaUtilVencidaList),
         'modalCaAVencerHtml' => renderModalCaAVencerHtml($caAVencerList),
         'modalEntregasHojeHtml' => renderModalEntregasHojeHtml($entregasHojeList),
         'modalPinBloqueadosHtml' => renderModalPinBloqueadosHtml($semPinList, $caVencidosList),
         'modalEpisEmPosseHtml' => renderModalEpisEmPosseHtml($episEmPosseList),
+        'modalFuncVencidosHtml' => renderModalFuncVencidosHtml($funcVencidosList ?? []),
+        'modalFuncTrocaHtml' => renderModalFuncTrocaHtml($funcTrocaList ?? []),
         'modalTodasAtividadesHtml' => renderModalTodasAtividadesHtml($ultimasAtividades)
     ], JSON_UNESCAPED_UNICODE);
     exit;
@@ -849,63 +966,87 @@ require_once __DIR__ . '/../components/sidebar.php';
     box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
-/* Banner de Alertas (Soft Red) */
+/* Banner de Alertas (Fiel ao Android Print 2) */
 .alert-banner-box {
-    background-color: #fef2f2;
-    border: 1px solid #fecaca;
+    background-color: #fff5f5;
+    border: 1px solid #fed7d7;
     border-radius: var(--dash-card-radius);
     padding: 1.25rem 1.5rem;
     margin-bottom: 1.5rem;
-    display: flex;
-    gap: 1.25rem;
-    align-items: flex-start;
     box-shadow: 0 4px 14px rgba(239, 68, 68, 0.06);
     width: 100%;
     box-sizing: border-box;
 }
 
-.alert-bell-icon {
-    background: #fee2e2;
-    color: #ef4444;
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+.alert-banner-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
-    flex-shrink: 0;
-}
-
-.alert-banner-title {
-    font-size: 1rem;
+    gap: 8px;
+    font-size: 1.05rem;
     font-weight: 700;
     color: #991b1b;
-    margin-bottom: 8px;
+    margin-bottom: 1rem;
 }
 
-.alert-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.alert-banner-header i {
+    color: #ef4444;
+    font-size: 1.25rem;
+}
+
+.alert-card-list {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 10px;
 }
 
-.alert-list li {
-    font-size: 0.875rem;
-    color: #b91c1c;
-    font-weight: 500;
+.alert-card-item {
+    background-color: #fff0f0;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    transition: all 0.2s ease;
+}
+
+.alert-card-item:hover {
+    background-color: #ffe4e4;
+    border-color: #fca5a5;
+    transform: translateX(2px);
+}
+
+.alert-card-text {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #991b1b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-ver-alert {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.775rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: color 0.2s ease, transform 0.2s ease;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    text-decoration: none;
 }
 
-.alert-list li:hover {
+.btn-ver-alert:hover {
+    background-color: #fca5a5;
     color: #7f1d1d;
-    text-decoration: underline;
-    transform: translateX(3px);
+    box-shadow: 0 2px 8px rgba(153, 27, 27, 0.15);
 }
 
 /* Título de Seção */
@@ -1275,20 +1416,52 @@ require_once __DIR__ . '/../components/sidebar.php';
             </div>
         </div>
 
-        <!-- 2. Banner de Alertas de Validade & Vida Útil (Soft Red) -->
+        <!-- 2. Banner de Alertas de Validade & Vida Útil (Fiel ao Android Print 2) -->
         <div class="alert-banner-box">
-            <div class="alert-bell-icon">
+            <div class="alert-banner-header">
                 <i class="bi bi-bell-fill"></i>
+                <span>Atenção - Alertas de Validade & Vida Útil:</span>
             </div>
-            <div>
-                <div class="alert-banner-title">Atenção - Alertas de Validade & Vida Útil:</div>
-                <ul class="alert-list">
-                    <li id="alert-ca-vencidos" data-bs-toggle="modal" data-bs-target="#modalCaVencidos">• <?= $alerts['ca_vencidos'] ?> EPI(s) com C.A. vencido.</li>
-                    <li id="alert-vida-util" data-bs-toggle="modal" data-bs-target="#modalEpisVidaUtilVencida">• <?= $alerts['vida_util_vencida'] ?> EPI(s) em uso com vida útil vencida.</li>
-                    <li id="alert-troca-proxima" data-bs-toggle="modal" data-bs-target="#modalCaAVencer">• <?= $alerts['troca_proxima'] ?> EPI(s) em uso com troca próxima.</li>
-                    <li id="alert-func-vencidos" data-bs-toggle="modal" data-bs-target="#modalEpisVidaUtilVencida">• <?= $alerts['func_vencidos'] ?> funcionário(s) com EPI(s) vencidos.</li>
-                    <li id="alert-func-troca" data-bs-toggle="modal" data-bs-target="#modalCaAVencer">• <?= $alerts['func_troca'] ?> funcionário(s) com EPI(s) próximos da troca.</li>
-                </ul>
+            <div class="alert-card-list">
+                <!-- Item 1: C.A. Vencido -->
+                <div class="alert-card-item">
+                    <div class="alert-card-text">
+                        • <span id="alert-ca-vencidos"><?= $alerts['ca_vencidos'] ?></span> EPI(s) com C.A. vencido
+                    </div>
+                    <button type="button" class="btn-ver-alert" data-bs-toggle="modal" data-bs-target="#modalCaVencidos">Ver ›</button>
+                </div>
+
+                <!-- Item 2: Vida Útil Vencida -->
+                <div class="alert-card-item">
+                    <div class="alert-card-text">
+                        • <span id="alert-vida-util"><?= $alerts['vida_util_vencida'] ?></span> EPI(s) em uso com vida útil vencida
+                    </div>
+                    <button type="button" class="btn-ver-alert" data-bs-toggle="modal" data-bs-target="#modalEpisVidaUtilVencida">Ver ›</button>
+                </div>
+
+                <!-- Item 3: Troca Próxima -->
+                <div class="alert-card-item">
+                    <div class="alert-card-text">
+                        • <span id="alert-troca-proxima"><?= $alerts['troca_proxima'] ?></span> EPI(s) em uso com troca próxima
+                    </div>
+                    <button type="button" class="btn-ver-alert" data-bs-toggle="modal" data-bs-target="#modalCaAVencer">Ver ›</button>
+                </div>
+
+                <!-- Item 4: Funcionários c/ EPI Vencidos -->
+                <div class="alert-card-item">
+                    <div class="alert-card-text">
+                        • <span id="alert-func-vencidos"><?= $alerts['func_vencidos'] ?></span> funcionário(s) com EPI(s) vencidos
+                    </div>
+                    <button type="button" class="btn-ver-alert" data-bs-toggle="modal" data-bs-target="#modalFuncVencidos">Ver ›</button>
+                </div>
+
+                <!-- Item 5: Funcionários Próximos da Troca -->
+                <div class="alert-card-item">
+                    <div class="alert-card-text">
+                        • <span id="alert-func-troca"><?= $alerts['func_troca'] ?></span> funcionário(s) com EPI(s) próximos da troca
+                    </div>
+                    <button type="button" class="btn-ver-alert" data-bs-toggle="modal" data-bs-target="#modalFuncTroca">Ver ›</button>
+                </div>
             </div>
         </div>
 
@@ -1465,14 +1638,14 @@ require_once __DIR__ . '/../components/sidebar.php';
             <div class="modal-header border-bottom-0 pb-2">
                 <div>
                     <h5 class="modal-title fw-bold text-danger" id="modal-title-ca-vencidos">
-                        <i class="bi bi-shield-x me-2"></i>Equipamentos com C.A. Vencido (<?= $alerts['ca_vencidos'] ?>)
+                        <i class="bi bi-shield-x me-2"></i>Equipamentos Vencidos (<?= $kpis['epis_vencidos'] ?>)
                     </h5>
-                    <p class="text-muted small m-0">Equipamentos com Certificado de Aprovação vencido no Ministério do Trabalho.</p>
+                    <p class="text-muted small m-0">Equipamentos com C.A. vencido no catálogo ou com vida útil expirada em uso.</p>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body pt-2" id="body-modal-ca-vencidos">
-                <?= renderModalCaVencidosHtml($caVencidosList) ?>
+                <?= renderModalCaVencidosHtml($caVencidosList, $vidaUtilVencidaList) ?>
             </div>
             <div class="modal-footer border-top-0 pt-0">
                 <button type="button" class="btn btn-light border rounded-3" data-bs-dismiss="modal">Fechar</button>
@@ -1603,6 +1776,54 @@ require_once __DIR__ . '/../components/sidebar.php';
     </div>
 </div>
 
+<!-- 7. Modal Funcionários com EPI(s) Vencidos -->
+<div class="modal fade" id="modalFuncVencidos" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-bottom-0 pb-2">
+                <div>
+                    <h5 class="modal-title fw-bold text-danger" id="modal-title-func-vencidos">
+                        <i class="bi bi-people-fill me-2"></i>Funcionários com EPI(s) Vencidos (<?= $alerts['func_vencidos'] ?>)
+                    </h5>
+                    <p class="text-muted small m-0">Colaboradores ativos em posse de um ou mais equipamentos com vida útil expirada.</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-2" id="body-modal-func-vencidos">
+                <?= renderModalFuncVencidosHtml($funcVencidosList ?? []) ?>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-light border rounded-3" data-bs-dismiss="modal">Fechar</button>
+                <a href="entregas.php" class="btn btn-danger rounded-3">Gerenciar Trocas / Entregas</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 8. Modal Funcionários Próximos da Troca de EPI -->
+<div class="modal fade" id="modalFuncTroca" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-bottom-0 pb-2">
+                <div>
+                    <h5 class="modal-title fw-bold text-warning" id="modal-title-func-troca" style="color: #d97706 !important;">
+                        <i class="bi bi-person-gear me-2"></i>Funcionários Próximos da Troca de EPI (<?= $alerts['func_troca'] ?>)
+                    </h5>
+                    <p class="text-muted small m-0">Colaboradores com substituição de equipamentos programada para os próximos dias.</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-2" id="body-modal-func-troca">
+                <?= renderModalFuncTrocaHtml($funcTrocaList ?? []) ?>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-light border rounded-3" data-bs-dismiss="modal">Fechar</button>
+                <a href="entregas.php" class="btn btn-warning rounded-3 text-dark">Gerenciar Trocas</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- 7. Modal Todas Atividades / Log de Auditoria -->
 <div class="modal fade" id="modalTodasAtividades" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
@@ -1727,34 +1948,40 @@ function toggleTop5Filtro(tipo) {
 function atualizarDashboardDOM(data) {
     if (!data || !data.success) return;
 
-    // 1. Lista de Alertas
+    // 1. Lista de Alertas (Atualiza SOMENTE o número dentro do <span>, o texto descritivo está no HTML)
     if (data.alerts) {
         const elCaVencidos = document.getElementById('alert-ca-vencidos');
-        if (elCaVencidos) elCaVencidos.innerHTML = `• ${data.alerts.ca_vencidos} EPI(s) com C.A. vencido.`;
+        if (elCaVencidos) elCaVencidos.textContent = data.alerts.ca_vencidos;
 
         const elVidaUtil = document.getElementById('alert-vida-util');
-        if (elVidaUtil) elVidaUtil.innerHTML = `• ${data.alerts.vida_util_vencida} EPI(s) em uso com vida útil vencida.`;
+        if (elVidaUtil) elVidaUtil.textContent = data.alerts.vida_util_vencida;
 
         const elTrocaProxima = document.getElementById('alert-troca-proxima');
-        if (elTrocaProxima) elTrocaProxima.innerHTML = `• ${data.alerts.troca_proxima} EPI(s) em uso com troca próxima.`;
+        if (elTrocaProxima) elTrocaProxima.textContent = data.alerts.troca_proxima;
 
         const elFuncVencidos = document.getElementById('alert-func-vencidos');
-        if (elFuncVencidos) elFuncVencidos.innerHTML = `• ${data.alerts.func_vencidos} funcionário(s) com EPI(s) vencidos.`;
+        if (elFuncVencidos) elFuncVencidos.textContent = data.alerts.func_vencidos;
 
         const elFuncTroca = document.getElementById('alert-func-troca');
-        if (elFuncTroca) elFuncTroca.innerHTML = `• ${data.alerts.func_troca} funcionário(s) com EPI(s) próximos da troca.`;
+        if (elFuncTroca) elFuncTroca.textContent = data.alerts.func_troca;
     }
 
     // 2. Títulos dos Modais
     if (data.alerts && data.kpis && data.custos) {
         const titleCaVencidos = document.getElementById('modal-title-ca-vencidos');
-        if (titleCaVencidos) titleCaVencidos.innerHTML = `<i class="bi bi-shield-x me-2"></i>Equipamentos com C.A. Vencido (${data.alerts.ca_vencidos})`;
+        if (titleCaVencidos) titleCaVencidos.innerHTML = `<i class="bi bi-shield-x me-2"></i>Equipamentos Vencidos (${data.kpis.epis_vencidos})`;
 
         const titleVidaUtil = document.getElementById('modal-title-vida-util');
         if (titleVidaUtil) titleVidaUtil.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i>EPIs em Uso com Vida Útil Vencida (${data.alerts.vida_util_vencida})`;
 
         const titleCaAVencer = document.getElementById('modal-title-ca-a-vencer');
         if (titleCaAVencer) titleCaAVencer.innerHTML = `<i class="bi bi-hourglass-split me-2"></i>Equipamentos A Vencer nos Próximos Dias (${data.alerts.troca_proxima})`;
+
+        const titleFuncVencidos = document.getElementById('modal-title-func-vencidos');
+        if (titleFuncVencidos) titleFuncVencidos.innerHTML = `<i class="bi bi-people-fill me-2"></i>Funcionários com EPI(s) Vencidos (${data.alerts.func_vencidos})`;
+
+        const titleFuncTroca = document.getElementById('modal-title-func-troca');
+        if (titleFuncTroca) titleFuncTroca.innerHTML = `<i class="bi bi-person-gear me-2"></i>Funcionários Próximos da Troca de EPI (${data.alerts.func_troca})`;
 
         const titleEntregasHoje = document.getElementById('modal-title-entregas-hoje');
         if (titleEntregasHoje) titleEntregasHoje.innerHTML = `<i class="bi bi-journal-check me-2"></i>Entregas Realizadas Hoje (${data.kpis.entregas_hoje})`;
@@ -1841,6 +2068,14 @@ function atualizarDashboardDOM(data) {
     if (data.modalEpisEmPosseHtml) {
         const bodyPosse = document.getElementById('body-modal-epis-em-posse');
         if (bodyPosse) bodyPosse.innerHTML = data.modalEpisEmPosseHtml;
+    }
+    if (data.modalFuncVencidosHtml) {
+        const bodyFuncVencidos = document.getElementById('body-modal-func-vencidos');
+        if (bodyFuncVencidos) bodyFuncVencidos.innerHTML = data.modalFuncVencidosHtml;
+    }
+    if (data.modalFuncTrocaHtml) {
+        const bodyFuncTroca = document.getElementById('body-modal-func-troca');
+        if (bodyFuncTroca) bodyFuncTroca.innerHTML = data.modalFuncTrocaHtml;
     }
     if (data.modalTodasAtividadesHtml) {
         const bodyAtividades = document.getElementById('body-modal-todas-atividades');

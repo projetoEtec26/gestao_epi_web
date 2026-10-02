@@ -4,7 +4,6 @@ declare(strict_types=1);
 // Garante o fuso horário padrão oficial do Brasil (America/Sao_Paulo - GMT-3)
 date_default_timezone_set('America/Sao_Paulo');
 
-// Funções helper globais para conversão automática de datas e horários em UTC para São Paulo/Brasil (America/Sao_Paulo)
 if (!function_exists('formatarDataHoraBr')) {
     function formatarDataHoraBr(?string $datetimeStr, string $format = 'd/m/Y H:i'): string {
         if (empty($datetimeStr) || $datetimeStr === '0000-00-00 00:00:00') {
@@ -51,13 +50,7 @@ if (!function_exists('normalizarParaOrdenacaoPHP')) {
     }
 }
 
-/**
- * Configuração da URL Base da API do ecossistema Gestão EPI.
- * 
- * Por padrão, conecta-se à API em nuvem na Render.
- * Para testar no ambiente local do XAMPP, altere para: 'http://localhost/gestao_epi_api/'
- */
-$appRoot = '/';
+$appRoot = '/OLD/gestao_epi_web_14/';
 if (php_sapi_name() === 'cli-server') {
     $appRoot = '/';
 } elseif (!empty($_SERVER['SCRIPT_NAME'])) {
@@ -67,36 +60,32 @@ if (php_sapi_name() === 'cli-server') {
     }
     $dir = str_replace('\\', '/', $dir);
     $appRoot = ($dir === '/' || $dir === '.') ? '/' : rtrim($dir, '/') . '/';
-} elseif (!empty($_SERVER['REQUEST_URI'])) {
-    $uriPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '';
-    if (preg_match('#^(/[^/]+/)#', $uriPath, $matches)) {
-        $appRoot = $matches[1];
-    } else {
-        $appRoot = '/';
-    }
 }
 
+// Detecta automaticamente se está no ambiente Local (XAMPP) ou Produção (Locaweb)
+$isLocalhost = (
+    php_sapi_name() === 'cli' || 
+    (isset($_SERVER['HTTP_HOST']) && (
+        str_contains($_SERVER['HTTP_HOST'], 'localhost') || 
+        str_contains($_SERVER['HTTP_HOST'], '127.0.0.1')
+    ))
+);
+
 return [
-    // API REST: Seleciona automaticamente a API local (18ms) quando em localhost/XAMPP, ou a Nuvem (Render) em produção
+    // URL da API: no XAMPP busca a gestao_epi_api_8, na Locaweb busca a /api/
     'api_base_url' => getenv('API_BASE_URL') ?: (
-        (php_sapi_name() === 'cli' || (isset($_SERVER['HTTP_HOST']) && (str_contains($_SERVER['HTTP_HOST'], 'localhost') || str_contains($_SERVER['HTTP_HOST'], '127.0.0.1'))))
-        ? (
-            (isset($_SERVER['REQUEST_URI']) && str_contains($_SERVER['REQUEST_URI'], '/OLD/')) || (isset($_SERVER['SCRIPT_NAME']) && str_contains($_SERVER['SCRIPT_NAME'], '/OLD/'))
-            ? 'http://localhost/OLD/gestao_epi_api_7/'
-            : 'http://localhost/gestao_epi_api_7/'
-          )
-        : 'https://gestao-epi-api.onrender.com/'
+        $isLocalhost 
+            ? 'http://localhost/gestao_epi_api_8/' 
+            : 'http://gestaoepi.tecnologia.ws/api/'
     ),
     
-    // Banco de Dados em Nuvem (Aiven Cloud MySQL)
-    'db_host' => getenv('DB_HOST') ?: 'db-gestao-epi-gestaoepi.a.aivencloud.com',
-    'db_port' => getenv('DB_PORT') ?: '10903',
-    'db_name' => getenv('DB_NAME') ?: 'defaultdb',
-    'db_user' => getenv('DB_USER') ?: 'avnadmin',
-    'db_pass' => getenv('DB_PASS') ?: base64_decode('QVZOU19UMlduaFU3X0RmOE1KMkN2dVcw'),
+    // Banco MySQL oficial da Locaweb
+    'db_host' => getenv('DB_HOST') ?: 'db_gestao_epi.mysql.dbaas.com.br',
+    'db_port' => getenv('DB_PORT') ?: '3306',
+    'db_name' => getenv('DB_NAME') ?: 'db_gestao_epi',
+    'db_user' => getenv('DB_USER') ?: 'db_gestao_epi',
+    'db_pass' => getenv('DB_PASS') ?: 'Gestaoepi@1',
 
-    // Raiz da aplicação Web-PHP calculada dinamicamente
+    // Raiz da aplicação Web-PHP
     'app_root_url' => getenv('APP_ROOT_URL') ?: $appRoot
 ];
-
-
