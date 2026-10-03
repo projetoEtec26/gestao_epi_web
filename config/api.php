@@ -53,16 +53,24 @@ if (!function_exists('normalizarParaOrdenacaoPHP')) {
 if (!function_exists('obterDispositivoWeb')) {
     function obterDispositivoWeb(): string {
         if (!empty($_SERVER['HTTP_X_DEVICE_INFO'])) {
-            return $_SERVER['HTTP_X_DEVICE_INFO'];
+            $dev = trim((string)$_SERVER['HTTP_X_DEVICE_INFO']);
+            if ($dev !== '' && $dev !== 'Aparelho desconhecido') {
+                return $dev;
+            }
         }
 
         $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-        if (empty($userAgent)) {
-            return 'Web (Navegador Desconhecido)';
+        if (empty($userAgent) || $userAgent === 'Aparelho desconhecido') {
+            return 'Aparelho desconhecido';
         }
 
         if (str_contains($userAgent, 'GestaoEpi_Android_')) {
             return str_replace('GestaoEpi_Android_', '', $userAgent);
+        }
+
+        if (str_contains($userAgent, 'GestaoEpi_Web_')) {
+            $clean = str_replace('GestaoEpi_Web_', '', $userAgent);
+            return str_replace('_', ' ', $clean);
         }
 
         $os = 'Sistema Desconhecido';
@@ -76,13 +84,13 @@ if (!function_exists('obterDispositivoWeb')) {
 
         $browser = 'Navegador';
         if (preg_match('/edg\/([0-9.]+)/i', $userAgent, $m)) {
-            $browser = 'Edge ' . explode('.', $m[1])[0];
+            $browser = 'Edge';
         } elseif (preg_match('/chrome\/([0-9.]+)/i', $userAgent, $m)) {
-            $browser = 'Chrome ' . explode('.', $m[1])[0];
+            $browser = 'Chrome';
         } elseif (preg_match('/firefox\/([0-9.]+)/i', $userAgent, $m)) {
-            $browser = 'Firefox ' . explode('.', $m[1])[0];
+            $browser = 'Firefox';
         } elseif (preg_match('/safari\/([0-9.]+)/i', $userAgent, $m) && !preg_match('/chrome/i', $userAgent)) {
-            $browser = 'Safari ' . explode('.', $m[1])[0];
+            $browser = 'Safari';
         } elseif (preg_match('/msie|trident/i', $userAgent)) {
             $browser = 'Internet Explorer';
         }

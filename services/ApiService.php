@@ -40,21 +40,32 @@ class ApiService {
             $url = $this->baseUrl . ltrim($endpoint, '/');
 
             $deviceInfo = function_exists('obterDispositivoWeb') ? obterDispositivoWeb() : 'Web (Navegador Desconhecido)';
+            $clientIp = $_SERVER['HTTP_CF_CONNECTING_IP'] 
+                ?? $_SERVER['HTTP_X_FORWARDED_FOR'] 
+                ?? $_SERVER['REMOTE_ADDR'] 
+                ?? '127.0.0.1';
+
+            if (str_contains($clientIp, ',')) {
+                $clientIp = trim(explode(',', $clientIp)[0]);
+            }
+
+            $contextoPadrao = [
+                'origem'   => 'ONLINE',
+                'aparelho' => $deviceInfo,
+                'ip'       => $clientIp
+            ];
 
             $headers = [
                 'Content-Type: application/json',
                 'Accept: application/json',
                 'X-Device-Info: ' . $deviceInfo,
-                'User-Agent: GestaoEpi_Web_' . str_replace(' ', '_', $deviceInfo)
+                'User-Agent: GestaoEpi_Web_' . str_replace(' ', '_', $deviceInfo),
+                'X-Forwarded-For: ' . $clientIp,
+                'X-Real-IP: ' . $clientIp
             ];
 
             if (!empty($_SERVER['HTTP_USER_AGENT'])) {
                 $headers[] = 'X-Original-User-Agent: ' . $_SERVER['HTTP_USER_AGENT'];
-            }
-
-            if (!empty($_SERVER['REMOTE_ADDR'])) {
-                $headers[] = 'X-Forwarded-For: ' . $_SERVER['REMOTE_ADDR'];
-                $headers[] = 'X-Real-IP: ' . $_SERVER['REMOTE_ADDR'];
             }
 
             // Injeta automaticamente o token JWT da sessão se o usuário estiver logado
@@ -90,8 +101,26 @@ class ApiService {
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Evita problemas de SSL em localhost/Render de teste
             if ($data !== null && in_array(strtoupper($method), ['POST', 'PUT', 'PATCH'], true)) {
                 if (is_array($data)) {
-                    if (!isset($data['aparelho'])) $data['aparelho'] = $deviceInfo;
-                    if (!isset($data['dispositivo'])) $data['dispositivo'] = $deviceInfo;
+                    if (!isset($data['contexto']) || !is_array($data['contexto'])) {
+                        $data['contexto'] = $contextoPadrao;
+                    } else {
+                        if (empty($data['contexto']['aparelho']) || $data['contexto']['aparelho'] === 'Aparelho desconhecido') {
+                            $data['contexto']['aparelho'] = $deviceInfo;
+                        }
+                        if (empty($data['contexto']['origem'])) {
+                            $data['contexto']['origem'] = 'ONLINE';
+                        }
+                        if (empty($data['contexto']['ip'])) {
+                            $data['contexto']['ip'] = $clientIp;
+                        }
+                    }
+
+                    if (empty($data['aparelho']) || $data['aparelho'] === 'Aparelho desconhecido') {
+                        $data['aparelho'] = $deviceInfo;
+                    }
+                    if (empty($data['dispositivo']) || $data['dispositivo'] === 'Aparelho desconhecido') {
+                        $data['dispositivo'] = $deviceInfo;
+                    }
                 }
                 $jsonData = json_encode($data);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
