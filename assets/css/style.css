@@ -1667,24 +1667,34 @@ body.dark-mode .form-select:disabled {
 }
 
 /* Indicadores de Número (Spinners) e Calendário (Dates) Visíveis no Modo Escuro */
-html.dark-mode input[type="number"]::-webkit-inner-spin-button,
-body.dark-mode input[type="number"]::-webkit-inner-spin-button,
-html.dark-mode input[type="number"]::-webkit-outer-spin-button,
-body.dark-mode input[type="number"]::-webkit-outer-spin-button {
-    filter: invert(0.85) brightness(1.6) !important;
-    opacity: 0.9 !important;
-    cursor: pointer;
+html.dark-mode ::-webkit-inner-spin-button,
+body.dark-mode ::-webkit-inner-spin-button,
+html.dark-mode ::-webkit-outer-spin-button,
+body.dark-mode ::-webkit-outer-spin-button,
+html.dark-mode input::-webkit-inner-spin-button,
+body.dark-mode input::-webkit-inner-spin-button,
+html.dark-mode input::-webkit-outer-spin-button,
+body.dark-mode input::-webkit-outer-spin-button {
+    filter: invert(1) brightness(2) !important;
+    opacity: 1 !important;
+    cursor: pointer !important;
 }
 
+html.dark-mode ::-webkit-calendar-picker-indicator,
+body.dark-mode ::-webkit-calendar-picker-indicator,
+html.dark-mode input::-webkit-calendar-picker-indicator,
+body.dark-mode input::-webkit-calendar-picker-indicator,
 html.dark-mode input[type="date"]::-webkit-calendar-picker-indicator,
 body.dark-mode input[type="date"]::-webkit-calendar-picker-indicator,
 html.dark-mode input[type="datetime-local"]::-webkit-calendar-picker-indicator,
 body.dark-mode input[type="datetime-local"]::-webkit-calendar-picker-indicator,
 html.dark-mode input[type="time"]::-webkit-calendar-picker-indicator,
-body.dark-mode input[type="time"]::-webkit-calendar-picker-indicator {
-    filter: invert(0.85) brightness(1.6) !important;
-    opacity: 0.9 !important;
-    cursor: pointer;
+body.dark-mode input[type="time"]::-webkit-calendar-picker-indicator,
+html.dark-mode input[type="month"]::-webkit-calendar-picker-indicator,
+body.dark-mode input[type="month"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(2) drop-shadow(0 0 1px #38bdf8) !important;
+    opacity: 1 !important;
+    cursor: pointer !important;
 }
 
 html.dark-mode label,
