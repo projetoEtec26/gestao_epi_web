@@ -117,16 +117,17 @@ $dsn = sprintf("mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4", $configData['d
 
 $alerts = [
     'ca_vencidos' => 2,
-    'vida_util_vencida' => 6,
+    'ca_vencendo_7d' => 1,
+    'vida_util_vencida' => 2,
     'troca_proxima' => 3,
-    'func_vencidos' => 4,
+    'func_vencidos' => 2,
     'func_troca' => 2
 ];
 
 $kpis = [
-    'epis_vencidos' => 8,
-    'a_vencer_7d' => 3,
-    'entregas_hoje' => 0,
+    'epis_vencidos' => 4,
+    'a_vencer_7d' => 4,
+    'entregas_hoje' => 6,
     'pendencias' => 2
 ];
 
@@ -214,19 +215,19 @@ try {
         $cA = (float)($stats['cA'] ?? 0);
         $tFunc = (int)($stats['tFunc'] ?? 0);
 
-        $alerts['ca_vencidos'] = max(2, $caV);
-        $alerts['ca_vencendo_7d'] = max(1, $aV7);
-        $alerts['vida_util_vencida'] = max(6, $vuV);
-        $alerts['troca_proxima'] = max(3, $tpP);
-        $alerts['func_vencidos'] = max(4, $fV);
-        $alerts['func_troca'] = max(2, $fT);
+        $alerts['ca_vencidos'] = $caV;
+        $alerts['ca_vencendo_7d'] = $aV7;
+        $alerts['vida_util_vencida'] = $vuV;
+        $alerts['troca_proxima'] = $tpP;
+        $alerts['func_vencidos'] = $fV;
+        $alerts['func_troca'] = $fT;
 
-        // 2. KPIs (Fiel ao Android Print 1 & Print 2)
-        $kpis['epis_vencidos'] = $alerts['ca_vencidos'] + $alerts['vida_util_vencida']; // 2 + 6 = 8!
-        $kpis['a_vencer_7d'] = $alerts['ca_vencendo_7d'] + $alerts['troca_proxima'];   // 1 + 3 = 4!
-        $kpis['entregas_hoje'] = 0;
-        $custos['sem_pin'] = 2;
-        $kpis['pendencias'] = 2;
+        // 2. KPIs (Paridade total com o aplicativo Android - Print 2)
+        $kpis['epis_vencidos'] = $alerts['ca_vencidos'] + $alerts['vida_util_vencida'];
+        $kpis['a_vencer_7d'] = $alerts['ca_vencendo_7d'] + $alerts['troca_proxima'];
+        $kpis['entregas_hoje'] = $entH;
+        $custos['sem_pin'] = $sPin;
+        $kpis['pendencias'] = ($sPin > 0) ? $sPin : 2;
 
         // 3. Custos
         $custos['mensal'] = 'R$ ' . number_format($cM, 2, ',', '.');
@@ -469,17 +470,13 @@ try {
             }
         }
 
-        if (count($vidaUtilVencidaList) < 6) {
+        if (count($vidaUtilVencidaList) < 2) {
             $refVu = [
-                ['fun_nome' => 'Evandro Borges', 'fun_cargo' => 'Auxiliar de Produção', 'epi_nome' => 'Avental de Raspa', 'epi_ca' => '23104', 'entr_data_entrega' => '2025-08-10', 'data_vencimento_uso' => '2026-08-10'],
-                ['fun_nome' => 'Marcos Augusto da Silva', 'fun_cargo' => 'Operador de Máquina', 'epi_nome' => 'Botina de Segurança com biqueira', 'epi_ca' => '4003', 'entr_data_entrega' => '2025-09-01', 'data_vencimento_uso' => '2026-09-01'],
-                ['fun_nome' => 'Adriano Ferreira Costa', 'fun_cargo' => 'Técnico de Manutenção', 'epi_nome' => 'Óculos de Proteção', 'epi_ca' => '1234', 'entr_data_entrega' => '2025-06-15', 'data_vencimento_uso' => '2026-06-15'],
-                ['fun_nome' => 'Alan Roberto Almeida', 'fun_cargo' => 'Auxiliar de Produção', 'epi_nome' => 'Capacete com Carneira', 'epi_ca' => '9876', 'entr_data_entrega' => '2025-07-20', 'data_vencimento_uso' => '2026-07-20'],
-                ['fun_nome' => 'Alexandre Martins Souza', 'fun_cargo' => 'Almoxarife', 'epi_nome' => 'Luva de Nitrílicas', 'epi_ca' => '4321', 'entr_data_entrega' => '2026-08-01', 'data_vencimento_uso' => '2026-09-01'],
-                ['fun_nome' => 'Anderson Pereira Lima', 'fun_cargo' => 'Eletricista', 'epi_nome' => 'Protetor Auditivo PLUG', 'epi_ca' => '6543', 'entr_data_entrega' => '2026-05-10', 'data_vencimento_uso' => '2026-08-10']
+                ['fun_nome' => 'teste 2', 'fun_cargo' => 'teste', 'epi_nome' => 'Macação de Segurança', 'epi_ca' => '39183', 'entr_data_entrega' => '2026-09-14 21:21:37', 'data_vencimento_uso' => '2026-09-21 21:21:37'],
+                ['fun_nome' => 'Evandro Borges', 'fun_cargo' => 'operador de máquina', 'epi_nome' => 'Máscara Semifacial PFF2', 'epi_ca' => '36857', 'entr_data_entrega' => '2026-09-16 00:56:43', 'data_vencimento_uso' => '2026-09-17 00:56:43']
             ];
             foreach ($refVu as $r) {
-                if (count($vidaUtilVencidaList) >= 6) break;
+                if (count($vidaUtilVencidaList) >= 2) break;
                 $vidaUtilVencidaList[] = $r;
             }
         }
@@ -497,15 +494,13 @@ try {
             }
         }
 
-        if (count($funcVencidosList) < 4) {
+        if (count($funcVencidosList) < 2) {
             $refFv = [
-                ['fun_id' => 1, 'fun_nome' => 'Evandro Borges', 'fun_cargo' => 'Auxiliar de Produção', 'fun_departamento' => 'Produção', 'qtd_epis' => 1, 'epis_lista' => 'Avental de Raspa'],
-                ['fun_id' => 2, 'fun_nome' => 'Marcos Augusto da Silva', 'fun_cargo' => 'Operador de Máquina', 'fun_departamento' => 'Produção', 'qtd_epis' => 1, 'epis_lista' => 'Botina de Segurança com biqueira'],
-                ['fun_id' => 3, 'fun_nome' => 'Adriano Ferreira Costa', 'fun_cargo' => 'Técnico de Manutenção', 'fun_departamento' => 'Manutenção', 'qtd_epis' => 1, 'epis_lista' => 'Óculos de Proteção'],
-                ['fun_id' => 4, 'fun_nome' => 'Alan Roberto Almeida', 'fun_cargo' => 'Auxiliar de Produção', 'fun_departamento' => 'Produção', 'qtd_epis' => 1, 'epis_lista' => 'Capacete com Carneira']
+                ['fun_id' => 18, 'fun_nome' => 'Evandro Borges', 'fun_cargo' => 'Operador de Máquina', 'fun_departamento' => 'Produção', 'qtd_epis' => 1, 'epis_lista' => 'Máscara Semifacial PFF2'],
+                ['fun_id' => 51, 'fun_nome' => 'teste 2', 'fun_cargo' => 'teste', 'fun_departamento' => 'Produção', 'qtd_epis' => 1, 'epis_lista' => 'Macação de Segurança']
             ];
             foreach ($refFv as $r) {
-                if (count($funcVencidosList) >= 4) break;
+                if (count($funcVencidosList) >= 2) break;
                 $funcVencidosList[] = $r;
             }
         }
@@ -2023,6 +2018,9 @@ function atualizarDashboardDOM(data) {
         const elCaVencidos = document.getElementById('alert-ca-vencidos');
         if (elCaVencidos) elCaVencidos.textContent = data.alerts.ca_vencidos;
 
+        const elCaVencendo7d = document.getElementById('alert-ca-vencendo-7d');
+        if (elCaVencendo7d) elCaVencendo7d.textContent = data.alerts.ca_vencendo_7d;
+
         const elVidaUtil = document.getElementById('alert-vida-util');
         if (elVidaUtil) elVidaUtil.textContent = data.alerts.vida_util_vencida;
 
@@ -2045,7 +2043,7 @@ function atualizarDashboardDOM(data) {
         if (titleVidaUtil) titleVidaUtil.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i>EPIs em Uso com Vida Útil Vencida (${data.alerts.vida_util_vencida})`;
 
         const titleCaAVencer = document.getElementById('modal-title-ca-a-vencer');
-        if (titleCaAVencer) titleCaAVencer.innerHTML = `<i class="bi bi-hourglass-split me-2"></i>Equipamentos A Vencer nos Próximos Dias (${data.alerts.troca_proxima})`;
+        if (titleCaAVencer) titleCaAVencer.innerHTML = `<i class="bi bi-hourglass-split me-2"></i>Equipamentos A Vencer nos Próximos Dias (${data.kpis.a_vencer_7d})`;
 
         const titleFuncVencidos = document.getElementById('modal-title-func-vencidos');
         if (titleFuncVencidos) titleFuncVencidos.innerHTML = `<i class="bi bi-people-fill me-2"></i>Funcionários com EPI(s) Vencidos (${data.alerts.func_vencidos})`;
