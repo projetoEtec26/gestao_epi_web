@@ -82,14 +82,59 @@ $aceitouTermos = !empty($currentUser['usu_aceite_termos']);
 ?>
 
 <style>
+/* Painel no mesmo visual do modal "Novo Item no Catálogo" */
 .settings-container {
-    width: 100%;
-    max-width: 100%;
+    max-width: 820px;
+    margin: 8px auto 24px auto;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.25);
+    padding: 0 24px 24px 24px;
+    overflow: hidden;
+}
+
+.settings-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 -24px 8px -24px;
+    padding: 18px 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.settings-panel-header i {
+    color: #3b82f6;
+    font-size: 1.15rem;
+}
+
+.settings-panel-header h3 {
+    color: #3b82f6;
+    font-size: 1.15rem;
+    font-weight: 700;
     margin: 0;
 }
 
+.settings-panel-subtitle {
+    font-size: 12.5px;
+    margin: 0 0 4px 0;
+}
+
 html.dark-mode .settings-container, body.dark-mode .settings-container {
-    background-color: transparent !important;
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
+}
+
+html.dark-mode .settings-panel-header, body.dark-mode .settings-panel-header {
+    border-bottom-color: #334155 !important;
+}
+
+html.dark-mode .settings-panel-header i,
+body.dark-mode .settings-panel-header i,
+html.dark-mode .settings-panel-header h3,
+body.dark-mode .settings-panel-header h3 {
+    color: #60a5fa !important;
 }
 
 .settings-group-title {
@@ -157,7 +202,7 @@ html.dark-mode .settings-group-title, body.dark-mode .settings-group-title {
 }
 
 html.dark-mode .settings-card, body.dark-mode .settings-card {
-    background-color: #1e293b !important;
+    background-color: #0f172a !important;
     border-color: #334155 !important;
 }
 
@@ -175,7 +220,7 @@ html.dark-mode .settings-card small.text-muted, body.dark-mode .settings-card sm
 }
 
 html.dark-mode .settings-logout-card, body.dark-mode .settings-logout-card {
-    background-color: #1e293b !important;
+    background-color: #0f172a !important;
     border-color: #ef4444 !important;
 }
 
@@ -207,12 +252,11 @@ html.dark-mode .form-control, body.dark-mode .form-control {
     
     <div class="content-body">
         <div class="settings-container">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h3 class="fw-bold m-0" style="color: var(--color-primary);">Configurações</h3>
-                    <p class="text-muted small m-0">Gerencie suas credenciais de segurança, aparência e termos do ecossistema.</p>
-                </div>
+            <div class="settings-panel-header">
+                <i class="bi bi-gear-fill"></i>
+                <h3>Configurações</h3>
             </div>
+            <p class="text-muted settings-panel-subtitle">Gerencie suas credenciais de segurança, aparência e termos do ecossistema.</p>
 
             <?php if ($erro !== null): ?>
                 <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
