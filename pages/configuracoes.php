@@ -404,10 +404,12 @@ function alterarTemaApp(val) {
     const body = document.body;
     if (val === 'dark') {
         html.classList.add('dark-mode');
+        html.style.backgroundColor = '#0f172a';
         body.classList.add('dark-mode');
         localStorage.setItem('theme-mode', 'dark');
     } else {
         html.classList.remove('dark-mode');
+        html.style.backgroundColor = '';
         body.classList.remove('dark-mode');
         localStorage.setItem('theme-mode', 'light');
     }

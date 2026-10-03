@@ -142,6 +142,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Gestão EPI</title>
+    <!-- Script e Estilo Anti-Flicker do Modo Escuro -->
+    <script>
+        (function() {
+            var theme = localStorage.getItem('theme-mode');
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark-mode');
+                document.documentElement.style.backgroundColor = '#0f172a';
+                document.documentElement.style.color = '#f8fafc';
+            }
+        })();
+    </script>
+    <style id="anti-flicker-dark-login">
+        html.dark-mode, html.dark-mode body {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+        }
+        body.dark-mode .auth-card {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f8fafc !important;
+        }
+        body.dark-mode .form-control {
+            background-color: #0f172a !important;
+            border-color: #475569 !important;
+            color: #f8fafc !important;
+        }
+    </style>
     <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->

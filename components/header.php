@@ -82,14 +82,39 @@ if (isset($page_roles) && is_array($page_roles)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($page_title) ? $page_title . ' - Gestão EPI' : 'Gestão EPI' ?></title>
     
-    <!-- Script Anti-Flicker do Modo Escuro (executado imediatamente antes de renderizar o HTML/BODY) -->
+    <!-- Anti-Flicker Instantâneo do Modo Escuro (Executado síncronamente no início do <head> antes do carregamento de CSS da rede) -->
     <script>
         (function() {
-            if (localStorage.getItem('theme-mode') === 'dark') {
+            var theme = localStorage.getItem('theme-mode');
+            if (theme === 'dark') {
                 document.documentElement.classList.add('dark-mode');
+                document.documentElement.style.backgroundColor = '#0f172a';
+                document.documentElement.style.color = '#f8fafc';
             }
         })();
     </script>
+    <style id="anti-flicker-dark-style">
+        html.dark-mode, 
+        html.dark-mode body, 
+        html.dark-mode #app-wrapper, 
+        html.dark-mode #main-content,
+        html.dark-mode .content-body,
+        html.dark-mode .settings-container,
+        html.dark-mode .settings-card,
+        html.dark-mode .welcome-card,
+        html.dark-mode .dash-card,
+        html.dark-mode .card-custom {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+        }
+        html.dark-mode .settings-card,
+        html.dark-mode .welcome-card,
+        html.dark-mode .dash-card,
+        html.dark-mode .card-custom {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+        }
+    </style>
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="<?= APP_ROOT ?>assets/favicon.svg">
