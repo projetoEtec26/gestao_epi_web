@@ -82,6 +82,15 @@ if (isset($page_roles) && is_array($page_roles)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($page_title) ? $page_title . ' - Gestão EPI' : 'Gestão EPI' ?></title>
     
+    <!-- Script Anti-Flicker do Modo Escuro (executado imediatamente antes de renderizar o HTML/BODY) -->
+    <script>
+        (function() {
+            if (localStorage.getItem('theme-mode') === 'dark') {
+                document.documentElement.classList.add('dark-mode');
+            }
+        })();
+    </script>
+    
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="<?= APP_ROOT ?>assets/favicon.svg">
     <!-- Bootstrap 5 CDN -->

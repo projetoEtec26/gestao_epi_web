@@ -400,11 +400,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function alterarTemaApp(val) {
+    const html = document.documentElement;
+    const body = document.body;
     if (val === 'dark') {
-        document.body.classList.add('dark-mode');
+        html.classList.add('dark-mode');
+        body.classList.add('dark-mode');
         localStorage.setItem('theme-mode', 'dark');
     } else {
-        document.body.classList.remove('dark-mode');
+        html.classList.remove('dark-mode');
+        body.classList.remove('dark-mode');
         localStorage.setItem('theme-mode', 'light');
     }
     const themeBtn = document.getElementById('theme-toggle-btn');

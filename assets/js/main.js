@@ -15,37 +15,52 @@ document.addEventListener('DOMContentLoaded', function() {
  * Inicializa e gerencia a preferência do Modo Escuro (Dark Mode)
  */
 function initDarkMode() {
+    const html = document.documentElement;
     const body = document.body;
     const themeBtn = document.getElementById('theme-toggle-btn');
     const themeIcon = themeBtn ? themeBtn.querySelector('i') : null;
+    const selectTema = document.getElementById('select-tema-app');
     
     // Recupera a preferência salva
     const savedTheme = localStorage.getItem('theme-mode');
     
-    // Aplica o tema
+    // Aplica o tema sincronizado em html e body
     if (savedTheme === 'dark') {
+        html.classList.add('dark-mode');
         body.classList.add('dark-mode');
         if (themeIcon) {
             themeIcon.className = 'bi bi-sun';
         }
+        if (selectTema) {
+            selectTema.value = 'dark';
+        }
     } else {
+        html.classList.remove('dark-mode');
         body.classList.remove('dark-mode');
         if (themeIcon) {
             themeIcon.className = 'bi bi-moon-stars';
         }
+        if (selectTema) {
+            selectTema.value = 'light';
+        }
     }
     
-    // Evento de clique
+    // Evento de clique no botão do topbar
     if (themeBtn) {
         themeBtn.addEventListener('click', function() {
-            body.classList.toggle('dark-mode');
-            
-            if (body.classList.contains('dark-mode')) {
+            const isDark = body.classList.contains('dark-mode');
+            if (!isDark) {
+                html.classList.add('dark-mode');
+                body.classList.add('dark-mode');
                 localStorage.setItem('theme-mode', 'dark');
                 if (themeIcon) themeIcon.className = 'bi bi-sun';
+                if (selectTema) selectTema.value = 'dark';
             } else {
+                html.classList.remove('dark-mode');
+                body.classList.remove('dark-mode');
                 localStorage.setItem('theme-mode', 'light');
                 if (themeIcon) themeIcon.className = 'bi bi-moon-stars';
+                if (selectTema) selectTema.value = 'light';
             }
         });
     }

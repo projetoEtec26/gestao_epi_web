@@ -1338,3 +1338,72 @@ a.active-sub i {
     color: #ffffff !important;
 }
 
+/* Correções Completas de Modo Escuro Sem Flash / Flicker de Transição */
+html.dark-mode,
+html.dark-mode body,
+body.dark-mode {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode #main-content,
+body.dark-mode #main-content,
+html.dark-mode .content-body,
+body.dark-mode .content-body,
+html.dark-mode .dashboard-container,
+body.dark-mode .dashboard-container {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode .settings-card,
+body.dark-mode .settings-card,
+html.dark-mode .welcome-card,
+body.dark-mode .welcome-card,
+html.dark-mode .dash-card,
+body.dark-mode .dash-card,
+html.dark-mode .card-custom,
+body.dark-mode .card-custom,
+html.dark-mode .metric-pill-card,
+body.dark-mode .metric-pill-card {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode .settings-card h6,
+body.dark-mode .settings-card h6,
+html.dark-mode .settings-group-title,
+body.dark-mode .settings-group-title {
+    color: #f8fafc !important;
+}
+
+html.dark-mode .form-select,
+body.dark-mode .form-select,
+html.dark-mode .form-control,
+body.dark-mode .form-control,
+html.dark-mode .input-group-text,
+body.dark-mode .input-group-text {
+    background-color: #1e293b !important;
+    border-color: #475569 !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode .form-select option,
+body.dark-mode .form-select option,
+html.dark-mode option,
+body.dark-mode option {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode .form-select:focus,
+body.dark-mode .form-select:focus,
+html.dark-mode .form-control:focus,
+body.dark-mode .form-control:focus {
+    background-color: #1e293b !important;
+    border-color: #3b82f6 !important;
+    color: #f8fafc !important;
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;
+}
+
