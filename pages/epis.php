@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 $page_title = 'EPIs (Controle C.A.)';
 $active_menu = 'epis';
-$page_roles = ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR', 'GESTOR']; // RH possui acesso somente consulta (API bloqueia escrita)
+$page_roles = ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'GESTOR', 'ALMOXARIFE_OPERADOR']; // RH possui acesso somente consulta (API bloqueia escrita)
 
 require_once __DIR__ . '/../services/ApiService.php';
 

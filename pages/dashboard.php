@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 $page_title = 'Dashboard';
 $active_menu = 'dashboard';
-$page_roles = ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR', 'GESTOR'];
+$page_roles = ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'GESTOR', 'ALMOXARIFE_OPERADOR'];
 
 require_once __DIR__ . '/../services/ApiService.php';
 

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 $page_title = 'Termos de Uso';
 $active_menu = 'configuracoes';
-$page_roles = ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR', 'GESTOR'];
+$page_roles = ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'GESTOR', 'ALMOXARIFE_OPERADOR'];
 
 require_once __DIR__ . '/../components/header.php';
 require_once __DIR__ . '/../components/sidebar.php';

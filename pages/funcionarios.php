@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 $page_title = 'Funcionários';
 $active_menu = 'funcionarios';
-$page_roles = ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR', 'GESTOR'];
+$page_roles = ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'GESTOR'];
 
 require_once __DIR__ . '/../components/header.php';
 require_once __DIR__ . '/../components/sidebar.php';

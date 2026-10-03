@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 $page_title = 'Auditoria de Logs';
 $active_menu = 'auditoria';
-$page_roles = ['ADMINISTRADOR']; // Apenas Administradores do Sistema
+$page_roles = ['ADMINISTRADOR', 'TECNICO_SST', 'GESTOR']; // Apenas Administradores do Sistema
 
 require_once __DIR__ . '/../components/header.php';
 require_once __DIR__ . '/../components/sidebar.php';

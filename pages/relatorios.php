@@ -4,7 +4,7 @@ declare(strict_types=1);
 $page_title = 'Relatórios e Conformidade';
 $active_menu = 'relatorios';
 // RH_ADMINISTRATIVO possui acesso apenas ao Relatório Geral e ao relatório individual por colaborador
-$page_roles = ['ADMINISTRADOR', 'TECNICO_SST', 'GESTOR', 'RH_ADMINISTRATIVO'];
+$page_roles = ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'GESTOR', 'ALMOXARIFE_OPERADOR'];
 
 require_once __DIR__ . '/../components/header.php';
 require_once __DIR__ . '/../components/sidebar.php';

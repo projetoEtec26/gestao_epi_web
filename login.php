@@ -23,7 +23,16 @@ if (isset($_SESSION['token']) && $_SESSION['token'] !== '' && isset($_SESSION['u
         $apiVal = new ApiService();
         $meVal = $apiVal->get('auth/me');
         if (isset($meVal['success']) && $meVal['success']) {
-            header('Location: ' . APP_ROOT . 'pages/dashboard.php');
+                        $perfil = $_SESSION['usuario']['usu_perfil'] ?? '';
+            $homePage = match (strtoupper((string)$perfil)) {
+                'ADMINISTRADOR'       => 'pages/usuarios.php',
+                'RH_ADMINISTRATIVO'   => 'pages/funcionarios.php',
+                'TECNICO_SST'         => 'pages/epis.php',
+                'GESTOR'              => 'pages/dashboard.php',
+                'ALMOXARIFE_OPERADOR' => 'pages/entregas.php',
+                default               => 'pages/entregas.php',
+            };
+            header('Location: ' . APP_ROOT . $homePage);
             exit;
         } else {
             // Token expirado ou inválido na nuvem: limpa para forçar nova autenticação
@@ -84,7 +93,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
                 // Garante a gravação imediata da sessão PHP em disco
                 session_write_close();
 
-                $redirectUrl = $_SESSION['exige_troca_senha'] ? APP_ROOT . 'login.php' : APP_ROOT . 'pages/dashboard.php';
+                                $perfil = $_SESSION['usuario']['usu_perfil'] ?? '';
+                $homePage = match (strtoupper((string)$perfil)) {
+                    'ADMINISTRADOR'       => 'pages/usuarios.php',
+                    'RH_ADMINISTRATIVO'   => 'pages/funcionarios.php',
+                    'TECNICO_SST'         => 'pages/epis.php',
+                    'GESTOR'              => 'pages/dashboard.php',
+                    'ALMOXARIFE_OPERADOR' => 'pages/entregas.php',
+                    default               => 'pages/entregas.php',
+                };
+                $redirectUrl = $_SESSION['exige_troca_senha'] ? APP_ROOT . 'login.php' : APP_ROOT . $homePage;
                 header('Location: ' . $redirectUrl);
                 exit;
             } else {
@@ -128,7 +146,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
                 session_write_close();
                 
                 $_SESSION['success_message'] = 'Senha alterada com sucesso! Bem-vindo ao Gestão EPI.';
-                header('Location: ' . APP_ROOT . 'pages/dashboard.php');
+                            $perfil = $_SESSION['usuario']['usu_perfil'] ?? '';
+            $homePage = match (strtoupper((string)$perfil)) {
+                'ADMINISTRADOR'       => 'pages/usuarios.php',
+                'RH_ADMINISTRATIVO'   => 'pages/funcionarios.php',
+                'TECNICO_SST'         => 'pages/epis.php',
+                'GESTOR'              => 'pages/dashboard.php',
+                'ALMOXARIFE_OPERADOR' => 'pages/entregas.php',
+                default               => 'pages/entregas.php',
+            };
+            header('Location: ' . APP_ROOT . $homePage);
                 exit;
             } else {
                 $erro = $response['message'] ?? 'Não foi possível alterar a senha.';

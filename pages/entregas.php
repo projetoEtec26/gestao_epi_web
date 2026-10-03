@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 $page_title = 'Histórico Geral de Entregas';
 $active_menu = 'entregas';
-$page_roles = ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR', 'GESTOR'];
+$page_roles = ['ADMINISTRADOR', 'TECNICO_SST', 'GESTOR', 'ALMOXARIFE_OPERADOR'];
 
 require_once __DIR__ . '/../components/header.php';
 require_once __DIR__ . '/../components/sidebar.php';

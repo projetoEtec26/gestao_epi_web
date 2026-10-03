@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 $page_title = 'Usuários e Permissões';
 $active_menu = 'usuarios';
-$page_roles = ['ADMINISTRADOR']; // Apenas administradores do sistema possuem acesso
+$page_roles = ['ADMINISTRADOR', 'TECNICO_SST', 'GESTOR']; // Apenas administradores do sistema possuem acesso
 
 require_once __DIR__ . '/../components/header.php';
 require_once __DIR__ . '/../components/sidebar.php';

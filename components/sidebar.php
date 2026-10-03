@@ -18,15 +18,15 @@ if (!defined('APP_ROOT')) {
 if (!function_exists('hasPermission')) {
     function hasPermission(string $menuName, string $perfil): bool {
         $permissions = [
-            'dashboard'   => ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR', 'GESTOR'],
-            'funcionarios'=> ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR', 'GESTOR'],
-            'epis'        => ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR', 'GESTOR'],
-            'entregas'    => ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR', 'GESTOR'],
-            'relatorios'  => ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'GESTOR'],
-            'usuarios'    => ['ADMINISTRADOR'],
-            'auditoria'   => ['ADMINISTRADOR'],
-            'pendencias'  => ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR', 'GESTOR'],
-            'configuracoes'=> ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR', 'GESTOR']
+            'dashboard'    => ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'GESTOR', 'ALMOXARIFE_OPERADOR'],
+            'funcionarios' => ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'GESTOR'],
+            'epis'         => ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'GESTOR', 'ALMOXARIFE_OPERADOR'],
+            'entregas'     => ['ADMINISTRADOR', 'TECNICO_SST', 'GESTOR', 'ALMOXARIFE_OPERADOR'],
+            'relatorios'   => ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'GESTOR', 'ALMOXARIFE_OPERADOR'],
+            'usuarios'     => ['ADMINISTRADOR', 'TECNICO_SST', 'GESTOR'],
+            'auditoria'    => ['ADMINISTRADOR', 'TECNICO_SST', 'GESTOR'],
+            'pendencias'   => ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'GESTOR'],
+            'configuracoes'=> ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'GESTOR', 'ALMOXARIFE_OPERADOR']
         ];
 
         return in_array($perfil, $permissions[$menuName] ?? [], true);
