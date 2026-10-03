@@ -82,24 +82,45 @@ $aceitouTermos = !empty($currentUser['usu_aceite_termos']);
 ?>
 
 <style>
-/* Painel no mesmo visual do modal "Novo Item no Catálogo" */
+/* Painel no mesmo visual do modal "Novo Item no Catálogo" — compacto em 2 colunas para caber na tela sem rolagem */
 .settings-container {
-    max-width: 820px;
-    margin: 8px auto 24px auto;
+    max-width: 1040px;
+    margin: 0 auto;
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 16px;
     box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.25);
-    padding: 0 24px 24px 24px;
+    padding: 0 24px 18px 24px;
     overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 20px;
+    align-items: start;
+}
+
+.settings-container > .settings-panel-header,
+.settings-container > .settings-panel-subtitle,
+.settings-container > .alert,
+.settings-container > .settings-group-full {
+    grid-column: 1 / -1;
+}
+
+.settings-container > .settings-group {
+    margin-bottom: 4px !important;
+}
+
+@media (max-width: 991px) {
+    .settings-container {
+        grid-template-columns: 1fr;
+    }
 }
 
 .settings-panel-header {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 0 -24px 8px -24px;
-    padding: 18px 24px;
+    margin: 0 -24px 6px -24px;
+    padding: 14px 24px;
     border-bottom: 1px solid #e2e8f0;
 }
 
@@ -140,16 +161,16 @@ body.dark-mode .settings-panel-header h3 {
 .settings-group-title {
     color: #2563eb;
     font-weight: 600;
-    font-size: 1.05rem;
-    margin-bottom: 0.5rem;
-    margin-top: 1.5rem;
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+    margin-top: 0.75rem;
 }
 
 .settings-card {
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 14px;
-    padding: 16px 20px;
+    padding: 12px 16px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
     transition: all 0.2s ease;
 }
@@ -175,7 +196,7 @@ body.dark-mode .settings-panel-header h3 {
     border: 2px solid #ef4444 !important;
     background-color: #ffffff;
     border-radius: 14px;
-    padding: 16px 20px;
+    padding: 10px 16px;
     box-shadow: 0 2px 6px rgba(239, 68, 68, 0.08);
     transition: all 0.2s ease;
 }
@@ -445,7 +466,7 @@ html.dark-mode .form-control, body.dark-mode .form-control {
             </div>
 
             <!-- 5. ENCERRAR SESSÃO (SAIR) -->
-            <div class="settings-group mt-4 mb-4">
+            <div class="settings-group settings-group-full mt-3 mb-0">
                 <a href="<?= APP_ROOT ?>logout.php" class="settings-logout-card text-decoration-none d-flex align-items-center gap-3">
                     <div class="settings-logout-icon">
                         <i class="bi bi-box-arrow-right"></i>
