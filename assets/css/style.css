@@ -407,15 +407,18 @@ html.dark-mode #topbar .toggle-sidebar-btn, body.dark-mode #topbar .toggle-sideb
     color: #cbd5e1 !important;
 }
 
-/* Componentes de Busca & Addons (Input Group Text & Web Search Box) */
+/* Componentes de Busca & Addons (Input Group Text, Web Search Box, Autocomplete, Badges & Bootstrap Utility Overrides) */
 html.dark-mode .input-group-text, body.dark-mode .input-group-text {
     background-color: #0f172a !important;
     border-color: #334155 !important;
     color: #38bdf8 !important;
 }
 
-html.dark-mode .input-group-text.bg-white, body.dark-mode .input-group-text.bg-white {
+html.dark-mode .input-group-text.bg-white, body.dark-mode .input-group-text.bg-white,
+html.dark-mode .input-group-text.bg-light, body.dark-mode .input-group-text.bg-light {
     background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #38bdf8 !important;
 }
 
 html.dark-mode .web-search-box, body.dark-mode .web-search-box {
@@ -439,6 +442,69 @@ html.dark-mode .web-search-box #btn-limpar, body.dark-mode .web-search-box #btn-
 html.dark-mode .web-card-container, body.dark-mode .web-card-container {
     background-color: #1e293b !important;
     border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode #dropdown-colab, body.dark-mode #dropdown-colab,
+html.dark-mode #dropdown-autocomplete-colab, body.dark-mode #dropdown-autocomplete-colab,
+html.dark-mode .autocomplete-dropdown-container, body.dark-mode .autocomplete-dropdown-container {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode .web-dd-item, body.dark-mode .web-dd-item {
+    color: #f8fafc !important;
+    border-bottom-color: #334155 !important;
+}
+
+html.dark-mode .web-dd-item:hover, body.dark-mode .web-dd-item:hover {
+    background-color: #334155 !important;
+}
+
+/* Overrides globais para Utilitários Bootstrap (.bg-white, .bg-light, .bg-body-tertiary, .table-light) */
+html.dark-mode .bg-white, body.dark-mode .bg-white,
+html.dark-mode .bg-light, body.dark-mode .bg-light,
+html.dark-mode .bg-body-tertiary, body.dark-mode .bg-body-tertiary {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+html.dark-mode .card, body.dark-mode .card,
+html.dark-mode .card-ca-item, body.dark-mode .card-ca-item {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode .badge.bg-light, body.dark-mode .badge.bg-light,
+html.dark-mode .badge.bg-white, body.dark-mode .badge.bg-white {
+    background-color: #334155 !important;
+    color: #f8fafc !important;
+    border-color: #475569 !important;
+}
+
+html.dark-mode .table-light, body.dark-mode .table-light {
+    background-color: #1e293b !important;
+    color: #cbd5e1 !important;
+}
+
+html.dark-mode .table-light th, body.dark-mode .table-light th,
+html.dark-mode .table-light td, body.dark-mode .table-light td {
+    background-color: #1e293b !important;
+    color: #cbd5e1 !important;
+    border-color: #334155 !important;
+}
+
+html.dark-mode .modal-header.bg-light, body.dark-mode .modal-header.bg-light {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-bottom-color: #334155 !important;
+}
+
+html.dark-mode .modal-body.bg-light, body.dark-mode .modal-body.bg-light {
+    background-color: #0f172a !important;
     color: #f8fafc !important;
 }
 

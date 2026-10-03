@@ -399,7 +399,7 @@ $acao = $_GET['acao'] ?? 'lista';
                             <i class="bi bi-search text-primary me-1"></i> Buscar Colaborador (Tempo Real) *
                         </label>
                         <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 text-primary">
+                            <span class="input-group-text bg-transparent border-end-0 text-primary">
                                 <i class="bi bi-search"></i>
                             </span>
                             <input type="text" 
@@ -1190,7 +1190,7 @@ $acao = $_GET['acao'] ?? 'lista';
                 <p class="text-muted small mb-3">Selecione um colaborador da lista para cadastrar, redefinir ou gerenciar o PIN de assinatura eletrônica.</p>
                 
                 <div class="input-group mb-3">
-                    <span class="input-group-text bg-white border-end-0 text-primary"><i class="bi bi-search"></i></span>
+                    <span class="input-group-text bg-transparent border-end-0 text-primary"><i class="bi bi-search"></i></span>
                     <input type="text" id="busca-pin-global" class="form-control border-start-0" placeholder="Filtrar colaborador por nome ou CPF..." oninput="filtrarColaboradoresPin(this.value)">
                 </div>
 

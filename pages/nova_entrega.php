@@ -101,7 +101,7 @@ try {
                                 <i class="bi bi-search text-primary me-1"></i> Buscar Colaborador (Tempo Real) *
                             </label>
                             <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0 text-primary">
+                                <span class="input-group-text bg-transparent border-end-0 text-primary">
                                     <i class="bi bi-person-bounding-box"></i>
                                 </span>
                                 <input type="text" 
@@ -197,7 +197,7 @@ try {
                                 <i class="bi bi-search text-primary me-1"></i> Buscar Equipamento (Tempo Real) *
                             </label>
                             <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0 text-primary">
+                                <span class="input-group-text bg-transparent border-end-0 text-primary">
                                     <i class="bi bi-shield-check"></i>
                                 </span>
                                 <input type="text" 

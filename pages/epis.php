@@ -603,7 +603,7 @@ require_once __DIR__ . '/../components/sidebar.php';
                         <i class="bi bi-search text-primary me-1"></i> Consulta de EPIs no Catálogo
                     </label>
                     <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0 text-primary">
+                        <span class="input-group-text bg-transparent border-end-0 text-primary">
                             <i class="bi bi-shield-check"></i>
                         </span>
                         <input type="text" 
