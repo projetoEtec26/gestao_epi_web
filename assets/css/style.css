@@ -1383,10 +1383,63 @@ body.dark-mode .form-select,
 html.dark-mode .form-control,
 body.dark-mode .form-control,
 html.dark-mode .input-group-text,
-body.dark-mode .input-group-text {
-    background-color: #1e293b !important;
-    border-color: #475569 !important;
+body.dark-mode .input-group-text,
+html.dark-mode input,
+body.dark-mode input,
+html.dark-mode select,
+body.dark-mode select,
+html.dark-mode textarea,
+body.dark-mode textarea {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
     color: #f8fafc !important;
+    color-scheme: dark !important;
+}
+
+html.dark-mode label,
+body.dark-mode label,
+html.dark-mode .form-label,
+body.dark-mode .form-label,
+html.dark-mode .audit-label,
+body.dark-mode .audit-label {
+    color: #cbd5e1 !important;
+}
+
+/* Placeholders de Alta Visibilidade e Contraste no Modo Escuro */
+html.dark-mode ::placeholder,
+body.dark-mode ::placeholder,
+html.dark-mode input::placeholder,
+body.dark-mode input::placeholder,
+html.dark-mode textarea::placeholder,
+body.dark-mode textarea::placeholder,
+html.dark-mode .form-control::placeholder,
+body.dark-mode .form-control::placeholder {
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+}
+
+html.dark-mode ::-webkit-input-placeholder,
+body.dark-mode ::-webkit-input-placeholder,
+html.dark-mode input::-webkit-input-placeholder,
+body.dark-mode input::-webkit-input-placeholder {
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+}
+
+html.dark-mode ::-moz-placeholder,
+body.dark-mode ::-moz-placeholder,
+html.dark-mode input::-moz-placeholder,
+body.dark-mode input::-moz-placeholder {
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+}
+
+html.dark-mode :-ms-input-placeholder,
+body.dark-mode :-ms-input-placeholder,
+html.dark-mode input:-ms-input-placeholder,
+body.dark-mode input:-ms-input-placeholder {
+    color: #94a3b8 !important;
+    opacity: 1 !important;
 }
 
 html.dark-mode .form-select option,
@@ -1401,7 +1454,7 @@ html.dark-mode .form-select:focus,
 body.dark-mode .form-select:focus,
 html.dark-mode .form-control:focus,
 body.dark-mode .form-control:focus {
-    background-color: #1e293b !important;
+    background-color: #0f172a !important;
     border-color: #3b82f6 !important;
     color: #f8fafc !important;
     box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;

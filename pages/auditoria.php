@@ -214,6 +214,29 @@ body.dark-mode .audit-card-title {
     color: #60a5fa !important;
 }
 
+body.dark-mode .audit-label {
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode .audit-select,
+body.dark-mode .audit-input {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+    color-scheme: dark !important;
+}
+
+body.dark-mode .audit-input::placeholder,
+body.dark-mode .audit-select::placeholder {
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+}
+
+body.dark-mode .audit-input::-webkit-input-placeholder {
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+}
+
 body.dark-mode .audit-btn-pdf,
 body.dark-mode .audit-btn-limpar {
     background-color: #1e293b !important;
