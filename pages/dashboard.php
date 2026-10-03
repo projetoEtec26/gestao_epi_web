@@ -1954,16 +1954,33 @@ let dadosMensal = <?= json_encode($entregasMensal) ?>;
 let htmlTop5Geral = <?= json_encode(renderTop5EpisHtml($top5Epis)) ?>;
 let htmlTop5Mensal = <?= json_encode(renderTop5EpisHtml($top5EpisMensal)) ?>;
 
+window.atualizarCoresGraficoModoEscuro = function() {
+    if (!chartEntregasInstance) return;
+    const isDark = document.documentElement.classList.contains('dark-mode') || (document.body && document.body.classList.contains('dark-mode'));
+    const tickColor = isDark ? '#cbd5e1' : '#64748b';
+    const gridColor = isDark ? '#334155' : '#f1f5f9';
+
+    if (chartEntregasInstance.options.scales.x) {
+        chartEntregasInstance.options.scales.x.ticks.color = tickColor;
+    }
+    if (chartEntregasInstance.options.scales.y) {
+        chartEntregasInstance.options.scales.y.ticks.color = tickColor;
+        chartEntregasInstance.options.scales.y.grid.color = gridColor;
+    }
+    chartEntregasInstance.update('none');
+};
+
 const barTopLabelsPlugin = {
     id: 'barTopLabels',
     afterDatasetsDraw(chart) {
         const { ctx } = chart;
+        const isDark = document.documentElement.classList.contains('dark-mode') || (document.body && document.body.classList.contains('dark-mode'));
         chart.data.datasets.forEach((dataset, i) => {
             const meta = chart.getDatasetMeta(i);
             meta.data.forEach((bar, index) => {
                 const val = dataset.data[index];
                 ctx.save();
-                ctx.fillStyle = '#1e3a8a';
+                ctx.fillStyle = isDark ? '#38bdf8' : '#1e3a8a';
                 ctx.font = 'bold 12px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
@@ -1975,6 +1992,10 @@ const barTopLabelsPlugin = {
 };
 
 document.addEventListener('DOMContentLoaded', function() {
+    const isDark = document.documentElement.classList.contains('dark-mode') || (document.body && document.body.classList.contains('dark-mode'));
+    const tickColor = isDark ? '#cbd5e1' : '#64748b';
+    const gridColor = isDark ? '#334155' : '#f1f5f9';
+
     // Inicialização do Gráfico 7 Dias / Entregas (Fiel ao App Android - Print 2)
     const ctx = document.getElementById('chartEntregas7Dias').getContext('2d');
     chartEntregasInstance = new Chart(ctx, {
@@ -2004,8 +2025,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 legend: { display: false }
             },
             scales: {
-                x: { grid: { display: false } },
-                y: { grid: { color: '#f1f5f9' }, beginAtZero: true, ticks: { precision: 0 } }
+                x: {
+                    grid: { display: false },
+                    ticks: { color: tickColor, font: { weight: '600' } }
+                },
+                y: {
+                    grid: { color: gridColor },
+                    beginAtZero: true,
+                    ticks: { precision: 0, color: tickColor, font: { weight: '600' } }
+                }
             }
         }
     });

@@ -44,6 +44,8 @@ function initDarkMode() {
             document.cookie = 'theme-mode=light; path=/; max-age=31536000; SameSite=Lax';
             if (themeIcon) themeIcon.className = 'bi bi-moon-stars';
             if (selectTema) selectTema.value = 'light';
+        if (typeof window.atualizarCoresGraficoModoEscuro === 'function') {
+            window.atualizarCoresGraficoModoEscuro();
         }
     }
 
