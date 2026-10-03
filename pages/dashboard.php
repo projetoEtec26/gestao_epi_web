@@ -2030,6 +2030,53 @@ function toggleTop5Filtro(tipo) {
 }
 
 /**
+ * Helper para atualizar modal preservando a aba ativa (Tab) e posição de rolagem (Scroll)
+ */
+function atualizarModalBodyComAbas(containerId, novoHtml) {
+    const container = document.getElementById(containerId);
+    if (!container || !novoHtml) return;
+
+    // Guarda a posição de rolagem e a aba ativa antes da atualização
+    const savedScrollTop = container.scrollTop;
+    const activeTab = container.querySelector('.nav-link.active');
+    const activeTabId = activeTab ? activeTab.id : null;
+    const activeTargetId = activeTab ? activeTab.getAttribute('data-bs-target') : null;
+
+    // Atualiza o conteúdo HTML
+    container.innerHTML = novoHtml;
+
+    // Restaura a aba selecionada pelo usuário
+    if (activeTabId && activeTargetId) {
+        const btnTab = container.querySelector('#' + activeTabId);
+        const targetPane = container.querySelector(activeTargetId);
+
+        if (btnTab && targetPane) {
+            container.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
+            container.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('show', 'active'));
+
+            btnTab.classList.add('active');
+            targetPane.classList.add('show', 'active');
+        }
+    }
+
+    // Restaura a posição de rolagem
+    if (savedScrollTop > 0) {
+        container.scrollTop = savedScrollTop;
+    }
+}
+
+function atualizarModalBodySimples(containerId, novoHtml) {
+    const container = document.getElementById(containerId);
+    if (!container || !novoHtml) return;
+
+    const savedScrollTop = container.scrollTop;
+    container.innerHTML = novoHtml;
+    if (savedScrollTop > 0) {
+        container.scrollTop = savedScrollTop;
+    }
+}
+
+/**
  * Atualiza o DOM do Dashboard com dados recebidos via JSON sem recarregar a página
  */
 function atualizarDashboardDOM(data) {
@@ -2134,45 +2181,34 @@ function atualizarDashboardDOM(data) {
         containerTop5.innerHTML = (filtroTop5Atual === 'mensal') ? htmlTop5Mensal : htmlTop5Geral;
     }
 
-    // 7. Conteúdo HTML dos Modais e Atividades
+    // 7. Conteúdo HTML dos Modais e Atividades (Preservando Abas Ativas e Posição de Rolagem)
     if (data.modalCaVencidosHtml) {
-        const bodyCaVencidos = document.getElementById('body-modal-ca-vencidos');
-        if (bodyCaVencidos) bodyCaVencidos.innerHTML = data.modalCaVencidosHtml;
+        atualizarModalBodyComAbas('body-modal-ca-vencidos', data.modalCaVencidosHtml);
     }
     if (data.modalVidaUtilVencidaHtml) {
-        const bodyVidaUtil = document.getElementById('body-modal-vida-util-vencida');
-        if (bodyVidaUtil) bodyVidaUtil.innerHTML = data.modalVidaUtilVencidaHtml;
+        atualizarModalBodySimples('body-modal-vida-util-vencida', data.modalVidaUtilVencidaHtml);
     }
     if (data.modalCaAVencerHtml) {
-        const bodyCaAVencer = document.getElementById('body-modal-ca-a-vencer');
-        if (bodyCaAVencer) bodyCaAVencer.innerHTML = data.modalCaAVencerHtml;
+        atualizarModalBodySimples('body-modal-ca-a-vencer', data.modalCaAVencerHtml);
     }
     if (data.modalEntregasHojeHtml) {
-        const bodyEntregasHoje = document.getElementById('body-modal-entregas-hoje');
-        if (bodyEntregasHoje) bodyEntregasHoje.innerHTML = data.modalEntregasHojeHtml;
+        atualizarModalBodySimples('body-modal-entregas-hoje', data.modalEntregasHojeHtml);
     }
     if (data.modalPinBloqueadosHtml) {
-        const bodyPin = document.getElementById('body-modal-pin-bloqueados');
-        if (bodyPin) bodyPin.innerHTML = data.modalPinBloqueadosHtml;
+        atualizarModalBodyComAbas('body-modal-pin-bloqueados', data.modalPinBloqueadosHtml);
     }
     if (data.modalEpisEmPosseHtml) {
-        const bodyPosse = document.getElementById('body-modal-epis-em-posse');
-        if (bodyPosse) bodyPosse.innerHTML = data.modalEpisEmPosseHtml;
+        atualizarModalBodySimples('body-modal-epis-em-posse', data.modalEpisEmPosseHtml);
     }
     if (data.modalFuncVencidosHtml) {
-        const bodyFuncVencidos = document.getElementById('body-modal-func-vencidos');
-        if (bodyFuncVencidos) bodyFuncVencidos.innerHTML = data.modalFuncVencidosHtml;
+        atualizarModalBodySimples('body-modal-func-vencidos', data.modalFuncVencidosHtml);
     }
     if (data.modalFuncTrocaHtml) {
-        const bodyFuncTroca = document.getElementById('body-modal-func-troca');
-        if (bodyFuncTroca) bodyFuncTroca.innerHTML = data.modalFuncTrocaHtml;
+        atualizarModalBodySimples('body-modal-func-troca', data.modalFuncTrocaHtml);
     }
     if (data.modalTodasAtividadesHtml) {
-        const bodyAtividades = document.getElementById('body-modal-todas-atividades');
-        if (bodyAtividades) bodyAtividades.innerHTML = data.modalTodasAtividadesHtml;
-
-        const feedAtividadesCard = document.getElementById('card-feed-ultimas-atividades');
-        if (feedAtividadesCard) feedAtividadesCard.innerHTML = data.modalTodasAtividadesHtml;
+        atualizarModalBodySimples('body-modal-todas-atividades', data.modalTodasAtividadesHtml);
+        atualizarModalBodySimples('card-feed-ultimas-atividades', data.modalTodasAtividadesHtml);
     }
 
     // 8. Gráfico de Entregas
