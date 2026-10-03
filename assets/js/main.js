@@ -30,23 +30,6 @@ function initDatePickers() {
         openMaterialDatePickerModal(input);
     }
 
-    function makeInputsReadOnly() {
-        document.querySelectorAll('input[type="date"], input[type="datetime-local"]').forEach(input => {
-            if (!input.hasAttribute('readonly')) {
-                input.setAttribute('readonly', 'readonly');
-            }
-        });
-    }
-
-    makeInputsReadOnly();
-
-    if ('MutationObserver' in window) {
-        const observer = new MutationObserver(function() {
-            makeInputsReadOnly();
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
-    }
-
     document.addEventListener('mousedown', function(e) {
         const input = e.target.closest('input[type="date"], input[type="datetime-local"], .mask-date');
         if (input && !input.disabled) {
@@ -367,6 +350,7 @@ function initDarkMode() {
             document.cookie = 'theme-mode=light; path=/; max-age=31536000; SameSite=Lax';
             if (themeIcon) themeIcon.className = 'bi bi-moon-stars';
             if (selectTema) selectTema.value = 'light';
+        }
         if (typeof window.atualizarCoresGraficoModoEscuro === 'function') {
             window.atualizarCoresGraficoModoEscuro();
         }
