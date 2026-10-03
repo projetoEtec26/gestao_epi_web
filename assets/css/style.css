@@ -1666,7 +1666,7 @@ body.dark-mode .form-select:disabled {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
 }
 
-/* Indicadores de Número (Spinners) e Calendário (Dates) Visíveis no Modo Escuro */
+/* Indicadores de Número (Spinners) e Calendário (Dates) em Tom Ciano (#38bdf8) sem fundo branco no Modo Escuro */
 html.dark-mode ::-webkit-inner-spin-button,
 body.dark-mode ::-webkit-inner-spin-button,
 html.dark-mode ::-webkit-outer-spin-button,
@@ -1675,11 +1675,10 @@ html.dark-mode input::-webkit-inner-spin-button,
 body.dark-mode input::-webkit-inner-spin-button,
 html.dark-mode input::-webkit-outer-spin-button,
 body.dark-mode input::-webkit-outer-spin-button {
-    filter: invert(1) brightness(3) contrast(1.5) !important;
-    background-color: rgba(56, 189, 248, 0.15) !important;
-    border-radius: 4px !important;
-    padding: 2px !important;
-    opacity: 1 !important;
+    filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(170deg) brightness(102%) contrast(97%) !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    opacity: 0.95 !important;
     cursor: pointer !important;
 }
 
@@ -1695,21 +1694,20 @@ html.dark-mode input[type="time"]::-webkit-calendar-picker-indicator,
 body.dark-mode input[type="time"]::-webkit-calendar-picker-indicator,
 html.dark-mode input[type="month"]::-webkit-calendar-picker-indicator,
 body.dark-mode input[type="month"]::-webkit-calendar-picker-indicator {
-    filter: invert(1) brightness(3) contrast(1.5) drop-shadow(0 0 3px #38bdf8) !important;
-    background-color: rgba(56, 189, 248, 0.15) !important;
-    border-radius: 6px !important;
-    padding: 4px 6px !important;
-    opacity: 1 !important;
+    filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(170deg) brightness(102%) contrast(97%) !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    opacity: 0.95 !important;
     cursor: pointer !important;
-    transition: all 0.2s ease !important;
+    transition: opacity 0.2s ease !important;
 }
 
 html.dark-mode ::-webkit-calendar-picker-indicator:hover,
 body.dark-mode ::-webkit-calendar-picker-indicator:hover,
 html.dark-mode input::-webkit-calendar-picker-indicator:hover,
 body.dark-mode input::-webkit-calendar-picker-indicator:hover {
-    background-color: rgba(56, 189, 248, 0.3) !important;
-    filter: invert(1) brightness(3.5) drop-shadow(0 0 5px #38bdf8) !important;
+    opacity: 1 !important;
+    filter: invert(55%) sepia(90%) saturate(3000%) hue-rotate(170deg) brightness(115%) contrast(105%) !important;
 }
 
 html.dark-mode label,
