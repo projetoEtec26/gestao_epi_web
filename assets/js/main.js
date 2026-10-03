@@ -4,12 +4,38 @@ document.addEventListener('DOMContentLoaded', function() {
     initDarkMode();
     initSidebarToggle();
     initInputsMasks();
+    initNumberSpinners();
 
     // Notifica automaticamente o Dashboard sempre que qualquer alteração/sucesso for realizada no sistema
     if (document.querySelector('.alert-success')) {
         window.notificarAtualizacaoSistema();
     }
 });
+
+/**
+ * Suporte global de clique para incrementar/decrementar campos do tipo número (setas ▲ e ▼)
+ */
+function initNumberSpinners() {
+    document.addEventListener('click', function(e) {
+        const input = e.target.closest('input[type="number"]');
+        if (!input || input.disabled || input.readOnly) return;
+
+        const rect = input.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+
+        // Se o clique for no lado direito do campo (na área das setas ▲▼)
+        if (clickX > rect.width - 28) {
+            if (clickY < rect.height / 2) {
+                try { input.stepUp(); } catch(err) { input.value = (parseFloat(input.value) || 0) + 1; }
+            } else {
+                try { input.stepDown(); } catch(err) { input.value = Math.max((parseFloat(input.value) || 0) - 1, 0); }
+            }
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    });
+}
 
 /**
  * Inicializa e gerencia a preferência do Modo Escuro (Dark Mode)
