@@ -310,9 +310,14 @@ try {
                 $regId = $log['log_registro_id'] ?? '---';
 
                 $ocorrencia = $log['log_ocorrencia'] ?? null;
+                $detalhesJson = json_decode($log['log_detalhes'] ?? '', true);
                 if (empty($ocorrencia)) {
-                    $detalhesJson = json_decode($log['log_detalhes'] ?? '', true);
                     $ocorrencia = $detalhesJson['ocorrencia'] ?? 'Sem descrição.';
+                }
+
+                $aparelhoLog = $detalhesJson['contexto']['aparelho'] ?? $detalhesJson['aparelho'] ?? $detalhesJson['dispositivo'] ?? null;
+                if (!empty($aparelhoLog) && $aparelhoLog !== 'Aparelho desconhecido' && !str_contains($ocorrencia, 'no aparelho:')) {
+                    $ocorrencia .= ' no aparelho: ' . $aparelhoLog;
                 }
                 ?>
                 <tr>
