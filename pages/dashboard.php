@@ -1450,6 +1450,38 @@ require_once __DIR__ . '/../components/sidebar.php';
     color: #94a3b8;
     font-weight: 500;
 }
+
+/* Regras de Alto Contraste para Modo Escuro no Dashboard */
+body.dark-mode .top5-name,
+html.dark-mode .top5-name {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .top5-rank-num,
+html.dark-mode .top5-rank-num {
+    color: #38bdf8 !important;
+}
+
+body.dark-mode .top5-val,
+html.dark-mode .top5-val {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .top5-progress-bg,
+html.dark-mode .top5-progress-bg {
+    background-color: #334155 !important;
+}
+
+body.dark-mode .activity-feed-item,
+html.dark-mode .activity-feed-item {
+    background-color: #0f172a !important;
+    border-color: #1e293b !important;
+}
+
+body.dark-mode .activity-text,
+html.dark-mode .activity-text {
+    color: #f8fafc !important;
+}
 </style>
 
 <div id="main-content">

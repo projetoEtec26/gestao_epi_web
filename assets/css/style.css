@@ -1474,3 +1474,24 @@ body.dark-mode {
     color: #f8fafc !important;
 }
 
+/* Regras de Contraste para o Card Top 5 EPIs e Feeds no Modo Escuro */
+html.dark-mode .top5-name,
+body.dark-mode .top5-name {
+    color: #f8fafc !important;
+}
+
+html.dark-mode .top5-rank-num,
+body.dark-mode .top5-rank-num {
+    color: #38bdf8 !important;
+}
+
+html.dark-mode .top5-val,
+body.dark-mode .top5-val {
+    color: #f8fafc !important;
+}
+
+html.dark-mode .top5-progress-bg,
+body.dark-mode .top5-progress-bg {
+    background-color: #334155 !important;
+}
+
