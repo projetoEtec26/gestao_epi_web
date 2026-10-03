@@ -295,34 +295,6 @@ $podeDevolver = in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXAR
     cursor: not-allowed;
 }
 
-/* Botão Flutuante (+) Android */
-.android-fab {
-    position: absolute;
-    bottom: -22px;
-    right: 20px;
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: #38bdf8;
-    color: #0f172a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-    font-weight: bold;
-    box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4);
-    cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-    border: none;
-    text-decoration: none;
-    z-index: 10;
-}
-
-.android-fab:hover {
-    transform: scale(1.08);
-    background: #7dd3fc;
-    color: #0f172a;
-}
 </style>
 
 <div id="main-content">
@@ -480,12 +452,7 @@ $podeDevolver = in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXAR
                         </div>
                     </form>
 
-                    <!-- Botão Flutuante (+) para Nova Entrega -->
-                    <?php if ($podeDevolver): ?>
-                        <a href="nova_entrega.php" class="android-fab" title="Nova Entrega de EPI">
-                            +
-                        </a>
-                    <?php endif; ?>
+
 
                 </div>
             </div>
