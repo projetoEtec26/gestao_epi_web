@@ -14,21 +14,248 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * Suporte global para abrir o picker de calendário (mês, dia, ano) ao clicar em qualquer campo de data ou seu ícone
+ * Suporte global para abrir o modal de calendário Material Design (mês, dia, ano - conforme Print 2) ao clicar em qualquer campo de data ou seu ícone
  */
 function initDatePickers() {
     document.addEventListener('click', function(e) {
         const input = e.target.closest('input[type="date"], input[type="datetime-local"]');
-        if (!input || input.disabled || input.readOnly) return;
+        if (!input || input.disabled) return;
 
-        if (typeof input.showPicker === 'function') {
-            try {
-                input.showPicker();
-            } catch (err) {
-                // Previne exceção caso o picker já esteja aberto ou em execução pelo navegador
+        e.preventDefault();
+        e.stopPropagation();
+        input.blur();
+        openMaterialDatePickerModal(input);
+    });
+
+    document.addEventListener('focusin', function(e) {
+        const input = e.target.closest('input[type="date"], input[type="datetime-local"]');
+        if (!input || input.disabled) return;
+        
+        input.blur();
+    });
+}
+
+/**
+ * Abre o Modal de Calendário Estilo Material Design (Print 2) para seleção interativa de data
+ */
+function openMaterialDatePickerModal(inputElement) {
+    const existing = document.querySelector('.md-picker-backdrop');
+    if (existing) existing.remove();
+
+    let initialDate = new Date();
+    if (inputElement.value && inputElement.value.trim() !== '') {
+        const parts = inputElement.value.split('-');
+        if (parts.length === 3) {
+            const y = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10) - 1;
+            const d = parseInt(parts[2], 10);
+            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+                initialDate = new Date(y, m, d);
             }
         }
+    }
+
+    let selectedDate = new Date(initialDate.getFullYear(), initialDate.getMonth(), initialDate.getDate());
+    let viewDate = new Date(initialDate.getFullYear(), initialDate.getMonth(), 1);
+    let isSelectingYear = false;
+
+    const weekdaysShort = ['Dom.', 'Seg.', 'Ter.', 'Qua.', 'Qui.', 'Sex.', 'Sáb.'];
+    const weekdaysHeaders = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+    const monthsShort = ['jan.', 'fev.', 'mar.', 'abr.', 'mai.', 'jun.', 'jul.', 'ago.', 'set.', 'out.', 'nov.', 'dez.'];
+    const monthsLong = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'md-picker-backdrop';
+
+    backdrop.innerHTML = `
+        <div class="md-picker-modal" role="dialog" aria-modal="true">
+            <div class="md-picker-header">
+                <div class="md-picker-header-year" id="md-picker-year-display">${selectedDate.getFullYear()}</div>
+                <div class="md-picker-header-date" id="md-picker-date-display"></div>
+            </div>
+            <div class="md-picker-body" id="md-picker-body-content">
+                <div class="md-picker-nav">
+                    <button type="button" class="md-picker-nav-btn" id="md-picker-prev-month" aria-label="Mês Anterior">&lt;</button>
+                    <div class="md-picker-month-title" id="md-picker-month-title"></div>
+                    <button type="button" class="md-picker-nav-btn" id="md-picker-next-month" aria-label="Próximo Mês">&gt;</button>
+                </div>
+                <div class="md-picker-weekdays">
+                    ${weekdaysHeaders.map(h => `<div class="md-picker-weekday">${h}</div>`).join('')}
+                </div>
+                <div class="md-picker-days" id="md-picker-days-grid"></div>
+            </div>
+            <div class="md-picker-footer">
+                <button type="button" class="md-picker-btn md-picker-btn-cancel" id="md-picker-btn-cancel">CANCELAR</button>
+                <button type="button" class="md-picker-btn md-picker-btn-ok" id="md-picker-btn-ok">OK</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(backdrop);
+
+    const yearDisplay = backdrop.querySelector('#md-picker-year-display');
+    const dateDisplay = backdrop.querySelector('#md-picker-date-display');
+    const bodyContent = backdrop.querySelector('#md-picker-body-content');
+    const cancelBtn = backdrop.querySelector('#md-picker-btn-cancel');
+    const okBtn = backdrop.querySelector('#md-picker-btn-ok');
+
+    function updateHeader() {
+        yearDisplay.textContent = selectedDate.getFullYear();
+        const dayName = weekdaysShort[selectedDate.getDay()];
+        const dayNum = selectedDate.getDate();
+        const monthName = monthsShort[selectedDate.getMonth()];
+        dateDisplay.textContent = `${dayName}, ${dayNum} de ${monthName}`;
+    }
+
+    function renderDaysView() {
+        const monthTitle = backdrop.querySelector('#md-picker-month-title');
+        const daysGrid = backdrop.querySelector('#md-picker-days-grid');
+        if (!monthTitle || !daysGrid) return;
+
+        monthTitle.textContent = `${monthsLong[viewDate.getMonth()]} de ${viewDate.getFullYear()}`;
+        
+        const firstDayIdx = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay();
+        const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
+        const today = new Date();
+
+        let gridHtml = '';
+        for (let i = 0; i < firstDayIdx; i++) {
+            gridHtml += `<div class="md-picker-day-cell empty"></div>`;
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const isSelected = (
+                selectedDate.getFullYear() === viewDate.getFullYear() &&
+                selectedDate.getMonth() === viewDate.getMonth() &&
+                selectedDate.getDate() === d
+            );
+            const isToday = (
+                today.getFullYear() === viewDate.getFullYear() &&
+                today.getMonth() === viewDate.getMonth() &&
+                today.getDate() === d
+            );
+
+            let classes = 'md-picker-day-cell';
+            if (isSelected) classes += ' selected';
+            else if (isToday) classes += ' today';
+
+            gridHtml += `<div class="${classes}" data-day="${d}">${d}</div>`;
+        }
+
+        daysGrid.innerHTML = gridHtml;
+
+        daysGrid.querySelectorAll('.md-picker-day-cell[data-day]').forEach(cell => {
+            cell.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const d = parseInt(cell.getAttribute('data-day'), 10);
+                selectedDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), d);
+                updateHeader();
+                renderDaysView();
+            });
+        });
+    }
+
+    function setupNavEvents() {
+        const prevBtn = backdrop.querySelector('#md-picker-prev-month');
+        const nextBtn = backdrop.querySelector('#md-picker-next-month');
+        if (prevBtn) {
+            prevBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                viewDate.setMonth(viewDate.getMonth() - 1);
+                renderDaysView();
+            });
+        }
+        if (nextBtn) {
+            nextBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                viewDate.setMonth(viewDate.getMonth() + 1);
+                renderDaysView();
+            });
+        }
+    }
+
+    function renderYearView() {
+        let yearsHtml = '<div class="md-picker-year-list">';
+        for (let y = 1940; y <= 2060; y++) {
+            const isSelected = (y === selectedDate.getFullYear());
+            yearsHtml += `<div class="md-picker-year-item ${isSelected ? 'selected' : ''}" data-year="${y}">${y}</div>`;
+        }
+        yearsHtml += '</div>';
+        
+        bodyContent.innerHTML = yearsHtml;
+
+        const yearListEl = bodyContent.querySelector('.md-picker-year-list');
+        const selectedYearEl = yearListEl.querySelector('.md-picker-year-item.selected');
+        if (selectedYearEl) {
+            selectedYearEl.scrollIntoView({ block: 'center' });
+        }
+
+        yearListEl.querySelectorAll('.md-picker-year-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const chosenYear = parseInt(item.getAttribute('data-year'), 10);
+                viewDate.setFullYear(chosenYear);
+                selectedDate.setFullYear(chosenYear);
+                isSelectingYear = false;
+                
+                restoreDaysLayout();
+            });
+        });
+    }
+
+    function restoreDaysLayout() {
+        bodyContent.innerHTML = `
+            <div class="md-picker-nav">
+                <button type="button" class="md-picker-nav-btn" id="md-picker-prev-month" aria-label="Mês Anterior">&lt;</button>
+                <div class="md-picker-month-title" id="md-picker-month-title"></div>
+                <button type="button" class="md-picker-nav-btn" id="md-picker-next-month" aria-label="Próximo Mês">&gt;</button>
+            </div>
+            <div class="md-picker-weekdays">
+                ${weekdaysHeaders.map(h => `<div class="md-picker-weekday">${h}</div>`).join('')}
+            </div>
+            <div class="md-picker-days" id="md-picker-days-grid"></div>
+        `;
+        setupNavEvents();
+        updateHeader();
+        renderDaysView();
+    }
+
+    setupNavEvents();
+
+    yearDisplay.addEventListener('click', function(e) {
+        e.stopPropagation();
+        isSelectingYear = !isSelectingYear;
+        if (isSelectingYear) {
+            renderYearView();
+        } else {
+            restoreDaysLayout();
+        }
     });
+
+    cancelBtn.addEventListener('click', function() {
+        backdrop.remove();
+    });
+
+    backdrop.addEventListener('click', function(e) {
+        if (e.target === backdrop) {
+            backdrop.remove();
+        }
+    });
+
+    okBtn.addEventListener('click', function() {
+        const yyyy = selectedDate.getFullYear();
+        const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(selectedDate.getDate()).padStart(2, '0');
+        const formattedSql = `${yyyy}-${mm}-${dd}`;
+        
+        inputElement.value = formattedSql;
+        inputElement.dispatchEvent(new Event('input', { bubbles: true }));
+        inputElement.dispatchEvent(new Event('change', { bubbles: true }));
+        
+        backdrop.remove();
+    });
+
+    updateHeader();
+    renderDaysView();
 }
 
 /**

@@ -1872,3 +1872,274 @@ body.dark-mode .autocomplete-item:hover {
     color: #38bdf8 !important;
 }
 
+/* Modal de Calendário Estilo Material Design (Print 2) */
+.md-picker-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(2px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: mdPickerFadeIn 0.2s ease-out;
+}
+
+@keyframes mdPickerFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.md-picker-modal {
+    width: 100%;
+    max-width: 320px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    font-family: inherit;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+html.dark-mode .md-picker-modal,
+body.dark-mode .md-picker-modal {
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+}
+
+.md-picker-header {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    padding: 20px 24px;
+}
+
+.md-picker-header-year {
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0.9;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.md-picker-header-year:hover {
+    text-decoration: underline;
+}
+
+.md-picker-header-date {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-top: 4px;
+    text-transform: capitalize;
+}
+
+.md-picker-body {
+    padding: 16px 20px 8px 20px;
+}
+
+.md-picker-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.md-picker-nav-btn {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #475569;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+html.dark-mode .md-picker-nav-btn,
+body.dark-mode .md-picker-nav-btn {
+    color: #cbd5e1;
+}
+
+.md-picker-nav-btn:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+html.dark-mode .md-picker-nav-btn:hover,
+body.dark-mode .md-picker-nav-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.md-picker-month-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #334155;
+    text-transform: capitalize;
+}
+
+html.dark-mode .md-picker-month-title,
+body.dark-mode .md-picker-month-title {
+    color: #f1f5f9;
+}
+
+.md-picker-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.md-picker-weekday {
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8;
+    padding: 4px 0;
+}
+
+.md-picker-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    text-align: center;
+}
+
+.md-picker-day-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: #1e293b;
+    border-radius: 50%;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+    margin: 1px;
+}
+
+html.dark-mode .md-picker-day-cell,
+body.dark-mode .md-picker-day-cell {
+    color: #e2e8f0;
+}
+
+.md-picker-day-cell:hover:not(.empty):not(.selected) {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #059669;
+}
+
+html.dark-mode .md-picker-day-cell:hover:not(.empty):not(.selected),
+body.dark-mode .md-picker-day-cell:hover:not(.empty):not(.selected) {
+    background-color: rgba(16, 185, 129, 0.25);
+    color: #34d399;
+}
+
+.md-picker-day-cell.empty {
+    cursor: default;
+}
+
+.md-picker-day-cell.today:not(.selected) {
+    border: 1.5px solid #10b981;
+    color: #10b981;
+    font-weight: 700;
+}
+
+.md-picker-day-cell.selected {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
+}
+
+.md-picker-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 12px 20px 16px 20px;
+}
+
+.md-picker-btn {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background-color 0.15s ease;
+}
+
+.md-picker-btn-cancel {
+    color: #305bd3;
+}
+
+html.dark-mode .md-picker-btn-cancel,
+body.dark-mode .md-picker-btn-cancel {
+    color: #60a5fa;
+}
+
+.md-picker-btn-cancel:hover {
+    background-color: rgba(48, 91, 211, 0.08);
+}
+
+.md-picker-btn-ok {
+    color: #305bd3;
+}
+
+html.dark-mode .md-picker-btn-ok,
+body.dark-mode .md-picker-btn-ok {
+    color: #60a5fa;
+}
+
+.md-picker-btn-ok:hover {
+    background-color: rgba(48, 91, 211, 0.08);
+}
+
+.md-picker-year-list {
+    max-height: 240px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 12px 0;
+}
+
+.md-picker-year-item {
+    padding: 10px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #334155;
+}
+
+html.dark-mode .md-picker-year-item,
+body.dark-mode .md-picker-year-item {
+    color: #e2e8f0;
+}
+
+.md-picker-year-item:hover {
+    background-color: rgba(16, 185, 129, 0.15);
+}
+
+.md-picker-year-item.selected {
+    background-color: #10b981;
+    color: #ffffff;
+}
+
