@@ -196,27 +196,24 @@ try {
                             <label for="input-busca-epi-item" class="form-label fw-semibold mb-1" style="font-size: 12px;">
                                 <i class="bi bi-search text-primary me-1"></i> Buscar Equipamento (Tempo Real) *
                             </label>
-                            <div id="srch-box-border-epi-item" style="
-                                display:flex; align-items:center; gap:8px;
-                                background:#fff; border:1.5px solid #d0d5dd;
-                                border-radius:10px; padding:0 12px;
-                                transition:border-color .2s, box-shadow .2s;">
-                                <i class="bi bi-shield-check" style="color:#3b82f6;font-size:15px;flex-shrink:0;"></i>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-primary">
+                                    <i class="bi bi-shield-check"></i>
+                                </span>
                                 <input type="text" 
                                        id="input-busca-epi-item" 
-                                       autocomplete="off"
+                                       class="form-control border-start-0 border-end-0 py-2" 
                                        placeholder="Digite o nome (ex: Bot...), fabricante ou C.A...." 
-                                       style="border:none;outline:none;flex:1;padding:9px 0;font-size:14px;background:transparent;"
+                                       autocomplete="off"
                                        oninput="aoDigitarBuscaEpiEntrega(this.value)"
-                                       onfocus="this.closest('#srch-box-border-epi-item').style.borderColor='#3b82f6'; this.closest('#srch-box-border-epi-item').style.boxShadow='0 0 0 3px rgba(59,130,246,.15)'; aoFocarBuscaEpiEntrega();"
-                                       onblur="this.closest('#srch-box-border-epi-item').style.borderColor='#d0d5dd'; this.closest('#srch-box-border-epi-item').style.boxShadow='none';"
+                                       onfocus="aoFocarBuscaEpiEntrega()"
                                        onkeydown="aoTeclarBuscaEpiEntrega(event)">
-                                <button type="button" 
+                                <button class="btn btn-outline-secondary border-start-0 d-none" 
+                                        type="button" 
                                         id="btn-limpar-busca-epi-item" 
-                                        title="Limpar seleção" 
                                         onclick="limparSelecaoEpiEntrega()" 
-                                        style="display:none;background:none;border:none;cursor:pointer;color:#9ca3af;font-size:18px;line-height:1;padding:0 2px;">
-                                    &times;
+                                        title="Limpar seleção">
+                                    <i class="bi bi-x-lg"></i>
                                 </button>
                             </div>
                             <input type="hidden" id="select-epi-item" value="">

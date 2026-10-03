@@ -398,35 +398,31 @@ $acao = $_GET['acao'] ?? 'lista';
                         <label for="busca-input" class="form-label fw-semibold mb-1" style="font-size:12px;">
                             <i class="bi bi-search text-primary me-1"></i> Buscar Colaborador (Tempo Real) *
                         </label>
-                        <div class="position-relative">
-                            <div id="srch-box-border-func" style="
-                                display:flex; align-items:center; gap:8px;
-                                background:#fff; border:1.5px solid #d0d5dd;
-                                border-radius:10px; padding:0 12px;
-                                transition:border-color .2s, box-shadow .2s;">
-                                <i class="bi bi-search" style="color:#3b82f6;font-size:15px;flex-shrink:0;"></i>
-                                <input type="text" 
-                                       id="busca-input" 
-                                       autocomplete="off"
-                                       placeholder="Digite nome (ex: Ron...), CPF ou cargo..." 
-                                       style="border:none;outline:none;flex:1;padding:9px 0;font-size:14px;background:transparent;"
-                                       oninput="aoDigitarBuscaFuncionario(this.value)"
-                                       onkeyup="aoDigitarBuscaFuncionario(this.value)"
-                                       onfocus="this.closest('#srch-box-border-func').style.borderColor='#3b82f6'; this.closest('#srch-box-border-func').style.boxShadow='0 0 0 3px rgba(59,130,246,.15)'; aoFocarBuscaFuncionario();"
-                                       onblur="this.closest('#srch-box-border-func').style.borderColor='#d0d5dd'; this.closest('#srch-box-border-func').style.boxShadow='none';"
-                                       onkeydown="aoTeclarBuscaFuncionario(event)">
-                                <button type="button" 
-                                        id="btn-limpar-busca" 
-                                        title="Limpar busca" 
-                                        onclick="limparBuscaFuncionario()" 
-                                        style="display:none;background:none;border:none;cursor:pointer;color:#9ca3af;font-size:18px;line-height:1;padding:0 2px;">
-                                    &times;
-                                </button>
-                            </div>
-                            <!-- Dropdown de Autocomplete / Sugestões em Tempo Real -->
-                            <div id="autocomplete-lista" 
-                                 style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; width: 100%; max-height: 340px; overflow-y: auto; z-index: 99999; border-radius: 12px; background: #ffffff; border: 1.5px solid #e2e8f0; box-shadow: 0 12px 32px -4px rgba(0,0,0,0.18), 0 2px 8px -2px rgba(0,0,0,0.08) !important;">
-                            </div>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-primary">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" 
+                                   id="busca-input" 
+                                   class="form-control border-start-0 border-end-0 py-2" 
+                                   placeholder="Digite nome (ex: Ron...), CPF ou cargo..." 
+                                   autocomplete="off"
+                                   oninput="aoDigitarBuscaFuncionario(this.value)"
+                                   onkeyup="aoDigitarBuscaFuncionario(this.value)"
+                                   onfocus="aoFocarBuscaFuncionario()"
+                                   onkeydown="aoTeclarBuscaFuncionario(event)">
+                            <button class="btn btn-outline-secondary border-start-0 d-none" 
+                                    type="button" 
+                                    id="btn-limpar-busca" 
+                                    onclick="limparBuscaFuncionario()" 
+                                    title="Limpar busca">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                        <!-- Dropdown Flutuante de Autocomplete / Sugestões em Tempo Real -->
+                        <div id="autocomplete-lista" 
+                             class="shadow-lg mt-1 p-0 border" 
+                             style="display: none; position: absolute; top: 100%; left: 0; right: 0; width: 100%; max-height: 340px; overflow-y: auto; z-index: 99999; border-radius: 10px; background: #ffffff; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2) !important;">
                         </div>
                     </div>
                     <div class="col-md-3">

@@ -1495,3 +1495,41 @@ body.dark-mode .top5-progress-bg {
     background-color: #334155 !important;
 }
 
+/* Unificação de Caixas de Busca (Input-Group) e Autocomplete Flutuante em Modo Escuro - Igual ao Print 2 */
+html.dark-mode .input-group-text,
+body.dark-mode .input-group-text {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #38bdf8 !important;
+}
+
+html.dark-mode .input-group-text i,
+body.dark-mode .input-group-text i {
+    color: #38bdf8 !important;
+}
+
+html.dark-mode #autocomplete-lista,
+body.dark-mode #autocomplete-lista,
+html.dark-mode #autocomplete-lista-epis,
+body.dark-mode #autocomplete-lista-epis,
+html.dark-mode #dropdown-autocomplete-epi,
+body.dark-mode #dropdown-autocomplete-epi {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+    box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark-mode .autocomplete-item,
+body.dark-mode .autocomplete-item {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-bottom-color: #334155 !important;
+}
+
+html.dark-mode .autocomplete-item:hover,
+body.dark-mode .autocomplete-item:hover {
+    background-color: #334155 !important;
+    color: #38bdf8 !important;
+}
+
