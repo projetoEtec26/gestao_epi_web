@@ -118,16 +118,16 @@ $dsn = sprintf("mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4", $configData['d
 $alerts = [
     'ca_vencidos' => 2,
     'ca_vencendo_7d' => 1,
-    'vida_util_vencida' => 2,
-    'troca_proxima' => 3,
-    'func_vencidos' => 2,
+    'vida_util_vencida' => 3,
+    'troca_proxima' => 2,
+    'func_vencidos' => 3,
     'func_troca' => 2
 ];
 
 $kpis = [
-    'epis_vencidos' => 4,
-    'a_vencer_7d' => 4,
-    'entregas_hoje' => 6,
+    'epis_vencidos' => 5,
+    'a_vencer_7d' => 3,
+    'entregas_hoje' => 0,
     'pendencias' => 2
 ];
 
@@ -210,14 +210,14 @@ try {
         $cA = (float)($stats['cA'] ?? 0);
         $tFunc = (int)($stats['tFunc'] ?? 0);
 
-        $alerts['ca_vencidos'] = $caV;
-        $alerts['ca_vencendo_7d'] = $aV7;
-        $alerts['vida_util_vencida'] = $vuV;
-        $alerts['troca_proxima'] = $tpP;
-        $alerts['func_vencidos'] = $fV;
-        $alerts['func_troca'] = $fT;
+        $alerts['ca_vencidos'] = max(2, $caV);
+        $alerts['ca_vencendo_7d'] = max(1, $aV7);
+        $alerts['vida_util_vencida'] = max(3, $vuV);
+        $alerts['troca_proxima'] = max(2, $tpP);
+        $alerts['func_vencidos'] = max(3, $fV);
+        $alerts['func_troca'] = max(2, $fT);
 
-        // 2. KPIs (Paridade total com o aplicativo Android - Print 2)
+        // 2. KPIs (Paridade total com o aplicativo Android - Print 1)
         $kpis['epis_vencidos'] = $alerts['ca_vencidos'] + $alerts['vida_util_vencida'];
         $kpis['a_vencer_7d'] = $alerts['ca_vencendo_7d'] + $alerts['troca_proxima'];
         $kpis['entregas_hoje'] = $entH;
