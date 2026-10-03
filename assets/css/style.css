@@ -668,7 +668,42 @@ body.dark-mode .table-custom tr:hover td {
     background-color: rgba(255, 255, 255, 0.01);
 }
 
-/* Modais Glassmorphism & Ajuste de Z-Index */
+/* Modais Responsivos, Anti-Corte & Ajuste de Z-Index */
+.modal-dialog {
+    max-height: calc(100vh - 30px) !important;
+    margin: 15px auto !important;
+}
+
+.modal-dialog-scrollable .modal-content {
+    max-height: calc(100vh - 30px) !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-dialog-scrollable .modal-body {
+    flex-grow: 1;
+    overflow-y: auto !important;
+    max-height: calc(100vh - 160px) !important;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+html.dark-mode .btn-close, body.dark-mode .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%) !important;
+    opacity: 0.85;
+}
+
+html.dark-mode .btn-close:hover, body.dark-mode .btn-close:hover {
+    opacity: 1;
+}
 .modal-backdrop {
     z-index: 1060 !important;
 }

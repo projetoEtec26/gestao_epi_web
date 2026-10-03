@@ -322,7 +322,7 @@ $userProfile = $_SESSION['usuario']['usu_perfil'] ?? '';
 
 <!-- Modal Termo de Ciência e Assinatura Eletrônica -->
 <div class="modal fade" id="modalTermo" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title fw-bold" style="color: var(--color-primary);"><i class="bi bi-file-lock2 me-2"></i>Recibo de Entrega Eletrônica de EPI</h5>

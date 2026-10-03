@@ -861,7 +861,7 @@ require_once __DIR__ . '/../components/sidebar.php';
 
 <!-- 0. Modal Importar EPIs em Lote -->
 <div class="modal fade" id="modalImportarEpi" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <form class="modal-content" method="POST" action="epis.php" enctype="multipart/form-data" id="form-importar-epi" onsubmit="return aoSubmeterFormImportacaoEpi(event)">
             <input type="hidden" name="acao" value="importar">
             <div class="modal-header">
@@ -899,7 +899,7 @@ require_once __DIR__ . '/../components/sidebar.php';
 
 <!-- 1. Modal Cadastrar -->
 <div class="modal fade" id="modalCadastrar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <form class="modal-content" method="POST" action="epis.php" novalidate>
             <input type="hidden" name="acao" value="cadastrar">
             <div class="modal-header">
@@ -1032,7 +1032,7 @@ require_once __DIR__ . '/../components/sidebar.php';
 
 <!-- 2. Modal Editar -->
 <div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <form class="modal-content" method="POST" action="epis.php" novalidate>
             <input type="hidden" name="acao" value="editar">
             <input type="hidden" id="edit-epi-id" name="epi_id">
@@ -1293,7 +1293,7 @@ require_once __DIR__ . '/../components/sidebar.php';
 
 <!-- Modal Histórico de Preços -->
 <div class="modal fade" id="modalHistoricoPrecos" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title fw-bold" style="color: var(--color-primary);">

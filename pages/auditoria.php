@@ -457,7 +457,7 @@ body.dark-mode .audit-btn-limpar {
 
 <!-- Modal Detalhes do Log (Estrutura JSON do Payload) -->
 <div class="modal fade" id="modalDetalhesLog" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title fw-bold" style="color: var(--color-primary);"><i class="bi bi-braces me-2"></i>Payload Estruturado de Auditoria</h5>

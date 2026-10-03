@@ -750,7 +750,7 @@ $acao = $_GET['acao'] ?? 'lista';
 
 <!-- 1. Modal Cadastrar -->
 <div class="modal fade" id="modalCadastrar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <form class="modal-content" method="POST" action="funcionarios.php" novalidate id="formCadastrar">
             <input type="hidden" name="acao" value="cadastrar">
             <div class="modal-header">
@@ -806,7 +806,7 @@ $acao = $_GET['acao'] ?? 'lista';
 
 <!-- 2. Modal Editar -->
 <div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <form class="modal-content" method="POST" action="funcionarios.php" novalidate id="formEditar">
             <input type="hidden" name="acao" value="editar">
             <input type="hidden" id="edit-fun-id" name="fun_id">
@@ -887,7 +887,7 @@ $acao = $_GET['acao'] ?? 'lista';
 
 <!-- 4. Modal Importar Funcionários em Lote -->
 <div class="modal fade" id="modalImportar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title fw-bold" style="color: var(--color-primary);"><i class="bi bi-file-earmark-arrow-up me-2"></i>Importar Funcionários em Lote</h5>
@@ -953,7 +953,7 @@ $acao = $_GET['acao'] ?? 'lista';
 
 <!-- 5. Modal de Ficha Detalhada (Histórico e PIN) -->
 <div class="modal fade" id="modalDetalhes" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title fw-bold" style="color: var(--color-primary);"><i class="bi bi-file-earmark-person me-2"></i>Ficha Individual do Colaborador</h5>
@@ -1178,7 +1178,7 @@ $acao = $_GET['acao'] ?? 'lista';
 
 <!-- 10. Modal Gestão Global de PIN (Speed Dial) -->
 <div class="modal fade" id="modalGestaoPinGlobal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title fw-bold" style="color: var(--color-primary);">
