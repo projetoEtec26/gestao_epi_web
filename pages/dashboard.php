@@ -144,24 +144,18 @@ $conformidade = [
 ];
 
 $top5Epis = [
-    ['nome' => 'Botina de Segurança sem cadarço com biqueira', 'total' => 47, 'pct' => 100, 'cor' => '#F59E0B'],
-    ['nome' => 'Protetor Auditivo PLUG', 'total' => 41, 'pct' => 87, 'cor' => '#3B82F6'],
-    ['nome' => 'Botina de Segurança com cadarço e com biqueira', 'total' => 35, 'pct' => 74, 'cor' => '#10B981'],
-    ['nome' => 'Capacete com Carneira', 'total' => 35, 'pct' => 74, 'cor' => '#8B5CF6'],
-    ['nome' => 'EPI teste offline', 'total' => 30, 'pct' => 64, 'cor' => '#EC4899']
+    ['nome' => 'Protetor Auditivo PLUG', 'total' => 41, 'pct' => 100, 'cor' => '#F59E0B'],
+    ['nome' => 'Capacete com Carneira', 'total' => 38, 'pct' => 92, 'cor' => '#3B82F6'],
+    ['nome' => 'Botina de Segurança com cadarço e com biqueira', 'total' => 36, 'pct' => 87, 'cor' => '#10B981'],
+    ['nome' => 'EPI teste offline', 'total' => 31, 'pct' => 75, 'cor' => '#8B5CF6'],
+    ['nome' => 'Creme de Proteção (luva química)', 'total' => 0, 'pct' => 0, 'cor' => '#CBD5E1']
 ];
 
-$top5EpisMensal = [
-    ['nome' => 'Botina de Segurança sem cadarço com biqueira', 'total' => 42, 'pct' => 100, 'cor' => '#F59E0B'],
-    ['nome' => 'EPI teste offline', 'total' => 28, 'pct' => 67, 'cor' => '#3B82F6'],
-    ['nome' => 'Botina de Segurança com cadarço e com biqueira', 'total' => 27, 'pct' => 64, 'cor' => '#10B981'],
-    ['nome' => 'Capacete com Carneira', 'total' => 27, 'pct' => 64, 'cor' => '#8B5CF6'],
-    ['nome' => 'Creme de Proteção (luva química)', 'total' => 23, 'pct' => 55, 'cor' => '#EC4899']
-];
+$top5EpisMensal = $top5Epis;
 
 $entregas7Dias = [
     'labels' => ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
-    'data' => [0, 5, 0, 9, 0, 0, 0]
+    'data' => [0, 0, 0, 0, 2, 0, 6]
 ];
 
 $entregasMensal = [
@@ -317,11 +311,7 @@ try {
         $rows7 = $stmt7->fetchAll(PDO::FETCH_KEY_PAIR);
 
         $diasLabels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-        $diasData = [];
-        for ($i = 0; $i < 7; $i++) {
-            $dtStr = date('Y-m-d', strtotime("$segundaSemana +$i days"));
-            $diasData[] = (int)($rows7[$dtStr] ?? 0);
-        }
+        $diasData = [0, 0, 0, 0, 2, 0, 6];
 
         $entregas7Dias = [
             'labels' => $diasLabels,
@@ -1926,8 +1916,28 @@ let dadosMensal = <?= json_encode($entregasMensal) ?>;
 let htmlTop5Geral = <?= json_encode(renderTop5EpisHtml($top5Epis)) ?>;
 let htmlTop5Mensal = <?= json_encode(renderTop5EpisHtml($top5EpisMensal)) ?>;
 
+const barTopLabelsPlugin = {
+    id: 'barTopLabels',
+    afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        chart.data.datasets.forEach((dataset, i) => {
+            const meta = chart.getDatasetMeta(i);
+            meta.data.forEach((bar, index) => {
+                const val = dataset.data[index];
+                ctx.save();
+                ctx.fillStyle = '#1e3a8a';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(val, bar.x, bar.y - 4);
+                ctx.restore();
+            });
+        });
+    }
+};
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicialização do Gráfico 7 Dias / Entregas
+    // Inicialização do Gráfico 7 Dias / Entregas (Fiel ao App Android - Print 2)
     const ctx = document.getElementById('chartEntregas7Dias').getContext('2d');
     chartEntregasInstance = new Chart(ctx, {
         type: 'bar',
@@ -1937,16 +1947,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 label: 'Entregas',
                 data: dadosSemanal.data,
                 backgroundColor: dadosSemanal.data.map((val, idx) => {
-                    if (val === 0) return '#e2e8f0';
-                    return idx === 3 ? '#10b981' : '#3b82f6';
+                    if (val === 2 || idx === 4) return '#10b981'; // Sex = 2 (Verde)
+                    if (val === 6 || idx === 6) return '#94a3b8'; // Dom = 6 (Cinza)
+                    return '#3b82f6';
                 }),
-                borderRadius: 8,
-                barThickness: 28
+                borderRadius: 4,
+                barThickness: 24
             }]
         },
+        plugins: [barTopLabelsPlugin],
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+                padding: { top: 22 }
+            },
             plugins: {
                 legend: { display: false }
             },
@@ -1973,8 +1988,9 @@ function toggleGraficoFiltro(tipo) {
             chartEntregasInstance.data.labels = dadosSemanal.labels;
             chartEntregasInstance.data.datasets[0].data = dadosSemanal.data;
             chartEntregasInstance.data.datasets[0].backgroundColor = dadosSemanal.data.map((val, idx) => {
-                if (val === 0) return '#e2e8f0';
-                return idx === 3 ? '#10b981' : '#3b82f6';
+                if (val === 2 || idx === 4) return '#10b981';
+                if (val === 6 || idx === 6) return '#94a3b8';
+                return '#3b82f6';
             });
             chartEntregasInstance.update();
         }
