@@ -106,8 +106,8 @@ $podeDevolver = in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXAR
 .web-search-box {
     display: flex;
     align-items: center;
-    background: #ffffff;
-    border: 1.5px solid #cbd5e1;
+    background-color: var(--color-card-bg, #ffffff);
+    border: 1.5px solid var(--color-border, #cbd5e1);
     border-radius: 10px;
     padding: 0 14px;
     transition: all 0.2s ease;
@@ -205,6 +205,78 @@ $podeDevolver = in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXAR
 .web-dd-item:hover {
     background-color: #f1f5f9;
 }
+
+/* Suporte ao Modo Escuro (Dark Mode) */
+html.dark-mode .web-card-container, body.dark-mode .web-card-container {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode .web-search-box, body.dark-mode .web-search-box {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+html.dark-mode .web-search-box input, body.dark-mode .web-search-box input {
+    background-color: transparent !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode .web-search-box input::placeholder, body.dark-mode .web-search-box input::placeholder {
+    color: #94a3b8 !important;
+}
+
+html.dark-mode .web-search-box #btn-limpar, body.dark-mode .web-search-box #btn-limpar {
+    color: #cbd5e1 !important;
+}
+
+html.dark-mode #dropdown-colab, body.dark-mode #dropdown-colab {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode .web-dd-item, body.dark-mode .web-dd-item {
+    color: #f8fafc !important;
+    border-bottom-color: #334155 !important;
+}
+
+html.dark-mode .web-dd-item:hover, body.dark-mode .web-dd-item:hover {
+    background-color: #334155 !important;
+}
+
+html.dark-mode .web-epi-row, body.dark-mode .web-epi-row {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode .web-epi-row:hover, body.dark-mode .web-epi-row:hover {
+    background-color: #1e293b !important;
+    border-color: #475569 !important;
+}
+
+html.dark-mode .web-epi-icon-box, body.dark-mode .web-epi-icon-box {
+    background-color: #1e3a8a !important;
+    color: #93c5fd !important;
+}
+
+html.dark-mode .form-label, body.dark-mode .form-label {
+    color: #cbd5e1 !important;
+}
+
+html.dark-mode .form-select, body.dark-mode .form-select {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+html.dark-mode .form-control, body.dark-mode .form-control {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
 </style>
 
 <div id="main-content">
@@ -286,7 +358,7 @@ $podeDevolver = in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXAR
                                 <div id="dropdown-colab" style="
                                     display:none;
                                     position:absolute;top:calc(100% + 4px);left:0;right:0;
-                                    background:#ffffff;border:1.5px solid #e2e8f0;border-radius:10px;
+                                    background:var(--color-card-bg, #ffffff);border:1.5px solid var(--color-border, #e2e8f0);border-radius:10px;
                                     box-shadow:0 10px 25px rgba(0,0,0,0.1);
                                     overflow:hidden;max-height:280px;overflow-y:auto;z-index:99999;">
                                 </div>
