@@ -969,57 +969,57 @@ require_once __DIR__ . '/../components/sidebar.php';
     box-sizing: border-box;
 }
 
-/* Card de Boas-vindas */
+/* Card de Boas-vindas Otimizado */
 .welcome-card {
     background: #ffffff;
     border-radius: var(--dash-card-radius);
-    padding: 1.25rem 1.5rem;
+    padding: 0.75rem 1.25rem;
     box-shadow: var(--dash-shadow);
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.85rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 0.75rem;
     border: 1px solid rgba(226, 232, 240, 0.8);
     width: 100%;
     box-sizing: border-box;
 }
 
 .welcome-title {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: #1e293b;
     margin: 0;
 }
 
 .welcome-date {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     color: #64748b;
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 .badge-sincronizado {
     background-color: #10b981;
     color: #ffffff;
-    font-size: 0.725rem;
+    font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.5px;
-    padding: 6px 14px;
+    padding: 4px 12px;
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
-/* Banner de Alertas (Fiel ao Android Print 2) */
+/* Banner de Alertas (Grid de 2 Colunas no Desktop para economizar espaço vertical) */
 .alert-banner-box {
     background-color: #fff5f5;
     border: 1px solid #fed7d7;
     border-radius: var(--dash-card-radius);
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 1.5rem;
+    padding: 0.85rem 1.25rem;
+    margin-bottom: 1rem;
     box-shadow: 0 4px 14px rgba(239, 68, 68, 0.06);
     width: 100%;
     box-sizing: border-box;
@@ -1029,32 +1029,38 @@ require_once __DIR__ . '/../components/sidebar.php';
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: #991b1b;
-    margin-bottom: 1rem;
+    margin-bottom: 0.65rem;
 }
 
 .alert-banner-header i {
     color: #ef4444;
-    font-size: 1.25rem;
+    font-size: 1.1rem;
 }
 
 .alert-card-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 12px;
+}
+
+@media (max-width: 992px) {
+    .alert-card-list {
+        grid-template-columns: 1fr;
+    }
 }
 
 .alert-card-item {
     background-color: #fff0f0;
     border: 1px solid #fecaca;
-    border-radius: 12px;
-    padding: 10px 16px;
+    border-radius: 10px;
+    padding: 6px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 8px;
     transition: all 0.2s ease;
 }
 
@@ -1065,7 +1071,7 @@ require_once __DIR__ . '/../components/sidebar.php';
 }
 
 .alert-card-text {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: #991b1b;
     display: flex;
@@ -1078,8 +1084,8 @@ require_once __DIR__ . '/../components/sidebar.php';
     color: #991b1b;
     border: 1px solid #fca5a5;
     border-radius: 20px;
-    padding: 4px 14px;
-    font-size: 0.775rem;
+    padding: 3px 10px;
+    font-size: 0.725rem;
     font-weight: 700;
     cursor: pointer;
     display: inline-flex;
@@ -1098,21 +1104,21 @@ require_once __DIR__ . '/../components/sidebar.php';
 
 /* Título de Seção */
 .section-header-title {
-    font-size: 1.15rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #1e3a8a;
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.65rem;
 }
 
-/* Resumo do Dia: 4 KPI Cards Grandes */
+/* Resumo do Dia: 4 KPI Cards Otimizados */
 .kpi-resumo-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.25rem;
-    margin-bottom: 1.5rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
     width: 100%;
     box-sizing: border-box;
 }
@@ -1131,7 +1137,7 @@ require_once __DIR__ . '/../components/sidebar.php';
 
 .kpi-card-block {
     border-radius: var(--dash-card-radius);
-    padding: 1.25rem 1.25rem 1rem 1.25rem;
+    padding: 0.85rem 1rem;
     color: #ffffff;
     box-shadow: var(--dash-shadow);
     cursor: pointer;
@@ -1139,13 +1145,13 @@ require_once __DIR__ . '/../components/sidebar.php';
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 130px;
+    min-height: 105px;
     position: relative;
     overflow: hidden;
 }
 
 .kpi-card-block:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     box-shadow: var(--dash-shadow-hover);
 }
 
@@ -1166,20 +1172,20 @@ require_once __DIR__ . '/../components/sidebar.php';
 }
 
 .kpi-block-icon {
-    font-size: 1.6rem;
+    font-size: 1.35rem;
     opacity: 0.95;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 .kpi-block-value {
-    font-size: 2.2rem;
+    font-size: 1.85rem;
     font-weight: 800;
     line-height: 1;
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.25rem;
 }
 
 .kpi-block-label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     opacity: 0.95;
     letter-spacing: 0.2px;
