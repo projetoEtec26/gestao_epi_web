@@ -83,8 +83,13 @@ $aceitouTermos = !empty($currentUser['usu_aceite_termos']);
 
 <style>
 .settings-container {
-    max-width: 720px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+}
+
+html.dark-mode .settings-container, body.dark-mode .settings-container {
+    background-color: transparent !important;
 }
 
 .settings-group-title {
