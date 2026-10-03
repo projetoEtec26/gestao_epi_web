@@ -94,81 +94,65 @@ $podeDevolver = in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXAR
 ?>
 
 <style>
-/* Estilização fiel da Tela de Devolução do App Android (Print 1) */
-.card-devolucao-android {
-    background-color: #172033;
-    border: 1px solid #28374f;
-    border-radius: 16px;
-    color: #e2e8f0;
+/* Estilização Web oficial (Light Mode Design System) conforme modelo da aplicação Web */
+.web-card-container {
+    background-color: var(--color-card-bg, #ffffff);
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-    position: relative;
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
 }
 
-.android-title-bar {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #38bdf8;
-    margin-bottom: 20px;
+.web-search-box {
     display: flex;
     align-items: center;
-    gap: 8px;
-}
-
-/* Campos de entrada com efeito Android Outlined Material */
-.android-field-wrapper {
-    position: relative;
-    margin-bottom: 18px;
-}
-
-.android-input-box {
-    display: flex;
-    align-items: center;
-    background: #111827;
-    border: 1.5px solid #334155;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
     border-radius: 10px;
     padding: 0 14px;
     transition: all 0.2s ease;
 }
 
-.android-input-box:focus-within {
-    border-color: #38bdf8;
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+.web-search-box:focus-within {
+    border-color: var(--color-primary, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
-.android-input-box input, .android-input-box select {
-    background: transparent;
+.web-search-box input {
     border: none;
     outline: none;
-    color: #f8fafc;
-    width: 100%;
-    padding: 12px 0;
+    background: transparent;
+    padding: 11px 0;
     font-size: 14px;
+    color: var(--color-text-primary, #0f172a);
+    width: 100%;
 }
 
-.android-input-box select option {
-    background: #1e293b;
-    color: #f8fafc;
+.web-epi-row {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    user-select: none;
 }
 
-.android-field-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #94a3b8;
-    margin-bottom: 6px;
-    display: block;
+.web-epi-row:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
 }
 
-.android-field-label span {
-    color: #ef4444;
-}
-
-.android-user-badge {
-    background: #2563eb;
-    color: #fff;
-    width: 44px;
-    height: 44px;
+.web-epi-icon-box {
+    width: 40px;
+    height: 40px;
     border-radius: 8px;
+    background: #eff6ff;
+    color: var(--color-primary, #2563eb);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -176,135 +160,62 @@ $podeDevolver = in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXAR
     flex-shrink: 0;
 }
 
-/* Header de Funcionário Selecionado */
-.android-func-header {
-    margin-top: 15px;
-    margin-bottom: 16px;
-}
-
-.android-func-name {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #38bdf8;
-    margin-bottom: 2px;
-}
-
-.android-func-subtext {
-    font-size: 12px;
-    color: #94a3b8;
-    font-weight: 500;
-}
-
-/* Lista de EPIs em posse com Checkbox e Ícones */
-.android-epi-list {
-    max-height: 380px;
-    overflow-y: auto;
-    padding-right: 4px;
-    margin-bottom: 20px;
-}
-
-.android-epi-list::-webkit-scrollbar {
-    width: 6px;
-}
-.android-epi-list::-webkit-scrollbar-thumb {
-    background: #334155;
-    border-radius: 4px;
-}
-
-.android-epi-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 12px 14px;
-    background: transparent;
-    border-bottom: 1px solid #1f2d42;
-    transition: background 0.15s ease;
-    cursor: pointer;
-    user-select: none;
-}
-
-.android-epi-item:hover {
-    background: rgba(255, 255, 255, 0.03);
-}
-
-.android-checkbox {
-    width: 22px;
-    height: 22px;
-    accent-color: #2563eb;
+.web-checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--color-primary, #2563eb);
     cursor: pointer;
     flex-shrink: 0;
 }
 
-.android-epi-icon {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: #38bdf8;
-    flex-shrink: 0;
-}
-
-.android-epi-details {
-    flex: 1;
-    min-width: 0;
-}
-
-.android-epi-nome {
-    font-size: 14px;
-    font-weight: 600;
-    color: #f1f5f9;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.android-epi-ca {
-    font-size: 12px;
-    color: #64748b;
-    margin-top: 1px;
-}
-
-/* Botão Principal CONFIRMAR DEVOLUÇÃO */
-.btn-confirmar-devolucao {
-    background-color: #2563eb;
+.btn-web-primary {
+    background-color: var(--color-primary, #2563eb);
     color: #ffffff;
-    font-weight: 700;
-    font-size: 15px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    padding: 14px;
-    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 12px 24px;
+    border-radius: 8px;
     border: none;
-    width: 100%;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
     transition: all 0.2s ease;
 }
 
-.btn-confirmar-devolucao:hover {
-    background-color: #1d4ed8;
-    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+.btn-web-primary:hover {
+    background-color: var(--color-primary-hover, #1d4ed8);
     color: #ffffff;
+    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
 }
 
-.btn-confirmar-devolucao:disabled {
-    background-color: #334155;
-    color: #64748b;
+.btn-web-primary:disabled {
+    background-color: #94a3b8;
+    color: #ffffff;
     box-shadow: none;
     cursor: not-allowed;
 }
 
+.web-dd-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    color: #0f172a;
+    font-size: 13px;
+    transition: background 0.12s;
+}
+
+.web-dd-item:hover {
+    background-color: #f1f5f9;
+}
 </style>
 
 <div id="main-content">
     <?php require_once __DIR__ . '/../components/topbar.php'; ?>
     
     <div class="content-body">
+        <!-- Top Bar Header (Padrão Web) -->
         <div class="d-flex justify-content-between align-items-center mb-4 gap-2 flex-wrap flex-md-nowrap">
             <div>
                 <h3 class="fw-bold m-0" style="color: var(--color-primary);">Entregas &amp; Devoluções</h3>
-                <p class="text-muted mb-0">Gerencie a devolução, substituição e condições de retorno dos EPIs dos funcionários.</p>
+                <p class="text-muted mb-0">Gerencie a devolução, substituição e condições de retorno dos EPIs dos colaboradores.</p>
             </div>
             <div class="d-flex align-items-center gap-2 text-nowrap flex-nowrap">
                 <div class="btn-group-toggle-view" role="group">
@@ -337,28 +248,30 @@ $podeDevolver = in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXAR
             </div>
         <?php endif; ?>
 
-        <div class="row justify-content-center g-4">
-            <!-- CARTÃO PRINCIPAL: Devolução de EPI (Fiel ao App Android - Print 1) -->
-            <div class="col-xl-7 col-lg-9 col-md-11">
-                <div class="card-devolucao-android">
-                    
-                    <div class="android-title-bar">
-                        <i class="bi bi-arrow-counterclockwise text-primary"></i> Devolução de EPI
-                    </div>
+        <form method="POST" action="devolucoes.php" id="form-devolucao-web">
+            <input type="hidden" name="acao" value="registrar_devolucao">
+            <input type="hidden" name="fun_id_selecionado" id="fun_id_selecionado" value="">
 
-                    <form method="POST" action="devolucoes.php" id="form-devolucao-android">
-                        <input type="hidden" name="acao" value="registrar_devolucao">
-                        <input type="hidden" name="fun_id_selecionado" id="fun_id_selecionado" value="">
+            <div class="row g-4">
+                <!-- COLUNA ESQUERDA: Seleção de Funcionário & Lista de EPIs em Posse -->
+                <div class="col-lg-6">
+                    <div class="web-card-container h-100 d-flex flex-column">
+                        <h5 class="fw-bold mb-3" style="color: var(--color-primary);">
+                            <i class="bi bi-person-check me-2"></i>Devolução de EPI
+                        </h5>
 
-                        <!-- ===== CAMPO DE BUSCA DE FUNCIONÁRIO (COM AUTOCOMPLETE) ===== -->
-                        <div class="android-field-wrapper">
-                            <label class="android-field-label">Buscar Funcionário... <span>*</span></label>
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="android-input-box position-relative flex-grow-1" id="wrapper-busca-colab">
+                        <!-- CAMPO DE BUSCA DE FUNCIONÁRIO COM AUTOCOMPLETE -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size: 13px; color: #475569;">
+                                Buscar Colaborador (Tempo Real) <span class="text-danger">*</span>
+                            </label>
+                            <div class="position-relative" id="wrapper-busca-colab">
+                                <div class="web-search-box">
+                                    <i class="bi bi-search text-primary me-2" style="font-size: 15px;"></i>
                                     <input type="text"
                                            id="input-busca-colaborador"
                                            autocomplete="off"
-                                           placeholder="Digite o nome ou CPF..."
+                                           placeholder="Digite nome (ex: Ron...), CPF ou cargo..."
                                            oninput="buscarColaborador(this.value)"
                                            onkeydown="teclarBusca(event)">
                                     <button type="button" 
@@ -367,121 +280,133 @@ $podeDevolver = in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXAR
                                             style="display:none;background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;padding:0 4px;">
                                         &times;
                                     </button>
-                                    
-                                    <!-- Dropdown Autocomplete -->
-                                    <div id="dropdown-colab" style="
-                                        display:none;
-                                        position:absolute;top:calc(100% + 6px);left:0;right:0;
-                                        background:#1e293b;border:1.5px solid #334155;border-radius:12px;
-                                        box-shadow:0 12px 32px rgba(0,0,0,0.5);
-                                        overflow:hidden;max-height:300px;overflow-y:auto;z-index:99999;">
-                                    </div>
                                 </div>
-                                <div class="android-user-badge" title="Selecionar Colaborador">
-                                    <i class="bi bi-person-fill"></i>
+                                
+                                <!-- Dropdown Autocomplete -->
+                                <div id="dropdown-colab" style="
+                                    display:none;
+                                    position:absolute;top:calc(100% + 4px);left:0;right:0;
+                                    background:#ffffff;border:1.5px solid #e2e8f0;border-radius:10px;
+                                    box-shadow:0 10px 25px rgba(0,0,0,0.1);
+                                    overflow:hidden;max-height:280px;overflow-y:auto;z-index:99999;">
                                 </div>
                             </div>
                         </div>
 
-                        <!-- ===== CABEÇALHO DO FUNCIONÁRIO SELECIONADO ===== -->
-                        <div class="android-func-header d-none" id="header-func-info">
-                            <div class="android-func-name" id="display-func-nome">Funcionário: Selecionado</div>
-                            <div class="android-func-subtext">EPIs atualmente em posse</div>
+                        <!-- SEÇÃO DE COLABORADOR SELECIONADO -->
+                        <div class="d-none border-bottom pb-2 mb-3" id="header-func-info">
+                            <div class="fw-bold fs-6" style="color: var(--color-primary);" id="display-func-nome">
+                                Funcionário: Selecionado
+                            </div>
+                            <div class="text-muted" style="font-size: 12px;">
+                                Marque os EPIs que estão sendo devolvidos pelo colaborador:
+                            </div>
                         </div>
 
-                        <div class="text-center py-4 text-muted" id="msg-selecione-func" style="font-size: 14px;">
-                            <i class="bi bi-person-bounding-box d-block mb-2" style="font-size: 32px; color: #475569;"></i>
-                            Selecione um colaborador acima para visualizar os EPIs em posse.
+                        <div class="text-center py-5 text-muted flex-grow-1 d-flex flex-column align-items-center justify-content-center" id="msg-selecione-func">
+                            <i class="bi bi-person-bounding-box mb-2" style="font-size: 40px; color: #cbd5e1;"></i>
+                            <div class="fw-semibold">Nenhum colaborador selecionado</div>
+                            <div style="font-size: 13px; max-width: 280px;">Pesquise um funcionário no campo acima para carregar a lista de EPIs sob sua posse.</div>
                         </div>
 
-                        <!-- ===== LISTA DE EPIs EM POSSE COM CHECKBOXES ===== -->
-                        <div class="android-epi-list d-none" id="container-epi-list">
+                        <!-- LISTA DE EPIs EM POSSE COM CHECKBOXES -->
+                        <div class="overflow-y-auto d-none flex-grow-1 pe-1" id="container-epi-list" style="max-height: 360px;">
                             <!-- Injetado via JavaScript -->
                         </div>
+                    </div>
+                </div>
 
-                        <!-- ===== CAMPOS DE SELEÇÃO INFERIORES ===== -->
-                        <div id="campos-formulario-devolucao" class="opacity-50 pointer-events-none">
-                            <div class="android-field-wrapper">
-                                <label class="android-field-label">Motivo da Devolução <span>*</span></label>
-                                <div class="android-input-box">
-                                    <select name="item_devolucao_motivo" id="select-motivo" required>
-                                        <option value="" disabled selected>Selecione o motivo...</option>
-                                        <option value="Devolução física ao almoxarifado">Devolução física ao almoxarifado</option>
-                                        <option value="Fim da vida útil / Desgaste natural">Fim da vida útil / Desgaste natural</option>
-                                        <option value="Troca periódica de EPI">Troca periódica de EPI</option>
-                                        <option value="Danificado / Avariado">Danificado / Avariado</option>
-                                        <option value="Extravio / Perda do colaborador">Extravio / Perda do colaborador</option>
-                                        <option value="Demissão / Desligamento">Demissão / Desligamento</option>
-                                        <option value="Outro motivo">Outro motivo</option>
+                <!-- COLUNA DIREITA: Formulário de Devolução & Parâmetros -->
+                <div class="col-lg-6">
+                    <div class="web-card-container h-100 d-flex flex-column justify-content-between" id="campos-formulario-devolucao">
+                        <div>
+                            <h5 class="fw-bold mb-3" style="color: var(--color-primary);">
+                                <i class="bi bi-clipboard-check me-2"></i>Parâmetros da Devolução
+                            </h5>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" style="font-size: 13px;">
+                                    Motivo da Devolução <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select py-2" name="item_devolucao_motivo" id="select-motivo" required>
+                                    <option value="" disabled selected>Selecione o motivo da devolução...</option>
+                                    <option value="Devolução física ao almoxarifado">Devolução física ao almoxarifado (DEVOLVIDO)</option>
+                                    <option value="Fim da vida útil / Desgaste natural">Fim da vida útil / Desgaste natural</option>
+                                    <option value="Troca periódica de EPI">Troca periódica de EPI</option>
+                                    <option value="Danificado / Avariado">Danificado / Avariado</option>
+                                    <option value="Extravio / Perda do colaborador">Extravio / Perda do colaborador (EXTRAVIADO)</option>
+                                    <option value="Demissão / Desligamento">Demissão / Desligamento do funcionário</option>
+                                    <option value="Outro motivo">Outro motivo</option>
+                                </select>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" style="font-size: 13px;">
+                                        Condição do Item Devolvido <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select py-2" name="item_devolucao_condicao" id="select-condicao">
+                                        <option value="DANIFICADO" selected>DANIFICADO / AVARIADO</option>
+                                        <option value="USADO">USADO (Para Descarte)</option>
+                                        <option value="NOVO">NOVO (Reaproveitável)</option>
+                                        <option value="BOM_ESTADO">BOM ESTADO</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" style="font-size: 13px;">
+                                        Destino do Item <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select py-2" name="item_devolucao_destino" id="select-destino">
+                                        <option value="MANUTENCAO" selected>MANUTENÇÃO / HIGIENIZAÇÃO</option>
+                                        <option value="ESTOQUE">RETORNO AO ESTOQUE ATIVO</option>
+                                        <option value="DESCARTE">COLETA / DESCARTE ECOLÓGICO</option>
                                     </select>
                                 </div>
                             </div>
 
-                            <div class="row g-2 mb-3">
-                                <div class="col-md-6">
-                                    <div class="android-field-wrapper mb-0">
-                                        <label class="android-field-label">Condição do Item Devolvido</label>
-                                        <div class="android-input-box">
-                                            <select name="item_devolucao_condicao" id="select-condicao">
-                                                <option value="DANIFICADO" selected>DANIFICADO</option>
-                                                <option value="USADO">USADO (Descarte)</option>
-                                                <option value="NOVO">NOVO (Reaproveitável)</option>
-                                                <option value="BOM_ESTADO">BOM ESTADO</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="android-field-wrapper mb-0">
-                                        <label class="android-field-label">Destino do Item</label>
-                                        <div class="android-input-box">
-                                            <select name="item_devolucao_destino" id="select-destino">
-                                                <option value="MANUTENCAO" selected>MANUTENÇÃO / HIGIENIZAÇÃO</option>
-                                                <option value="ESTOQUE">RETORNO AO ESTOQUE</option>
-                                                <option value="DESCARTE">COLETA / DESCARTE ECOLÓGICO</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold" style="font-size: 13px;">
+                                    Observações Complementares
+                                </label>
+                                <textarea class="form-control" name="item_devolucao_obs" rows="3" placeholder="Descreva particularidades do estado do item de devolução..."></textarea>
                             </div>
+                        </div>
 
-                            <!-- ===== BOTÃO DE AÇÃO PRINCIPAL ===== -->
-                            <button type="submit" class="btn-confirmar-devolucao" id="btn-submit-devolucao" disabled>
-                                CONFIRMAR DEVOLUÇÃO
+                        <!-- BOTÃO DE AÇÃO PRINCIPAL -->
+                        <div class="pt-3 border-top text-end">
+                            <button type="submit" class="btn-web-primary w-100 py-3" id="btn-submit-devolucao" disabled>
+                                <i class="bi bi-check2-circle me-1 fs-5"></i> CONFIRMAR DEVOLUÇÃO
                             </button>
                         </div>
-                    </form>
-
-
-
+                    </div>
                 </div>
             </div>
-        </div>
+        </form>
 
-        <!-- Seção Adicional: Consulta de Histórico de Retornos do Funcionário -->
-        <div class="row justify-content-center mt-5">
-            <div class="col-xl-7 col-lg-9 col-md-11">
-                <div class="card-custom">
-                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-                        <h6 class="fw-bold m-0 text-secondary">
+        <!-- SEÇÃO INFERIOR: Histórico Recente de Devoluções -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="web-card-container">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold m-0" style="color: var(--color-primary);">
                             <i class="bi bi-clock-history me-1"></i> Histórico Recente de Retornos do Colaborador
                         </h6>
                     </div>
-                    <div class="table-responsive" style="max-height: 250px;">
-                        <table class="table table-sm table-hover align-middle">
+                    <div class="table-responsive" style="max-height: 280px;">
+                        <table class="table table-hover align-middle mb-0 border">
                             <thead class="table-light">
-                                <tr style="font-size: 12px;">
+                                <tr style="font-size: 13px;">
                                     <th>Data Retorno</th>
                                     <th>EPI / C.A.</th>
                                     <th>Qtd</th>
                                     <th>Motivo</th>
-                                    <th>Status</th>
+                                    <th>Situação</th>
                                 </tr>
                             </thead>
                             <tbody id="lista-historico-devolucoes">
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted py-3" style="font-size: 13px;">
-                                        Selecione um colaborador acima para consultar o histórico.
+                                    <td colspan="5" class="text-center text-muted py-4" style="font-size: 13px;">
+                                        Selecione um colaborador acima para consultar o histórico de devoluções.
                                     </td>
                                 </tr>
                             </tbody>
@@ -499,7 +424,6 @@ $podeDevolver = in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXAR
 const PROXY_URL = 'api_proxy.php';
 const PODE_DEVOLVER = <?= $podeDevolver ? 'true' : 'false' ?>;
 
-// Lista de funcionários injetada pelo PHP
 const LISTA_FUNCIONARIOS = <?= json_encode(array_values(array_map(function($f) {
     return [
         'fun_id'         => (int)$f['fun_id'],
@@ -527,7 +451,6 @@ function mascaraCpf(cpf) {
     return d.length===11 ? `${d.slice(0,3)}.***.***-${d.slice(9)}` : (cpf||'---');
 }
 
-// Retorna ícone do Bootstrap correspondente ao tipo de EPI (conforme Print 1)
 function obterIconeEpi(nomeEpi) {
     const n = normalizar(nomeEpi);
     if (n.includes('botina') || n.includes('bota') || n.includes('calcado') || n.includes('sapato')) {
@@ -580,7 +503,7 @@ function renderDropdown(termo) {
     if (!dd) return;
 
     if (resultados.length === 0) {
-        dd.innerHTML = `<div style="padding:12px;text-align:center;color:#94a3b8;font-size:13px;">Nenhum colaborador encontrado com "${escapar(termo)}"</div>`;
+        dd.innerHTML = `<div style="padding:12px;text-align:center;color:#64748b;font-size:13px;">Nenhum colaborador encontrado com "${escapar(termo)}"</div>`;
         dd.style.display = 'block';
         return;
     }
@@ -588,12 +511,10 @@ function renderDropdown(termo) {
     let html = '';
     resultados.slice(0, 7).forEach((f, idx) => {
         html += `
-            <div class="dd-item" id="dd-item-${idx}" 
-                 onclick="escolherColaborador(${f.fun_id}, '${f.fun_nome.replace(/'/g,"\\'")}')"
-                 style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #334155;color:#f8fafc;font-size:13px;"
-                 onmouseover="this.style.background='#334155'" onmouseout="this.style.background='transparent'">
-                <div class="fw-semibold">${escapar(f.fun_nome)}</div>
-                <div style="font-size:11px;color:#94a3b8;">${escapar(f.fun_cargo || 'Sem cargo')} • CPF: ${mascaraCpf(f.fun_cpf)}</div>
+            <div class="web-dd-item" id="dd-item-${idx}" 
+                 onclick="escolherColaborador(${f.fun_id}, '${f.fun_nome.replace(/'/g,"\\'")}')">
+                <div class="fw-semibold text-dark">${escapar(f.fun_nome)}</div>
+                <div style="font-size:11px;color:#64748b;">${escapar(f.fun_cargo || 'Sem cargo')} • CPF: ${mascaraCpf(f.fun_cpf)}</div>
             </div>`;
     });
 
@@ -629,8 +550,6 @@ function limparBusca() {
     document.getElementById('container-epi-list').classList.add('d-none');
     document.getElementById('msg-selecione-func').classList.remove('d-none');
     
-    const container = document.getElementById('campos-formulario-devolucao');
-    container.classList.add('opacity-50', 'pointer-events-none');
     document.getElementById('btn-submit-devolucao').disabled = true;
 
     fecharDropdown();
@@ -667,12 +586,12 @@ function carregarPosse(funId) {
                         const loteStr = item.item_numero_lote ? ` | Lote: ${item.item_numero_lote}` : '';
 
                         html += `
-                            <label class="android-epi-item">
-                                <input type="checkbox" name="item_ids[]" value="${item.item_id}" class="android-checkbox item-checkbox" onchange="atualizarEstadoBotao()">
-                                <div class="android-epi-icon">${icone}</div>
-                                <div class="android-epi-details">
-                                    <div class="android-epi-nome">${escapar(epiNome)}</div>
-                                    <div class="android-epi-ca">${caStr}${loteStr}</div>
+                            <label class="web-epi-row">
+                                <input type="checkbox" name="item_ids[]" value="${item.item_id}" class="web-checkbox item-checkbox" onchange="atualizarEstadoBotao()">
+                                <div class="web-epi-icon-box">${icone}</div>
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="fw-semibold text-dark" style="font-size:14px;">${escapar(epiNome)}</div>
+                                    <div class="text-muted" style="font-size:12px;">${caStr}${loteStr}</div>
                                 </div>
                             </label>`;
                     });
@@ -680,15 +599,12 @@ function carregarPosse(funId) {
 
                 if (count > 0) {
                     container.innerHTML = html;
-                    document.getElementById('campos-formulario-devolucao').classList.remove('opacity-50', 'pointer-events-none');
                 } else {
                     container.innerHTML = '<div class="text-center text-muted py-4">Nenhum EPI atualmente sob posse deste funcionário.</div>';
-                    document.getElementById('campos-formulario-devolucao').classList.add('opacity-50', 'pointer-events-none');
                     document.getElementById('btn-submit-devolucao').disabled = true;
                 }
             } else {
                 container.innerHTML = '<div class="text-center text-muted py-4">Nenhum EPI em posse localizado.</div>';
-                document.getElementById('campos-formulario-devolucao').classList.add('opacity-50', 'pointer-events-none');
                 document.getElementById('btn-submit-devolucao').disabled = true;
             }
             atualizarEstadoBotao();
