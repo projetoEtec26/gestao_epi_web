@@ -74,22 +74,26 @@ if (isset($page_roles) && is_array($page_roles)) {
         exit;
     }
 }
+
+$isDarkMode = ($_COOKIE['theme-mode'] ?? '') === 'dark';
 ?>
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="<?= $isDarkMode ? 'dark-mode' : '' ?>" style="<?= $isDarkMode ? 'background-color: #0f172a !important; color: #f8fafc !important;' : '' ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="<?= $isDarkMode ? '#0f172a' : '#2563eb' ?>">
     <title><?= isset($page_title) ? $page_title . ' - Gestão EPI' : 'Gestão EPI' ?></title>
     
     <!-- Anti-Flicker Instantâneo do Modo Escuro (Executado síncronamente no início do <head> antes do carregamento de CSS da rede) -->
     <script>
         (function() {
-            var theme = localStorage.getItem('theme-mode');
+            var theme = localStorage.getItem('theme-mode') || (document.cookie.match(/theme-mode=([^;]+)/) || [])[1];
             if (theme === 'dark') {
                 document.documentElement.classList.add('dark-mode');
                 document.documentElement.style.backgroundColor = '#0f172a';
                 document.documentElement.style.color = '#f8fafc';
+                document.cookie = 'theme-mode=dark; path=/; max-age=31536000; SameSite=Lax';
             }
         })();
     </script>
@@ -103,16 +107,26 @@ if (isset($page_roles) && is_array($page_roles)) {
         html.dark-mode .settings-card,
         html.dark-mode .welcome-card,
         html.dark-mode .dash-card,
-        html.dark-mode .card-custom {
+        html.dark-mode .card-custom,
+        html.dark-mode .card,
+        html.dark-mode .modal-content {
             background-color: #0f172a !important;
             color: #f8fafc !important;
         }
         html.dark-mode .settings-card,
         html.dark-mode .welcome-card,
         html.dark-mode .dash-card,
-        html.dark-mode .card-custom {
+        html.dark-mode .card-custom,
+        html.dark-mode .card,
+        html.dark-mode .modal-content {
             background-color: #1e293b !important;
             border-color: #334155 !important;
+        }
+        /* Desativa transições de background durante navegação para evitar efeito fade branco -> escuro */
+        html.dark-mode *,
+        html.dark-mode *::before,
+        html.dark-mode *::after {
+            transition: background-color 0s ease, border-color 0s ease, color 0s ease !important;
         }
     </style>
     
@@ -144,5 +158,5 @@ if (isset($page_roles) && is_array($page_roles)) {
         }
     </script>
 </head>
-<body>
+<body class="<?= $isDarkMode ? 'dark-mode' : '' ?>" style="<?= $isDarkMode ? 'background-color: #0f172a !important; color: #f8fafc !important;' : '' ?>">
 <div id="app-wrapper">

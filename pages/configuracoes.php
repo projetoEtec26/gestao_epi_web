@@ -405,13 +405,17 @@ function alterarTemaApp(val) {
     if (val === 'dark') {
         html.classList.add('dark-mode');
         html.style.backgroundColor = '#0f172a';
-        body.classList.add('dark-mode');
+        html.style.color = '#f8fafc';
+        if (body) body.classList.add('dark-mode');
         localStorage.setItem('theme-mode', 'dark');
+        document.cookie = 'theme-mode=dark; path=/; max-age=31536000; SameSite=Lax';
     } else {
         html.classList.remove('dark-mode');
         html.style.backgroundColor = '';
-        body.classList.remove('dark-mode');
+        html.style.color = '';
+        if (body) body.classList.remove('dark-mode');
         localStorage.setItem('theme-mode', 'light');
+        document.cookie = 'theme-mode=light; path=/; max-age=31536000; SameSite=Lax';
     }
     const themeBtn = document.getElementById('theme-toggle-btn');
     if (themeBtn) {

@@ -21,51 +21,40 @@ function initDarkMode() {
     const themeIcon = themeBtn ? themeBtn.querySelector('i') : null;
     const selectTema = document.getElementById('select-tema-app');
     
-    // Recupera a preferência salva
-    const savedTheme = localStorage.getItem('theme-mode');
+    // Recupera a preferência salva no localStorage ou Cookie
+    const cookieMatch = document.cookie.match(/theme-mode=([^;]+)/);
+    const savedTheme = localStorage.getItem('theme-mode') || (cookieMatch ? cookieMatch[1] : 'light');
     
-    // Aplica o tema sincronizado em html e body
-    if (savedTheme === 'dark') {
-        html.classList.add('dark-mode');
-        html.style.backgroundColor = '#0f172a';
-        body.classList.add('dark-mode');
-        if (themeIcon) {
-            themeIcon.className = 'bi bi-sun';
-        }
-        if (selectTema) {
-            selectTema.value = 'dark';
-        }
-    } else {
-        html.classList.remove('dark-mode');
-        html.style.backgroundColor = '';
-        body.classList.remove('dark-mode');
-        if (themeIcon) {
-            themeIcon.className = 'bi bi-moon-stars';
-        }
-        if (selectTema) {
-            selectTema.value = 'light';
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            html.classList.add('dark-mode');
+            html.style.backgroundColor = '#0f172a';
+            html.style.color = '#f8fafc';
+            if (body) body.classList.add('dark-mode');
+            localStorage.setItem('theme-mode', 'dark');
+            document.cookie = 'theme-mode=dark; path=/; max-age=31536000; SameSite=Lax';
+            if (themeIcon) themeIcon.className = 'bi bi-sun';
+            if (selectTema) selectTema.value = 'dark';
+        } else {
+            html.classList.remove('dark-mode');
+            html.style.backgroundColor = '';
+            html.style.color = '';
+            if (body) body.classList.remove('dark-mode');
+            localStorage.setItem('theme-mode', 'light');
+            document.cookie = 'theme-mode=light; path=/; max-age=31536000; SameSite=Lax';
+            if (themeIcon) themeIcon.className = 'bi bi-moon-stars';
+            if (selectTema) selectTema.value = 'light';
         }
     }
+
+    // Aplica o tema sincronizado
+    applyTheme(savedTheme);
     
     // Evento de clique no botão do topbar
     if (themeBtn) {
         themeBtn.addEventListener('click', function() {
-            const isDark = html.classList.contains('dark-mode') || body.classList.contains('dark-mode');
-            if (!isDark) {
-                html.classList.add('dark-mode');
-                html.style.backgroundColor = '#0f172a';
-                body.classList.add('dark-mode');
-                localStorage.setItem('theme-mode', 'dark');
-                if (themeIcon) themeIcon.className = 'bi bi-sun';
-                if (selectTema) selectTema.value = 'dark';
-            } else {
-                html.classList.remove('dark-mode');
-                html.style.backgroundColor = '';
-                body.classList.remove('dark-mode');
-                localStorage.setItem('theme-mode', 'light');
-                if (themeIcon) themeIcon.className = 'bi bi-moon-stars';
-                if (selectTema) selectTema.value = 'light';
-            }
+            const isDark = html.classList.contains('dark-mode') || (body && body.classList.contains('dark-mode'));
+            applyTheme(isDark ? 'light' : 'dark');
         });
     }
 }
