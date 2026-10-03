@@ -147,32 +147,52 @@ $aceitouTermos = !empty($currentUser['usu_aceite_termos']);
     flex-shrink: 0;
 }
 
-body.dark-mode .settings-group-title {
+html.dark-mode .settings-group-title, body.dark-mode .settings-group-title {
     color: #60a5fa !important;
 }
 
-body.dark-mode .settings-card {
+html.dark-mode .settings-card, body.dark-mode .settings-card {
     background-color: #1e293b !important;
     border-color: #334155 !important;
 }
 
-body.dark-mode .settings-icon-box {
+html.dark-mode .settings-icon-box, body.dark-mode .settings-icon-box {
     background-color: #1e3a8a !important;
     color: #93c5fd !important;
 }
 
-body.dark-mode .settings-card h6 {
+html.dark-mode .settings-card h6, body.dark-mode .settings-card h6 {
     color: #f8fafc !important;
 }
 
-body.dark-mode .settings-logout-card {
+html.dark-mode .settings-card small.text-muted, body.dark-mode .settings-card small.text-muted {
+    color: #cbd5e1 !important;
+}
+
+html.dark-mode .settings-logout-card, body.dark-mode .settings-logout-card {
     background-color: #1e293b !important;
     border-color: #ef4444 !important;
 }
 
-body.dark-mode .settings-logout-icon {
+html.dark-mode .settings-logout-card:hover, body.dark-mode .settings-logout-card:hover {
+    background-color: #450a0a !important;
+}
+
+html.dark-mode .settings-logout-icon, body.dark-mode .settings-logout-icon {
     background-color: #450a0a !important;
     color: #fca5a5 !important;
+}
+
+html.dark-mode .form-select, body.dark-mode .form-select {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+html.dark-mode .form-control, body.dark-mode .form-control {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
 }
 </style>
 
@@ -212,7 +232,7 @@ body.dark-mode .settings-logout-icon {
                                 <i class="bi bi-shield-lock-fill"></i>
                             </div>
                             <div>
-                                <h6 class="fw-bold m-0" style="color: #334155;">Alterar Senha do Operador</h6>
+                                <h6 class="fw-bold m-0" style="color: var(--color-text-primary, #334155);">Alterar Senha do Operador</h6>
                                 <small class="text-muted">Redefinir a senha do operador logado</small>
                             </div>
                         </div>
@@ -258,7 +278,7 @@ body.dark-mode .settings-logout-icon {
                                 <i class="bi bi-gear-fill"></i>
                             </div>
                             <div>
-                                <h6 class="fw-bold m-0" style="color: #334155;">Tema do Aplicativo</h6>
+                                <h6 class="fw-bold m-0" style="color: var(--color-text-primary, #334155);">Tema do Aplicativo</h6>
                                 <small class="text-muted">Escolha entre modo claro e modo escuro</small>
                             </div>
                         </div>
@@ -282,7 +302,7 @@ body.dark-mode .settings-logout-icon {
                                 <i class="bi bi-lock-fill"></i>
                             </div>
                             <div>
-                                <h6 class="fw-bold m-0" style="color: #334155;">Termos e Políticas (LGPD)</h6>
+                                <h6 class="fw-bold m-0" style="color: var(--color-text-primary, #334155);">Termos e Políticas (LGPD)</h6>
                                 <small class="text-muted">Consulte os Termos e Políticas de Privacidade (LGPD).</small>
                             </div>
                         </div>
@@ -328,7 +348,7 @@ body.dark-mode .settings-logout-icon {
                                 <i class="bi bi-box-arrow-up-right"></i>
                             </div>
                             <div>
-                                <h6 class="fw-bold m-0" style="color: #334155;">Sobre o Projeto</h6>
+                                <h6 class="fw-bold m-0" style="color: var(--color-text-primary, #334155);">Sobre o Projeto</h6>
                                 <small class="text-muted">Descrição técnica e acadêmica do TCC</small>
                             </div>
                         </div>

@@ -40,7 +40,7 @@
 }
 
 /* Modo Escuro (Dark Mode) */
-body.dark-mode {
+html.dark-mode, body.dark-mode, :root.dark-mode {
     --color-bg: #090d16;
     --color-sidebar-bg: #0d121f;
     --color-sidebar-text: #64748b;
@@ -382,6 +382,29 @@ body.sidebar-collapsed #sidebar .nav-item a span:not(.icon-box) {
     display: flex;
     align-items: center;
     gap: 24px;
+}
+
+/* Overrides de Modo Escuro para o Topbar */
+html.dark-mode #topbar, body.dark-mode #topbar {
+    background-color: #1e293b !important;
+    border-bottom: 1px solid #334155 !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode #topbar .text-muted, body.dark-mode #topbar .text-muted {
+    color: #cbd5e1 !important;
+}
+
+html.dark-mode #topbar .text-dark, body.dark-mode #topbar .text-dark {
+    color: #f8fafc !important;
+}
+
+html.dark-mode #topbar .theme-switch, body.dark-mode #topbar .theme-switch {
+    color: #38bdf8 !important;
+}
+
+html.dark-mode #topbar .toggle-sidebar-btn, body.dark-mode #topbar .toggle-sidebar-btn {
+    color: #cbd5e1 !important;
 }
 
 /* Área de Conteúdo */

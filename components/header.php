@@ -109,7 +109,8 @@ $isDarkMode = ($_COOKIE['theme-mode'] ?? '') === 'dark';
         html.dark-mode .dash-card,
         html.dark-mode .card-custom,
         html.dark-mode .card,
-        html.dark-mode .modal-content {
+        html.dark-mode .modal-content,
+        html.dark-mode #topbar {
             background-color: #0f172a !important;
             color: #f8fafc !important;
         }
@@ -118,9 +119,14 @@ $isDarkMode = ($_COOKIE['theme-mode'] ?? '') === 'dark';
         html.dark-mode .dash-card,
         html.dark-mode .card-custom,
         html.dark-mode .card,
-        html.dark-mode .modal-content {
+        html.dark-mode .modal-content,
+        html.dark-mode #topbar {
             background-color: #1e293b !important;
             border-color: #334155 !important;
+        }
+        html.dark-mode #topbar .text-muted,
+        html.dark-mode #topbar .text-dark {
+            color: #cbd5e1 !important;
         }
         /* Desativa transições de background durante navegação para evitar efeito fade branco -> escuro */
         html.dark-mode *,
