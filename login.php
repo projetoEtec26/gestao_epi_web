@@ -56,10 +56,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
         $erro = 'Por favor, preencha o usuário e a senha.';
     } else {
         try {
+            $deviceInfo = function_exists('obterDispositivoWeb') ? obterDispositivoWeb() : 'Web (Navegador Desconhecido)';
             $api = new ApiService();
             $response = $api->post('auth/login', [
                 'usu_login' => $login,
-                'senha' => $senha
+                'senha' => $senha,
+                'aparelho' => $deviceInfo,
+                'dispositivo' => $deviceInfo
             ]);
 
             $statusCode = $response['status_code'] ?? 200;

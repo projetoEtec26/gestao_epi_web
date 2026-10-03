@@ -39,10 +39,23 @@ class ApiService {
         while ($attempt <= $maxRetries) {
             $url = $this->baseUrl . ltrim($endpoint, '/');
 
+            $deviceInfo = function_exists('obterDispositivoWeb') ? obterDispositivoWeb() : 'Web (Navegador Desconhecido)';
+
             $headers = [
                 'Content-Type: application/json',
-                'Accept: application/json'
+                'Accept: application/json',
+                'X-Device-Info: ' . $deviceInfo,
+                'User-Agent: GestaoEpi_Web_' . str_replace(' ', '_', $deviceInfo)
             ];
+
+            if (!empty($_SERVER['HTTP_USER_AGENT'])) {
+                $headers[] = 'X-Original-User-Agent: ' . $_SERVER['HTTP_USER_AGENT'];
+            }
+
+            if (!empty($_SERVER['REMOTE_ADDR'])) {
+                $headers[] = 'X-Forwarded-For: ' . $_SERVER['REMOTE_ADDR'];
+                $headers[] = 'X-Real-IP: ' . $_SERVER['REMOTE_ADDR'];
+            }
 
             // Injeta automaticamente o token JWT da sessão se o usuário estiver logado
             if (isset($_SESSION['token']) && $_SESSION['token'] !== '') {
@@ -76,6 +89,10 @@ class ApiService {
             curl_setopt($ch, CURLOPT_TIMEOUT, 60); // Response timeout de 30s para relatórios pesados e logs de auditoria
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Evita problemas de SSL em localhost/Render de teste
             if ($data !== null && in_array(strtoupper($method), ['POST', 'PUT', 'PATCH'], true)) {
+                if (is_array($data)) {
+                    if (!isset($data['aparelho'])) $data['aparelho'] = $deviceInfo;
+                    if (!isset($data['dispositivo'])) $data['dispositivo'] = $deviceInfo;
+                }
                 $jsonData = json_encode($data);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
             }

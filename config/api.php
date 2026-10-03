@@ -50,6 +50,47 @@ if (!function_exists('normalizarParaOrdenacaoPHP')) {
     }
 }
 
+if (!function_exists('obterDispositivoWeb')) {
+    function obterDispositivoWeb(): string {
+        if (!empty($_SERVER['HTTP_X_DEVICE_INFO'])) {
+            return $_SERVER['HTTP_X_DEVICE_INFO'];
+        }
+
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        if (empty($userAgent)) {
+            return 'Web (Navegador Desconhecido)';
+        }
+
+        if (str_contains($userAgent, 'GestaoEpi_Android_')) {
+            return str_replace('GestaoEpi_Android_', '', $userAgent);
+        }
+
+        $os = 'Sistema Desconhecido';
+        if (preg_match('/windows nt 10/i', $userAgent)) $os = 'Windows 10/11';
+        elseif (preg_match('/windows nt 6.3/i', $userAgent)) $os = 'Windows 8.1';
+        elseif (preg_match('/windows nt 6.1/i', $userAgent)) $os = 'Windows 7';
+        elseif (preg_match('/macintosh|mac os x/i', $userAgent)) $os = 'macOS';
+        elseif (preg_match('/linux/i', $userAgent)) $os = 'Linux';
+        elseif (preg_match('/iphone|ipad/i', $userAgent)) $os = 'iOS';
+        elseif (preg_match('/android/i', $userAgent)) $os = 'Android';
+
+        $browser = 'Navegador';
+        if (preg_match('/edg\/([0-9.]+)/i', $userAgent, $m)) {
+            $browser = 'Edge ' . explode('.', $m[1])[0];
+        } elseif (preg_match('/chrome\/([0-9.]+)/i', $userAgent, $m)) {
+            $browser = 'Chrome ' . explode('.', $m[1])[0];
+        } elseif (preg_match('/firefox\/([0-9.]+)/i', $userAgent, $m)) {
+            $browser = 'Firefox ' . explode('.', $m[1])[0];
+        } elseif (preg_match('/safari\/([0-9.]+)/i', $userAgent, $m) && !preg_match('/chrome/i', $userAgent)) {
+            $browser = 'Safari ' . explode('.', $m[1])[0];
+        } elseif (preg_match('/msie|trident/i', $userAgent)) {
+            $browser = 'Internet Explorer';
+        }
+
+        return "Web ($browser no $os)";
+    }
+}
+
 $appRoot = '/OLD/gestao_epi_web_14/';
 if (php_sapi_name() === 'cli-server') {
     $appRoot = '/';
