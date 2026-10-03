@@ -78,13 +78,26 @@ function openMaterialDatePickerModal(inputElement) {
 
     let initialDate = new Date();
     if (inputElement.value && inputElement.value.trim() !== '') {
-        const parts = inputElement.value.split('-');
-        if (parts.length === 3) {
-            const y = parseInt(parts[0], 10);
-            const m = parseInt(parts[1], 10) - 1;
-            const d = parseInt(parts[2], 10);
-            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
-                initialDate = new Date(y, m, d);
+        const val = inputElement.value.trim();
+        if (val.includes('-')) {
+            const parts = val.split('-');
+            if (parts.length === 3) {
+                const y = parseInt(parts[0], 10);
+                const m = parseInt(parts[1], 10) - 1;
+                const d = parseInt(parts[2], 10);
+                if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+                    initialDate = new Date(y, m, d);
+                }
+            }
+        } else if (val.includes('/')) {
+            const parts = val.split('/');
+            if (parts.length === 3) {
+                const d = parseInt(parts[0], 10);
+                const m = parseInt(parts[1], 10) - 1;
+                const y = parseInt(parts[2], 10);
+                if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+                    initialDate = new Date(y, m, d);
+                }
             }
         }
     }
@@ -279,9 +292,13 @@ function openMaterialDatePickerModal(inputElement) {
         const yyyy = selectedDate.getFullYear();
         const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
         const dd = String(selectedDate.getDate()).padStart(2, '0');
-        const formattedSql = `${yyyy}-${mm}-${dd}`;
         
-        inputElement.value = formattedSql;
+        if (inputElement.type === 'date' || inputElement.type === 'datetime-local') {
+            inputElement.value = `${yyyy}-${mm}-${dd}`;
+        } else {
+            inputElement.value = `${dd}/${mm}/${yyyy}`;
+        }
+        
         inputElement.dispatchEvent(new Event('input', { bubbles: true }));
         inputElement.dispatchEvent(new Event('change', { bubbles: true }));
         
