@@ -597,9 +597,9 @@ require_once __DIR__ . '/../components/sidebar.php';
         <div id="visao-catalogo" class="<?= $visaoInicial === 'catalogo' ? '' : 'd-none' ?>">
         <!-- Listagem e Filtro -->
         <div class="card-custom">
-            <div class="row g-3 mb-4">
+            <div class="row g-3 mb-4 align-items-end">
                 <div class="col-md-6 col-lg-5 position-relative">
-                    <label for="busca-input" class="form-label fw-semibold" style="font-size: 12px;">
+                    <label for="busca-input" class="form-label fw-semibold mb-1" style="font-size: 12px;">
                         <i class="bi bi-search text-primary me-1"></i> Consulta de EPIs no Catálogo
                     </label>
                     <div class="input-group">
@@ -629,7 +629,10 @@ require_once __DIR__ . '/../components/sidebar.php';
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <select id="filtro-tipo" class="form-select" onchange="aplicarFiltrosEpi()">
+                    <label for="filtro-tipo" class="form-label fw-semibold mb-1" style="font-size: 12px;">
+                        <i class="bi bi-funnel text-primary me-1"></i> Tipo de Item
+                    </label>
+                    <select id="filtro-tipo" class="form-select py-2" onchange="aplicarFiltrosEpi()">
                         <option value="">Todos os Tipos</option>
                         <option value="EPI_COM_CA">EPI com C.A.</option>
                         <option value="ITEM_SEGURANCA_SEM_CA">Item de Segurança sem C.A.</option>
@@ -638,7 +641,10 @@ require_once __DIR__ . '/../components/sidebar.php';
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select id="filtro-ca-status" class="form-select" onchange="aplicarFiltrosEpi()">
+                    <label for="filtro-ca-status" class="form-label fw-semibold mb-1" style="font-size: 12px;">
+                        <i class="bi bi-shield-exclamation text-primary me-1"></i> Status do C.A.
+                    </label>
+                    <select id="filtro-ca-status" class="form-select py-2" onchange="aplicarFiltrosEpi()">
                         <option value="">Todos os Status C.A.</option>
                         <option value="vigente">Vigente</option>
                         <option value="vencido">Vencido / Próximo</option>

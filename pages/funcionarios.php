@@ -393,7 +393,7 @@ $acao = $_GET['acao'] ?? 'lista';
 
             <!-- Listagem e Filtro -->
             <div class="card-custom" style="position: relative; z-index: 1050;">
-                <div class="row g-3 mb-4">
+                <div class="row g-3 mb-4 align-items-end">
                     <div class="col-md-6 col-lg-5">
                         <label for="busca-input" class="form-label fw-semibold mb-1" style="font-size:12px;">
                             <i class="bi bi-search text-primary me-1"></i> Buscar Colaborador (Tempo Real) *
@@ -430,7 +430,10 @@ $acao = $_GET['acao'] ?? 'lista';
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <select id="filtro-setor" class="form-select" onchange="aplicarFiltrosFuncionario()">
+                        <label for="filtro-setor" class="form-label fw-semibold mb-1" style="font-size:12px;">
+                            <i class="bi bi-building text-primary me-1"></i> Setor / Departamento
+                        </label>
+                        <select id="filtro-setor" class="form-select py-2" onchange="aplicarFiltrosFuncionario()">
                             <option value="">Todos os Setores</option>
                             <?php
                             $setores = array_unique(array_column($funcionarios, 'fun_departamento'));
@@ -444,7 +447,10 @@ $acao = $_GET['acao'] ?? 'lista';
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <select id="filtro-status" class="form-select" onchange="aplicarFiltrosFuncionario()">
+                        <label for="filtro-status" class="form-label fw-semibold mb-1" style="font-size:12px;">
+                            <i class="bi bi-person-check text-primary me-1"></i> Situação
+                        </label>
+                        <select id="filtro-status" class="form-select py-2" onchange="aplicarFiltrosFuncionario()">
                             <option value="">Todos os Status</option>
                             <option value="ATIVO">Ativo</option>
                             <option value="INATIVO">Inativo</option>
