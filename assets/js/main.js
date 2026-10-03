@@ -5,12 +5,31 @@ document.addEventListener('DOMContentLoaded', function() {
     initSidebarToggle();
     initInputsMasks();
     initNumberSpinners();
+    initDatePickers();
 
     // Notifica automaticamente o Dashboard sempre que qualquer alteração/sucesso for realizada no sistema
     if (document.querySelector('.alert-success')) {
         window.notificarAtualizacaoSistema();
     }
 });
+
+/**
+ * Suporte global para abrir o picker de calendário (mês, dia, ano) ao clicar em qualquer campo de data ou seu ícone
+ */
+function initDatePickers() {
+    document.addEventListener('click', function(e) {
+        const input = e.target.closest('input[type="date"], input[type="datetime-local"]');
+        if (!input || input.disabled || input.readOnly) return;
+
+        if (typeof input.showPicker === 'function') {
+            try {
+                input.showPicker();
+            } catch (err) {
+                // Previne exceção caso o picker já esteja aberto ou em execução pelo navegador
+            }
+        }
+    });
+}
 
 /**
  * Suporte global de clique para incrementar/decrementar campos do tipo número (setas ▲ e ▼)
