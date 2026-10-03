@@ -421,21 +421,25 @@ html.dark-mode .input-group-text.bg-light, body.dark-mode .input-group-text.bg-l
     color: #38bdf8 !important;
 }
 
-html.dark-mode .web-search-box, body.dark-mode .web-search-box {
+html.dark-mode .web-search-box, body.dark-mode .web-search-box,
+html.dark-mode [id^="srch-rel-"], body.dark-mode [id^="srch-rel-"] {
     background-color: #0f172a !important;
     border-color: #334155 !important;
 }
 
-html.dark-mode .web-search-box input, body.dark-mode .web-search-box input {
+html.dark-mode .web-search-box input, body.dark-mode .web-search-box input,
+html.dark-mode [id^="srch-rel-"] input, body.dark-mode [id^="srch-rel-"] input {
     background-color: transparent !important;
     color: #f8fafc !important;
 }
 
-html.dark-mode .web-search-box input::placeholder, body.dark-mode .web-search-box input::placeholder {
+html.dark-mode .web-search-box input::placeholder, body.dark-mode .web-search-box input::placeholder,
+html.dark-mode [id^="srch-rel-"] input::placeholder, body.dark-mode [id^="srch-rel-"] input::placeholder {
     color: #94a3b8 !important;
 }
 
-html.dark-mode .web-search-box #btn-limpar, body.dark-mode .web-search-box #btn-limpar {
+html.dark-mode .web-search-box #btn-limpar, body.dark-mode .web-search-box #btn-limpar,
+html.dark-mode [id^="srch-rel-"] button, body.dark-mode [id^="srch-rel-"] button {
     color: #cbd5e1 !important;
 }
 
@@ -447,7 +451,8 @@ html.dark-mode .web-card-container, body.dark-mode .web-card-container {
 
 html.dark-mode #dropdown-colab, body.dark-mode #dropdown-colab,
 html.dark-mode #dropdown-autocomplete-colab, body.dark-mode #dropdown-autocomplete-colab,
-html.dark-mode .autocomplete-dropdown-container, body.dark-mode .autocomplete-dropdown-container {
+html.dark-mode .autocomplete-dropdown-container, body.dark-mode .autocomplete-dropdown-container,
+html.dark-mode [id^="dropdown-rel-"], body.dark-mode [id^="dropdown-rel-"] {
     background-color: #1e293b !important;
     border-color: #334155 !important;
     color: #f8fafc !important;

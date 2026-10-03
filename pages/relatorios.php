@@ -111,7 +111,7 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                             <div class="position-relative" id="wrapper-busca-rel-geral">
                                 <div id="srch-rel-geral-border" style="
                                     display:flex;align-items:center;gap:6px;
-                                    background:#fff;border:1.5px solid #d0d5dd;
+                                    background:var(--color-card-bg, #fff);border:1.5px solid var(--color-border, #d0d5dd);
                                     border-radius:8px;padding:0 10px;
                                     height:38px;
                                     transition:border-color .2s,box-shadow .2s;">
@@ -123,7 +123,7 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                                            style="border:none;outline:none;flex:1;padding:6px 0;font-size:13px;background:transparent;"
                                            oninput="buscarRelGeral(this.value)"
                                            onfocus="this.closest('[id=srch-rel-geral-border]').style.borderColor='#3b82f6';this.closest('[id=srch-rel-geral-border]').style.boxShadow='0 0 0 3px rgba(59,130,246,.15)';"
-                                           onblur="setTimeout(()=>{this.closest('[id=srch-rel-geral-border]').style.borderColor='#d0d5dd';this.closest('[id=srch-rel-geral-border]').style.boxShadow='none';},150)"
+                                           onblur="setTimeout(()=>{this.closest('[id=srch-rel-geral-border]').style.borderColor='';this.closest('[id=srch-rel-geral-border]').style.boxShadow='none';},150)"
                                            onkeydown="teclarRelGeral(event)">
                                     <button type="button" id="btn-limpar-rel-geral" title="Limpar"
                                             onclick="limparRelGeral()"
@@ -131,7 +131,7 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                                 </div>
                                 <div id="dropdown-rel-geral" style="
                                     display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
-                                    background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;
+                                    background:var(--color-card-bg, #fff);border:1.5px solid var(--color-border, #e2e8f0);border-radius:12px;
                                     box-shadow:0 12px 32px -4px rgba(0,0,0,.18),0 2px 8px -2px rgba(0,0,0,.08);
                                     overflow:hidden;max-height:300px;overflow-y:auto;z-index:99999;"></div>
                             </div>
@@ -198,7 +198,7 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                             <div class="position-relative" id="wrapper-busca-rel-entregas">
                                 <div id="srch-rel-entregas-border" style="
                                     display:flex;align-items:center;gap:8px;
-                                    background:#fff;border:1.5px solid #d0d5dd;
+                                    background:var(--color-card-bg, #fff);border:1.5px solid var(--color-border, #d0d5dd);
                                     border-radius:10px;padding:0 12px;height:42px;
                                     transition:border-color .2s,box-shadow .2s;">
                                     <i class="bi bi-search" style="color:#3b82f6;font-size:15px;flex-shrink:0;"></i>
@@ -209,7 +209,7 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                                            style="border:none;outline:none;flex:1;padding:8px 0;font-size:13.5px;background:transparent;"
                                            oninput="buscarRelEntregas(this.value)"
                                            onfocus="this.closest('[id=srch-rel-entregas-border]').style.borderColor='#3b82f6';this.closest('[id=srch-rel-entregas-border]').style.boxShadow='0 0 0 3px rgba(59,130,246,.15)';"
-                                           onblur="setTimeout(()=>{this.closest('[id=srch-rel-entregas-border]').style.borderColor='#d0d5dd';this.closest('[id=srch-rel-entregas-border]').style.boxShadow='none';},150)"
+                                           onblur="setTimeout(()=>{this.closest('[id=srch-rel-entregas-border]').style.borderColor='';this.closest('[id=srch-rel-entregas-border]').style.boxShadow='none';},150)"
                                            onkeydown="teclarRelEntregas(event)">
                                     <button type="button" id="btn-limpar-rel-entregas" title="Limpar"
                                             onclick="limparRelEntregas()"
@@ -217,7 +217,7 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                                 </div>
                                 <div id="dropdown-rel-entregas" style="
                                     display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
-                                    background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;
+                                    background:var(--color-card-bg, #fff);border:1.5px solid var(--color-border, #e2e8f0);border-radius:12px;
                                     box-shadow:0 12px 32px -4px rgba(0,0,0,.18),0 2px 8px -2px rgba(0,0,0,.08);
                                     overflow:hidden;max-height:340px;overflow-y:auto;z-index:99999;"></div>
                             </div>
@@ -288,7 +288,7 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                             <div class="position-relative" id="wrapper-busca-rel-epi">
                                 <div id="srch-rel-epi-border" style="
                                     display:flex;align-items:center;gap:8px;
-                                    background:#fff;border:1.5px solid #d0d5dd;
+                                    background:var(--color-card-bg, #fff);border:1.5px solid var(--color-border, #d0d5dd);
                                     border-radius:10px;padding:0 12px;height:42px;
                                     transition:border-color .2s,box-shadow .2s;">
                                     <i class="bi bi-search" style="color:#3b82f6;font-size:15px;flex-shrink:0;"></i>
@@ -299,7 +299,7 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                                            style="border:none;outline:none;flex:1;padding:8px 0;font-size:13.5px;background:transparent;"
                                            oninput="buscarRelEpi(this.value)"
                                            onfocus="this.closest('[id=srch-rel-epi-border]').style.borderColor='#3b82f6';this.closest('[id=srch-rel-epi-border]').style.boxShadow='0 0 0 3px rgba(59,130,246,.15)';"
-                                           onblur="setTimeout(()=>{this.closest('[id=srch-rel-epi-border]').style.borderColor='#d0d5dd';this.closest('[id=srch-rel-epi-border]').style.boxShadow='none';},150)"
+                                           onblur="setTimeout(()=>{this.closest('[id=srch-rel-epi-border]').style.borderColor='';this.closest('[id=srch-rel-epi-border]').style.boxShadow='none';},150)"
                                            onkeydown="teclarRelEpi(event)">
                                     <button type="button" id="btn-limpar-rel-epi" title="Limpar"
                                             onclick="limparRelEpi()"
@@ -307,7 +307,7 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                                 </div>
                                 <div id="dropdown-rel-epi" style="
                                     display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
-                                    background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;
+                                    background:var(--color-card-bg, #fff);border:1.5px solid var(--color-border, #e2e8f0);border-radius:12px;
                                     box-shadow:0 12px 32px -4px rgba(0,0,0,.18),0 2px 8px -2px rgba(0,0,0,.08);
                                     overflow:hidden;max-height:300px;overflow-y:auto;z-index:99999;"></div>
                             </div>
@@ -377,7 +377,7 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                             <div class="position-relative" id="wrapper-busca-rel-custos">
                                 <div id="srch-rel-custos-border" style="
                                     display:flex;align-items:center;gap:6px;
-                                    background:#fff;border:1.5px solid #d0d5dd;
+                                    background:var(--color-card-bg, #fff);border:1.5px solid var(--color-border, #d0d5dd);
                                     border-radius:8px;padding:0 10px;
                                     height:38px;
                                     transition:border-color .2s,box-shadow .2s;">
@@ -389,7 +389,7 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                                            style="border:none;outline:none;flex:1;padding:6px 0;font-size:13px;background:transparent;"
                                            oninput="buscarRelCustos(this.value)"
                                            onfocus="this.closest('[id=srch-rel-custos-border]').style.borderColor='#3b82f6';this.closest('[id=srch-rel-custos-border]').style.boxShadow='0 0 0 3px rgba(59,130,246,.15)';"
-                                           onblur="setTimeout(()=>{this.closest('[id=srch-rel-custos-border]').style.borderColor='#d0d5dd';this.closest('[id=srch-rel-custos-border]').style.boxShadow='none';},150)"
+                                           onblur="setTimeout(()=>{this.closest('[id=srch-rel-custos-border]').style.borderColor='';this.closest('[id=srch-rel-custos-border]').style.boxShadow='none';},150)"
                                            onkeydown="teclarRelCustos(event)">
                                     <button type="button" id="btn-limpar-rel-custos" title="Limpar"
                                             onclick="limparRelCustos()"
@@ -397,7 +397,7 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                                 </div>
                                 <div id="dropdown-rel-custos" style="
                                     display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
-                                    background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;
+                                    background:var(--color-card-bg, #fff);border:1.5px solid var(--color-border, #e2e8f0);border-radius:12px;
                                     box-shadow:0 12px 32px -4px rgba(0,0,0,.18),0 2px 8px -2px rgba(0,0,0,.08);
                                     overflow:hidden;max-height:300px;overflow-y:auto;z-index:99999;"></div>
                             </div>
