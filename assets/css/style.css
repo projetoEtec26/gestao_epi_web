@@ -1698,32 +1698,41 @@ body.dark-mode ::-webkit-outer-spin-button {
     display: none !important;
 }
 
-html.dark-mode ::-webkit-calendar-picker-indicator,
-body.dark-mode ::-webkit-calendar-picker-indicator,
-html.dark-mode input::-webkit-calendar-picker-indicator,
-body.dark-mode input::-webkit-calendar-picker-indicator,
-html.dark-mode input[type="date"]::-webkit-calendar-picker-indicator,
-body.dark-mode input[type="date"]::-webkit-calendar-picker-indicator,
-html.dark-mode input[type="datetime-local"]::-webkit-calendar-picker-indicator,
-body.dark-mode input[type="datetime-local"]::-webkit-calendar-picker-indicator,
-html.dark-mode input[type="time"]::-webkit-calendar-picker-indicator,
-body.dark-mode input[type="time"]::-webkit-calendar-picker-indicator,
-html.dark-mode input[type="month"]::-webkit-calendar-picker-indicator,
-body.dark-mode input[type="month"]::-webkit-calendar-picker-indicator {
-    filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(170deg) brightness(102%) contrast(97%) !important;
-    background: transparent !important;
-    background-color: transparent !important;
-    opacity: 0.95 !important;
-    cursor: pointer !important;
-    transition: opacity 0.2s ease !important;
+/* Padronização de Ícone de Calendário em Todos os Inputs de Data (Light & Dark Mode - Igual ao Print 2) */
+input[type="date"],
+input[type="datetime-local"] {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2364748b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3crect x='2' y='3' width='12' height='11' rx='2'/%3e%3cpath d='M2 6h12M5 1v3M11 1v3'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+    background-size: 16px 16px !important;
+    padding-right: 34px !important;
 }
 
-html.dark-mode ::-webkit-calendar-picker-indicator:hover,
-body.dark-mode ::-webkit-calendar-picker-indicator:hover,
-html.dark-mode input::-webkit-calendar-picker-indicator:hover,
-body.dark-mode input::-webkit-calendar-picker-indicator:hover {
-    opacity: 1 !important;
-    filter: invert(55%) sepia(90%) saturate(3000%) hue-rotate(170deg) brightness(115%) contrast(105%) !important;
+html.dark-mode input[type="date"],
+body.dark-mode input[type="date"],
+html.dark-mode input[type="datetime-local"],
+body.dark-mode input[type="datetime-local"] {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2338bdf8' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3e%3crect x='2' y='3' width='12' height='11' rx='2'/%3e%3cpath d='M2 6h12M5 1v3M11 1v3'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+    background-size: 16px 16px !important;
+    padding-right: 34px !important;
+}
+
+html.dark-mode input[type="date"]:hover,
+body.dark-mode input[type="date"]:hover,
+html.dark-mode input[type="date"]:focus,
+body.dark-mode input[type="date"]:focus {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2360a5fa' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3e%3crect x='2' y='3' width='12' height='11' rx='2'/%3e%3cpath d='M2 6h12M5 1v3M11 1v3'/%3e%3c/svg%3e") !important;
+}
+
+/* Oculta o indicador nativo inconsistente do Chrome/Edge para utilizar o ícone SVG padronizado mantendo a área clicável */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    opacity: 0 !important;
+    width: 34px !important;
+    height: 100% !important;
+    cursor: pointer !important;
 }
 
 html.dark-mode label,
