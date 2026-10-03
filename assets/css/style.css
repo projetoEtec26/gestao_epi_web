@@ -1666,7 +1666,12 @@ body.dark-mode .form-select:disabled {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
 }
 
-/* Indicadores de Número (Spinners de Setas ▲▼) em Ciano (#38bdf8) sem bloco retangular no Modo Escuro */
+/* Indicadores de Número (Spinners Nativos ▲▼) em Modo Escuro */
+html.dark-mode input[type="number"],
+body.dark-mode input[type="number"] {
+    color-scheme: dark !important;
+}
+
 html.dark-mode input[type="number"]::-webkit-inner-spin-button,
 body.dark-mode input[type="number"]::-webkit-inner-spin-button,
 html.dark-mode input[type="number"]::-webkit-outer-spin-button,
@@ -1675,25 +1680,13 @@ html.dark-mode ::-webkit-inner-spin-button,
 body.dark-mode ::-webkit-inner-spin-button,
 html.dark-mode ::-webkit-outer-spin-button,
 body.dark-mode ::-webkit-outer-spin-button {
-    -webkit-appearance: none !important;
-    appearance: none !important;
-    width: 20px !important;
-    height: 100% !important;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='%2338bdf8' d='M8 2l4 5H4l4-5zm0 12l-4-5h8l-4 5z'/%3e%3c/svg%3e") !important;
-    background-repeat: no-repeat !important;
-    background-position: center center !important;
-    background-size: 14px 14px !important;
-    background-color: transparent !important;
-    filter: none !important;
-    opacity: 0.9 !important;
+    -webkit-appearance: inner-spin-button !important;
+    appearance: auto !important;
+    opacity: 1 !important;
+    display: block !important;
+    filter: invert(1) brightness(2) !important;
     cursor: pointer !important;
     margin: 0 !important;
-}
-
-html.dark-mode input[type="number"]::-webkit-inner-spin-button:hover,
-body.dark-mode input[type="number"]::-webkit-inner-spin-button:hover {
-    opacity: 1 !important;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='%2360a5fa' d='M8 2l4 5H4l4-5zm0 12l-4-5h8l-4 5z'/%3e%3c/svg%3e") !important;
 }
 
 html.dark-mode ::-webkit-calendar-picker-indicator,
