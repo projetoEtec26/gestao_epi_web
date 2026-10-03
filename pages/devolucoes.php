@@ -320,57 +320,51 @@ $podeDevolver = in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXAR
                 <div class="col-lg-6">
                     <div class="web-card-container h-100 d-flex flex-column justify-content-between" id="campos-formulario-devolucao">
                         <div>
-                            <h5 class="fw-bold mb-3" style="color: var(--color-primary);">
-                                <i class="bi bi-clipboard-check me-2"></i>Parâmetros da Devolução
-                            </h5>
-
                             <div class="mb-3">
                                 <label class="form-label fw-semibold" style="font-size: 13px;">
-                                    Motivo da Devolução <span class="text-danger">*</span>
+                                    Motivo do Retorno <span class="text-danger">*</span>
                                 </label>
-                                <select class="form-select py-2" name="item_devolucao_motivo" id="select-motivo" required>
-                                    <option value="" disabled selected>Selecione o motivo da devolução...</option>
-                                    <option value="Devolução física ao almoxarifado">Devolução física ao almoxarifado (DEVOLVIDO)</option>
+                                <select class="form-select py-2" name="item_devolucao_motivo" id="select-motivo" required style="font-size: 13.5px; border-radius: 8px;">
+                                    <option value="Devolução física ao almoxarifado (DEVOLVIDO)" selected>Devolução física ao almoxarifado (DEVOLVIDO)</option>
                                     <option value="Fim da vida útil / Desgaste natural">Fim da vida útil / Desgaste natural</option>
                                     <option value="Troca periódica de EPI">Troca periódica de EPI</option>
                                     <option value="Danificado / Avariado">Danificado / Avariado</option>
-                                    <option value="Extravio / Perda do colaborador">Extravio / Perda do colaborador (EXTRAVIADO)</option>
+                                    <option value="Extravio / Perda do colaborador (EXTRAVIADO)">Extravio / Perda do colaborador (EXTRAVIADO)</option>
                                     <option value="Demissão / Desligamento">Demissão / Desligamento do funcionário</option>
                                     <option value="Outro motivo">Outro motivo</option>
                                 </select>
                             </div>
 
                             <div class="row g-3 mb-3">
-                                <div class="col-md-6">
+                                <div class="col-sm-6">
                                     <label class="form-label fw-semibold" style="font-size: 13px;">
-                                        Condição do Item Devolvido <span class="text-danger">*</span>
+                                        Condição do EPI <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select py-2" name="item_devolucao_condicao" id="select-condicao">
-                                        <option value="DANIFICADO" selected>DANIFICADO / AVARIADO</option>
-                                        <option value="USADO">USADO (Para Descarte)</option>
-                                        <option value="NOVO">NOVO (Reaproveitável)</option>
-                                        <option value="BOM_ESTADO">BOM ESTADO</option>
+                                    <select class="form-select py-2" name="item_devolucao_condicao" id="select-condicao" style="font-size: 13px; border-radius: 8px;">
+                                        <option value="USADO" selected>Usado (Descarte)</option>
+                                        <option value="DANIFICADO">Danificado / Avariado</option>
+                                        <option value="NOVO">Novo (Reaproveitável)</option>
+                                        <option value="BOM_ESTADO">Bom Estado</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-sm-6">
                                     <label class="form-label fw-semibold" style="font-size: 13px;">
                                         Destino do Item <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select py-2" name="item_devolucao_destino" id="select-destino">
-                                        <option value="MANUTENCAO" selected>MANUTENÇÃO / HIGIENIZAÇÃO</option>
-                                        <option value="ESTOQUE">RETORNO AO ESTOQUE ATIVO</option>
-                                        <option value="DESCARTE">COLETA / DESCARTE ECOLÓGICO</option>
+                                    <select class="form-select py-2" name="item_devolucao_destino" id="select-destino" style="font-size: 13px; border-radius: 8px;">
+                                        <option value="DESCARTE" selected>Coleta / Descarte Ecológico</option>
+                                        <option value="HIGIENIZACAO">Higienização e Manutenção</option>
+                                        <option value="ESTOQUE">Retorno ao Estoque Ativo</option>
                                     </select>
                                 </div>
                             </div>
 
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label class="form-label fw-semibold" style="font-size: 13px;">
                                     Observações Complementares
                                 </label>
-                                <textarea class="form-control" name="item_devolucao_obs" rows="3" placeholder="Descreva particularidades do estado do item de devolução..."></textarea>
+                                <textarea class="form-control" name="item_devolucao_obs" rows="2" style="font-size: 13px; border-radius: 8px;" placeholder="Descreva particularidades do estado do item..."></textarea>
                             </div>
-                        </div>
 
                         <!-- BOTÃO DE AÇÃO PRINCIPAL -->
                         <div class="pt-3 border-top text-end">
