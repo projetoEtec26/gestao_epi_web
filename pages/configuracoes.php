@@ -86,31 +86,27 @@ $aceitouTermos = !empty($currentUser['usu_aceite_termos']);
 .settings-container {
     max-width: 1040px;
     margin: 0 auto;
+    min-height: calc(100vh - 130px);
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 16px;
-    box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.25);
-    padding: 0 24px 18px 24px;
+    box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.15);
+    padding: 0 24px 20px 24px;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.settings-grid-body {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    column-gap: 20px;
-    align-items: start;
-}
-
-.settings-container > .settings-panel-header,
-.settings-container > .settings-panel-subtitle,
-.settings-container > .alert,
-.settings-container > .settings-group-full {
-    grid-column: 1 / -1;
-}
-
-.settings-container > .settings-group {
-    margin-bottom: 4px !important;
+    gap: 16px 24px;
+    margin-top: 12px;
 }
 
 @media (max-width: 991px) {
-    .settings-container {
+    .settings-grid-body {
         grid-template-columns: 1fr;
     }
 }
@@ -273,193 +269,203 @@ html.dark-mode .form-control, body.dark-mode .form-control {
     
     <div class="content-body">
         <div class="settings-container">
-            <div class="settings-panel-header">
-                <i class="bi bi-gear-fill"></i>
-                <h3>Configurações</h3>
-            </div>
-            <p class="text-muted settings-panel-subtitle">Gerencie suas credenciais de segurança, aparência e termos do ecossistema.</p>
-
-            <?php if ($erro !== null): ?>
-                <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    <div><?= htmlspecialchars($erro) ?></div>
+            <div>
+                <div class="settings-panel-header">
+                    <i class="bi bi-gear-fill"></i>
+                    <h3>Configurações</h3>
                 </div>
-            <?php endif; ?>
+                <p class="text-muted settings-panel-subtitle">Gerencie suas credenciais de segurança, aparência e termos do ecossistema.</p>
 
-            <?php if ($sucesso !== null): ?>
-                <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
-                    <i class="bi bi-check-circle-fill me-2"></i>
-                    <div><?= htmlspecialchars($sucesso) ?></div>
-                </div>
-            <?php endif; ?>
-
-            <!-- 1. Segurança de Acesso -->
-            <div class="settings-group mb-3">
-                <h6 class="settings-group-title">Segurança de Acesso</h6>
-                <div class="settings-card">
-                    <div class="d-flex align-items-center justify-content-between" style="cursor: pointer;" onclick="toggleSenhaForm()">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="settings-icon-box">
-                                <i class="bi bi-shield-lock-fill"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold m-0" style="color: var(--color-text-primary, #334155);">Alterar Senha do Operador</h6>
-                                <small class="text-muted">Redefinir a senha do operador logado</small>
-                            </div>
-                        </div>
-                        <i class="bi bi-chevron-down text-muted ms-2" id="icon-chevron-senha"></i>
+                <?php if ($erro !== null): ?>
+                    <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div><?= htmlspecialchars($erro) ?></div>
                     </div>
+                <?php endif; ?>
 
-                    <!-- Formulário de Alteração de Senha Accordion -->
-                    <div id="form-alterar-senha" class="mt-3 pt-3 border-top" style="display: <?= ($erro !== null || $sucesso !== null) ? 'block' : 'none' ?>;">
-                        <form method="POST" action="configuracoes.php" novalidate>
-                            <input type="hidden" name="acao" value="alterar_senha">
-                            
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold small">Senha Atual *</label>
-                                <input type="password" class="form-control" name="senha_atual" placeholder="Digite sua senha pessoal de acesso vigente" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold small">Nova Senha *</label>
-                                <input type="password" class="form-control" name="nova_senha" placeholder="Digite a nova senha de acesso segura" required>
-                                <small class="text-muted d-block mt-1" style="font-size: 11px;">A senha deve conter ao menos 6 caracteres, contendo pelo menos uma letra e um número.</small>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold small">Confirmar Nova Senha *</label>
-                                <input type="password" class="form-control" name="confirmar_senha" placeholder="Repita a nova senha de acesso" required>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary w-100" style="background-color: #2563eb; border: none; padding: 10px; font-weight: 500;">
-                                <i class="bi bi-shield-check me-1"></i> Atualizar Minha Senha
-                            </button>
-                        </form>
+                <?php if ($sucesso !== null): ?>
+                    <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <div><?= htmlspecialchars($sucesso) ?></div>
                     </div>
-                </div>
-            </div>
+                <?php endif; ?>
 
-            <!-- 2. Aparência -->
-            <div class="settings-group mb-3">
-                <h6 class="settings-group-title">Aparência</h6>
-                <div class="settings-card">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="settings-icon-box">
-                                <i class="bi bi-gear-fill"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold m-0" style="color: var(--color-text-primary, #334155);">Tema do Aplicativo</h6>
-                                <small class="text-muted">Escolha entre modo claro e modo escuro</small>
-                            </div>
-                        </div>
-                        <div>
-                            <select id="select-tema-app" class="form-select form-select-sm" style="min-width: 110px; border-radius: 8px; font-weight: 500;" onchange="alterarTemaApp(this.value)">
-                                <option value="light">Claro</option>
-                                <option value="dark">Escuro</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. Termos e Políticas (LGPD) -->
-            <div class="settings-group mb-3">
-                <h6 class="settings-group-title">Termos e Políticas (LGPD)</h6>
-                <div class="settings-card">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2" style="cursor: pointer;" onclick="toggleTermosInfo()">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="settings-icon-box">
-                                <i class="bi bi-lock-fill"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold m-0" style="color: var(--color-text-primary, #334155);">Termos e Políticas (LGPD)</h6>
-                                <small class="text-muted">Consulte os Termos e Políticas de Privacidade (LGPD).</small>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="bi bi-chevron-down text-muted" id="icon-chevron-termos"></i>
-                        </div>
-                    </div>
-
-                    <div id="info-termos-lgpd" class="mt-3 pt-3 border-top" style="display: none;">
-                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                            <div>
-                                <?php if ($aceitouTermos): ?>
-                                    <?php
-                                    $dataAceiteMs = isset($currentUser['usu_data_aceite_termos']) ? (int)$currentUser['usu_data_aceite_termos'] : null;
-                                    $strAceite = $dataAceiteMs !== null && $dataAceiteMs > 0
-                                        ? 'Aceitos em ' . date('d/m/Y \à\s H:i', (int)($dataAceiteMs / 1000))
-                                        : 'Termos de Uso já aceitos no sistema';
-                                    ?>
-                                    <div class="badge bg-success-subtle text-success border border-success-subtle p-2" style="font-weight: 500; font-size: 12px;">
-                                        <i class="bi bi-patch-check-fill me-1"></i> <?= htmlspecialchars($strAceite) ?>
+                <div class="settings-grid-body">
+                    <!-- Coluna 1 -->
+                    <div>
+                        <!-- 1. Segurança de Acesso -->
+                        <div class="settings-group mb-3">
+                            <h6 class="settings-group-title">Segurança de Acesso</h6>
+                            <div class="settings-card">
+                                <div class="d-flex align-items-center justify-content-between" style="cursor: pointer;" onclick="toggleSenhaForm()">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="settings-icon-box">
+                                            <i class="bi bi-shield-lock-fill"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold m-0" style="color: var(--color-text-primary, #334155);">Alterar Senha do Operador</h6>
+                                            <small class="text-muted">Redefinir a senha do operador logado</small>
+                                        </div>
                                     </div>
-                                <?php else: ?>
-                                    <div class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle p-2" style="font-weight: 500; font-size: 12px;">
-                                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Você ainda não registrou o aceite dos Termos de Uso.
+                                    <i class="bi bi-chevron-down text-muted ms-2" id="icon-chevron-senha"></i>
+                                </div>
+
+                                <!-- Formulário de Alteração de Senha Accordion -->
+                                <div id="form-alterar-senha" class="mt-3 pt-3 border-top" style="display: <?= ($erro !== null || $sucesso !== null) ? 'block' : 'none' ?>;">
+                                    <form method="POST" action="configuracoes.php" novalidate>
+                                        <input type="hidden" name="acao" value="alterar_senha">
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold small">Senha Atual *</label>
+                                            <input type="password" class="form-control" name="senha_atual" placeholder="Digite sua senha pessoal de acesso vigente" required>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold small">Nova Senha *</label>
+                                            <input type="password" class="form-control" name="nova_senha" placeholder="Digite a nova senha de acesso segura" required>
+                                            <small class="text-muted d-block mt-1" style="font-size: 11px;">A senha deve conter ao menos 6 caracteres, contendo pelo menos uma letra e um número.</small>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold small">Confirmar Nova Senha *</label>
+                                            <input type="password" class="form-control" name="confirmar_senha" placeholder="Repita a nova senha de acesso" required>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary w-100" style="background-color: #2563eb; border: none; padding: 10px; font-weight: 500;">
+                                            <i class="bi bi-shield-check me-1"></i> Atualizar Minha Senha
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Termos e Políticas (LGPD) -->
+                        <div class="settings-group mb-3">
+                            <h6 class="settings-group-title">Termos e Políticas (LGPD)</h6>
+                            <div class="settings-card">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2" style="cursor: pointer;" onclick="toggleTermosInfo()">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="settings-icon-box">
+                                            <i class="bi bi-lock-fill"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold m-0" style="color: var(--color-text-primary, #334155);">Termos e Políticas (LGPD)</h6>
+                                            <small class="text-muted">Consulte os Termos e Políticas de Privacidade (LGPD).</small>
+                                        </div>
                                     </div>
-                                <?php endif; ?>
-                            </div>
-                            <a href="<?= APP_ROOT ?>pages/aceitar-termos.php" class="btn btn-outline-primary btn-sm px-3" style="border-radius: 8px;">
-                                <i class="bi bi-file-text me-1"></i> Ver Termos de Uso
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-chevron-down text-muted" id="icon-chevron-termos"></i>
+                                    </div>
+                                </div>
 
-            <!-- 4. Informações -->
-            <div class="settings-group mb-3">
-                <h6 class="settings-group-title">Informações</h6>
-                <div class="settings-card">
-                    <div class="d-flex align-items-center justify-content-between" style="cursor: pointer;" onclick="toggleSobreProjeto()">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="settings-icon-box">
-                                <i class="bi bi-box-arrow-up-right"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold m-0" style="color: var(--color-text-primary, #334155);">Sobre o Projeto</h6>
-                                <small class="text-muted">Descrição técnica e acadêmica do TCC</small>
-                            </div>
-                        </div>
-                        <i class="bi bi-chevron-down text-muted ms-2" id="icon-chevron-sobre"></i>
-                    </div>
-
-                    <!-- Informações do Projeto e Perfil Expandível -->
-                    <div id="info-sobre-projeto" class="mt-3 pt-3 border-top" style="display: none;">
-                        <div class="p-3 bg-body-tertiary rounded-3 mb-3 border">
-                            <h6 class="fw-bold text-primary mb-3" style="font-size: 13px;"><i class="bi bi-person-badge me-1"></i>Dados do Meu Perfil</h6>
-                            <div class="text-center mb-3">
-                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 56px; height: 56px; font-size: 22px; font-weight: 600;">
-                                    <?= strtoupper(substr($currentUser['usu_login'], 0, 2)) ?>
-                                </div>
-                                <h6 class="fw-bold m-0"><?= htmlspecialchars($currentUser['usu_login']) ?></h6>
-                                <span class="badge bg-primary-subtle text-primary mt-1" style="font-size:11px;"><?= htmlspecialchars($perfilLabel) ?></span>
-                            </div>
-                            <div class="d-flex flex-column gap-2 text-muted" style="font-size: 12px;">
-                                <div class="d-flex justify-content-between border-bottom pb-1">
-                                    <span>ID do Usuário:</span>
-                                    <span class="fw-bold text-body">#<?= $currentUser['usu_id'] ?></span>
-                                </div>
-                                <div class="d-flex justify-content-between border-bottom pb-1">
-                                    <span>Situação da Conta:</span>
-                                    <span class="badge bg-success-subtle text-success">ATIVO</span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span>Último Login:</span>
-                                    <span class="fw-medium text-body"><?= !empty($currentUser['usu_ultimo_login']) ? formatarDataHoraBr($currentUser['usu_ultimo_login'], 'd/m/Y H:i') : 'Esta sessão' ?></span>
+                                <div id="info-termos-lgpd" class="mt-3 pt-3 border-top" style="display: none;">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                        <div>
+                                            <?php if ($aceitouTermos): ?>
+                                                <?php
+                                                $dataAceiteMs = isset($currentUser['usu_data_aceite_termos']) ? (int)$currentUser['usu_data_aceite_termos'] : null;
+                                                $strAceite = $dataAceiteMs !== null && $dataAceiteMs > 0
+                                                    ? 'Aceitos em ' . date('d/m/Y \à\s H:i', (int)($dataAceiteMs / 1000))
+                                                    : 'Termos de Uso já aceitos no sistema';
+                                                ?>
+                                                <div class="badge bg-success-subtle text-success border border-success-subtle p-2" style="font-weight: 500; font-size: 12px;">
+                                                    <i class="bi bi-patch-check-fill me-1"></i> <?= htmlspecialchars($strAceite) ?>
+                                                </div>
+                                            <?php else: ?>
+                                                <div class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle p-2" style="font-weight: 500; font-size: 12px;">
+                                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Você ainda não registrou o aceite dos Termos de Uso.
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <a href="<?= APP_ROOT ?>pages/aceitar-termos.php" class="btn btn-outline-primary btn-sm px-3" style="border-radius: 8px;">
+                                            <i class="bi bi-file-text me-1"></i> Ver Termos de Uso
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="p-3 bg-body-tertiary rounded-3 border" style="font-size: 12px;">
-                            <h6 class="fw-bold text-primary mb-2" style="font-size: 13px;"><i class="bi bi-cloud-check me-1"></i>Status da API &amp; Ecossistema</h6>
-                            <p class="mb-1 text-muted">URL Base de Conexão:</p>
-                            <code class="d-block p-2 bg-dark text-light rounded text-break mb-2" style="font-size: 11px;"><?= htmlspecialchars($configApiUrl) ?></code>
-                            <p class="m-0 text-muted" style="font-size: 11px;">
-                                <i class="bi bi-info-circle me-1"></i> Sistema Gestão de EPI Web - Versão 8.0 (2026). Descrição técnica e acadêmica desenvolvida para trabalho de conclusão de curso (TCC).
-                            </p>
+                    <!-- Coluna 2 -->
+                    <div>
+                        <!-- 2. Aparência -->
+                        <div class="settings-group mb-3">
+                            <h6 class="settings-group-title">Aparência</h6>
+                            <div class="settings-card">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="settings-icon-box">
+                                            <i class="bi bi-gear-fill"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold m-0" style="color: var(--color-text-primary, #334155);">Tema do Aplicativo</h6>
+                                            <small class="text-muted">Escolha entre modo claro e modo escuro</small>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <select id="select-tema-app" class="form-select form-select-sm" style="min-width: 110px; border-radius: 8px; font-weight: 500;" onchange="alterarTemaApp(this.value)">
+                                            <option value="light">Claro</option>
+                                            <option value="dark">Escuro</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Informações -->
+                        <div class="settings-group mb-3">
+                            <h6 class="settings-group-title">Informações</h6>
+                            <div class="settings-card">
+                                <div class="d-flex align-items-center justify-content-between" style="cursor: pointer;" onclick="toggleSobreProjeto()">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="settings-icon-box">
+                                            <i class="bi bi-box-arrow-up-right"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold m-0" style="color: var(--color-text-primary, #334155);">Sobre o Projeto</h6>
+                                            <small class="text-muted">Descrição técnica e acadêmica do TCC</small>
+                                        </div>
+                                    </div>
+                                    <i class="bi bi-chevron-down text-muted ms-2" id="icon-chevron-sobre"></i>
+                                </div>
+
+                                <!-- Informações do Projeto e Perfil Expandível -->
+                                <div id="info-sobre-projeto" class="mt-3 pt-3 border-top" style="display: none;">
+                                    <div class="p-3 bg-body-tertiary rounded-3 mb-3 border">
+                                        <h6 class="fw-bold text-primary mb-3" style="font-size: 13px;"><i class="bi bi-person-badge me-1"></i>Dados do Meu Perfil</h6>
+                                        <div class="text-center mb-3">
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 56px; height: 56px; font-size: 22px; font-weight: 600;">
+                                                <?= strtoupper(substr($currentUser['usu_login'], 0, 2)) ?>
+                                            </div>
+                                            <h6 class="fw-bold m-0"><?= htmlspecialchars($currentUser['usu_login']) ?></h6>
+                                            <span class="badge bg-primary-subtle text-primary mt-1" style="font-size:11px;"><?= htmlspecialchars($perfilLabel) ?></span>
+                                        </div>
+                                        <div class="d-flex flex-column gap-2 text-muted" style="font-size: 12px;">
+                                            <div class="d-flex justify-content-between border-bottom pb-1">
+                                                <span>ID do Usuário:</span>
+                                                <span class="fw-bold text-body">#<?= $currentUser['usu_id'] ?></span>
+                                            </div>
+                                            <div class="d-flex justify-content-between border-bottom pb-1">
+                                                <span>Situação da Conta:</span>
+                                                <span class="badge bg-success-subtle text-success">ATIVO</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <span>Último Login:</span>
+                                                <span class="fw-medium text-body"><?= !empty($currentUser['usu_ultimo_login']) ? formatarDataHoraBr($currentUser['usu_ultimo_login'], 'd/m/Y H:i') : 'Esta sessão' ?></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-3 bg-body-tertiary rounded-3 border" style="font-size: 12px;">
+                                        <h6 class="fw-bold text-primary mb-2" style="font-size: 13px;"><i class="bi bi-cloud-check me-1"></i>Status da API &amp; Ecossistema</h6>
+                                        <p class="mb-1 text-muted">URL Base de Conexão:</p>
+                                        <code class="d-block p-2 bg-dark text-light rounded text-break mb-2" style="font-size: 11px;"><?= htmlspecialchars($configApiUrl) ?></code>
+                                        <p class="m-0 text-muted" style="font-size: 11px;">
+                                            <i class="bi bi-info-circle me-1"></i> Sistema Gestão de EPI Web - Versão 8.0 (2026). Descrição técnica e acadêmica desenvolvida para trabalho de conclusão de curso (TCC).
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -476,7 +482,6 @@ html.dark-mode .form-control, body.dark-mode .form-control {
                     </div>
                 </a>
             </div>
-
         </div>
     </div>
 </div>
