@@ -17,22 +17,56 @@ document.addEventListener('DOMContentLoaded', function() {
  * Suporte global para abrir o modal de calendário Material Design (mês, dia, ano - conforme Print 2) ao clicar em qualquer campo de data ou seu ícone
  */
 function initDatePickers() {
-    document.addEventListener('click', function(e) {
-        const input = e.target.closest('input[type="date"], input[type="datetime-local"]');
+    function triggerPicker(e) {
+        const input = e.target.closest('input[type="date"], input[type="datetime-local"], .mask-date');
         if (!input || input.disabled) return;
+
+        // Evita reabrir se já houver um modal ativo
+        if (document.querySelector('.md-picker-backdrop')) return;
 
         e.preventDefault();
         e.stopPropagation();
-        input.blur();
+        if (typeof input.blur === 'function') input.blur();
         openMaterialDatePickerModal(input);
-    });
+    }
 
-    document.addEventListener('focusin', function(e) {
-        const input = e.target.closest('input[type="date"], input[type="datetime-local"]');
-        if (!input || input.disabled) return;
-        
-        input.blur();
-    });
+    function makeInputsReadOnly() {
+        document.querySelectorAll('input[type="date"], input[type="datetime-local"]').forEach(input => {
+            if (!input.hasAttribute('readonly')) {
+                input.setAttribute('readonly', 'readonly');
+            }
+        });
+    }
+
+    makeInputsReadOnly();
+
+    if ('MutationObserver' in window) {
+        const observer = new MutationObserver(function() {
+            makeInputsReadOnly();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    document.addEventListener('mousedown', function(e) {
+        const input = e.target.closest('input[type="date"], input[type="datetime-local"], .mask-date');
+        if (input && !input.disabled) {
+            triggerPicker(e);
+        }
+    }, true);
+
+    document.addEventListener('click', function(e) {
+        const input = e.target.closest('input[type="date"], input[type="datetime-local"], .mask-date');
+        if (input && !input.disabled) {
+            triggerPicker(e);
+        }
+    }, true);
+
+    document.addEventListener('touchend', function(e) {
+        const input = e.target.closest('input[type="date"], input[type="datetime-local"], .mask-date');
+        if (input && !input.disabled) {
+            triggerPicker(e);
+        }
+    }, { capture: true, passive: false });
 }
 
 /**
