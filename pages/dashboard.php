@@ -215,6 +215,7 @@ try {
         $tFunc = (int)($stats['tFunc'] ?? 0);
 
         $alerts['ca_vencidos'] = $caV;
+        $alerts['ca_vencendo_7d'] = $aV7;
         $alerts['vida_util_vencida'] = $vuV;
         $alerts['troca_proxima'] = $tpP;
         $alerts['func_vencidos'] = $fV;
@@ -1431,7 +1432,15 @@ require_once __DIR__ . '/../components/sidebar.php';
                     <button type="button" class="btn-ver-alert" data-bs-toggle="modal" data-bs-target="#modalCaVencidos">Ver ›</button>
                 </div>
 
-                <!-- Item 2: Vida Útil Vencida -->
+                <!-- Item 2: C.A. Vencendo (7 dias) -->
+                <div class="alert-card-item">
+                    <div class="alert-card-text">
+                        • <span id="alert-ca-vencendo-7d"><?= $alerts['ca_vencendo_7d'] ?? 1 ?></span> EPI(s) com C.A. vencendo (7 dias)
+                    </div>
+                    <button type="button" class="btn-ver-alert" data-bs-toggle="modal" data-bs-target="#modalCaAVencer">Ver ›</button>
+                </div>
+
+                <!-- Item 3: Vida Útil Vencida -->
                 <div class="alert-card-item">
                     <div class="alert-card-text">
                         • <span id="alert-vida-util"><?= $alerts['vida_util_vencida'] ?></span> EPI(s) em uso com vida útil vencida
@@ -1439,7 +1448,7 @@ require_once __DIR__ . '/../components/sidebar.php';
                     <button type="button" class="btn-ver-alert" data-bs-toggle="modal" data-bs-target="#modalEpisVidaUtilVencida">Ver ›</button>
                 </div>
 
-                <!-- Item 3: Troca Próxima -->
+                <!-- Item 4: Troca Próxima -->
                 <div class="alert-card-item">
                     <div class="alert-card-text">
                         • <span id="alert-troca-proxima"><?= $alerts['troca_proxima'] ?></span> EPI(s) em uso com troca próxima
@@ -1447,7 +1456,7 @@ require_once __DIR__ . '/../components/sidebar.php';
                     <button type="button" class="btn-ver-alert" data-bs-toggle="modal" data-bs-target="#modalCaAVencer">Ver ›</button>
                 </div>
 
-                <!-- Item 4: Funcionários c/ EPI Vencidos -->
+                <!-- Item 5: Funcionários c/ EPI Vencidos -->
                 <div class="alert-card-item">
                     <div class="alert-card-text">
                         • <span id="alert-func-vencidos"><?= $alerts['func_vencidos'] ?></span> funcionário(s) com EPI(s) vencidos
@@ -1455,7 +1464,7 @@ require_once __DIR__ . '/../components/sidebar.php';
                     <button type="button" class="btn-ver-alert" data-bs-toggle="modal" data-bs-target="#modalFuncVencidos">Ver ›</button>
                 </div>
 
-                <!-- Item 5: Funcionários Próximos da Troca -->
+                <!-- Item 6: Funcionários Próximos da Troca -->
                 <div class="alert-card-item">
                     <div class="alert-card-text">
                         • <span id="alert-func-troca"><?= $alerts['func_troca'] ?></span> funcionário(s) com EPI(s) próximos da troca
