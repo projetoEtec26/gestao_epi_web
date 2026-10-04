@@ -257,18 +257,20 @@ body.sidebar-collapsed #sidebar .brand span {
 }
 
 .submenu-toggle-btn {
-    background: transparent;
-    border: none;
-    color: #94a3b8;
+    background: rgba(6, 182, 212, 0.08);
+    border: 1.5px solid rgba(6, 182, 212, 0.35);
+    color: #06b6d4;
     cursor: pointer;
-    font-size: 15px;
-    padding: 6px 10px;
-    border-radius: 6px;
+    font-size: 16px;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
     transition: all 0.2s ease;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     margin-right: 4px;
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.1);
 }
 
 .submenu-toggle-btn:hover {
@@ -1131,13 +1133,7 @@ body.sidebar-active .sidebar-overlay,
         left: 0 !important;
     }
     
-    body.sidebar-active #topbar,
-    body.sidebar-active header#topbar {
-        visibility: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-        transition: visibility 0.2s, opacity 0.2s;
-    }
+
     
     #main-content {
         margin-left: 0 !important;

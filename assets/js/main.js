@@ -477,10 +477,8 @@ function initSidebarToggle() {
         }
     });
 
-    // No Mobile (largura <= 991px), a primeira tela que deve aparecer é o menu aberto para navegação
-    if (window.innerWidth <= 991) {
-        openMobileSidebar();
-    } else {
+    // Carrega o estado da barra lateral salva para Desktop
+    if (window.innerWidth > 991) {
         const isCollapsedSaved = localStorage.getItem('sidebar-collapsed');
         if (isCollapsedSaved === 'true') {
             document.body.classList.add('sidebar-collapsed');

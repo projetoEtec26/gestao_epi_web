@@ -33,12 +33,7 @@ if (!function_exists('hasPermission')) {
     }
 }
 ?>
-<script>
-if (window.innerWidth <= 991) {
-    document.body.classList.add('sidebar-active');
-}
-</script>
-<div id="sidebar" class="open">
+<div id="sidebar">
     <div class="brand" style="display: flex; align-items: center; flex-wrap: wrap; background-color: #0b1120; position: relative; z-index: 20; flex-shrink: 0;">
         <img src="<?= APP_ROOT ?>assets/favicon.svg" alt="Logo" width="32" height="32" style="margin-right: 12px;">
         <div style="display: flex; flex-direction: column;">
@@ -456,22 +451,7 @@ function onSubmenuItemRelatorioClick(e, tipo) {
         window.location.href = '<?= APP_ROOT ?>pages/relatorios.php?tipo=' + tipo;
     }
 }
-
-// No celular (<= 991px), garante que a primeira tela a aparecer seja o menu aberto (Print 2)
-if (window.innerWidth <= 991) {
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof window.openMobileSidebar === 'function') {
-            window.openMobileSidebar();
-        } else {
-            document.body.classList.add('sidebar-active');
-            const sb = document.getElementById('sidebar');
-            if (sb) sb.classList.add('open');
-            const ov = document.getElementById('sidebar-overlay');
-            if (ov) ov.classList.add('active');
-        }
-    });
-}
 </script>
 
 <!-- Overlay semitransparente para menu lateral mobile (off-canvas) -->
-<div id="sidebar-overlay" class="sidebar-overlay active" aria-hidden="true"></div>
+<div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
