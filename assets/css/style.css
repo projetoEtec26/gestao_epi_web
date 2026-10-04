@@ -2484,3 +2484,149 @@ body.dark-mode .btn-group-toggle-view .btn-view.active {
 }
 
 
+
+
+/* ========================================================
+   OVERIDES GLOBAIS DE ALTO CONTRASTE PARA MODO ESCURO (DARK MODE)
+   ======================================================== */
+html.dark-mode,
+body.dark-mode {
+    --color-bg: #090d16 !important;
+    --color-sidebar-bg: #0d121f !important;
+    --color-card-bg: #131929 !important;
+    --color-text-primary: #f8fafc !important;
+    --color-text-secondary: #94a3b8 !important;
+    --color-border: #1e293b !important;
+}
+
+html.dark-mode .text-muted,
+body.dark-mode .text-muted,
+html.dark-mode .text-secondary,
+body.dark-mode .text-secondary,
+html.dark-mode small.text-muted,
+body.dark-mode small.text-muted,
+html.dark-mode p.text-muted,
+body.dark-mode p.text-muted,
+html.dark-mode div.text-muted,
+body.dark-mode div.text-muted,
+html.dark-mode td.text-muted,
+body.dark-mode td.text-muted,
+html.dark-mode span.text-muted,
+body.dark-mode span.text-muted,
+html.dark-mode small,
+body.dark-mode small {
+    color: #94a3b8 !important;
+}
+
+html.dark-mode table,
+body.dark-mode table,
+html.dark-mode .table,
+body.dark-mode .table,
+html.dark-mode .table-custom,
+body.dark-mode .table-custom {
+    color: #f1f5f9 !important;
+}
+
+html.dark-mode table th,
+body.dark-mode table th,
+html.dark-mode .table th,
+body.dark-mode .table th,
+html.dark-mode .table-custom th,
+body.dark-mode .table-custom th {
+    color: #94a3b8 !important;
+    background-color: #0f172a !important;
+    border-bottom-color: #334155 !important;
+}
+
+html.dark-mode table td,
+body.dark-mode table td,
+html.dark-mode .table td,
+body.dark-mode .table td,
+html.dark-mode .table-custom td,
+body.dark-mode .table-custom td {
+    color: #e2e8f0 !important;
+    border-bottom-color: #1e293b !important;
+}
+
+html.dark-mode .form-label,
+body.dark-mode .form-label,
+html.dark-mode label,
+body.dark-mode label {
+    color: #cbd5e1 !important;
+}
+
+html.dark-mode .form-control,
+body.dark-mode .form-control,
+html.dark-mode .form-select,
+body.dark-mode .form-select,
+html.dark-mode input[type="text"],
+body.dark-mode input[type="text"],
+html.dark-mode input[type="search"],
+body.dark-mode input[type="search"],
+html.dark-mode input[type="password"],
+body.dark-mode input[type="password"],
+html.dark-mode select,
+body.dark-mode select {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+html.dark-mode .form-control::placeholder,
+body.dark-mode .form-control::placeholder,
+html.dark-mode input::placeholder,
+body.dark-mode input::placeholder {
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+}
+
+html.dark-mode .input-group-text,
+body.dark-mode .input-group-text {
+    background-color: #0f172a !important;
+    color: #94a3b8 !important;
+    border-color: #334155 !important;
+}
+
+html.dark-mode h1, body.dark-mode h1,
+html.dark-mode h2, body.dark-mode h2,
+html.dark-mode h3, body.dark-mode h3,
+html.dark-mode h4, body.dark-mode h4,
+html.dark-mode h5, body.dark-mode h5,
+html.dark-mode h6, body.dark-mode h6 {
+    color: #f8fafc !important;
+}
+
+html.dark-mode .card,
+body.dark-mode .card,
+html.dark-mode .card-custom,
+body.dark-mode .card-custom {
+    background-color: #131929 !important;
+    border-color: #1e293b !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode .modal-content,
+body.dark-mode .modal-content {
+    background-color: #131929 !important;
+    border-color: #1e293b !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode .modal-header,
+body.dark-mode .modal-header,
+html.dark-mode .modal-footer,
+body.dark-mode .modal-footer {
+    border-color: #1e293b !important;
+}
+
+html.dark-mode .text-dark,
+body.dark-mode .text-dark {
+    color: #f8fafc !important;
+}
+
+html.dark-mode .bg-light,
+body.dark-mode .bg-light {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+}
+

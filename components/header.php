@@ -130,9 +130,24 @@ $isDarkMode = ($_COOKIE['theme-mode'] ?? '') === 'dark';
             background-color: #1e293b !important;
             border-color: #334155 !important;
         }
-        html.dark-mode #topbar .text-muted,
+        html.dark-mode .text-muted,
+        html.dark-mode .text-secondary,
+        html.dark-mode small,
+        html.dark-mode #topbar .text-muted {
+            color: #94a3b8 !important;
+        }
+        html.dark-mode .text-dark,
         html.dark-mode #topbar .text-dark {
-            color: #cbd5e1 !important;
+            color: #f8fafc !important;
+        }
+        html.dark-mode table td,
+        html.dark-mode .table td {
+            color: #e2e8f0 !important;
+        }
+        html.dark-mode table th,
+        html.dark-mode .table th {
+            color: #94a3b8 !important;
+            background-color: #0f172a !important;
         }
         /* Desativa transições de background durante navegação para evitar efeito fade branco -> escuro */
         html.dark-mode *,
@@ -141,6 +156,7 @@ $isDarkMode = ($_COOKIE['theme-mode'] ?? '') === 'dark';
             transition: background-color 0s ease, border-color 0s ease, color 0s ease !important;
         }
     </style>
+
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="<?= APP_ROOT ?>assets/favicon.svg">
