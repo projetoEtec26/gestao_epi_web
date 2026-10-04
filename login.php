@@ -23,15 +23,7 @@ if (isset($_SESSION['token']) && $_SESSION['token'] !== '' && isset($_SESSION['u
         $apiVal = new ApiService();
         $meVal = $apiVal->get('auth/me');
         if (isset($meVal['success']) && $meVal['success']) {
-            $perfil = $_SESSION['usuario']['usu_perfil'] ?? '';
-            $homePage = match (strtoupper((string)$perfil)) {
-                'ADMINISTRADOR'       => 'pages/usuarios.php',
-                'RH_ADMINISTRATIVO'   => 'pages/funcionarios.php',
-                'TECNICO_SST'         => 'pages/epis.php',
-                'GESTOR'              => 'pages/dashboard.php',
-                'ALMOXARIFE_OPERADOR' => 'pages/entregas.php',
-                default               => 'pages/entregas.php',
-            };
+            $homePage = 'pages/dashboard.php';
             header('Location: ' . APP_ROOT . $homePage);
             exit;
         } else {
@@ -93,15 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
                 // Garante a gravação imediata da sessão PHP em disco
                 session_write_close();
 
-                $perfil = $_SESSION['usuario']['usu_perfil'] ?? '';
-                $homePage = match (strtoupper((string)$perfil)) {
-                    'ADMINISTRADOR'       => 'pages/usuarios.php',
-                    'RH_ADMINISTRATIVO'   => 'pages/funcionarios.php',
-                    'TECNICO_SST'         => 'pages/epis.php',
-                    'GESTOR'              => 'pages/dashboard.php',
-                    'ALMOXARIFE_OPERADOR' => 'pages/entregas.php',
-                    default               => 'pages/entregas.php',
-                };
+                $homePage = 'pages/dashboard.php';
                 $redirectUrl = $_SESSION['exige_troca_senha'] ? APP_ROOT . 'login.php' : APP_ROOT . $homePage;
                 header('Location: ' . $redirectUrl);
                 exit;
