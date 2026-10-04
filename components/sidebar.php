@@ -34,7 +34,7 @@ if (!function_exists('hasPermission')) {
 }
 ?>
 <div id="sidebar">
-    <div class="brand" style="display: flex; align-items: center; flex-wrap: wrap;">
+    <div class="brand" style="display: flex; align-items: center; flex-wrap: wrap; background-color: #0b1120; position: relative; z-index: 20; flex-shrink: 0;">
         <img src="<?= APP_ROOT ?>assets/favicon.svg" alt="Logo" width="32" height="32" style="margin-right: 12px;">
         <div style="display: flex; flex-direction: column;">
             <span>Gestão de EPI</span>

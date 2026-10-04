@@ -113,6 +113,7 @@ body.sidebar-collapsed #main-content {
     width: var(--sidebar-width);
     background-color: #0b1120;
     height: 100vh;
+    height: 100dvh;
     position: fixed;
     top: 0;
     left: 0;
@@ -121,6 +122,7 @@ body.sidebar-collapsed #main-content {
     flex-direction: column;
     transition: var(--transition-smooth);
     border-right: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden;
 }
 
 body.sidebar-collapsed #sidebar {
@@ -134,6 +136,10 @@ body.sidebar-collapsed #sidebar {
     padding: 0 20px;
     gap: 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: #0b1120 !important;
+    position: relative;
+    z-index: 20;
+    flex-shrink: 0;
 }
 
 #sidebar .brand i {
@@ -159,11 +165,15 @@ body.sidebar-collapsed #sidebar .brand span {
 #sidebar .nav-menu {
     flex-grow: 1;
     list-style: none;
-    padding: 16px 12px;
+    padding: 16px 12px 36px 12px;
     display: flex;
     flex-direction: column;
     gap: 4px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    position: relative;
+    z-index: 1;
 }
 
 #sidebar .nav-item {
@@ -319,7 +329,8 @@ body.sidebar-collapsed #sidebar .brand span {
 /* Item de Logout (Sair) */
 #sidebar .nav-item.logout-item {
     margin-top: auto;
-    padding-top: 12px;
+    padding-top: 16px;
+    padding-bottom: 24px;
 }
 
 #sidebar .nav-item.logout-item a {
@@ -1105,10 +1116,12 @@ body.sidebar-active .sidebar-overlay,
         width: 280px !important;
         max-width: 85vw !important;
         height: 100vh;
+        height: 100dvh !important;
         z-index: 9999 !important;
         transform: translateX(-100%);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        overflow: hidden !important;
     }
     
     #sidebar.open,
