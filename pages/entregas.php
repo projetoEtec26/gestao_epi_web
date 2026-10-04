@@ -46,13 +46,13 @@ $userProfile = $_SESSION['usuario']['usu_perfil'] ?? '';
         </div>
 
         <!-- Cabeçalho da Página -->
-        <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap flex-md-nowrap">
-            <div>
+        <div class="page-header-responsive d-flex justify-content-between align-items-center mb-3">
+            <div class="page-header-title">
                 <h3 class="fw-bold m-0" style="color: var(--color-primary);">Entregas &amp; Devoluções</h3>
                 <p class="text-muted mb-0">Consulte o feed completo de fornecimento de EPIs com assinaturas eletrônicas e hashes de integridade.</p>
             </div>
 
-            <div class="d-flex align-items-center gap-2 text-nowrap flex-nowrap">
+            <div class="page-header-actions d-flex gap-2">
                 <div class="btn-group-toggle-view" role="group">
                     <a href="entregas.php" class="btn btn-view active">
                         <i class="bi bi-clock-history me-1"></i> Histórico
@@ -72,9 +72,11 @@ $userProfile = $_SESSION['usuario']['usu_perfil'] ?? '';
                 </div>
 
                 <?php if (in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'ALMOXARIFE_OPERADOR'], true)): ?>
-                    <a href="nova_entrega.php" class="btn btn-primary text-nowrap px-3 py-2 fw-semibold rounded-3 shadow-sm">
-                        <i class="bi bi-plus-lg me-1"></i> Nova Entrega
-                    </a>
+                    <div class="page-header-buttons">
+                        <a href="nova_entrega.php" class="btn btn-primary text-nowrap px-3 py-2 fw-semibold rounded-3 shadow-sm w-100">
+                            <i class="bi bi-plus-lg me-1"></i> Nova Entrega
+                        </a>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>

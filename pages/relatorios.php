@@ -60,13 +60,13 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
     <?php require_once __DIR__ . '/../components/topbar.php'; ?>
     
     <div class="content-body no-print">
-        <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap flex-md-nowrap">
-            <div>
+        <div class="page-header-responsive d-flex justify-content-between align-items-center mb-3">
+            <div class="page-header-title">
                 <h3 class="fw-bold m-0" style="color: var(--color-primary);">Relatórios Gerenciais</h3>
                 <p class="text-muted mb-0">Gere relatórios de auditoria, custos consolidados, conformidade e vencimentos de Certificados de Aprovação (C.A.).</p>
             </div>
 
-            <div class="d-flex align-items-center gap-2 flex-wrap mt-2 mt-md-0">
+            <div class="page-header-actions d-flex gap-2">
                 <div class="btn-group-toggle-view" role="group" id="lista-tipos-relatorios">
                     <button type="button" data-tipo="geral" data-painel="geral" class="btn btn-view <?= $tipoInicial === 'geral' ? 'active' : '' ?>" onclick="mostrarPainelRelatorio('geral', this)">
                         <i class="bi bi-clipboard-data me-1"></i> Rel. Geral EPIs

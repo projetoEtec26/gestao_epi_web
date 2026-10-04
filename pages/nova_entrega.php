@@ -45,8 +45,8 @@ try {
     
     <div class="content-body">
         <!-- Header da Página -->
-        <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap flex-md-nowrap">
-            <div>
+        <div class="page-header-responsive d-flex justify-content-between align-items-center mb-3">
+            <div class="page-header-title">
                 <div class="d-flex align-items-center gap-2">
                     <h3 class="fw-bold m-0" style="color: var(--color-primary);">Entregas &amp; Devoluções</h3>
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1" style="font-size: 11px;">
@@ -57,7 +57,7 @@ try {
                     Registro oficial de fornecimento de EPIs, substituições com devolução vinculada e coleta de assinatura eletrônica por PIN.
                 </p>
             </div>
-            <div class="d-flex align-items-center gap-2 text-nowrap flex-nowrap">
+            <div class="page-header-actions d-flex gap-2">
                 <div class="btn-group-toggle-view" role="group">
                     <a href="entregas.php" class="btn btn-view">
                         <i class="bi bi-clock-history me-1"></i> Histórico
@@ -66,9 +66,11 @@ try {
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Devolução
                     </a>
                 </div>
-                <a href="nova_entrega.php" class="btn btn-primary text-nowrap px-3 py-2 fw-semibold rounded-3 shadow-sm">
-                    <i class="bi bi-plus-lg me-1"></i> Nova Entrega
-                </a>
+                <div class="page-header-buttons">
+                    <a href="nova_entrega.php" class="btn btn-primary text-nowrap px-3 py-2 fw-semibold rounded-3 shadow-sm w-100">
+                        <i class="bi bi-plus-lg me-1"></i> Nova Entrega
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -84,7 +86,7 @@ try {
             <div class="col-lg-8">
                 
                 <!-- PASSO 1: Seleção do Colaborador -->
-                <div class="card-custom mb-4" style="position: relative; z-index: 1050;">
+                <div class="card-custom mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold m-0 text-color-primary">
                             <span class="badge bg-primary text-white rounded-circle me-1" style="width: 22px; height: 22px; line-height: 14px; font-size: 11px;">1</span>
@@ -125,7 +127,7 @@ try {
                             <!-- Dropdown Flutuante de Autocomplete -->
                             <div id="dropdown-autocomplete-colab" 
                                  class="shadow-lg mt-1 p-0 border autocomplete-dropdown-container" 
-                                 style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; width: 100%; max-height: 320px; overflow-y: auto; z-index: 999999; border-radius: 12px;">
+                                 style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; width: 100%; max-height: 320px; overflow-y: auto; z-index: 100; border-radius: 12px;">
                             </div>
                         </div>
                         <div class="col-md-3">
@@ -220,7 +222,7 @@ try {
 
                             <!-- Dropdown Flutuante de Autocomplete / Sugestões em Tempo Real -->
                             <div id="dropdown-autocomplete-epi" 
-                                 style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; width: 100%; max-height: 340px; overflow-y: auto; z-index: 99999; border-radius: 12px; background: #ffffff; border: 1.5px solid #e2e8f0; box-shadow: 0 12px 32px -4px rgba(0,0,0,0.18), 0 2px 8px -2px rgba(0,0,0,0.08) !important;">
+                                 style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; width: 100%; max-height: 340px; overflow-y: auto; z-index: 100; border-radius: 12px; background: #ffffff; border: 1.5px solid #e2e8f0; box-shadow: 0 12px 32px -4px rgba(0,0,0,0.18), 0 2px 8px -2px rgba(0,0,0,0.08) !important;">
                             </div>
                         </div>
 

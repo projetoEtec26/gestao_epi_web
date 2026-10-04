@@ -550,13 +550,13 @@ require_once __DIR__ . '/../components/sidebar.php';
     <?php require_once __DIR__ . '/../components/topbar.php'; ?>
     
     <div class="content-body">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <div>
+        <div class="page-header-responsive d-flex justify-content-between align-items-center mb-3">
+            <div class="page-header-title">
                 <h3 class="fw-bold m-0" style="color: var(--color-primary);">EPIs (Controle C.A.)</h3>
-                <p class="text-muted">Gerencie a homologação, rastreabilidade e validade do Certificado de Aprovação (C.A.) dos EPIs.</p>
+                <p class="text-muted m-0">Gerencie a homologação, rastreabilidade e validade do Certificado de Aprovação (C.A.) dos EPIs.</p>
             </div>
 
-            <div class="d-flex gap-2">
+            <div class="page-header-actions d-flex gap-2">
                 <div class="btn-group-toggle-view" role="group">
                     <button type="button" class="btn btn-view <?= $visaoInicial === 'catalogo' ? 'active' : '' ?>" id="btn-visao-catalogo" onclick="alternarVisao('catalogo')">
                         <i class="bi bi-box-seam me-1"></i> Lista de EPIs
@@ -570,12 +570,14 @@ require_once __DIR__ . '/../components/sidebar.php';
                 </div>
 
                 <?php if ($podeEditar): ?>
-                    <button class="btn btn-outline-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#modalImportarEpi" title="Importar EPIs em Lote (CSV / Excel)">
-                        <i class="bi bi-file-earmark-arrow-up me-1"></i> Importar
-                    </button>
-                    <button class="btn btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#modalCadastrar">
-                        <i class="bi bi-plus-lg me-1"></i> Novo EPI
-                    </button>
+                    <div class="page-header-buttons d-flex gap-2">
+                        <button class="btn btn-outline-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#modalImportarEpi" title="Importar EPIs em Lote (CSV / Excel)">
+                            <i class="bi bi-file-earmark-arrow-up me-1"></i> Importar
+                        </button>
+                        <button class="btn btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#modalCadastrar">
+                            <i class="bi bi-plus-lg me-1"></i> Novo EPI
+                        </button>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -625,7 +627,7 @@ require_once __DIR__ . '/../components/sidebar.php';
                     <!-- Dropdown Flutuante de Autocomplete / Sugestões em Tempo Real -->
                     <div id="autocomplete-lista-epis" 
                          class="shadow-lg mt-1 p-0 border" 
-                         style="display: none; position: absolute; top: 100%; left: 0; right: 0; width: 100%; max-height: 320px; overflow-y: auto; z-index: 99999; border-radius: 10px; background: #ffffff; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2) !important;">
+                         style="display: none; position: absolute; top: 100%; left: 0; right: 0; width: 100%; max-height: 320px; overflow-y: auto; z-index: 100; border-radius: 10px; background: #ffffff; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2) !important;">
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -823,7 +825,7 @@ require_once __DIR__ . '/../components/sidebar.php';
                             <!-- Dropdown Flutuante de Autocomplete / Sugestões em Tempo Real (Começar com) -->
                             <div id="autocomplete-lista-historico-preco" 
                                  class="shadow-lg mt-1 p-0 border" 
-                                 style="display: none; position: absolute; top: 100%; left: 0; right: 0; width: 100%; max-height: 340px; overflow-y: auto; z-index: 99999; border-radius: 12px; background: #ffffff; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15) !important;">
+                                 style="display: none; position: absolute; top: 100%; left: 0; right: 0; width: 100%; max-height: 340px; overflow-y: auto; z-index: 100; border-radius: 12px; background: #ffffff; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15) !important;">
                             </div>
                         </div>
                         <div class="col-md-3 col-lg-2">

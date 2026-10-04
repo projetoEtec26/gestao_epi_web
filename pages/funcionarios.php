@@ -348,14 +348,14 @@ $acao = $_GET['acao'] ?? 'lista';
             </div>
         <?php endif; ?>
 
-        <!-- CABEÇALHO COM BOTÕES DE VISÃO (IDÊNTICO À TELA DE EPIS) -->
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <div>
+        <!-- CABEÇALHO COM BOTÕES DE VISÃO (RESPONSIVO 100% MOBILE) -->
+        <div class="page-header-responsive d-flex justify-content-between align-items-center mb-3">
+            <div class="page-header-title">
                 <h3 class="fw-bold m-0" style="color: var(--color-primary);">Funcionários</h3>
-                <p class="text-muted">Gerencie o cadastro, PIN de segurança e histórico de posse de EPIs dos colaboradores.</p>
+                <p class="text-muted m-0">Gerencie o cadastro, PIN de segurança e histórico de posse de EPIs dos colaboradores.</p>
             </div>
 
-            <div class="d-flex gap-2">
+            <div class="page-header-actions d-flex gap-2">
                 <div class="btn-group-toggle-view" role="group">
                     <button type="button" class="btn btn-view <?= ($acao === 'lista' || empty($acao) || $acao === 'novo') ? 'active' : '' ?>" id="btn-func-lista" onclick="alternarVisaoFuncionarios('lista')">
                         <i class="bi bi-person-lines-fill me-1"></i> Lista Funcionários
@@ -369,12 +369,14 @@ $acao = $_GET['acao'] ?? 'lista';
                 </div>
 
                 <?php if ($podeEditar): ?>
-                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalImportar" title="Importar Colaboradores">
-                        <i class="bi bi-file-earmark-arrow-up me-1"></i> Importar
-                    </button>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCadastrar">
-                        <i class="bi bi-person-plus me-1"></i> Novo Funcionário
-                    </button>
+                    <div class="page-header-buttons d-flex gap-2">
+                        <button class="btn btn-outline-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#modalImportar" title="Importar Colaboradores">
+                            <i class="bi bi-file-earmark-arrow-up me-1"></i> Importar
+                        </button>
+                        <button class="btn btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#modalCadastrar">
+                            <i class="bi bi-person-plus me-1"></i> Novo Funcionário
+                        </button>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -392,7 +394,7 @@ $acao = $_GET['acao'] ?? 'lista';
         <div id="view-lista-funcionarios" style="display: <?= ($acao === 'lista' || empty($acao) || $acao === 'novo') ? 'block' : 'none' ?>;">
 
             <!-- Listagem e Filtro -->
-            <div class="card-custom" style="position: relative; z-index: 1050;">
+            <div class="card-custom">
                 <div class="row g-3 mb-4 align-items-end">
                     <div class="col-md-6 col-lg-5">
                         <label for="busca-input" class="form-label fw-semibold mb-1" style="font-size:12px;">
@@ -422,7 +424,7 @@ $acao = $_GET['acao'] ?? 'lista';
                         <!-- Dropdown Flutuante de Autocomplete / Sugestões em Tempo Real -->
                         <div id="autocomplete-lista" 
                              class="shadow-lg mt-1 p-0 border" 
-                             style="display: none; position: absolute; top: 100%; left: 0; right: 0; width: 100%; max-height: 340px; overflow-y: auto; z-index: 99999; border-radius: 10px; background: #ffffff; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2) !important;">
+                             style="display: none; position: absolute; top: 100%; left: 0; right: 0; width: 100%; max-height: 340px; overflow-y: auto; z-index: 100; border-radius: 10px; background: #ffffff; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2) !important;">
                         </div>
                     </div>
                     <div class="col-md-3">
@@ -720,7 +722,7 @@ $acao = $_GET['acao'] ?? 'lista';
         display: flex;
         justify-content: space-around;
         align-items: center;
-        z-index: 1030;
+        z-index: 100;
         box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
     ">
         <a href="<?= APP_ROOT ?>pages/entregas.php" class="text-decoration-none text-muted text-center py-1 flex-fill" style="font-size: 10px; font-weight: 600;">

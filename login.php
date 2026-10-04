@@ -14,7 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $config = require __DIR__ . '/config/api.php';
 if (!defined('APP_ROOT')) {
-    define('APP_ROOT', $config['app_root_url'] ?? '/gestao_epi_web_12/');
+    define('APP_ROOT', $config['app_root_url'] ?? '/gestao_epi_web_14/');
 }
 
 // Se o usuário já estiver logado com token válido e não exigir troca de senha, valida o token na API e redireciona para a dashboard
@@ -23,7 +23,7 @@ if (isset($_SESSION['token']) && $_SESSION['token'] !== '' && isset($_SESSION['u
         $apiVal = new ApiService();
         $meVal = $apiVal->get('auth/me');
         if (isset($meVal['success']) && $meVal['success']) {
-                        $perfil = $_SESSION['usuario']['usu_perfil'] ?? '';
+            $perfil = $_SESSION['usuario']['usu_perfil'] ?? '';
             $homePage = match (strtoupper((string)$perfil)) {
                 'ADMINISTRADOR'       => 'pages/usuarios.php',
                 'RH_ADMINISTRATIVO'   => 'pages/funcionarios.php',
@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
                 // Garante a gravação imediata da sessão PHP em disco
                 session_write_close();
 
-                                $perfil = $_SESSION['usuario']['usu_perfil'] ?? '';
+                $perfil = $_SESSION['usuario']['usu_perfil'] ?? '';
                 $homePage = match (strtoupper((string)$perfil)) {
                     'ADMINISTRADOR'       => 'pages/usuarios.php',
                     'RH_ADMINISTRATIVO'   => 'pages/funcionarios.php',
@@ -118,6 +118,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
 }
 
 // Fluxo 2: Troca Obrigatória de Senha no Primeiro Acesso
+if (!function_exists('validarPoliticaSenha')) {
+    function validarPoliticaSenha(string $senha): ?string {
+        if (strlen($senha) < 6) {
+            return "A senha deve conter no mínimo 6 caracteres.";
+        }
+        if (!preg_match('/[a-zA-Z]/', $senha) || !preg_match('/[0-9]/', $senha)) {
+            return "A senha deve conter pelo menos uma letra e um número.";
+        }
+        return null; // Senha válida
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] === 'alterar_senha') {
     $senhaAtual = $_SESSION['senha_temporaria'] ?? '';
     $novaSenha = isset($_POST['nova_senha']) ? $_POST['nova_senha'] : '';
@@ -125,12 +137,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
 
     if ($novaSenha === '' || $confirmarSenha === '') {
         $erro = 'Os campos de nova senha e confirmação são obrigatórios.';
-    } elseif (strlen($novaSenha) < 6) {
-        $erro = 'A nova senha deve possuir pelo menos 6 caracteres.';
-    } elseif (!preg_match('/[a-zA-Z]/', $novaSenha) || !preg_match('/[0-9]/', $novaSenha)) {
-        $erro = 'A nova senha deve conter pelo menos uma letra e um número.';
     } elseif ($novaSenha !== $confirmarSenha) {
-        $erro = 'A confirmação de nova senha não coincide.';
+        $erro = 'As senhas não coincidem.';
+    } elseif (($erroPolitica = validarPoliticaSenha($novaSenha)) !== null) {
+        $erro = $erroPolitica;
     } else {
         try {
             $api = new ApiService();
@@ -146,16 +156,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
                 session_write_close();
                 
                 $_SESSION['success_message'] = 'Senha alterada com sucesso! Bem-vindo ao Gestão EPI.';
-                            $perfil = $_SESSION['usuario']['usu_perfil'] ?? '';
-            $homePage = match (strtoupper((string)$perfil)) {
-                'ADMINISTRADOR'       => 'pages/usuarios.php',
-                'RH_ADMINISTRATIVO'   => 'pages/funcionarios.php',
-                'TECNICO_SST'         => 'pages/epis.php',
-                'GESTOR'              => 'pages/dashboard.php',
-                'ALMOXARIFE_OPERADOR' => 'pages/entregas.php',
-                default               => 'pages/entregas.php',
-            };
-            header('Location: ' . APP_ROOT . $homePage);
+                $perfil = $_SESSION['usuario']['usu_perfil'] ?? '';
+                $homePage = match (strtoupper((string)$perfil)) {
+                    'ADMINISTRADOR'       => 'pages/usuarios.php',
+                    'RH_ADMINISTRATIVO'   => 'pages/funcionarios.php',
+                    'TECNICO_SST'         => 'pages/epis.php',
+                    'GESTOR'              => 'pages/dashboard.php',
+                    'ALMOXARIFE_OPERADOR' => 'pages/entregas.php',
+                    default               => 'pages/entregas.php',
+                };
+                header('Location: ' . APP_ROOT . $homePage);
                 exit;
             } else {
                 $erro = $response['message'] ?? 'Não foi possível alterar a senha.';
@@ -172,6 +182,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Gestão EPI</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="<?= APP_ROOT ?>assets/favicon.svg">
+    
     <!-- Script e Estilo Anti-Flicker do Modo Escuro -->
     <script>
         (function() {
@@ -183,28 +196,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
             }
         })();
     </script>
-    <style id="anti-flicker-dark-login">
-        html.dark-mode, html.dark-mode body {
-            background-color: #0f172a !important;
-            color: #f8fafc !important;
-        }
-        body.dark-mode .auth-card {
-            background-color: #1e293b !important;
-            border-color: #334155 !important;
-            color: #f8fafc !important;
-        }
-        body.dark-mode .form-control {
-            background-color: #0f172a !important;
-            border-color: #475569 !important;
-            color: #f8fafc !important;
-        }
-    </style>
     <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Google Fonts (Outfit) -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --color-primary: #305BD3;
@@ -212,6 +210,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
             --color-bg: #f8fafc;
             --color-card-bg: #ffffff;
             --color-text: #0f172a;
+            --color-border: #cbd5e1;
+        }
+
+        html.dark-mode {
+            --color-bg: #0f172a;
+            --color-card-bg: #1e293b;
+            --color-text: #f8fafc;
+            --color-border: #334155;
+        }
+
+        /* Oculta o ícone nativo de revelar senha do Microsoft Edge/IE e autopreenchimento Chromium */
+        input::-ms-reveal,
+        input::-ms-clear {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+
+        input::-webkit-contacts-auto-fill-button,
+        input::-webkit-credentials-auto-fill-button {
+            visibility: hidden !important;
+            display: none !important;
+            pointer-events: none !important;
+            position: absolute !important;
+            right: 0 !important;
         }
 
         body {
@@ -222,15 +245,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
+            margin: 0;
         }
 
         .auth-card {
             background-color: var(--color-card-bg);
-            border: none;
+            border: 1px solid var(--color-border);
             border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(48, 91, 211, 0.08);
+            box-shadow: 0 10px 30px rgba(48, 91, 211, 0.08);
             padding: 40px;
-            max-width: 450px;
+            max-width: 440px;
             width: 100%;
         }
 
@@ -243,16 +268,84 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 10px;
+        }
+
+        .brand-logo i {
+            font-size: 34px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: var(--color-text);
+        }
+
+        .input-group-custom {
+            display: flex;
+            align-items: center;
+            background-color: var(--color-card-bg);
+            border: 1.5px solid var(--color-border);
+            border-radius: 10px;
+            padding: 0 12px;
+            transition: all 0.2s ease;
+        }
+
+        .input-group-custom:focus-within {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 4px rgba(48, 91, 211, 0.15);
+        }
+
+        .input-group-custom i.icon-prefix {
+            color: #64748b;
+            font-size: 18px;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .input-group-custom input {
+            border: none;
+            outline: none;
+            background: transparent;
+            color: var(--color-text);
+            padding: 12px 0;
+            font-size: 14.5px;
+            width: 100%;
+        }
+
+        .input-group-custom input::placeholder {
+            color: #94a3b8;
+        }
+
+        .input-group-custom button.btn-toggle-eye {
+            border: none;
+            background: transparent;
+            color: #64748b;
+            padding: 0;
+            margin-left: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s ease;
+        }
+
+        .input-group-custom button.btn-toggle-eye:hover {
+            color: var(--color-primary);
         }
 
         .btn-primary {
             background-color: var(--color-primary);
             border-color: var(--color-primary);
-            padding: 12px;
-            font-weight: 500;
-            border-radius: 8px;
+            padding: 13px;
+            font-weight: 600;
+            font-size: 15px;
+            border-radius: 10px;
             transition: all 0.2s ease-in-out;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(48, 91, 211, 0.2);
         }
 
         .btn-primary:hover {
@@ -260,30 +353,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
             border-color: var(--color-primary-hover);
         }
 
-        .form-control {
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #cbd5e1;
-        }
-
-        .form-control:focus {
-            box-shadow: 0 0 0 4px rgba(48, 91, 211, 0.15);
-            border-color: var(--color-primary);
-        }
-
-        .forgot-password {
+        .forgot-password-link {
             text-align: right;
-            margin-bottom: 20px;
+            margin-top: 8px;
+            margin-bottom: 24px;
         }
 
-        .forgot-password a {
+        .forgot-password-link a {
             color: var(--color-primary);
             text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 13.5px;
+            font-weight: 600;
         }
 
-        .forgot-password a:hover {
+        .forgot-password-link a:hover {
             text-decoration: underline;
         }
     </style>
@@ -291,21 +374,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
 <body>
 
 <div class="auth-card">
+    <!-- Logotipo Oficial Gestão_EPI -->
     <div class="brand-logo">
         <i class="bi bi-shield-check"></i>
         <span>Gestão_EPI</span>
     </div>
 
+    <h4 class="text-center mb-4" style="font-weight: 700; color: var(--color-text);">Acesse sua Conta</h4>
+
+    <!-- Alertas do Sistema -->
     <?php if ($erro !== null): ?>
-        <div class="alert alert-danger d-flex align-items-center" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <div class="alert alert-danger d-flex align-items-center mb-4" role="alert" style="border-radius: 10px; font-size: 13.5px;">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
             <div><?= htmlspecialchars($erro) ?></div>
         </div>
     <?php endif; ?>
 
     <?php if ($sucesso !== null): ?>
-        <div class="alert alert-success d-flex align-items-center" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>
+        <div class="alert alert-success d-flex align-items-center mb-4" role="alert" style="border-radius: 10px; font-size: 13.5px;">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
             <div><?= htmlspecialchars($sucesso) ?></div>
         </div>
         <script>
@@ -318,51 +405,99 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
     <?php endif; ?>
 
     <?php if (($_SESSION['exige_troca_senha'] ?? false) === true): ?>
-        <!-- FORMULÁRIO DE TROCA DE SENHA OBRIGATÓRIA -->
-        <h4 class="text-center mb-2 font-weight-bold">Alterar Senha</h4>
-        <p class="text-muted text-center mb-4">Insira sua nova credencial de acesso segura abaixo.</p>
+        <!-- FORMULÁRIO DE TROCA DE SENHA OBRIGATÓRIA (FLUXO 2 DO MANUAL) -->
+        <div class="alert alert-warning py-2 px-3 mb-4 d-flex align-items-center gap-2" style="border-radius: 10px; font-size: 13px;">
+            <i class="bi bi-shield-lock-fill fs-5"></i>
+            <div><strong>Bloqueio Ativo:</strong> Sua senha é temporária. Cadastre uma nova senha para continuar.</div>
+        </div>
 
         <form method="POST" action="login.php" novalidate>
             <input type="hidden" name="acao" value="alterar_senha">
             
+            <!-- Campo Nova Senha -->
             <div class="mb-3">
                 <label for="nova_senha" class="form-label">Nova Senha *</label>
-                <input type="password" class="form-control" id="nova_senha" name="nova_senha" placeholder="Mínimo 6 caracteres (letras e números)" required>
+                <div class="input-group-custom">
+                    <i class="bi bi-lock icon-prefix"></i>
+                    <input type="password" id="nova_senha" name="nova_senha" placeholder="Digite a nova senha" required autocomplete="new-password">
+                    <button type="button" class="btn-toggle-eye" onclick="alternarVisibilidadeSenha('nova_senha', this)" title="Mostrar / Ocultar Senha">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
             </div>
 
-            <div class="mb-4">
+            <!-- Campo Confirmar Nova Senha -->
+            <div class="mb-3">
                 <label for="confirmar_senha" class="form-label">Confirmar Nova Senha *</label>
-                <input type="password" class="form-control" id="confirmar_senha" name="confirmar_senha" placeholder="Digite a nova senha novamente" required>
+                <div class="input-group-custom">
+                    <i class="bi bi-lock icon-prefix"></i>
+                    <input type="password" id="confirmar_senha" name="confirmar_senha" placeholder="Digite a nova senha novamente" required autocomplete="new-password">
+                    <button type="button" class="btn-toggle-eye" onclick="alternarVisibilidadeSenha('confirmar_senha', this)" title="Mostrar / Ocultar Senha">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 mb-3">Salvar e Acessar</button>
-            <a href="logout.php" class="btn btn-light w-100">Cancelar e Sair</a>
+            <div class="p-3 mb-4 rounded-3 border" style="background-color: rgba(0,0,0,0.02); font-size: 12px;">
+                <div class="fw-bold mb-1 text-uppercase text-muted" style="letter-spacing: 0.5px;">Requisitos Obrigatórios:</div>
+                <div class="text-muted"><i class="bi bi-check-circle me-1"></i> Mínimo de 6 caracteres</div>
+                <div class="text-muted"><i class="bi bi-check-circle me-1"></i> Pelo menos uma letra e um número</div>
+                <div class="text-muted"><i class="bi bi-check-circle me-1"></i> Confirmação de senha idêntica</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mb-2">Salvar e Acessar Sistema</button>
+            <a href="logout.php" class="btn btn-outline-secondary w-100 text-decoration-none py-2" style="border-radius: 10px;">Cancelar e Sair</a>
         </form>
     <?php else: ?>
-        <!-- FORMULÁRIO DE LOGIN NORMAL -->
-        <h4 class="text-center mb-4 font-weight-bold">Acesse sua Conta</h4>
-
+        <!-- FORMULÁRIO DE LOGIN NORMAL (EXATAMENTE COMO NO MODELO DO PRINT WEB) -->
         <form method="POST" action="login.php" novalidate>
             <input type="hidden" name="acao" value="login">
             
+            <!-- Campo Usuário -->
             <div class="mb-3">
                 <label for="usu_login" class="form-label">Usuário *</label>
-                <input type="text" class="form-control" id="usu_login" name="usu_login" placeholder="Digite seu login" required>
+                <div class="input-group-custom">
+                    <i class="bi bi-person icon-prefix"></i>
+                    <input type="text" id="usu_login" name="usu_login" placeholder="Digite seu login" required autocomplete="username">
+                </div>
             </div>
 
-            <div class="mb-3">
+            <!-- Campo Senha (Com Cadeado no Ícone e Olhinho de Alternar Visibilidade) -->
+            <div class="mb-2">
                 <label for="senha" class="form-label">Senha *</label>
-                <input type="password" class="form-control" id="senha" name="senha" placeholder="Digite sua senha" required>
+                <div class="input-group-custom">
+                    <i class="bi bi-lock icon-prefix"></i>
+                    <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required autocomplete="current-password">
+                    <button type="button" class="btn-toggle-eye" onclick="alternarVisibilidadeSenha('senha', this)" title="Mostrar / Ocultar Senha">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
             </div>
 
-            <div class="forgot-password">
+            <!-- Link Esqueceu a Senha (Alinhado à Direita) -->
+            <div class="forgot-password-link">
                 <a href="recuperar-senha.php">Esqueceu a senha?</a>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">Entrar no Sistema</button>
+            <!-- Botão Entrar no Sistema -->
+            <button type="submit" class="btn btn-primary">Entrar no Sistema</button>
         </form>
     <?php endif; ?>
 </div>
+
+<script>
+function alternarVisibilidadeSenha(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+}
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

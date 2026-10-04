@@ -57,9 +57,15 @@ if (!function_exists('formatarDataBr')) {
     }
 }
 
-// 1. Validação de Sessão Geral
+// 1. Validação de Sessão Geral & Bloqueio Estrito por Troca Obrigatória de Senha
 if (!isset($_SESSION['token']) || $_SESSION['token'] === '' || !isset($_SESSION['usuario'])) {
     $_SESSION['error_message'] = 'Por favor, realize o login para acessar o sistema.';
+    header('Location: ' . APP_ROOT . 'login.php');
+    exit;
+}
+
+if (($_SESSION['exige_troca_senha'] ?? false) === true) {
+    $_SESSION['error_message'] = 'Troca obrigatória de senha pendente. Por favor, cadastre uma nova senha para continuar.';
     header('Location: ' . APP_ROOT . 'login.php');
     exit;
 }
