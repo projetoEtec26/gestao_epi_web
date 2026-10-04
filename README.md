@@ -339,7 +339,24 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 *   **Correções de Tema Escuro (Dark Mode):**
     - Ajustes globais em `assets/css/style.css` garantindo legibilidade de textos (`text-muted`, `text-dark`) e visibilidade de fundos (`bg-light`) quando o modo escuro está ativado.
 *   **Integração e Atualização de Infraestrutura:**
-    - Atualização da configuração para refletir a comunicação em tempo real com a API Render e a base de dados Aiven Cloud.### 📅 Versão 4.6.0 (21/09/2026) – Paridade de Submenus e Ações EPIs/Funcionários, Relatório Geral com Coluna Responsável e Nomenclatura Obsoleto
+    - Atualização da configuração para refletir a comunicação em tempo real com a API Render e a base de dados Aiven Cloud.
+
+### 📅 Versão 5.0.0 (04/10/2026) – Otimização de Navegação Responsiva em Celular e Tablet, Alto Contraste Global no Modo Escuro (Dark Mode) & Homologação Web
+*   **Ajuste de Navegação e Fechamento Automático da Gaveta Lateral Móvel (`assets/js/main.js`, `login.php`):**
+    - **Abertura Inteligente Pós-Login:** Configurada a abertura da gaveta lateral off-canvas (`#sidebar`) no celular/tablet exclusivamente na 1ª exibição após o acesso inicial via `login.php` (utilizando a sinalização de rota `?from_login=1`).
+    - **Leveza na Navegação Interna:** Nas interações e trocas de página subsequentes no celular/tablet (ex: *Funcionários*, *EPIs*, *Relatórios*, *Configurações*), a gaveta lateral fecha automaticamente (`closeMobileSidebar()`), permitindo que a nova página carregue e exiba seu conteúdo imediatamente sem bloqueio ou sobreposição do fundo escuro (`#sidebar-overlay`).
+*   **Correção de Esmagamento dos Botões de Alternância no Celular/Tablet (`assets/css/style.css`):**
+    - Eliminado o dimensionamento forçado `flex: 1 1 0px` por `flex: 0 0 auto` e `min-width: max-content` na classe `.btn-group-toggle-view .btn-view` sob `@media (max-width: 1199.98px)`.
+    - Garantida a preservação da largura natural de cada botão (*[Rel. Geral EPIs] [Rel. Financeiro] [Rel. EPI] [Rel. Funcionário]*), padding amplo (`8px 14px`), espaçamento (`gap: 6px`) e rolagem horizontal tátil suave (`overflow-x: auto`) sem qualquer colisão ou sobreposição de texto em telas menores.
+*   **Aprimoramento Global de Alto Contraste para o Modo Escuro (`components/header.php`, `assets/css/style.css`):**
+    - Implementadas sobrescritas de alto contraste com padrão WCAG AAA em `assets/css/style.css` e no bloco anti-flicker instantâneo em `components/header.php` para `.text-muted`, `.text-secondary`, `small`, `td.text-muted`, `p.text-muted` e `div.text-muted` (usando o tom prata/azul legível `#94a3b8` / `#cbd5e1`).
+    - Adicionadas sobrescritas para `.text-dark` (`#f8fafc`) e `.bg-light` (`#1e293b`), assegurando legibilidade absoluta de CPFs mascarados (`100.***.***-24`), valores numéricos de tabelas, descrições de cargos/setores e subtítulos em Dark Mode.
+*   **Isolamento Estrito do Overlay no Web Desktop (`assets/css/style.css`):**
+    - Escopado o contêiner `#sidebar-overlay` para `display: none` em telas maiores que 991px (Desktop), prevenindo bloqueios ou interceptações acidentais de clique do ponteiro do mouse fora do menu.
+*   **Suíte de Validação Automatizada de Navegação (`scratch/test_responsive_web_tablet_mobile.php`, `scratch/test_all_sidebar_menu_buttons.php`):**
+    - Executados os testes de validação dos 21 botões do menu lateral, 8 modais interativos do Dashboard, checagem de sintaxe em todas as 21 páginas PHP e simulação de resoluções de tela (Celular, Tablet e Web Desktop) com 100% de aprovação (100% PASS).
+
+### 📅 Versão 4.6.0 (21/09/2026) – Paridade de Submenus e Ações EPIs/Funcionários, Relatório Geral com Coluna Responsável e Nomenclatura Obsoleto
 *   **Paridade Visual e Funcional no Módulo EPIs (`pages/epis.php`):**
     - Adicionados os botões de ação superior **`Importar`** (modal `#modalImportarEpi`) e **`+ Novo EPI`** (modal `#modalCadastrar`) no cabeçalho da tela de EPIs, garantindo paridade 1:1 com a tela de Funcionários.
     - Sincronizada a alternância das abas de visão (*Lista de EPIs*, *Controle C.A.* e *Hist. de Preços*).
