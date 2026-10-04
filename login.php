@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
                 // Garante a gravação imediata da sessão PHP em disco
                 session_write_close();
 
-                $homePage = 'pages/dashboard.php';
+                $homePage = 'pages/dashboard.php?from_login=1';
                 $redirectUrl = $_SESSION['exige_troca_senha'] ? APP_ROOT . 'login.php' : APP_ROOT . $homePage;
                 header('Location: ' . $redirectUrl);
                 exit;

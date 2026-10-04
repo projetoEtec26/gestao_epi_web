@@ -477,9 +477,16 @@ function initSidebarToggle() {
         }
     });
 
-    // No Mobile (largura <= 991px), a 1ª tela que deve aparecer após o login / entrada no app é o menu aberto (Print em vermelho)
+    // No Mobile (largura <= 991px), abre o menu apenas ao entrar via login; na navegação interna das páginas, mantém fechado para exibir o conteúdo imediatamente
     if (window.innerWidth <= 991) {
-        openMobileSidebar();
+        const urlParams = new URLSearchParams(window.location.search);
+        const ref = document.referrer || '';
+        const isFromLogin = urlParams.has('from_login') || ref.indexOf('login.php') !== -1;
+        if (isFromLogin) {
+            openMobileSidebar();
+        } else {
+            closeMobileSidebar();
+        }
     } else {
         const isCollapsedSaved = localStorage.getItem('sidebar-collapsed');
         if (isCollapsedSaved === 'true') {

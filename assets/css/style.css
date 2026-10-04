@@ -1154,6 +1154,28 @@ body.dark-mode .autocomplete-item.active {
         transform: none !important;
         pointer-events: auto;
     }
+
+    /* Otimização de Rolagem Horizontal Fluida dos Botões no Celular / Tablet */
+    .page-header-responsive {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 10px !important;
+    }
+    .page-header-actions {
+        width: 100% !important;
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-bottom: 4px !important;
+        scrollbar-width: none; /* Firefox */
+    }
+    .page-header-actions::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+    }
+    .btn-group-toggle-view {
+        flex-shrink: 0 !important;
+        display: inline-flex !important;
+    }
 }
 
 /* ========================================================
