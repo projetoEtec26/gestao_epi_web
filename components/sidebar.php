@@ -33,7 +33,12 @@ if (!function_exists('hasPermission')) {
     }
 }
 ?>
-<div id="sidebar">
+<script>
+if (window.innerWidth <= 991) {
+    document.body.classList.add('sidebar-active');
+}
+</script>
+<div id="sidebar" class="open">
     <div class="brand" style="display: flex; align-items: center; flex-wrap: wrap; background-color: #0b1120; position: relative; z-index: 20; flex-shrink: 0;">
         <img src="<?= APP_ROOT ?>assets/favicon.svg" alt="Logo" width="32" height="32" style="margin-right: 12px;">
         <div style="display: flex; flex-direction: column;">
@@ -469,4 +474,4 @@ if (window.innerWidth <= 991) {
 </script>
 
 <!-- Overlay semitransparente para menu lateral mobile (off-canvas) -->
-<div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+<div id="sidebar-overlay" class="sidebar-overlay active" aria-hidden="true"></div>
