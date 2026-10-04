@@ -369,37 +369,110 @@ function initDarkMode() {
 }
 
 /**
- * Controla o recolhimento e ativação da barra lateral (Sidebar)
+ * Controla o recolhimento e ativação da barra lateral (Sidebar) em Desktop e Mobile
  */
 function initSidebarToggle() {
     const sidebarToggle = document.getElementById('sidebar-toggle-btn');
-    
+    const sidebar = document.getElementById('sidebar');
+    let overlay = document.getElementById('sidebar-overlay');
+
+    // Garante a existência do overlay no DOM
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'sidebar-overlay';
+        overlay.className = 'sidebar-overlay';
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(overlay);
+    }
+
+    function openMobileSidebar() {
+        document.body.classList.add('sidebar-active');
+        if (sidebar) sidebar.classList.add('open');
+        if (overlay) overlay.classList.add('active');
+        if (sidebarToggle) {
+            sidebarToggle.setAttribute('aria-expanded', 'true');
+        }
+    }
+
+    function closeMobileSidebar() {
+        document.body.classList.remove('sidebar-active');
+        if (sidebar) sidebar.classList.remove('open');
+        if (overlay) overlay.classList.remove('active');
+        if (sidebarToggle) {
+            sidebarToggle.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    function toggleMobileSidebar() {
+        const isOpen = document.body.classList.contains('sidebar-active') || (sidebar && sidebar.classList.contains('open'));
+        if (isOpen) {
+            closeMobileSidebar();
+        } else {
+            openMobileSidebar();
+        }
+    }
+
+    // Evento de clique no botão hambúrguer
     if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function() {
+        sidebarToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
             if (window.innerWidth > 991) {
-                // Desktop: colapsa
+                // Desktop: alterna o modo colapsado
                 document.body.classList.toggle('sidebar-collapsed');
-                // Salva estado
                 const isCollapsed = document.body.classList.contains('sidebar-collapsed');
                 localStorage.setItem('sidebar-collapsed', isCollapsed ? 'true' : 'false');
             } else {
-                // Mobile: ativa
-                document.body.classList.toggle('sidebar-active');
+                // Mobile: alterna abertura da sidebar off-canvas
+                toggleMobileSidebar();
             }
         });
     }
-    
-    // Fecha a sidebar mobile se clicar fora ou no conteúdo principal
-    const mainContent = document.getElementById('main-content');
-    if (mainContent) {
-        mainContent.addEventListener('click', function() {
-            if (window.innerWidth <= 991 && document.body.classList.contains('sidebar-active')) {
-                document.body.classList.remove('sidebar-active');
+
+    // Clicar no overlay semitransparente fecha a sidebar no mobile
+    if (overlay) {
+        overlay.addEventListener('click', function() {
+            if (window.innerWidth <= 991) {
+                closeMobileSidebar();
             }
         });
     }
-    
-    // Carrega estado da sidebar desktop salva
+
+    // Fechar ao pressionar a tecla ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+            if (window.innerWidth <= 991 && (document.body.classList.contains('sidebar-active') || (sidebar && sidebar.classList.contains('open')))) {
+                closeMobileSidebar();
+            }
+        }
+    });
+
+    // Fechar a sidebar mobile automaticamente ao clicar em qualquer opção/link do menu
+    if (sidebar) {
+        sidebar.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 991) {
+                    closeMobileSidebar();
+                }
+            });
+        });
+    }
+
+    // Restaura ou limpa estados em mudanças de tamanho de tela (Resize)
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 991) {
+            closeMobileSidebar();
+            const isCollapsedSaved = localStorage.getItem('sidebar-collapsed');
+            if (isCollapsedSaved === 'true') {
+                document.body.classList.add('sidebar-collapsed');
+            } else {
+                document.body.classList.remove('sidebar-collapsed');
+            }
+        }
+    });
+
+    // Carrega o estado da barra lateral salva para Desktop
     if (window.innerWidth > 991) {
         const isCollapsedSaved = localStorage.getItem('sidebar-collapsed');
         if (isCollapsedSaved === 'true') {

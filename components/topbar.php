@@ -22,7 +22,7 @@ if ($user !== null) {
 ?>
 <header id="topbar">
     <div class="left-section">
-        <button id="sidebar-toggle-btn" class="toggle-sidebar-btn" title="Alternar barra lateral">
+        <button id="sidebar-toggle-btn" class="toggle-sidebar-btn" title="Alternar barra lateral" aria-expanded="false" aria-controls="sidebar" aria-label="Alternar menu de navegação">
             <i class="bi bi-list"></i>
         </button>
         <h5 class="m-0 font-weight-semibold d-none d-sm-block text-muted">Gestão de EPIs Corporativos</h5>

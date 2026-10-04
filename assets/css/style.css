@@ -116,7 +116,7 @@ body.sidebar-collapsed #main-content {
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 1000;
+    z-index: 1050;
     display: flex;
     flex-direction: column;
     transition: var(--transition-smooth);
@@ -1072,14 +1072,49 @@ body.dark-mode .autocomplete-item.active {
     border-bottom: 0 !important;
 }
 
+/* Overlay Backdrop Semitransparente para Menu Mobile (Off-Canvas) */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1040;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s ease;
+    pointer-events: none;
+}
+
+body.sidebar-active .sidebar-overlay,
+.sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
 /* Responsividade Mobile */
 @media (max-width: 991px) {
     #sidebar {
-        left: calc(-1 * var(--sidebar-width));
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 260px !important;
+        max-width: 85vw !important;
+        height: 100vh;
+        z-index: 1050 !important;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
     
+    #sidebar.open,
     body.sidebar-active #sidebar {
-        left: 0;
+        transform: translateX(0) !important;
+        left: 0 !important;
     }
     
     #main-content {
@@ -1087,8 +1122,8 @@ body.dark-mode .autocomplete-item.active {
     }
     
     body.sidebar-active #main-content {
-        transform: translateX(100px);
-        pointer-events: none;
+        transform: none !important;
+        pointer-events: auto;
     }
 }
 

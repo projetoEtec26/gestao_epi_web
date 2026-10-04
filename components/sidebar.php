@@ -416,4 +416,5 @@ function onSubmenuItemRelatorioClick(e, tipo) {
 }
 </script>
 
-
+<!-- Overlay semitransparente para menu lateral mobile (off-canvas) -->
+<div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
