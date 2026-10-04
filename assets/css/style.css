@@ -1102,7 +1102,7 @@ body.sidebar-active .sidebar-overlay,
         position: fixed;
         top: 0;
         left: 0;
-        width: 260px !important;
+        width: 280px !important;
         max-width: 85vw !important;
         height: 100vh;
         z-index: 1050 !important;
@@ -2186,5 +2186,75 @@ body.dark-mode .md-picker-year-item {
 .md-picker-year-item.selected {
     background-color: #10b981;
     color: #ffffff;
+}
+
+/* ========================================================
+   REGRAS DE RESPONSIVIDADE & NAVEGABILIDADE MOBILE (100%)
+   ======================================================== */
+@media (max-width: 991px) {
+    #sidebar .nav-item a {
+        padding: 11px 14px;
+        font-size: 14.5px;
+        min-height: 44px;
+    }
+
+    .submenu-toggle-btn {
+        min-width: 44px;
+        min-height: 44px;
+        font-size: 17px;
+        padding: 8px 12px;
+    }
+
+    .sidebar-submenu-list a {
+        padding: 9px 12px;
+        font-size: 13.5px;
+        min-height: 42px;
+        margin: 3px 0;
+    }
+
+    /* Adaptação dos Alternadores de Visão (Tabs/Submenus de Páginas) no Mobile */
+    .btn-group-toggle-view {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        white-space: nowrap !important;
+        padding: 4px !important;
+        margin-bottom: 8px !important;
+        display: flex !important;
+        scroll-snap-type: x mandatory;
+    }
+
+    .btn-group-toggle-view .btn-view {
+        flex: 1 0 auto !important;
+        text-align: center !important;
+        justify-content: center !important;
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+        scroll-snap-align: start;
+    }
+
+    #topbar {
+        padding: 0 16px !important;
+    }
+
+    .content-body {
+        padding: 16px 12px !important;
+    }
+
+    .content-body .d-flex.justify-content-between.align-items-center {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+
+    .content-body .d-flex.justify-content-between.align-items-center > div {
+        width: 100% !important;
+    }
+
+    .content-body .d-flex.align-items-center.gap-2 {
+        width: 100% !important;
+        flex-wrap: wrap !important;
+    }
 }
 

@@ -251,6 +251,22 @@ if (!function_exists('hasPermission')) {
 </div>
 
 <script>
+function closeMobileIfOpen() {
+    if (window.innerWidth <= 991) {
+        if (typeof window.closeMobileSidebar === 'function') {
+            window.closeMobileSidebar();
+        } else {
+            document.body.classList.remove('sidebar-active');
+            const sb = document.getElementById('sidebar');
+            if (sb) sb.classList.remove('open');
+            const ov = document.getElementById('sidebar-overlay');
+            if (ov) ov.classList.remove('active');
+            const btn = document.getElementById('sidebar-toggle-btn');
+            if (btn) btn.setAttribute('aria-expanded', 'false');
+        }
+    }
+}
+
 function toggleSubmenu(e, targetId) {
     if (e) {
         e.preventDefault();
@@ -282,6 +298,7 @@ function onFuncionariosMenuClick(e) {
         if (typeof executarAcaoSubmenu === 'function') {
             if (e) e.preventDefault();
             executarAcaoSubmenu('lista');
+            closeMobileIfOpen();
         }
     }
 }
@@ -295,10 +312,14 @@ function onSubmenuItemClick(e, acao) {
         if (typeof executarAcaoSubmenu === 'function') {
             if (e) e.preventDefault();
             executarAcaoSubmenu(acao);
+            closeMobileIfOpen();
         } else if (typeof executarAcaoSpeedDial === 'function') {
             if (e) e.preventDefault();
             executarAcaoSpeedDial(acao);
+            closeMobileIfOpen();
         }
+    } else {
+        closeMobileIfOpen();
     }
 }
 
@@ -308,12 +329,15 @@ function onEpisMenuClick(e) {
         if (typeof executarAcaoSubmenuEpi === 'function') {
             if (e) e.preventDefault();
             executarAcaoSubmenuEpi('catalogo');
+            closeMobileIfOpen();
         } else if (typeof alternarVisao === 'function') {
             if (e) e.preventDefault();
             alternarVisao('catalogo');
+            closeMobileIfOpen();
         }
     } else {
         if (e) e.preventDefault();
+        closeMobileIfOpen();
         window.location.href = '<?= APP_ROOT ?>pages/epis.php?acao=lista';
     }
 }
@@ -327,6 +351,7 @@ function onSubmenuItemEpiClick(e, acao) {
         if (typeof executarAcaoSubmenuEpi === 'function') {
             if (e) e.preventDefault();
             executarAcaoSubmenuEpi(acao);
+            closeMobileIfOpen();
         } else if (typeof alternarVisao === 'function') {
             if (e) e.preventDefault();
             if (acao === 'novo') {
@@ -336,9 +361,11 @@ function onSubmenuItemEpiClick(e, acao) {
             } else {
                 alternarVisao(acao);
             }
+            closeMobileIfOpen();
         }
     } else {
         if (e) e.preventDefault();
+        closeMobileIfOpen();
         window.location.href = '<?= APP_ROOT ?>pages/epis.php?acao=' + acao;
     }
 }
@@ -349,9 +376,11 @@ function onEntregasMenuClick(e) {
         if (typeof executarAcaoSubmenuEntrega === 'function') {
             if (e) e.preventDefault();
             executarAcaoSubmenuEntrega('historico');
+            closeMobileIfOpen();
         }
     } else {
         if (e) e.preventDefault();
+        closeMobileIfOpen();
         window.location.href = '<?= APP_ROOT ?>pages/entregas.php';
     }
 }
@@ -360,8 +389,10 @@ function onSubmenuItemEntregaClick(e, acao) {
     if (typeof executarAcaoSubmenuEntrega === 'function') {
         if (e) e.preventDefault();
         executarAcaoSubmenuEntrega(acao);
+        closeMobileIfOpen();
     } else {
         if (e) e.preventDefault();
+        closeMobileIfOpen();
         if (acao === 'historico') {
             window.location.href = '<?= APP_ROOT ?>pages/entregas.php';
         } else if (acao === 'devolucao' || acao === 'devolucoes') {
@@ -378,12 +409,15 @@ function onRelatoriosMenuClick(e) {
         if (typeof executarAcaoSubmenuRelatorio === 'function') {
             if (e) e.preventDefault();
             executarAcaoSubmenuRelatorio('geral');
+            closeMobileIfOpen();
         } else if (typeof mostrarPainelRelatorio === 'function') {
             if (e) e.preventDefault();
             mostrarPainelRelatorio('geral');
+            closeMobileIfOpen();
         }
     } else {
         if (e) e.preventDefault();
+        closeMobileIfOpen();
         window.location.href = '<?= APP_ROOT ?>pages/relatorios.php?tipo=geral';
     }
 }
@@ -397,6 +431,7 @@ function onSubmenuItemRelatorioClick(e, tipo) {
         if (typeof executarAcaoSubmenuRelatorio === 'function') {
             if (e) e.preventDefault();
             executarAcaoSubmenuRelatorio(tipo);
+            closeMobileIfOpen();
         } else if (typeof mostrarPainelRelatorio === 'function') {
             if (e) e.preventDefault();
             const mapaTipoPainel = {
@@ -408,9 +443,11 @@ function onSubmenuItemRelatorioClick(e, tipo) {
             const painelAlvo = mapaTipoPainel[tipo] || tipo;
             const btn = document.querySelector(`#lista-tipos-relatorios button[data-tipo="${tipo}"], #lista-tipos-relatorios button[data-painel="${painelAlvo}"]`);
             mostrarPainelRelatorio(painelAlvo, btn);
+            closeMobileIfOpen();
         }
     } else {
         if (e) e.preventDefault();
+        closeMobileIfOpen();
         window.location.href = '<?= APP_ROOT ?>pages/relatorios.php?tipo=' + tipo;
     }
 }

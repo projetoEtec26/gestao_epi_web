@@ -412,6 +412,11 @@ function initSidebarToggle() {
         }
     }
 
+    // Expõe as funções globalmente no window para chamadas pelos submenus
+    window.openMobileSidebar = openMobileSidebar;
+    window.closeMobileSidebar = closeMobileSidebar;
+    window.toggleMobileSidebar = toggleMobileSidebar;
+
     // Evento de clique no botão hambúrguer
     if (sidebarToggle) {
         sidebarToggle.addEventListener('click', function(e) {
