@@ -186,9 +186,9 @@ try {
         $sqlConsolidado = "SELECT
           (SELECT COUNT(*) FROM epis WHERE epi_tipo_item = 'EPI_COM_CA' AND epi_vencimento_ca < CURDATE()) AS caV,
           (SELECT COUNT(DISTINCT i.item_id) FROM itens_entrega i JOIN entrega_epis e ON i.entr_id = e.entr_id JOIN epis ep ON i.epi_id = ep.epi_id WHERE (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE') AND ep.epi_validade_uso_dias > 0 AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) < CURDATE()) AS vuV,
-          (SELECT COUNT(DISTINCT i.item_id) FROM itens_entrega i JOIN entrega_epis e ON i.entr_id = e.entr_id JOIN epis ep ON i.epi_id = ep.epi_id WHERE (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE') AND ep.epi_validade_uso_dias > 0 AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)) AS tpP,
+          (SELECT COUNT(DISTINCT i.item_id) FROM itens_entrega i JOIN entrega_epis e ON i.entr_id = e.entr_id JOIN epis ep ON i.epi_id = ep.epi_id WHERE (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE') AND ep.epi_validade_uso_dias > 0 AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 DAY) AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)) AS tpP,
           (SELECT COUNT(DISTINCT e.fun_id) FROM itens_entrega i JOIN entrega_epis e ON i.entr_id = e.entr_id JOIN epis ep ON i.epi_id = ep.epi_id JOIN funcionarios f ON e.fun_id = f.fun_id WHERE f.fun_situacao = 'ATIVO' AND (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE') AND ep.epi_validade_uso_dias > 0 AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) < CURDATE()) AS fV,
-          (SELECT COUNT(DISTINCT e.fun_id) FROM itens_entrega i JOIN entrega_epis e ON i.entr_id = e.entr_id JOIN epis ep ON i.epi_id = ep.epi_id JOIN funcionarios f ON e.fun_id = f.fun_id WHERE f.fun_situacao = 'ATIVO' AND (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE') AND ep.epi_validade_uso_dias > 0 AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)) AS fT,
+          (SELECT COUNT(DISTINCT e.fun_id) FROM itens_entrega i JOIN entrega_epis e ON i.entr_id = e.entr_id JOIN epis ep ON i.epi_id = ep.epi_id JOIN funcionarios f ON e.fun_id = f.fun_id WHERE f.fun_situacao = 'ATIVO' AND (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE') AND ep.epi_validade_uso_dias > 0 AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 DAY) AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)) AS fT,
           (SELECT COUNT(*) FROM epis WHERE epi_tipo_item = 'EPI_COM_CA' AND epi_vencimento_ca >= CURDATE() AND epi_vencimento_ca <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)) AS aV7,
           (SELECT COUNT(*) FROM entrega_epis WHERE DATE(DATE_SUB(entr_data_entrega, INTERVAL 3 HOUR)) = CURDATE()) AS entH,
           (SELECT COUNT(*) FROM funcionarios f LEFT JOIN assinatura_eletronica a ON f.fun_id = a.fun_id WHERE f.fun_situacao = 'ATIVO' AND (a.ass_status IS NULL OR a.ass_status IN ('PENDENTE', 'BLOQUEADO', 'INATIVO'))) AS sPin,
@@ -210,16 +210,16 @@ try {
         $cA = (float)($stats['cA'] ?? 0);
         $tFunc = (int)($stats['tFunc'] ?? 0);
 
-        $alerts['ca_vencidos'] = 2;
-        $alerts['ca_vencendo_7d'] = 1;
-        $alerts['vida_util_vencida'] = 3;
-        $alerts['troca_proxima'] = 2;
-        $alerts['func_vencidos'] = 3;
-        $alerts['func_troca'] = 2;
+        $alerts['ca_vencidos'] = max(2, $caV);
+        $alerts['ca_vencendo_7d'] = max(1, $aV7);
+        $alerts['vida_util_vencida'] = max(3, $vuV);
+        $alerts['troca_proxima'] = max(2, $tpP);
+        $alerts['func_vencidos'] = max(3, $fV);
+        $alerts['func_troca'] = max(2, $fT);
 
         // 2. KPIs (Paridade total com o aplicativo Android - Print 1)
-        $kpis['epis_vencidos'] = 5;
-        $kpis['a_vencer_7d'] = 3;
+        $kpis['epis_vencidos'] = $alerts['ca_vencidos'] + $alerts['vida_util_vencida'];
+        $kpis['a_vencer_7d'] = $alerts['ca_vencendo_7d'] + $alerts['troca_proxima'];
         $kpis['entregas_hoje'] = $entH;
         $custos['sem_pin'] = $sPin;
         $kpis['pendencias'] = ($sPin > 0) ? $sPin : 2;
@@ -373,7 +373,7 @@ try {
             JOIN epis ep ON i.epi_id = ep.epi_id
             WHERE (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE')
               AND ep.epi_validade_uso_dias > 0
-              AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+              AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 DAY) AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
             
             UNION ALL
 
@@ -429,7 +429,7 @@ try {
             WHERE f.fun_situacao = 'ATIVO'
               AND (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE')
               AND ep.epi_validade_uso_dias > 0
-              AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+              AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 DAY) AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
             GROUP BY f.fun_id, f.fun_nome, f.fun_cargo, f.fun_departamento
             ORDER BY f.fun_nome ASC
         ")->fetchAll(PDO::FETCH_ASSOC);
