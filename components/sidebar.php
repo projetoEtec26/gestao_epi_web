@@ -303,8 +303,10 @@ function onFuncionariosMenuClick(e) {
         if (typeof executarAcaoSubmenu === 'function') {
             if (e) e.preventDefault();
             executarAcaoSubmenu('lista');
-            closeMobileIfOpen();
         }
+    } else {
+        if (e) e.preventDefault();
+        window.location.href = '<?= APP_ROOT ?>pages/funcionarios.php?acao=lista';
     }
 }
 
@@ -324,7 +326,9 @@ function onSubmenuItemClick(e, acao) {
             closeMobileIfOpen();
         }
     } else {
+        if (e) e.preventDefault();
         closeMobileIfOpen();
+        window.location.href = '<?= APP_ROOT ?>pages/funcionarios.php?acao=' + acao;
     }
 }
 

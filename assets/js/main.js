@@ -453,9 +453,9 @@ function initSidebarToggle() {
         }
     });
 
-    // Fechar a sidebar mobile automaticamente ao clicar em qualquer opção/link do menu
+    // Fechar a sidebar mobile automaticamente ao clicar apenas em opções finais/links diretos do menu
     if (sidebar) {
-        sidebar.querySelectorAll('a').forEach(function(link) {
+        sidebar.querySelectorAll('.sidebar-submenu-list a, .nav-item:not(.has-submenu) a').forEach(function(link) {
             link.addEventListener('click', function() {
                 if (window.innerWidth <= 991) {
                     closeMobileSidebar();
