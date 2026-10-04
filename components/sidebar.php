@@ -451,6 +451,21 @@ function onSubmenuItemRelatorioClick(e, tipo) {
         window.location.href = '<?= APP_ROOT ?>pages/relatorios.php?tipo=' + tipo;
     }
 }
+
+// No celular (<= 991px), garante que a primeira tela a aparecer seja o menu aberto (Print 2)
+if (window.innerWidth <= 991) {
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof window.openMobileSidebar === 'function') {
+            window.openMobileSidebar();
+        } else {
+            document.body.classList.add('sidebar-active');
+            const sb = document.getElementById('sidebar');
+            if (sb) sb.classList.add('open');
+            const ov = document.getElementById('sidebar-overlay');
+            if (ov) ov.classList.add('active');
+        }
+    });
+}
 </script>
 
 <!-- Overlay semitransparente para menu lateral mobile (off-canvas) -->
