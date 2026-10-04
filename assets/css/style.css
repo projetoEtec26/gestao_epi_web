@@ -1086,28 +1086,39 @@ body.dark-mode .autocomplete-item.active {
 }
 
 /* Overlay Backdrop Semitransparente para Menu Mobile (Off-Canvas) */
+#sidebar-overlay,
 .sidebar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    z-index: 1040;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s ease;
-    pointer-events: none;
+    display: none;
 }
 
-body.sidebar-active .sidebar-overlay,
-.sidebar-overlay.active {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-}
+/* Responsividade Mobile & Tablet */
+@media (max-width: 991px) {
+    #sidebar-overlay,
+    .sidebar-overlay {
+        display: block !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        background-color: rgba(15, 23, 42, 0.65) !important;
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+        z-index: 9998 !important;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none !important;
+        transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s ease;
+    }
+
+    body.sidebar-active #sidebar-overlay,
+    body.sidebar-active .sidebar-overlay,
+    #sidebar-overlay.active {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
 
 /* Responsividade Mobile */
 @media (max-width: 991px) {
