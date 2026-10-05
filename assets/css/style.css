@@ -702,6 +702,57 @@ body.dark-mode .table-custom tr:hover td {
     background-color: rgba(255, 255, 255, 0.01);
 }
 
+/* Cabeçalhos de Tabela Fixos durante a Rolagem (Sticky Table Headers) */
+.table thead th,
+.table-custom thead th,
+table thead th,
+.table-responsive .table thead th,
+.table-responsive-custom .table-custom thead th,
+#tabela-relatorio-gerado thead th,
+#tabela-entregas thead th,
+#tabela-funcionarios thead th,
+#tabela-epis thead th,
+#tabela-auditoria thead th,
+#tabela-usuarios thead th {
+    position: sticky !important;
+    top: var(--topbar-height, 70px) !important;
+    z-index: 99 !important;
+    background-color: var(--color-card-bg) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+/* Suporte para tabelas com container de rolagem interna (ex: max-height em relatórios) */
+.table-responsive[style*="max-height"] table thead th,
+.table-responsive[style*="overflow"] table thead th,
+#tabela-resultados-wrapper table thead th,
+#tabela-resultados-wrapper .table thead th {
+    top: 0 !important;
+}
+
+/* Evita transparência ao rolar dados sob o cabeçalho no Modo Claro */
+.table-light th,
+.table thead.table-light th,
+.table-custom th {
+    background-color: #f1f5f9 !important;
+    color: var(--color-text-primary) !important;
+}
+
+/* Evita transparência ao rolar dados sob o cabeçalho no Modo Escuro */
+html.dark-mode .table thead th,
+html.dark-mode .table-custom thead th,
+html.dark-mode table thead th,
+html.dark-mode .table-light th,
+html.dark-mode .table thead.table-light th,
+body.dark-mode .table thead th,
+body.dark-mode .table-custom thead th,
+body.dark-mode table thead th,
+body.dark-mode .table-light th,
+body.dark-mode .table thead.table-light th {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-bottom: 2px solid #334155 !important;
+}
+
 .modal-backdrop {
     z-index: 1060 !important;
 }
