@@ -469,6 +469,25 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 *   **Coluna Fixa Anti-Corte (Sticky Actions):** A coluna de "Ações" recebeu a propriedade `position: sticky; right: 0;`, garantindo que os botões (Ver e Editar) permaneçam permanentemente visíveis ancorados à direita da tela, resolvendo definitivamente o problema de interface cortada.
 *   **Limpeza da Barra Lateral (`components/sidebar.php`):** Removido o item obsoleto "Pendências de Envio", enxugando as opções de navegação e mantendo foco estrito nas operações essenciais.
 
+### 📅 Versão 7.0.0 (05/10/2026) – Paridade 1:1 Dashboard Web × Android (`gestao_epi_8`), Audit Git/GitHub (Commit `19299fa`) e Homologação em Produção Locaweb (`http://gestaoepi.tecnologia.ws/`)
+*   **Paridade 1:1 de Regras de Negócio do Dashboard Web com o Android (`gestao_epi_8`):**
+    - **Card 1 (EPIs Vencidos):** Consolidação dos equipamentos com Certificado de Aprovação (C.A.) vencidos no estoque com os equipamentos em uso ativo com Vida Útil vencida (5 itens: 2 C.A. + 3 Vida Útil).
+    - **Card 2 (A Vencer nos próximos 7 dias):** Consolidação dos equipamentos com C.A. vencendo em até 7 dias com itens em período de alerta de troca (3 itens: 1 C.A. + 2 Vida Útil).
+    - **Card 3 (Entregas Hoje):** Filtro estrito por entregas com status `FINALIZADA` registradas no dia atual no fuso horário `America/Sao_Paulo` (0 entregas).
+    - **Card 4 (Central de Pendências):** Consolidação unificada de C.A. Vencidos, Funcionários Sem PIN, EPIs sem Vida Útil e EPIs sem Rastreabilidade (2 pendências).
+    - **Taxa de Conformidade:** Cálculo oficial do Android (`Funcionários Ativos / Total de Funcionários * 100`) registrando 52 de 53 funcionários = 98.0%.
+    - **Métricas de Custos:** Custo Mensal (R$ 2.142,32) e Custo Acumulado Histórico (R$ 62.951,92 desde 15/07/2026).
+    - **Gráfico de Entregas 7 Dias:** Renderização dinâmica dos últimos 7 dias consecutivos em `America/Sao_Paulo` via Chart.js.
+    - **Top 5 EPIs Mais Utilizados:** Consulta SQL oficial do Android ordenando os equipamentos por quantidade acumulada fornecida (`SUM(item_quantidade)`).
+*   **Ciclo de Auditoria, Backup, Git/GitHub e Deploy Homologado (Etapas 6 a 10):**
+    - **Etapa 6 (Validação de Paridade):** Auditoria completa de 14 pontos aprovada com 🟢 **PARITY APPROVED**.
+    - **Etapa 7 (Backup & Validação):** Backup integral criado em `gestao_epi_web_14_BACKUP_ETAPA7_APROVADO` (832 arquivos, 281 pastas com paridade 1:1).
+    - **Etapa 7.1 (Conferência do Modal 1):** Esclarecida a contagem do Modal EPIs Vencidos (5 registros idênticos no Card 1 e na Aba "Todos").
+    - **Etapas 8A & 8B (Audit & Commit Local):** Auditoria do Git Diff e criação do commit local `19299fa` (`feat: atualiza dashboard web com paridade 1:1 ao Android`).
+    - **Etapa 8C (Push Controlado):** Push publicado no repositório oficial GitHub `https://github.com/projetoEtec26/gestao_epi_web.git` na branch `main`.
+    - **Etapa 9 (Auditoria Locaweb Read-Only):** Verificação de sincronização da Locaweb em produção (`http://gestaoepi.tecnologia.ws/`) e do banco MySQL remoto `db_gestao_epi.mysql.dbaas.com.br`.
+    - **Etapa 10 (Teste Funcional em Produção):** Teste funcional em produção 🟢 **APROVADO**, confirmando funcionamento e paridade 1:1 entre Android e Web no servidor remoto da Locaweb.
+
 ### 📅 Versão 3.6.0 (16/09/2026) – Padronização de Layout de Submenus, Correção de Overflow e Restauração de Botão Nova Entrega
 
 *   **Padronização Global de Cabeçalhos com Submenus (`pages/entregas.php`, `pages/devolucoes.php`, `pages/relatorios.php`, `pages/nova_entrega.php`):** Unificado o layout dos cabeçalhos de todas as páginas para seguir o padrão de referência do módulo **Funcionários** (`pages/funcionarios.php`). Estrutura padronizada: container `d-flex justify-content-between align-items-center mb-2 gap-2` com título/descrição à esquerda e botões de submenu (`btn-group-toggle-view`) + ação principal à direita.
