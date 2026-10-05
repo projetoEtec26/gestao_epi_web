@@ -67,7 +67,7 @@ body {
     background-color: var(--color-bg);
     color: var(--color-text-primary);
     min-height: 100vh;
-    overflow-x: hidden;
+    overflow-x: clip;
     transition: var(--transition-smooth);
 }
 
@@ -77,7 +77,7 @@ body {
     width: 100%;
     max-width: 100%;
     min-height: 100vh;
-    overflow-x: hidden;
+    overflow-x: clip;
 }
 
 #main-content {
@@ -89,7 +89,7 @@ body {
     display: flex;
     flex-direction: column;
     transition: var(--transition-smooth);
-    overflow-x: hidden;
+    overflow-x: clip;
     min-width: 0;
     box-sizing: border-box;
 }
@@ -358,9 +358,9 @@ body.sidebar-collapsed #sidebar .nav-item a span:not(.icon-box) {
 
 /* Topbar Estilizada - Fixa na parte superior durante a rolagem */
 #topbar, .topbar {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
     height: var(--topbar-height);
     background-color: var(--color-card-bg);
     border-bottom: 1px solid var(--color-border);
@@ -550,7 +550,7 @@ html.dark-mode .modal-body.bg-light, body.dark-mode .modal-body.bg-light {
     flex-direction: column;
     gap: 24px;
     min-width: 0;
-    overflow-x: hidden;
+    overflow-x: clip;
 }
 
 /* Cards Modernos */
