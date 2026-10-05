@@ -20,7 +20,7 @@ if ($user !== null) {
     $perfilLabel = $perfisMap[$user['usu_perfil']] ?? $user['usu_perfil'];
 }
 ?>
-<header id="topbar">
+<header id="topbar" class="topbar">
     <div class="left-section">
         <button id="sidebar-toggle-btn" class="toggle-sidebar-btn" title="Alternar barra lateral" aria-expanded="false" aria-controls="sidebar" aria-label="Alternar menu de navegação">
             <i class="bi bi-list"></i>

@@ -356,8 +356,11 @@ body.sidebar-collapsed #sidebar .nav-item a span:not(.icon-box) {
     display: none;
 }
 
-/* Topbar Estilizada */
-#topbar {
+/* Topbar Estilizada - Fixa na parte superior durante a rolagem */
+#topbar, .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
     height: var(--topbar-height);
     background-color: var(--color-card-bg);
     border-bottom: 1px solid var(--color-border);
