@@ -2558,6 +2558,93 @@ body.dark-mode .btn-group-toggle-view .btn-view.active {
     }
 }
 
+/* ========================================================
+   ADAPTAÇÕES ESPECÍFICAS PARA CELULAR E TABLET (STICKY & RESPONSIVIDADE)
+   ======================================================== */
+@media (max-width: 768px) {
+    :root {
+        --topbar-height: 60px;
+    }
+    
+    #topbar, .topbar {
+        height: var(--topbar-height, 60px) !important;
+        padding: 0 12px !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1000 !important;
+    }
+
+    /* Ajusta a posição sticky do cabeçalho da tabela no celular */
+    .table thead th,
+    .table-custom thead th,
+    table thead th,
+    .table-responsive .table thead th,
+    .table-responsive-custom .table-custom thead th,
+    #tabela-relatorio-gerado thead th,
+    #tabela-entregas thead th,
+    #tabela-funcionarios thead th,
+    #tabela-epis thead th,
+    #tabela-auditoria thead th,
+    #tabela-usuarios thead th {
+        top: var(--topbar-height, 60px) !important;
+    }
+
+    /* Tabelas com container de rolagem interna (ex: max-height em relatórios) no celular */
+    .table-responsive[style*="max-height"] table thead th,
+    .table-responsive[style*="overflow"] table thead th,
+    #tabela-resultados-wrapper table thead th,
+    #tabela-resultados-wrapper .table thead th {
+        top: 0 !important;
+    }
+
+    /* Otimização de rolagem e layout em celulares */
+    .table-responsive,
+    .table-responsive-custom {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        border-radius: 8px;
+    }
+
+    .table th, .table td,
+    .table-custom th, .table-custom td {
+        white-space: nowrap !important;
+        padding: 8px 10px !important;
+        font-size: 12.5px !important;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    :root {
+        --topbar-height: 65px;
+    }
+    
+    #topbar, .topbar {
+        height: var(--topbar-height, 65px) !important;
+        padding: 0 20px !important;
+    }
+
+    .table thead th,
+    .table-custom thead th,
+    table thead th,
+    .table-responsive .table thead th,
+    .table-responsive-custom .table-custom thead th,
+    #tabela-relatorio-gerado thead th,
+    #tabela-entregas thead th,
+    #tabela-funcionarios thead th,
+    #tabela-epis thead th,
+    #tabela-auditoria thead th,
+    #tabela-usuarios thead th {
+        top: var(--topbar-height, 65px) !important;
+    }
+
+    .table th, .table td,
+    .table-custom th, .table-custom td {
+        padding: 9px 12px !important;
+        font-size: 13px !important;
+    }
+}
+
+
 
 
 
