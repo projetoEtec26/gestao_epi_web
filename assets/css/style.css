@@ -707,8 +707,6 @@ body.dark-mode .table-custom tr:hover td {
 .table thead th,
 .table-custom thead th,
 table thead th,
-.table-responsive .table thead th,
-.table-responsive-custom .table-custom thead th,
 #tabela-relatorio-gerado thead th,
 #tabela-entregas thead th,
 #tabela-funcionarios thead th,
@@ -722,9 +720,11 @@ table thead th,
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 }
 
-/* Suporte para tabelas com container de rolagem interna (ex: max-height em relatórios) */
-.table-responsive[style*="max-height"] table thead th,
-.table-responsive[style*="overflow"] table thead th,
+/* Suporte para tabelas com container responsivo ou rolagem interna */
+.table-responsive table thead th,
+.table-responsive-custom table thead th,
+.table-responsive .table thead th,
+.table-responsive-custom .table-custom thead th,
 #tabela-resultados-wrapper table thead th,
 #tabela-resultados-wrapper .table thead th {
     top: 0 !important;
@@ -2637,27 +2637,21 @@ body.dark-mode .btn-group-toggle-view .btn-view.active {
         font-size: 13px !important;
     }
 
-    /* Ajusta a posição sticky do cabeçalho da tabela no celular */
-    .table thead th,
-    .table-custom thead th,
-    table thead th,
+    /* Ajusta a posição sticky do cabeçalho de tabela no celular sem gerar deslocamento vazio */
+    .table-responsive table thead th,
+    .table-responsive-custom table thead th,
     .table-responsive .table thead th,
     .table-responsive-custom .table-custom thead th,
-    #tabela-relatorio-gerado thead th,
+    #tabela-resultados-wrapper table thead th,
+    #tabela-resultados-wrapper .table thead th,
+    #tabela-auditoria thead th,
     #tabela-entregas thead th,
     #tabela-funcionarios thead th,
     #tabela-epis thead th,
-    #tabela-auditoria thead th,
     #tabela-usuarios thead th {
-        top: var(--topbar-height, 60px) !important;
-    }
-
-    /* Tabelas com container de rolagem interna (ex: max-height em relatórios) no celular */
-    .table-responsive[style*="max-height"] table thead th,
-    .table-responsive[style*="overflow"] table thead th,
-    #tabela-resultados-wrapper table thead th,
-    #tabela-resultados-wrapper .table thead th {
         top: 0 !important;
+        position: sticky !important;
+        z-index: 10 !important;
     }
 
     /* Otimização de rolagem e layout em celulares */
