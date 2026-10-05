@@ -100,11 +100,12 @@ body.sidebar-collapsed #main-content {
     margin-left: var(--sidebar-collapsed-width);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 991.98px) {
     #main-content {
         width: 100% !important;
         max-width: 100% !important;
         margin-left: 0 !important;
+        overflow-x: clip !important;
     }
 }
 
@@ -2559,9 +2560,9 @@ body.dark-mode .btn-group-toggle-view .btn-view.active {
 }
 
 /* ========================================================
-   ADAPTAÇÕES ESPECÍFICAS PARA CELULAR E TABLET (STICKY & RESPONSIVIDADE)
+   ADAPTAÇÕES ESPECÍFICAS PARA CELULAR E TABLET (STICKY & RESPONSIVIDADE 100% FIT)
    ======================================================== */
-@media (max-width: 768px) {
+@media (max-width: 991.98px) {
     :root {
         --topbar-height: 60px;
     }
@@ -2572,6 +2573,68 @@ body.dark-mode .btn-group-toggle-view .btn-view.active {
         position: sticky !important;
         top: 0 !important;
         z-index: 1000 !important;
+    }
+
+    /* Enquadramento estrito de largura de página e remoção de estouro lateral */
+    .content-body {
+        padding: 12px 8px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow-x: clip !important;
+    }
+
+    .audit-container,
+    .container,
+    .container-fluid {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    .card,
+    .card-custom,
+    .audit-card-filter,
+    .audit-table-card,
+    .settings-card,
+    .dash-card,
+    .welcome-card,
+    .search-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 14px 12px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+        border-radius: 12px !important;
+    }
+
+    /* Elimina margens negativas de .row do Bootstrap que causam corte lateral do card em celulares */
+    .row {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .row > [class*="col-"] {
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+    }
+
+    /* Ajusta inputs, selects e formulários para caberem 100% no container sem extrapolar */
+    .form-control,
+    .form-select,
+    .audit-input,
+    .audit-select,
+    input, select, textarea {
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        font-size: 13px !important;
     }
 
     /* Ajusta a posição sticky do cabeçalho da tabela no celular */
@@ -2600,6 +2663,8 @@ body.dark-mode .btn-group-toggle-view .btn-view.active {
     /* Otimização de rolagem e layout em celulares */
     .table-responsive,
     .table-responsive-custom {
+        width: 100% !important;
+        max-width: 100% !important;
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch !important;
         border-radius: 8px;
@@ -2613,7 +2678,7 @@ body.dark-mode .btn-group-toggle-view .btn-view.active {
     }
 }
 
-@media (min-width: 769px) and (max-width: 1024px) {
+@media (min-width: 992px) and (max-width: 1200px) {
     :root {
         --topbar-height: 65px;
     }

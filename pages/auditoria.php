@@ -103,8 +103,10 @@ function buildAuditUrl(array $overrides = []): string {
 
 <style>
 .audit-container {
+    width: 100%;
     max-width: 1100px;
     margin: 0 auto;
+    box-sizing: border-box;
 }
 
 .audit-card-filter {
@@ -113,6 +115,8 @@ function buildAuditUrl(array $overrides = []): string {
     border-radius: 14px;
     padding: 20px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .audit-card-title {
