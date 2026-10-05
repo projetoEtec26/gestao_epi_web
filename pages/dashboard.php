@@ -173,6 +173,15 @@ $entregasHojeList = [];
 $semPinList = [];
 $episEmPosseList = [];
 
+$semVidaUtilList = [];
+$semRastreabilidadeList = [];
+$pendenciasDet = [
+    'ca_vencidos' => 0,
+    'sem_pin' => 0,
+    'sem_vida_util' => 0,
+    'sem_rastreabilidade' => 0
+];
+
 try {
     $pdo = new PDO($dsn, $configData['db_user'], $configData['db_pass'], [
         PDO::ATTR_TIMEOUT => 4,
@@ -182,66 +191,314 @@ try {
 
     if ($pdo) {
         $pdo->exec("SET time_zone = '-03:00'");
-        // 1. Executa todas as contagens e métricas em UMA ÚNICA consulta SQL consolidada de alta performance
-        $sqlConsolidado = "SELECT
-          (SELECT COUNT(*) FROM epis WHERE epi_tipo_item = 'EPI_COM_CA' AND epi_vencimento_ca < CURDATE()) AS caV,
-          (SELECT COUNT(DISTINCT i.item_id) FROM itens_entrega i JOIN entrega_epis e ON i.entr_id = e.entr_id JOIN epis ep ON i.epi_id = ep.epi_id WHERE (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE') AND ep.epi_validade_uso_dias > 0 AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) < CURDATE()) AS vuV,
-          (SELECT COUNT(DISTINCT i.item_id) FROM itens_entrega i JOIN entrega_epis e ON i.entr_id = e.entr_id JOIN epis ep ON i.epi_id = ep.epi_id WHERE (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE') AND ep.epi_validade_uso_dias > 0 AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 DAY) AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)) AS tpP,
-          (SELECT COUNT(DISTINCT e.fun_id) FROM itens_entrega i JOIN entrega_epis e ON i.entr_id = e.entr_id JOIN epis ep ON i.epi_id = ep.epi_id JOIN funcionarios f ON e.fun_id = f.fun_id WHERE f.fun_situacao = 'ATIVO' AND (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE') AND ep.epi_validade_uso_dias > 0 AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) < CURDATE()) AS fV,
-          (SELECT COUNT(DISTINCT e.fun_id) FROM itens_entrega i JOIN entrega_epis e ON i.entr_id = e.entr_id JOIN epis ep ON i.epi_id = ep.epi_id JOIN funcionarios f ON e.fun_id = f.fun_id WHERE f.fun_situacao = 'ATIVO' AND (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE') AND ep.epi_validade_uso_dias > 0 AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 DAY) AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)) AS fT,
-          (SELECT COUNT(*) FROM epis WHERE epi_tipo_item = 'EPI_COM_CA' AND epi_vencimento_ca >= CURDATE() AND epi_vencimento_ca <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)) AS aV7,
-          (SELECT COUNT(*) FROM entrega_epis WHERE DATE(DATE_SUB(entr_data_entrega, INTERVAL 3 HOUR)) = CURDATE()) AS entH,
-          (SELECT COUNT(*) FROM funcionarios f LEFT JOIN assinatura_eletronica a ON f.fun_id = a.fun_id WHERE f.fun_situacao = 'ATIVO' AND (a.ass_status IS NULL OR a.ass_status IN ('PENDENTE', 'BLOQUEADO', 'INATIVO'))) AS sPin,
-          (SELECT COALESCE(SUM(i.item_quantidade * ep.epi_valor), 0) FROM itens_entrega i INNER JOIN epis ep ON i.epi_id = ep.epi_id INNER JOIN entrega_epis ent ON i.entr_id = ent.entr_id WHERE ent.entr_status = 'FINALIZADA' AND MONTH(ent.entr_data_entrega) = MONTH(CURDATE()) AND YEAR(ent.entr_data_entrega) = YEAR(CURDATE())) AS cM,
-          (SELECT COALESCE(SUM(i.item_quantidade * ep.epi_valor), 0) FROM itens_entrega i INNER JOIN epis ep ON i.epi_id = ep.epi_id INNER JOIN entrega_epis ent ON i.entr_id = ent.entr_id WHERE ent.entr_status = 'FINALIZADA') AS cA,
-          (SELECT COUNT(*) FROM funcionarios) AS tFunc";
+        $todayObj = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
+        $todayStr = $todayObj->format('Y-m-d');
+        $todayStart = $todayStr . ' 00:00:00';
+        $todayEnd = $todayStr . ' 23:59:59';
+        $in7DaysStr = (clone $todayObj)->modify('+7 days')->format('Y-m-d');
 
-        $stats = $pdo->query($sqlConsolidado)->fetch(PDO::FETCH_ASSOC);
+        // 1. CARD 1 & PENDÊNCIA 1: C.A. Vencidos (Catálogo)
+        $stmtCaV = $pdo->prepare("
+            SELECT epi_nome, epi_fabricante, epi_ca, epi_vencimento_ca, epi_status
+            FROM epis
+            WHERE (epi_status = 'VENCIDO' OR (epi_vencimento_ca IS NOT NULL AND epi_vencimento_ca < :today))
+            ORDER BY epi_nome ASC
+        ");
+        $stmtCaV->execute(['today' => $todayStr]);
+        $caVencidosList = $stmtCaV->fetchAll(PDO::FETCH_ASSOC);
+        $totCaVencidos = count($caVencidosList);
 
-        $caV = (int)($stats['caV'] ?? 0);
-        $vuV = (int)($stats['vuV'] ?? 0);
-        $tpP = (int)($stats['tpP'] ?? 0);
-        $fV = (int)($stats['fV'] ?? 0);
-        $fT = (int)($stats['fT'] ?? 0);
-        $aV7 = (int)($stats['aV7'] ?? 0);
-        $entH = (int)($stats['entH'] ?? 0);
-        $sPin = (int)($stats['sPin'] ?? 0);
-        $cM = (float)($stats['cM'] ?? 0);
-        $cA = (float)($stats['cA'] ?? 0);
-        $tFunc = (int)($stats['tFunc'] ?? 0);
+        // 2. CARD 1 & CARD 2: Itens Ativos em Uso (para Vida Útil Vencida e Vida Útil A Vencer)
+        $sqlItensEmUso = "
+            SELECT i.item_id, i.entr_id, i.epi_id, i.item_quantidade,
+                   e.entr_data_entrega, e.fun_id,
+                   ep.epi_nome, ep.epi_ca, ep.epi_fabricante, ep.epi_validade_uso_dias,
+                   ep.epi_vida_util, ep.epi_vida_util_unidade, ep.epi_vida_util_tipo, ep.epi_vida_util_alerta, ep.epi_vencimento_ca,
+                   f.fun_nome, f.fun_cargo, f.fun_departamento
+            FROM itens_entrega i
+            INNER JOIN entrega_epis e ON i.entr_id = e.entr_id
+            INNER JOIN epis ep ON i.epi_id = ep.epi_id
+            INNER JOIN funcionarios f ON e.fun_id = f.fun_id
+            WHERE e.entr_status = 'FINALIZADA'
+              AND i.item_data_devolucao IS NULL
+              AND (i.item_devolucao_motivo IS NULL OR i.item_devolucao_motivo = '')
+              AND (i.item_devolucao_vinculo_item_id IS NULL OR i.item_devolucao_vinculo_item_id = 0)
+        ";
+        $itensEmUso = $pdo->query($sqlItensEmUso)->fetchAll(PDO::FETCH_ASSOC);
 
-        $alerts['ca_vencidos'] = max(2, $caV);
-        $alerts['ca_vencendo_7d'] = max(1, $aV7);
-        $alerts['vida_util_vencida'] = max(3, $vuV);
-        $alerts['troca_proxima'] = max(2, $tpP);
-        $alerts['func_vencidos'] = max(3, $fV);
-        $alerts['func_troca'] = max(2, $fT);
+        $vidaUtilVencidaList = [];
+        $vidaUtilAVencerList = [];
 
-        // 2. KPIs (Paridade total com o aplicativo Android - Print 1)
-        $kpis['epis_vencidos'] = $alerts['ca_vencidos'] + $alerts['vida_util_vencida'];
-        $kpis['a_vencer_7d'] = $alerts['ca_vencendo_7d'] + $alerts['troca_proxima'];
-        $kpis['entregas_hoje'] = $entH;
-        $custos['sem_pin'] = $sPin;
-        $kpis['pendencias'] = ($sPin > 0) ? $sPin : 2;
+        foreach ($itensEmUso as $item) {
+            $dtEntregaStr = $item['entr_data_entrega'] ?? null;
+            if (!$dtEntregaStr) continue;
 
-        // 3. Custos
+            $dtEntrega = new DateTime($dtEntregaStr);
+            $dtVidaUtil = null;
+
+            $tipoVal = strtoupper(trim((string)($item['epi_vida_util_tipo'] ?? '')));
+            $valVu = (int)($item['epi_vida_util'] ?? 0);
+            $unidadeVu = strtoupper(trim((string)($item['epi_vida_util_unidade'] ?? '')));
+
+            if ($tipoVal === 'CONTROLADO' && $valVu > 0) {
+                $dtVidaUtil = clone $dtEntrega;
+                if (in_array($unidadeVu, ['DIAS', 'DIA'])) {
+                    $dtVidaUtil->modify("+{$valVu} days");
+                } elseif (in_array($unidadeVu, ['MESES', 'MES'])) {
+                    $dtVidaUtil->modify("+{$valVu} months");
+                } elseif (in_array($unidadeVu, ['ANOS', 'ANO'])) {
+                    $dtVidaUtil->modify("+{$valVu} years");
+                } else {
+                    $dtVidaUtil->modify("+{$valVu} days");
+                }
+            } elseif (!empty($item['epi_validade_uso_dias']) && (int)$item['epi_validade_uso_dias'] > 0) {
+                $vDias = (int)$item['epi_validade_uso_dias'];
+                $dtVidaUtil = (clone $dtEntrega)->modify("+{$vDias} days");
+            }
+
+            $dtCa = !empty($item['epi_vencimento_ca']) ? new DateTime($item['epi_vencimento_ca']) : null;
+
+            $dataTroca = null;
+            if ($dtVidaUtil && $dtCa) {
+                $dataTroca = $dtVidaUtil < $dtCa ? $dtVidaUtil : $dtCa;
+            } else {
+                $dataTroca = $dtVidaUtil ?: $dtCa;
+            }
+
+            if (!$dataTroca) continue;
+
+            $dtTrocaStr = $dataTroca->format('Y-m-d');
+            if ($dtTrocaStr < $todayStr) {
+                $item['data_vencimento_uso'] = $dataTroca->format('Y-m-d H:i:s');
+                $vidaUtilVencidaList[] = $item;
+            } else {
+                $diasParaTroca = (int)$todayObj->diff($dataTroca)->format('%r%a');
+                $diasAlerta = isset($item['epi_vida_util_alerta']) && $item['epi_vida_util_alerta'] !== null && (int)$item['epi_vida_util_alerta'] > 0
+                    ? (int)$item['epi_vida_util_alerta']
+                    : 30;
+
+                if ($diasParaTroca <= $diasAlerta && $diasParaTroca >= 0) {
+                    $item['data_vencimento'] = $dataTroca->format('Y-m-d');
+                    $item['dias_restantes'] = $diasParaTroca;
+                    $vidaUtilAVencerList[] = $item;
+                }
+            }
+        }
+
+        // 3. CARD 2: C.A. A Vencer nos próximos 7 dias (Catálogo)
+        $stmtCaAV = $pdo->prepare("
+            SELECT epi_id, epi_nome, epi_fabricante, epi_ca, epi_vencimento_ca
+            FROM epis
+            WHERE epi_tipo_item = 'EPI_COM_CA'
+              AND epi_vencimento_ca >= :today
+              AND epi_vencimento_ca <= :in7days
+            ORDER BY epi_vencimento_ca ASC
+        ");
+        $stmtCaAV->execute(['today' => $todayStr, 'in7days' => $in7DaysStr]);
+        $caAVencerCatalogList = $stmtCaAV->fetchAll(PDO::FETCH_ASSOC);
+
+        // Monta $caAVencerList unificado para Modal 2
+        $caAVencerList = [];
+        foreach ($vidaUtilAVencerList as $r) {
+            $caAVencerList[] = [
+                'fun_nome' => $r['fun_nome'] ?? '',
+                'fun_cargo' => $r['fun_cargo'] ?? '',
+                'epi_nome' => $r['epi_nome'] ?? '',
+                'epi_ca' => $r['epi_ca'] ?? '',
+                'epi_fabricante' => $r['epi_fabricante'] ?? '',
+                'entr_data_entrega' => $r['entr_data_entrega'] ?? null,
+                'epi_validade_uso_dias' => $r['epi_validade_uso_dias'] ?? null,
+                'data_vencimento' => $r['data_vencimento'] ?? null,
+                'dias_restantes' => $r['dias_restantes'] ?? 0
+            ];
+        }
+        foreach ($caAVencerCatalogList as $r) {
+            $dtV = new DateTime($r['epi_vencimento_ca']);
+            $dRestantes = (int)$todayObj->diff($dtV)->format('%r%a');
+            $caAVencerList[] = [
+                'fun_nome' => '',
+                'fun_cargo' => '',
+                'epi_nome' => $r['epi_nome'] ?? '',
+                'epi_ca' => $r['epi_ca'] ?? '',
+                'epi_fabricante' => $r['epi_fabricante'] ?? '',
+                'entr_data_entrega' => null,
+                'epi_validade_uso_dias' => null,
+                'data_vencimento' => $r['epi_vencimento_ca'],
+                'dias_restantes' => $dRestantes
+            ];
+        }
+
+        // 4. CARD 3: Entregas Realizadas Hoje (Somente FINALIZADA em Brasília)
+        $stmtEntH = $pdo->prepare("
+            SELECT e.entr_id, f.fun_nome, f.fun_cargo, e.entr_data_entrega, e.entr_status, e.entr_validacao_senha
+            FROM entrega_epis e
+            JOIN funcionarios f ON e.fun_id = f.fun_id
+            WHERE e.entr_status = 'FINALIZADA'
+              AND e.entr_data_entrega >= :todayStart
+              AND e.entr_data_entrega <= :todayEnd
+            ORDER BY f.fun_nome ASC
+        ");
+        $stmtEntH->execute(['todayStart' => $todayStart, 'todayEnd' => $todayEnd]);
+        $entregasHojeList = $stmtEntH->fetchAll(PDO::FETCH_ASSOC);
+
+        // 5. CARD 4 — PENDÊNCIAS: Categorias 2, 3 e 4
+        // PENDÊNCIA 2: Funcionários Sem PIN (Ativos e Afastados)
+        $semPinList = $pdo->query("
+            SELECT f.fun_id, f.fun_nome, f.fun_cpf, f.fun_cargo, f.fun_departamento, COALESCE(a.ass_status, 'PENDENTE') as status_pin
+            FROM funcionarios f
+            LEFT JOIN assinatura_eletronica a ON f.fun_id = a.fun_id
+            WHERE f.fun_situacao NOT IN ('INATIVO', 'DEMITIDO')
+              AND (a.ass_status IS NULL OR a.ass_status IN ('PENDENTE', 'BLOQUEADO', 'INATIVO'))
+            ORDER BY f.fun_nome ASC
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
+        // PENDÊNCIA 3: EPI Controlado sem Vida Útil
+        $semVidaUtilList = $pdo->query("
+            SELECT epi_id, epi_nome, epi_ca, epi_fabricante, epi_vida_util_tipo, epi_vida_util
+            FROM epis
+            WHERE epi_status = 'ATIVO'
+              AND epi_vida_util_tipo = 'CONTROLADO'
+              AND (epi_vida_util IS NULL OR epi_vida_util <= 0)
+            ORDER BY epi_nome ASC
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
+        // PENDÊNCIA 4: EPI sem C.A. sem Rastreabilidade
+        $semRastreabilidadeList = $pdo->query("
+            SELECT epi_id, epi_nome, epi_tipo_item, epi_numero_lote, epi_modelo, epi_identificacao, epi_ref_fornecedor
+            FROM epis
+            WHERE epi_tipo_item = 'ITEM_SEGURANCA_SEM_CA'
+              AND epi_status = 'ATIVO'
+              AND (epi_numero_lote IS NULL OR TRIM(epi_numero_lote) = '')
+              AND (epi_modelo IS NULL OR TRIM(epi_modelo) = '')
+              AND (epi_identificacao IS NULL OR TRIM(epi_identificacao) = '')
+              AND (epi_ref_fornecedor IS NULL OR TRIM(epi_ref_fornecedor) = '')
+            ORDER BY epi_nome ASC
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
+        // Alertas e KPIs Exatos
+        $alerts['ca_vencidos'] = $totCaVencidos;
+        $alerts['ca_vencendo_7d'] = count($caAVencerCatalogList);
+        $alerts['vida_util_vencida'] = count($vidaUtilVencidaList);
+        $alerts['troca_proxima'] = count($vidaUtilAVencerList);
+
+        $kpis['epis_vencidos'] = $alerts['ca_vencidos'] + $alerts['vida_util_vencida']; // CARD 1
+        $kpis['a_vencer_7d'] = $alerts['ca_vencendo_7d'] + $alerts['troca_proxima'];     // CARD 2
+        $kpis['entregas_hoje'] = count($entregasHojeList);                              // CARD 3
+
+        $pendenciasDet = [
+            'ca_vencidos' => $totCaVencidos,
+            'sem_pin' => count($semPinList),
+            'sem_vida_util' => count($semVidaUtilList),
+            'sem_rastreabilidade' => count($semRastreabilidadeList)
+        ];
+        $kpis['pendencias'] = $pendenciasDet['ca_vencidos'] + $pendenciasDet['sem_pin'] + $pendenciasDet['sem_vida_util'] + $pendenciasDet['sem_rastreabilidade']; // CARD 4
+
+        $custos['sem_pin'] = $pendenciasDet['sem_pin'];
+
+        // Alertas de Funcionários
+        $funcVencidosMap = [];
+        foreach ($vidaUtilVencidaList as $r) {
+            $fId = (int)$r['fun_id'];
+            if (!isset($funcVencidosMap[$fId])) {
+                $funcVencidosMap[$fId] = [
+                    'fun_id' => $fId,
+                    'fun_nome' => $r['fun_nome'],
+                    'fun_cargo' => $r['fun_cargo'],
+                    'fun_departamento' => $r['fun_departamento'],
+                    'qtd_epis' => 0,
+                    'epis_lista' => []
+                ];
+            }
+            $funcVencidosMap[$fId]['qtd_epis']++;
+            $funcVencidosMap[$fId]['epis_lista'][] = $r['epi_nome'];
+        }
+        $funcVencidosList = [];
+        foreach ($funcVencidosMap as $r) {
+            $r['epis_lista'] = implode(', ', array_unique($r['epis_lista']));
+            $funcVencidosList[] = $r;
+        }
+
+        $funcTrocaMap = [];
+        foreach ($vidaUtilAVencerList as $r) {
+            $fId = (int)$r['fun_id'];
+            if (!isset($funcTrocaMap[$fId])) {
+                $funcTrocaMap[$fId] = [
+                    'fun_id' => $fId,
+                    'fun_nome' => $r['fun_nome'],
+                    'fun_cargo' => $r['fun_cargo'],
+                    'fun_departamento' => $r['fun_departamento'],
+                    'qtd_epis' => 0,
+                    'epis_lista' => []
+                ];
+            }
+            $funcTrocaMap[$fId]['qtd_epis']++;
+            $funcTrocaMap[$fId]['epis_lista'][] = $r['epi_nome'];
+        }
+        $funcTrocaList = [];
+        foreach ($funcTrocaMap as $r) {
+            $r['epis_lista'] = implode(', ', array_unique($r['epis_lista']));
+            $funcTrocaList[] = $r;
+        }
+
+        $alerts['func_vencidos'] = count($funcVencidosList);
+        $alerts['func_troca'] = count($funcTrocaList);
+
+        // 6. CUSTO MENSAL E CUSTO ACUMULADO (Reais e Dinâmicos)
+        $monthNum = (int)$todayObj->format('n');
+        $yearNum = (int)$todayObj->format('Y');
+
+        $stmtCustoM = $pdo->prepare("
+            SELECT COALESCE(SUM(i.item_quantidade * ep.epi_valor), 0)
+            FROM itens_entrega i
+            INNER JOIN epis ep ON i.epi_id = ep.epi_id
+            INNER JOIN entrega_epis ent ON i.entr_id = ent.entr_id
+            WHERE ent.entr_status = 'FINALIZADA'
+              AND MONTH(ent.entr_data_entrega) = :m
+              AND YEAR(ent.entr_data_entrega) = :y
+        ");
+        $stmtCustoM->execute(['m' => $monthNum, 'y' => $yearNum]);
+        $cM = (float)$stmtCustoM->fetchColumn();
+
+        $stmtCustoA = $pdo->query("
+            SELECT COALESCE(SUM(i.item_quantidade * ep.epi_valor), 0)
+            FROM itens_entrega i
+            INNER JOIN epis ep ON i.epi_id = ep.epi_id
+            INNER JOIN entrega_epis ent ON i.entr_id = ent.entr_id
+            WHERE ent.entr_status = 'FINALIZADA'
+        ");
+        $cA = (float)$stmtCustoA->fetchColumn();
+
+        $stmtMinDate = $pdo->query("
+            SELECT MIN(entr_data_entrega)
+            FROM entrega_epis
+            WHERE entr_status = 'FINALIZADA'
+        ");
+        $minDateStr = $stmtMinDate->fetchColumn();
+
+        $legendaAcumuladoData = "Histórico";
+        if ($minDateStr) {
+            $dtMin = new DateTime($minDateStr);
+            $legendaAcumuladoData = "desde " . $dtMin->format('d/m/Y');
+        }
+
         $custos['mensal'] = 'R$ ' . number_format($cM, 2, ',', '.');
         $custos['acumulado'] = 'R$ ' . number_format($cA, 2, ',', '.');
+        $custos['legenda_acumulado'] = 'Acumulado (' . $legendaAcumuladoData . ')';
 
-        // 4. Conformidade (Taxa de Conformidade Oficial de EPIs: 52 de 53 colaboradores ativos em dia = 98%)
-        $tFuncEval = max(53, $tFunc);
-        $fVencidosCaValidos = 1;
-        $eDia = max(52, $tFuncEval - $fVencidosCaValidos);
-        $pctC = 98;
+        // 7. CONFORMIDADE (Fórmula Oficial do Android: Ativos / Total * 100)
+        $totFunc = (int)$pdo->query("SELECT COUNT(*) FROM funcionarios")->fetchColumn();
+        $totAtivos = (int)$pdo->query("SELECT COUNT(*) FROM funcionarios WHERE fun_situacao = 'ATIVO'")->fetchColumn();
+        $pctConformidade = $totFunc > 0 ? (int)round(($totAtivos / $totFunc) * 100) : 100;
         $conformidade = [
-            'pct' => $pctC,
-            'em_dia' => $eDia,
-            'tot_func' => $tFuncEval
+            'pct' => $pctConformidade,
+            'em_dia' => $totAtivos,
+            'tot_func' => $totFunc
         ];
 
-        // 5. Top 5 EPIs (Paridade Oficial 100% com o Android App - Print 1)
+        // 8. TOP 5 EPIs GERAL (Regra Oficial Android: SEM filtro entr_status = 'FINALIZADA')
         $stmtT = $pdo->query("
-            SELECT COALESCE(i.item_epi_nome_snapshot, e.epi_nome) as nome, SUM(i.item_quantidade) as total 
+            SELECT COALESCE(NULLIF(TRIM(i.item_epi_nome_snapshot), ''), e.epi_nome) as nome,
+                   SUM(i.item_quantidade) as total 
             FROM itens_entrega i 
             LEFT JOIN epis e ON i.epi_id = e.epi_id 
             GROUP BY nome 
@@ -249,76 +506,94 @@ try {
             LIMIT 5
         ");
         $topRes = $stmtT->fetchAll(PDO::FETCH_ASSOC);
-        if (!empty($topRes) && isset($topRes[0]['total']) && (int)$topRes[0]['total'] >= 40) {
-            $maxQ = max(1, (int)$topRes[0]['total']);
-            $cores = ['#F59E0B', '#3B82F6', '#10B981', '#8B5CF6', '#CBD5E1'];
-            $newTop = [];
-            foreach ($topRes as $idx => $r) {
-                $q = (int)$r['total'];
-                $newTop[] = [
-                    'nome' => $r['nome'],
-                    'total' => $q,
-                    'pct' => round(($q / $maxQ) * 100, 2),
-                    'cor' => $cores[$idx % count($cores)]
-                ];
-            }
-            $top5Epis = $newTop;
-        } else {
-            $top5Epis = $top5EpisOficial;
+        $maxQ = (!empty($topRes) && isset($topRes[0]['total'])) ? max(1, (int)$topRes[0]['total']) : 1;
+        $cores = ['#F59E0B', '#3B82F6', '#10B981', '#8B5CF6', '#CBD5E1'];
+        $newTop = [];
+        foreach ($topRes as $idx => $r) {
+            $q = (int)$r['total'];
+            $newTop[] = [
+                'nome' => $r['nome'] ?: 'Item sem nome',
+                'total' => $q,
+                'pct' => round(($q / $maxQ) * 100, 2),
+                'cor' => $cores[$idx % count($cores)]
+            ];
         }
+        $top5Epis = $newTop;
 
-        // 5.1 Top 5 EPIs Mês Atual (Paridade Oficial 100% com o Android App - Print 1)
-        $stmtTM = $pdo->query("
-            SELECT COALESCE(i.item_epi_nome_snapshot, e.epi_nome) as nome, SUM(i.item_quantidade) as total 
+        // 8.1 TOP 5 EPIs MÊS ATUAL
+        $stmtTM = $pdo->prepare("
+            SELECT COALESCE(NULLIF(TRIM(i.item_epi_nome_snapshot), ''), e.epi_nome) as nome,
+                   SUM(i.item_quantidade) as total 
             FROM itens_entrega i 
-            JOIN entrega_epis entr ON i.entr_id = entr.entr_id
+            INNER JOIN entrega_epis entr ON i.entr_id = entr.entr_id
             LEFT JOIN epis e ON i.epi_id = e.epi_id 
-            WHERE MONTH(DATE_SUB(entr.entr_data_entrega, INTERVAL 3 HOUR)) = MONTH(CURDATE())
-              AND YEAR(DATE_SUB(entr.entr_data_entrega, INTERVAL 3 HOUR)) = YEAR(CURDATE())
+            WHERE MONTH(entr.entr_data_entrega) = :m
+              AND YEAR(entr.entr_data_entrega) = :y
             GROUP BY nome 
             ORDER BY total DESC 
             LIMIT 5
         ");
+        $stmtTM->execute(['m' => $monthNum, 'y' => $yearNum]);
         $topResM = $stmtTM->fetchAll(PDO::FETCH_ASSOC);
-        if (!empty($topResM) && isset($topResM[0]['total']) && (int)$topResM[0]['total'] >= 40) {
-            $maxQM = max(1, (int)$topResM[0]['total']);
-            $cores = ['#F59E0B', '#3B82F6', '#10B981', '#8B5CF6', '#CBD5E1'];
-            $newTopM = [];
-            foreach ($topResM as $idx => $r) {
-                $q = (int)$r['total'];
-                $newTopM[] = [
-                    'nome' => $r['nome'],
-                    'total' => $q,
-                    'pct' => round(($q / $maxQM) * 100, 2),
-                    'cor' => $cores[$idx % count($cores)]
-                ];
-            }
-            $top5EpisMensal = $newTopM;
-        } else {
-            $top5EpisMensal = $top5EpisOficial;
+        $maxQM = (!empty($topResM) && isset($topResM[0]['total'])) ? max(1, (int)$topResM[0]['total']) : 1;
+        $newTopM = [];
+        foreach ($topResM as $idx => $r) {
+            $q = (int)$r['total'];
+            $newTopM[] = [
+                'nome' => $r['nome'] ?: 'Item sem nome',
+                'total' => $q,
+                'pct' => round(($q / $maxQM) * 100, 2),
+                'cor' => $cores[$idx % count($cores)]
+            ];
         }
+        $top5EpisMensal = $newTopM;
 
-        // 5.2 Entregas - Últimos 7 dias (Paridade Total com Android Print 1: Qui=2, Sáb=6)
+        // 9. GRÁFICO DOS ÚLTIMOS 7 DIAS (Dinâmico em Brasília)
+        $labels7d = [];
+        $data7d = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $dtDay = (clone $todayObj)->modify("-{$i} days");
+            $dayStr = $dtDay->format('Y-m-d');
+            $dayLabel = $dtDay->format('d/m');
+
+            $stmtCountDay = $pdo->prepare("
+                SELECT COUNT(*)
+                FROM entrega_epis
+                WHERE entr_status = 'FINALIZADA'
+                  AND entr_data_entrega >= :dStart
+                  AND entr_data_entrega <= :dEnd
+            ");
+            $stmtCountDay->execute([
+                'dStart' => $dayStr . ' 00:00:00',
+                'dEnd' => $dayStr . ' 23:59:59'
+            ]);
+            $countDay = (int)$stmtCountDay->fetchColumn();
+
+            $labels7d[] = $dayLabel;
+            $data7d[] = $countDay;
+        }
         $entregas7Dias = [
-            'labels' => ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
-            'data' => [0, 0, 0, 2, 0, 6, 0]
+            'labels' => $labels7d,
+            'data' => $data7d
         ];
 
-        // 5.3 Entregas do Mês Atual por Semana
-        $stmtM = $pdo->query("
+        // 9.1 Entregas do Mês Atual por Semana
+        $stmtM = $pdo->prepare("
             SELECT 
                 CASE 
-                    WHEN DAY(DATE_SUB(entr_data_entrega, INTERVAL 3 HOUR)) BETWEEN 1 AND 7 THEN 'Semana 1'
-                    WHEN DAY(DATE_SUB(entr_data_entrega, INTERVAL 3 HOUR)) BETWEEN 8 AND 14 THEN 'Semana 2'
-                    WHEN DAY(DATE_SUB(entr_data_entrega, INTERVAL 3 HOUR)) BETWEEN 15 AND 21 THEN 'Semana 3'
+                    WHEN DAY(entr_data_entrega) BETWEEN 1 AND 7 THEN 'Semana 1'
+                    WHEN DAY(entr_data_entrega) BETWEEN 8 AND 14 THEN 'Semana 2'
+                    WHEN DAY(entr_data_entrega) BETWEEN 15 AND 21 THEN 'Semana 3'
                     ELSE 'Semana 4'
                 END as semana,
                 COUNT(*) as total
             FROM entrega_epis
-            WHERE MONTH(DATE_SUB(entr_data_entrega, INTERVAL 3 HOUR)) = MONTH(CURDATE())
-              AND YEAR(DATE_SUB(entr_data_entrega, INTERVAL 3 HOUR)) = YEAR(CURDATE())
+            WHERE entr_status = 'FINALIZADA'
+              AND MONTH(entr_data_entrega) = :m
+              AND YEAR(entr_data_entrega) = :y
             GROUP BY semana
         ");
+        $stmtM->execute(['m' => $monthNum, 'y' => $yearNum]);
         $rowsM = $stmtM->fetchAll(PDO::FETCH_KEY_PAIR);
         $entregasMensal = [
             'labels' => ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
@@ -330,7 +605,7 @@ try {
             ]
         ];
 
-        // 6. Últimas Atividades (Formatadas Limpamente)
+        // Últimas Atividades
         $stmtA = $pdo->query("
             SELECT log_id, log_acao, log_detalhes, log_datahora 
             FROM log_auditoria 
@@ -342,163 +617,7 @@ try {
             $ultimasAtividades = array_map('formatarLogAuditoria', $logs);
         }
 
-        // Listas para Modais
-        $caVencidosList = $pdo->query("
-            SELECT epi_nome, epi_fabricante, epi_ca, epi_vencimento_ca 
-            FROM epis 
-            WHERE epi_tipo_item = 'EPI_COM_CA' AND epi_vencimento_ca < CURDATE()
-            ORDER BY epi_nome ASC
-        ")->fetchAll(PDO::FETCH_ASSOC);
-
-        $vidaUtilVencidaList = $pdo->query("
-            SELECT f.fun_nome, f.fun_cargo, ep.epi_nome, ep.epi_ca, e.entr_data_entrega, ep.epi_validade_uso_dias,
-                   DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) as data_vencimento_uso
-            FROM itens_entrega i
-            JOIN entrega_epis e ON i.entr_id = e.entr_id
-            JOIN funcionarios f ON e.fun_id = f.fun_id
-            JOIN epis ep ON i.epi_id = ep.epi_id
-            WHERE (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE')
-              AND ep.epi_validade_uso_dias > 0
-              AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) < CURDATE()
-            ORDER BY ep.epi_nome ASC
-        ")->fetchAll(PDO::FETCH_ASSOC);
-
-        $caAVencerList = $pdo->query("
-            SELECT f.fun_nome, f.fun_cargo, ep.epi_nome, ep.epi_ca, ep.epi_fabricante, e.entr_data_entrega, ep.epi_validade_uso_dias,
-                   DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) as data_vencimento,
-                   DATEDIFF(DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY), CURDATE()) as dias_restantes
-            FROM itens_entrega i
-            JOIN entrega_epis e ON i.entr_id = e.entr_id
-            JOIN funcionarios f ON e.fun_id = f.fun_id
-            JOIN epis ep ON i.epi_id = ep.epi_id
-            WHERE (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE')
-              AND ep.epi_validade_uso_dias > 0
-              AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 DAY) AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
-            
-            UNION ALL
-
-            SELECT '' as fun_nome, '' as fun_cargo, epi_nome, epi_ca, epi_fabricante, NULL as entr_data_entrega, NULL as epi_validade_uso_dias,
-                   epi_vencimento_ca as data_vencimento,
-                   DATEDIFF(epi_vencimento_ca, CURDATE()) as dias_restantes
-            FROM epis 
-            WHERE epi_tipo_item = 'EPI_COM_CA' AND epi_vencimento_ca >= CURDATE() AND epi_vencimento_ca <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)
-            
-            ORDER BY dias_restantes ASC, epi_nome ASC
-        ")->fetchAll(PDO::FETCH_ASSOC);
-
-        $entregasHojeList = $pdo->query("
-            SELECT e.entr_id, f.fun_nome, f.fun_cargo, e.entr_data_entrega, e.entr_status, e.entr_validacao_senha
-            FROM entrega_epis e
-            JOIN funcionarios f ON e.fun_id = f.fun_id
-            WHERE DATE(DATE_SUB(e.entr_data_entrega, INTERVAL 3 HOUR)) = CURDATE()
-            ORDER BY f.fun_nome ASC
-        ")->fetchAll(PDO::FETCH_ASSOC);
-
-        $semPinList = $pdo->query("
-            SELECT f.fun_id, f.fun_nome, f.fun_cpf, f.fun_cargo, f.fun_departamento, COALESCE(a.ass_status, 'PENDENTE') as status_pin
-            FROM funcionarios f
-            LEFT JOIN assinatura_eletronica a ON f.fun_id = a.fun_id
-            WHERE f.fun_situacao = 'ATIVO' AND (a.ass_status IS NULL OR a.ass_status IN ('PENDENTE', 'BLOQUEADO', 'INATIVO'))
-            ORDER BY f.fun_nome ASC
-        ")->fetchAll(PDO::FETCH_ASSOC);
-
-        $funcVencidosList = $pdo->query("
-            SELECT f.fun_id, f.fun_nome, f.fun_cargo, f.fun_departamento,
-                   COUNT(DISTINCT i.item_id) as qtd_epis,
-                   GROUP_CONCAT(DISTINCT ep.epi_nome SEPARATOR ', ') as epis_lista
-            FROM itens_entrega i
-            JOIN entrega_epis e ON i.entr_id = e.entr_id
-            JOIN funcionarios f ON e.fun_id = f.fun_id
-            JOIN epis ep ON i.epi_id = ep.epi_id
-            WHERE f.fun_situacao = 'ATIVO'
-              AND (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE')
-              AND ep.epi_validade_uso_dias > 0
-              AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) < CURDATE()
-            GROUP BY f.fun_id, f.fun_nome, f.fun_cargo, f.fun_departamento
-            ORDER BY f.fun_nome ASC
-        ")->fetchAll(PDO::FETCH_ASSOC);
-
-        $funcTrocaList = $pdo->query("
-            SELECT f.fun_id, f.fun_nome, f.fun_cargo, f.fun_departamento,
-                   COUNT(DISTINCT i.item_id) as qtd_epis,
-                   GROUP_CONCAT(DISTINCT ep.epi_nome SEPARATOR ', ') as epis_lista
-            FROM itens_entrega i
-            JOIN entrega_epis e ON i.entr_id = e.entr_id
-            JOIN funcionarios f ON e.fun_id = f.fun_id
-            JOIN epis ep ON i.epi_id = ep.epi_id
-            WHERE f.fun_situacao = 'ATIVO'
-              AND (i.item_status = 'ENTREGUE' OR i.item_status = 'EM_POSSE')
-              AND ep.epi_validade_uso_dias > 0
-              AND DATE_ADD(e.entr_data_entrega, INTERVAL ep.epi_validade_uso_dias DAY) BETWEEN DATE_ADD(CURDATE(), INTERVAL 1 DAY) AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
-            GROUP BY f.fun_id, f.fun_nome, f.fun_cargo, f.fun_departamento
-            ORDER BY f.fun_nome ASC
-        ")->fetchAll(PDO::FETCH_ASSOC);
-
-        // Garantia de Paridade 100% com os Modais e Cards do Android (Print 1)
-        if (count($caVencidosList) < 2) {
-            $refCaV = [
-                ['epi_nome' => 'Creme de Proteção (luva química)', 'epi_fabricante' => '3M Brasil', 'epi_ca' => '1111', 'epi_vencimento_ca' => '2026-05-10'],
-                ['epi_nome' => 'Protetor Auditivo Pomp Plus', 'epi_fabricante' => 'Honeywell', 'epi_ca' => '5555', 'epi_vencimento_ca' => '2026-04-15']
-            ];
-            foreach ($refCaV as $r) {
-                if (count($caVencidosList) >= 2) break;
-                $caVencidosList[] = $r;
-            }
-        }
-
-        if (count($vidaUtilVencidaList) < 2) {
-            $refVu = [
-                ['fun_nome' => 'teste 2', 'fun_cargo' => 'teste', 'epi_nome' => 'Macação de Segurança', 'epi_ca' => '39183', 'entr_data_entrega' => '2026-09-14 21:21:37', 'data_vencimento_uso' => '2026-09-21 21:21:37'],
-                ['fun_nome' => 'Evandro Borges', 'fun_cargo' => 'operador de máquina', 'epi_nome' => 'Máscara Semifacial PFF2', 'epi_ca' => '36857', 'entr_data_entrega' => '2026-09-16 00:56:43', 'data_vencimento_uso' => '2026-09-17 00:56:43']
-            ];
-            foreach ($refVu as $r) {
-                if (count($vidaUtilVencidaList) >= 2) break;
-                $vidaUtilVencidaList[] = $r;
-            }
-        }
-
-        if (count($caAVencerList) < 4) {
-            $refCaA = [
-                ['fun_nome' => 'Evandro Borges', 'fun_cargo' => 'Auxiliar de Produção', 'epi_nome' => 'Avental', 'epi_ca' => '5999', 'epi_fabricante' => 'LUVEX', 'entr_data_entrega' => '2026-09-22', 'epi_validade_uso_dias' => 365, 'data_vencimento' => date('Y-m-d', strtotime('+6 days')), 'dias_restantes' => 6],
-                ['fun_nome' => 'Luciana Oliveira', 'fun_cargo' => 'Operadora', 'epi_nome' => 'Luva 2', 'epi_ca' => '1234', 'epi_fabricante' => '3M', 'entr_data_entrega' => '2026-09-24', 'epi_validade_uso_dias' => 300, 'data_vencimento' => date('Y-m-d', strtotime('+13 days')), 'dias_restantes' => 13],
-                ['fun_nome' => 'Roberto Carlos', 'fun_cargo' => 'Técnico', 'epi_nome' => 'Cinta Lombar', 'epi_ca' => '8888', 'epi_fabricante' => 'STEELFLEX', 'entr_data_entrega' => '2026-09-24', 'epi_validade_uso_dias' => 365, 'data_vencimento' => date('Y-m-d', strtotime('+18 days')), 'dias_restantes' => 18],
-                ['fun_nome' => '', 'fun_cargo' => '', 'epi_nome' => 'Nova EPI', 'epi_ca' => '1237', 'epi_fabricante' => 'VOLK', 'entr_data_entrega' => null, 'epi_validade_uso_dias' => null, 'data_vencimento' => date('Y-m-d', strtotime('+23 days')), 'dias_restantes' => 23]
-            ];
-            foreach ($refCaA as $r) {
-                if (count($caAVencerList) >= 4) break;
-                $caAVencerList[] = $r;
-            }
-        }
-
-        if (count($funcVencidosList) < 2) {
-            $refFv = [
-                ['fun_id' => 18, 'fun_nome' => 'Evandro Borges', 'fun_cargo' => 'Operador de Máquina', 'fun_departamento' => 'Produção', 'qtd_epis' => 1, 'epis_lista' => 'Máscara Semifacial PFF2'],
-                ['fun_id' => 51, 'fun_nome' => 'teste 2', 'fun_cargo' => 'teste', 'fun_departamento' => 'Produção', 'qtd_epis' => 1, 'epis_lista' => 'Macação de Segurança']
-            ];
-            foreach ($refFv as $r) {
-                if (count($funcVencidosList) >= 2) break;
-                $funcVencidosList[] = $r;
-            }
-        }
-
-        if (count($funcTrocaList) < 2) {
-            $refFt = [
-                ['fun_id' => 5, 'fun_nome' => 'Alexandre Martins Souza', 'fun_cargo' => 'Almoxarife', 'fun_departamento' => 'Almoxarifado', 'qtd_epis' => 1, 'epis_lista' => 'Luva de Nitrílicas'],
-                ['fun_id' => 6, 'fun_nome' => 'Anderson Pereira Lima', 'fun_cargo' => 'Eletricista', 'fun_departamento' => 'Manutenção', 'qtd_epis' => 1, 'epis_lista' => 'Protetor Auditivo PLUG']
-            ];
-            foreach ($refFt as $r) {
-                if (count($funcTrocaList) >= 2) break;
-                $funcTrocaList[] = $r;
-            }
-        }
-
-        if (count($semPinList) < 2) {
-            $semPinList = [
-                ['fun_id' => 10, 'fun_nome' => 'Carlos Eduardo Santos', 'fun_cpf' => '100.***.***-24', 'fun_cargo' => 'Operador', 'fun_departamento' => 'Produção', 'status_pin' => 'PENDENTE'],
-                ['fun_id' => 11, 'fun_nome' => 'Daniel Oliveira', 'fun_cpf' => '200.***.***-55', 'fun_cargo' => 'Auxiliar', 'fun_departamento' => 'Logística', 'status_pin' => 'BLOQUEADO']
-            ];
-        }
-
+        // Ordenação Alfabética das Listas dos Modais
         if (!empty($caVencidosList)) {
             usort($caVencidosList, static function(array $a, array $b): int {
                 return strcmp(normalizarParaOrdenacaoPHP($a['epi_nome'] ?? ''), normalizarParaOrdenacaoPHP($b['epi_nome'] ?? ''));
@@ -524,8 +643,13 @@ try {
                 return strcmp(normalizarParaOrdenacaoPHP($a['fun_nome'] ?? ''), normalizarParaOrdenacaoPHP($b['fun_nome'] ?? ''));
             });
         }
-        if (!empty($episEmPosseList)) {
-            usort($episEmPosseList, static function(array $a, array $b): int {
+        if (!empty($semVidaUtilList)) {
+            usort($semVidaUtilList, static function(array $a, array $b): int {
+                return strcmp(normalizarParaOrdenacaoPHP($a['epi_nome'] ?? ''), normalizarParaOrdenacaoPHP($b['epi_nome'] ?? ''));
+            });
+        }
+        if (!empty($semRastreabilidadeList)) {
+            usort($semRastreabilidadeList, static function(array $a, array $b): int {
                 return strcmp(normalizarParaOrdenacaoPHP($a['epi_nome'] ?? ''), normalizarParaOrdenacaoPHP($b['epi_nome'] ?? ''));
             });
         }
@@ -541,7 +665,7 @@ try {
         }
     }
 } catch (Throwable $e) {
-    // Mantém fallbacks se a conexão falhar
+    // Mantém estado se houver falha
 }
 
 // Fallbacks de demonstração para visualização formatada
@@ -718,7 +842,7 @@ if (!function_exists('renderTabelaSemPinAux')) {
 if (!function_exists('renderTabelaCaVencidosAux')) {
     function renderTabelaCaVencidosAux(array $list): string {
         if (empty($list)) {
-            return '<div class="alert alert-success py-2 px-3 small rounded-3 m-0">Nenhum EPI com C.A. vencido.</div>';
+            return '<div class="alert alert-success py-2 px-3 small rounded-3 m-0"><i class="bi bi-check-circle me-1"></i>Nenhum EPI com C.A. vencido.</div>';
         }
         $html = '<div class="table-responsive"><table class="table table-hover align-middle mb-0" style="font-size: 13.5px;"><thead class="table-light"><tr><th>Item / Equipamento</th><th>Fabricante</th><th>C.A.</th><th>Data Vencimento</th><th>Situação</th></tr></thead><tbody>';
         foreach ($list as $item) {
@@ -736,11 +860,53 @@ if (!function_exists('renderTabelaCaVencidosAux')) {
     }
 }
 
+if (!function_exists('renderTabelaSemVidaUtilAux')) {
+    function renderTabelaSemVidaUtilAux(array $list): string {
+        if (empty($list)) {
+            return '<div class="alert alert-success py-2 px-3 small rounded-3 m-0"><i class="bi bi-check-circle me-1"></i>Nenhum EPI controlado sem vida útil cadastrada.</div>';
+        }
+        $html = '<div class="table-responsive"><table class="table table-hover align-middle mb-0" style="font-size: 13.5px;"><thead class="table-light"><tr><th>Equipamento (EPI)</th><th>C.A.</th><th>Fabricante</th><th>Tipo Vida Útil</th><th>Situação</th></tr></thead><tbody>';
+        foreach ($list as $item) {
+            $html .= '<tr>'
+                . '<td class="fw-bold text-dark">' . htmlspecialchars((string)($item['epi_nome'] ?? '')) . '</td>'
+                . '<td class="fw-bold text-primary">' . htmlspecialchars((string)($item['epi_ca'] ?: 'Isento')) . '</td>'
+                . '<td>' . htmlspecialchars((string)($item['epi_fabricante'] ?: '---')) . '</td>'
+                . '<td><span class="badge bg-warning text-dark">CONTROLADO</span></td>'
+                . '<td><span class="badge bg-danger">Vida Útil Ausente / Inválida</span></td>'
+                . '</tr>';
+        }
+        $html .= '</tbody></table></div>';
+        return $html;
+    }
+}
+
+if (!function_exists('renderTabelaSemRastreabilidadeAux')) {
+    function renderTabelaSemRastreabilidadeAux(array $list): string {
+        if (empty($list)) {
+            return '<div class="alert alert-success py-2 px-3 small rounded-3 m-0"><i class="bi bi-check-circle me-1"></i>Nenhum item sem C.A. com rastreabilidade pendente.</div>';
+        }
+        $html = '<div class="table-responsive"><table class="table table-hover align-middle mb-0" style="font-size: 13.5px;"><thead class="table-light"><tr><th>Item / Equipamento</th><th>Tipo Item</th><th>Lote</th><th>Modelo</th><th>Rastreabilidade</th></tr></thead><tbody>';
+        foreach ($list as $item) {
+            $html .= '<tr>'
+                . '<td class="fw-bold text-dark">' . htmlspecialchars((string)($item['epi_nome'] ?? '')) . '</td>'
+                . '<td><span class="badge bg-secondary">SEM C.A.</span></td>'
+                . '<td>' . htmlspecialchars((string)($item['epi_numero_lote'] ?: '---')) . '</td>'
+                . '<td>' . htmlspecialchars((string)($item['epi_modelo'] ?: '---')) . '</td>'
+                . '<td><span class="badge bg-danger">Campos de Rastreabilidade Vazios</span></td>'
+                . '</tr>';
+        }
+        $html .= '</tbody></table></div>';
+        return $html;
+    }
+}
+
 if (!function_exists('renderModalPinBloqueadosHtml')) {
-    function renderModalPinBloqueadosHtml(array $list, array $caVencidosList = []): string {
-        $totSemPin = count($list);
+    function renderModalPinBloqueadosHtml(array $semPinList = [], array $caVencidosList = [], array $semVidaUtilList = [], array $semRastreabilidadeList = []): string {
+        $totSemPin = count($semPinList);
         $totCaVencidos = count($caVencidosList);
-        $totalPendencias = $totSemPin + $totCaVencidos;
+        $totSemVu = count($semVidaUtilList);
+        $totSemRast = count($semRastreabilidadeList);
+        $totalPendencias = $totSemPin + $totCaVencidos + $totSemVu + $totSemRast;
 
         if ($totalPendencias === 0) {
             return '<div class="alert alert-success text-center py-4 rounded-3 m-0"><i class="bi bi-check-circle-fill me-2 fs-5"></i>Nenhuma pendência registrada no momento!</div>';
@@ -753,48 +919,84 @@ if (!function_exists('renderModalPinBloqueadosHtml')) {
         $html .= '</li>';
 
         $html .= '<li class="nav-item" role="presentation">';
-        $html .= '<button class="nav-link fw-bold py-2 rounded-3 text-danger" id="pills-ca-tab" data-bs-toggle="pill" data-bs-target="#pills-ca" type="button" role="tab"><i class="bi bi-shield-x me-1"></i>EPIs Vencidos (' . $totCaVencidos . ') — CRÍTICO</button>';
+        $html .= '<button class="nav-link fw-bold py-2 rounded-3 text-danger" id="pills-ca-tab" data-bs-toggle="pill" data-bs-target="#pills-ca" type="button" role="tab"><i class="bi bi-shield-x me-1"></i>C.A. Vencidos (' . $totCaVencidos . ')</button>';
         $html .= '</li>';
 
         $html .= '<li class="nav-item" role="presentation">';
-        $html .= '<button class="nav-link fw-bold py-2 rounded-3 text-warning-emphasis" id="pills-pin-tab" data-bs-toggle="pill" data-bs-target="#pills-pin" type="button" role="tab"><i class="bi bi-person-fill-exclamation me-1"></i>Sem PIN (' . $totSemPin . ')</button>';
+        $html .= '<button class="nav-link fw-bold py-2 rounded-3 text-primary" id="pills-pin-tab" data-bs-toggle="pill" data-bs-target="#pills-pin" type="button" role="tab"><i class="bi bi-person-fill-exclamation me-1"></i>Sem PIN (' . $totSemPin . ')</button>';
+        $html .= '</li>';
+
+        $html .= '<li class="nav-item" role="presentation">';
+        $html .= '<button class="nav-link fw-bold py-2 rounded-3 text-warning-emphasis" id="pills-vu-tab" data-bs-toggle="pill" data-bs-target="#pills-vu" type="button" role="tab"><i class="bi bi-clock-history me-1"></i>Sem Vida Útil (' . $totSemVu . ')</button>';
+        $html .= '</li>';
+
+        $html .= '<li class="nav-item" role="presentation">';
+        $html .= '<button class="nav-link fw-bold py-2 rounded-3 text-secondary" id="pills-rast-tab" data-bs-toggle="pill" data-bs-target="#pills-rast" type="button" role="tab"><i class="bi bi-qr-code me-1"></i>Sem Rastreab. (' . $totSemRast . ')</button>';
         $html .= '</li>';
 
         $html .= '</ul>';
 
         $html .= '<div class="tab-content" id="pills-tabContent-pendencias">';
 
-        // Tab 1: Todas (CRÍTICO EM PRIMEIRO LUGAR)
+        // Tab 1: Todas
         $html .= '<div class="tab-pane fade show active" id="pills-todas" role="tabpanel">';
         
-        // 1. Seção EPIs Vencidos (CRÍTICO - PRIMEIRO LUGAR NO TOPO)
+        // 1. C.A. Vencidos
         if ($totCaVencidos > 0) {
             $html .= '<div class="d-flex align-items-center justify-content-between mb-2 mt-1 alert alert-danger py-2 px-3 border-danger rounded-3 m-0 mb-2">';
-            $html .= '<span class="fw-bold text-danger" style="font-size: 13.5px;"><i class="bi bi-exclamation-octagon-fill me-2 fs-6"></i>Equipamentos (EPIs) com C.A. Vencido (' . $totCaVencidos . ') — CRÍTICO</span>';
-            $html .= '<a href="epis.php?acao=controle_ca" class="btn btn-sm btn-danger py-1 px-3 fw-bold rounded-2" style="font-size: 11.5px;">Ir para Controle C.A.</a>';
+            $html .= '<span class="fw-bold text-danger" style="font-size: 13.5px;"><i class="bi bi-exclamation-octagon-fill me-2 fs-6"></i>Catálogo com C.A. Vencido (' . $totCaVencidos . ')</span>';
+            $html .= '<a href="epis.php?acao=controle_ca" class="btn btn-sm btn-danger py-1 px-3 fw-bold rounded-2" style="font-size: 11.5px;">Controle C.A.</a>';
             $html .= '</div>';
             $html .= renderTabelaCaVencidosAux($caVencidosList);
         }
 
-        // 2. Seção Colaboradores sem PIN (SEGUNDO LUGAR)
+        // 2. Colaboradores sem PIN
         if ($totSemPin > 0) {
-            $html .= '<div class="d-flex align-items-center justify-content-between mb-2 ' . ($totCaVencidos > 0 ? 'mt-4' : 'mt-1') . '">';
-            $html .= '<span class="fw-bold text-primary" style="font-size: 13.5px;"><i class="bi bi-person-badge me-1"></i>Colaboradores com Assinatura / PIN Pendente (' . $totSemPin . ')</span>';
-            $html .= '<a href="funcionarios.php?acao=pin" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;">Gerenciar PINs</a>';
+            $html .= '<div class="d-flex align-items-center justify-content-between mb-2 ' . ($totCaVencidos > 0 ? 'mt-4' : 'mt-1') . ' alert alert-primary py-2 px-3 border-primary rounded-3 m-0 mb-2">';
+            $html .= '<span class="fw-bold text-primary" style="font-size: 13.5px;"><i class="bi bi-person-badge me-2 fs-6"></i>Colaboradores sem PIN de Assinatura (' . $totSemPin . ')</span>';
+            $html .= '<a href="funcionarios.php?acao=pin" class="btn btn-sm btn-primary py-1 px-3 fw-bold rounded-2" style="font-size: 11.5px;">Gerenciar PINs</a>';
             $html .= '</div>';
-            $html .= renderTabelaSemPinAux($list);
+            $html .= renderTabelaSemPinAux($semPinList);
+        }
+
+        // 3. EPI Controlado sem Vida Útil
+        if ($totSemVu > 0) {
+            $html .= '<div class="d-flex align-items-center justify-content-between mb-2 ' . (($totCaVencidos > 0 || $totSemPin > 0) ? 'mt-4' : 'mt-1') . ' alert alert-warning py-2 px-3 border-warning rounded-3 m-0 mb-2">';
+            $html .= '<span class="fw-bold text-dark" style="font-size: 13.5px;"><i class="bi bi-clock-history me-2 fs-6"></i>EPIs Controlados sem Vida Útil Cadastrada (' . $totSemVu . ')</span>';
+            $html .= '<a href="epis.php" class="btn btn-sm btn-warning text-dark py-1 px-3 fw-bold rounded-2" style="font-size: 11.5px;">Cadastros EPI</a>';
+            $html .= '</div>';
+            $html .= renderTabelaSemVidaUtilAux($semVidaUtilList);
+        }
+
+        // 4. EPI sem C.A. sem Rastreabilidade
+        if ($totSemRast > 0) {
+            $html .= '<div class="d-flex align-items-center justify-content-between mb-2 ' . (($totCaVencidos > 0 || $totSemPin > 0 || $totSemVu > 0) ? 'mt-4' : 'mt-1') . ' alert alert-secondary py-2 px-3 border-secondary rounded-3 m-0 mb-2">';
+            $html .= '<span class="fw-bold text-dark" style="font-size: 13.5px;"><i class="bi bi-qr-code me-2 fs-6"></i>Itens sem C.A. com Rastreabilidade Pendente (' . $totSemRast . ')</span>';
+            $html .= '<a href="epis.php" class="btn btn-sm btn-secondary py-1 px-3 fw-bold rounded-2" style="font-size: 11.5px;">Cadastros EPI</a>';
+            $html .= '</div>';
+            $html .= renderTabelaSemRastreabilidadeAux($semRastreabilidadeList);
         }
 
         $html .= '</div>';
 
-        // Tab 2: Apenas EPIs Vencidos (CRÍTICO)
+        // Tab 2: C.A. Vencidos
         $html .= '<div class="tab-pane fade" id="pills-ca" role="tabpanel">';
         $html .= renderTabelaCaVencidosAux($caVencidosList);
         $html .= '</div>';
 
-        // Tab 3: Apenas Sem PIN
+        // Tab 3: Sem PIN
         $html .= '<div class="tab-pane fade" id="pills-pin" role="tabpanel">';
-        $html .= renderTabelaSemPinAux($list);
+        $html .= renderTabelaSemPinAux($semPinList);
+        $html .= '</div>';
+
+        // Tab 4: Sem Vida Útil
+        $html .= '<div class="tab-pane fade" id="pills-vu" role="tabpanel">';
+        $html .= renderTabelaSemVidaUtilAux($semVidaUtilList);
+        $html .= '</div>';
+
+        // Tab 5: Sem Rastreabilidade
+        $html .= '<div class="tab-pane fade" id="pills-rast" role="tabpanel">';
+        $html .= renderTabelaSemRastreabilidadeAux($semRastreabilidadeList);
         $html .= '</div>';
 
         $html .= '</div>';
@@ -926,7 +1128,7 @@ if (isset($_GET['ajax']) || (isset($_GET['action']) && $_GET['action'] === 'real
         'modalVidaUtilVencidaHtml' => renderModalVidaUtilVencidaHtml($vidaUtilVencidaList),
         'modalCaAVencerHtml' => renderModalCaAVencerHtml($caAVencerList),
         'modalEntregasHojeHtml' => renderModalEntregasHojeHtml($entregasHojeList),
-        'modalPinBloqueadosHtml' => renderModalPinBloqueadosHtml($semPinList, $caVencidosList),
+        'modalPinBloqueadosHtml' => renderModalPinBloqueadosHtml($semPinList, $caVencidosList, $semVidaUtilList, $semRastreabilidadeList),
         'modalEpisEmPosseHtml' => renderModalEpisEmPosseHtml($episEmPosseList),
         'modalFuncVencidosHtml' => renderModalFuncVencidosHtml($funcVencidosList ?? []),
         'modalFuncTrocaHtml' => renderModalFuncTrocaHtml($funcTrocaList ?? []),
@@ -1607,7 +1809,7 @@ html.dark-mode .activity-text {
                 </div>
                 <div>
                     <div class="metric-pill-val" id="val-custo-acumulado" style="color: #2563eb;"><?= $custos['acumulado'] ?></div>
-                    <div class="metric-pill-sub">Acumulado (desde 15/07/2026)</div>
+                    <div class="metric-pill-sub" id="lbl-custo-acumulado"><?= htmlspecialchars($custos['legenda_acumulado'] ?? 'Acumulado (Histórico)') ?></div>
                 </div>
             </div>
 
@@ -1815,12 +2017,12 @@ html.dark-mode .activity-text {
                     <h5 class="modal-title fw-bold text-primary" id="modal-title-pin-bloqueados">
                         <i class="bi bi-clipboard-data-fill me-2"></i>Central de Pendências do Sistema (<?= $kpis['pendencias'] ?>)
                     </h5>
-                    <p class="text-muted small m-0">Consolidação de colaboradores sem PIN (<?= $custos['sem_pin'] ?>) e equipamentos com C.A. vencido (<?= $alerts['ca_vencidos'] ?>).</p>
+                    <p class="text-muted small m-0">Consolidação de C.A. Vencido (<?= $pendenciasDet['ca_vencidos'] ?>), Sem PIN (<?= $pendenciasDet['sem_pin'] ?>), Sem Vida Útil (<?= $pendenciasDet['sem_vida_util'] ?>) e Sem Rastreabilidade (<?= $pendenciasDet['sem_rastreabilidade'] ?>).</p>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body pt-2" id="body-modal-pin-bloqueados">
-                <?= renderModalPinBloqueadosHtml($semPinList, $caVencidosList) ?>
+                <?= renderModalPinBloqueadosHtml($semPinList, $caVencidosList, $semVidaUtilList, $semRastreabilidadeList) ?>
             </div>
             <div class="modal-footer border-top-0 pt-0">
                 <button type="button" class="btn btn-light border rounded-3" data-bs-dismiss="modal">Fechar</button>
@@ -2195,6 +2397,9 @@ function atualizarDashboardDOM(data) {
 
         const valCustoAcumulado = document.getElementById('val-custo-acumulado');
         if (valCustoAcumulado) valCustoAcumulado.innerText = data.custos.acumulado;
+
+        const lblCustoAcumulado = document.getElementById('lbl-custo-acumulado');
+        if (lblCustoAcumulado && data.custos.legenda_acumulado) lblCustoAcumulado.innerText = data.custos.legenda_acumulado;
 
         const valSemPin = document.getElementById('val-sem-pin');
         if (valSemPin) valSemPin.innerText = data.custos.sem_pin;
