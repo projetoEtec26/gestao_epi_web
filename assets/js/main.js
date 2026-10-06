@@ -14,42 +14,55 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * Suporte global para abrir o modal de calendário Material Design (mês, dia, ano - conforme Print 2) ao clicar em qualquer campo de data ou seu ícone
+ * Suporte global para abrir o modal de calendário Material Design (Print 2) em qualquer campo de data ou seu ícone (WEB Desktop, Celular, Tablet)
  */
 function initDatePickers() {
-    function triggerPicker(e) {
-        const input = e.target.closest('input[type="date"], input[type="datetime-local"], .mask-date');
-        if (!input || input.disabled) return;
+    function findDateInput(target) {
+        if (!target) return null;
+        let input = target.closest('input[type="date"], input[type="datetime-local"], .mask-date, [data-datepicker]');
+        if (input) return input;
 
-        // Evita reabrir se já houver um modal ativo
-        if (document.querySelector('.md-picker-backdrop')) return;
+        // Se o elemento for um <label> ou container do campo de data
+        if (target.tagName === 'LABEL' || target.classList.contains('form-label') || target.classList.contains('audit-label')) {
+            if (target.getAttribute && target.getAttribute('for')) {
+                const forEl = document.getElementById(target.getAttribute('for'));
+                if (forEl && (forEl.type === 'date' || forEl.type === 'datetime-local' || forEl.classList.contains('mask-date'))) {
+                    return forEl;
+                }
+            }
+            const siblingInput = target.parentElement ? target.parentElement.querySelector('input[type="date"], input[type="datetime-local"], .mask-date') : null;
+            if (siblingInput) return siblingInput;
+        }
+        return null;
+    }
 
-        e.preventDefault();
+    function handleDatePickerEvent(e) {
+        const input = findDateInput(e.target);
+        if (!input || input.disabled || input.readOnly) return;
+
+        // Sempre bloqueia o comportamento nativo (popup cinza do navegador)
+        if (e.cancelable) e.preventDefault();
         e.stopPropagation();
-        if (typeof input.blur === 'function') input.blur();
+
+        // Abre apenas uma vez por interação
+        if (document.querySelector('.md-picker-backdrop')) return;
         openMaterialDatePickerModal(input);
     }
 
+    // WEB Desktop (mouse)
     document.addEventListener('mousedown', function(e) {
-        const input = e.target.closest('input[type="date"], input[type="datetime-local"], .mask-date');
-        if (input && !input.disabled) {
-            triggerPicker(e);
-        }
+        if (e.button !== 0) return;
+        handleDatePickerEvent(e);
     }, true);
+    document.addEventListener('click', handleDatePickerEvent, true);
 
-    document.addEventListener('click', function(e) {
-        const input = e.target.closest('input[type="date"], input[type="datetime-local"], .mask-date');
-        if (input && !input.disabled) {
-            triggerPicker(e);
-        }
+    // Celular e Tablet (toque)
+    document.addEventListener('touchend', handleDatePickerEvent, { capture: true, passive: false });
+
+    // Teclado (Enter ou Espaço)
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') handleDatePickerEvent(e);
     }, true);
-
-    document.addEventListener('touchend', function(e) {
-        const input = e.target.closest('input[type="date"], input[type="datetime-local"], .mask-date');
-        if (input && !input.disabled) {
-            triggerPicker(e);
-        }
-    }, { capture: true, passive: false });
 }
 
 /**
@@ -121,7 +134,10 @@ function openMaterialDatePickerModal(inputElement) {
         </div>
     `;
 
-    document.body.appendChild(backdrop);
+    backdrop.style.zIndex = '100000';
+    // Dentro de um modal Bootstrap, anexa ao próprio .modal (fora do .modal-content) para não ser bloqueado pelo focus-trap
+    const bsModal = inputElement ? inputElement.closest('.modal') : null;
+    (bsModal || document.body).appendChild(backdrop);
 
     const yearDisplay = backdrop.querySelector('#md-picker-year-display');
     const dateDisplay = backdrop.querySelector('#md-picker-date-display');
@@ -133,8 +149,9 @@ function openMaterialDatePickerModal(inputElement) {
         yearDisplay.textContent = selectedDate.getFullYear();
         const dayName = weekdaysShort[selectedDate.getDay()];
         const dayNum = selectedDate.getDate();
-        const monthName = monthsShort[selectedDate.getMonth()];
-        dateDisplay.textContent = `${dayName}, ${dayNum} de ${monthName}`;
+        const rawMonth = monthsShort[selectedDate.getMonth()].replace('.', '');
+        const monthFormatted = rawMonth.charAt(0).toUpperCase() + rawMonth.slice(1).toLowerCase();
+        dateDisplay.textContent = `${dayName}, ${dayNum} De ${monthFormatted}.`;
     }
 
     function renderDaysView() {
@@ -142,7 +159,8 @@ function openMaterialDatePickerModal(inputElement) {
         const daysGrid = backdrop.querySelector('#md-picker-days-grid');
         if (!monthTitle || !daysGrid) return;
 
-        monthTitle.textContent = `${monthsLong[viewDate.getMonth()]} de ${viewDate.getFullYear()}`;
+        const monthName = monthsLong[viewDate.getMonth()];
+        monthTitle.textContent = `${monthName} De ${viewDate.getFullYear()}`;
         
         const firstDayIdx = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay();
         const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();

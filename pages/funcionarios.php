@@ -785,12 +785,12 @@ $acao = $_GET['acao'] ?? 'lista';
                 </div>
                 <div class="row">
                     <div class="col-6 mb-3">
-                        <label class="form-label">Admissão *</label>
-                        <input type="date" class="form-control" name="fun_dataadmissao" required>
+                        <label class="form-label" for="cad-fun-admissao">Admissão *</label>
+                        <input type="date" class="form-control" id="cad-fun-admissao" name="fun_dataadmissao" required>
                     </div>
                     <div class="col-6 mb-3">
-                        <label class="form-label">Situação</label>
-                        <select class="form-select" name="fun_situacao">
+                        <label class="form-label" for="cad-fun-situacao">Situação</label>
+                        <select class="form-select" id="cad-fun-situacao" name="fun_situacao">
                             <option value="ATIVO">Ativo</option>
                             <option value="AFASTADO">Afastado</option>
                         </select>
@@ -842,7 +842,7 @@ $acao = $_GET['acao'] ?? 'lista';
                 </div>
                 <div class="row">
                     <div class="col-6 mb-3">
-                        <label class="form-label">Admissão *</label>
+                        <label class="form-label" for="edit-fun-admissao">Admissão *</label>
                         <input type="date" class="form-control" id="edit-fun-admissao" name="fun_dataadmissao" required>
                     </div>
                     <div class="col-6 mb-3">

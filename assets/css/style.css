@@ -1847,6 +1847,9 @@ input[type="datetime-local"] {
     background-position: right 10px center !important;
     background-size: 16px 16px !important;
     padding-right: 34px !important;
+    position: relative !important;
+    cursor: pointer !important;
+    color-scheme: light !important;
 }
 
 html.dark-mode input[type="date"],
@@ -1858,6 +1861,7 @@ body.dark-mode input[type="datetime-local"] {
     background-position: right 10px center !important;
     background-size: 16px 16px !important;
     padding-right: 34px !important;
+    color-scheme: dark !important;
 }
 
 html.dark-mode input[type="date"]:hover,
@@ -1873,7 +1877,7 @@ input[type="datetime-local"],
     cursor: pointer !important;
 }
 
-/* Oculta e desativa totalmente o indicador nativo do Chrome/Edge para que qualquer clique no ícone ou no campo acione o modal customizado */
+/* Oculta e desativa o indicador nativo do Chrome/Edge para que qualquer clique no ícone ou no campo acione EXCLUSIVAMENTE o modal Material Design (Print 2) */
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="datetime-local"]::-webkit-calendar-picker-indicator,
 input[type="date"]::-webkit-inner-spin-button,
@@ -2032,7 +2036,7 @@ body.dark-mode .autocomplete-item:hover {
     height: 100vh;
     background-color: rgba(15, 23, 42, 0.65);
     backdrop-filter: blur(2px);
-    z-index: 10040 !important;
+    z-index: 100000 !important;
     display: flex;
     align-items: center;
     justify-content: center;
