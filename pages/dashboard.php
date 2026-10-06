@@ -169,6 +169,7 @@ $ultimasAtividades = [];
 $caVencidosList = [];
 $vidaUtilVencidaList = [];
 $caAVencerList = [];
+$caAVencer30dList = [];
 $entregasHojeList = [];
 $semPinList = [];
 $episEmPosseList = [];
@@ -196,6 +197,7 @@ try {
         $todayStart = $todayStr . ' 00:00:00';
         $todayEnd = $todayStr . ' 23:59:59';
         $in7DaysStr = (clone $todayObj)->modify('+7 days')->format('Y-m-d');
+        $in30DaysStr = (clone $todayObj)->modify('+30 days')->format('Y-m-d');
 
         // 1. CARD 1 & PENDÊNCIA 1: C.A. Vencidos (Catálogo)
         $stmtCaV = $pdo->prepare("
@@ -297,6 +299,18 @@ try {
         $stmtCaAV->execute(['today' => $todayStr, 'in7days' => $in7DaysStr]);
         $caAVencerCatalogList = $stmtCaAV->fetchAll(PDO::FETCH_ASSOC);
 
+        // 3.1 Consulta de C.A. a vencer nos próximos 30 dias para a Central de Alertas
+        $stmtCaAV30 = $pdo->prepare("
+            SELECT epi_id, epi_nome, epi_fabricante, epi_ca, epi_vencimento_ca
+            FROM epis
+            WHERE epi_tipo_item = 'EPI_COM_CA'
+              AND epi_vencimento_ca >= :today
+              AND epi_vencimento_ca <= :in30days
+            ORDER BY epi_vencimento_ca ASC
+        ");
+        $stmtCaAV30->execute(['today' => $todayStr, 'in30days' => $in30DaysStr]);
+        $caAVencerCatalog30dList = $stmtCaAV30->fetchAll(PDO::FETCH_ASSOC);
+
         // Monta $caAVencerList unificado para Modal 2
         $caAVencerList = [];
         foreach ($vidaUtilAVencerList as $r) {
@@ -316,6 +330,37 @@ try {
             $dtV = new DateTime($r['epi_vencimento_ca']);
             $dRestantes = (int)$todayObj->diff($dtV)->format('%r%a');
             $caAVencerList[] = [
+                'fun_nome' => '',
+                'fun_cargo' => '',
+                'epi_nome' => $r['epi_nome'] ?? '',
+                'epi_ca' => $r['epi_ca'] ?? '',
+                'epi_fabricante' => $r['epi_fabricante'] ?? '',
+                'entr_data_entrega' => null,
+                'epi_validade_uso_dias' => null,
+                'data_vencimento' => $r['epi_vencimento_ca'],
+                'dias_restantes' => $dRestantes
+            ];
+        }
+
+        // Monta $caAVencer30dList unificado para a Central de Alertas (30 Dias)
+        $caAVencer30dList = [];
+        foreach ($vidaUtilAVencerList as $r) {
+            $caAVencer30dList[] = [
+                'fun_nome' => $r['fun_nome'] ?? '',
+                'fun_cargo' => $r['fun_cargo'] ?? '',
+                'epi_nome' => $r['epi_nome'] ?? '',
+                'epi_ca' => $r['epi_ca'] ?? '',
+                'epi_fabricante' => $r['epi_fabricante'] ?? '',
+                'entr_data_entrega' => $r['entr_data_entrega'] ?? null,
+                'epi_validade_uso_dias' => $r['epi_validade_uso_dias'] ?? null,
+                'data_vencimento' => $r['data_vencimento'] ?? null,
+                'dias_restantes' => $r['dias_restantes'] ?? 0
+            ];
+        }
+        foreach ($caAVencerCatalog30dList as $r) {
+            $dtV = new DateTime($r['epi_vencimento_ca']);
+            $dRestantes = (int)$todayObj->diff($dtV)->format('%r%a');
+            $caAVencer30dList[] = [
                 'fun_nome' => '',
                 'fun_cargo' => '',
                 'epi_nome' => $r['epi_nome'] ?? '',
@@ -633,6 +678,11 @@ try {
                 return strcmp(normalizarParaOrdenacaoPHP($a['epi_nome'] ?? ''), normalizarParaOrdenacaoPHP($b['epi_nome'] ?? ''));
             });
         }
+        if (!empty($caAVencer30dList)) {
+            usort($caAVencer30dList, static function(array $a, array $b): int {
+                return strcmp(normalizarParaOrdenacaoPHP($a['epi_nome'] ?? ''), normalizarParaOrdenacaoPHP($b['epi_nome'] ?? ''));
+            });
+        }
         if (!empty($entregasHojeList)) {
             usort($entregasHojeList, static function(array $a, array $b): int {
                 return strcmp(normalizarParaOrdenacaoPHP($a['fun_nome'] ?? ''), normalizarParaOrdenacaoPHP($b['fun_nome'] ?? ''));
@@ -677,6 +727,148 @@ if (empty($ultimasAtividades)) {
         ['tipo' => 'warning', 'icone' => 'bi-pencil-square', 'badge' => 'CADASTRO', 'texto' => '3 campos alterados no cadastro do EPI (Exige Tamanho, Status, C.A.).', 'data' => 'Atividade em ' . date('d/m') . ' às 21:14'],
         ['tipo' => 'purple', 'icone' => 'bi-file-earmark-bar-chart-fill', 'badge' => 'RELATÓRIO', 'texto' => 'Relatório Geral de Consumo de EPIs gerado com sucesso.', 'data' => 'Atividade em ' . date('d/m') . ' às 21:10']
     ];
+}
+
+// Renderizadores HTML dos modais para carga inicial e atualizações AJAX em tempo real
+if (!function_exists('renderModalCentralAlertasHtml')) {
+    function renderModalCentralAlertasHtml(array $caVencidosList, array $caAVencer30dList, array $vidaUtilVencidaList): string {
+        $totCaVencidos = count($caVencidosList);
+        $totCaAVencer30 = count($caAVencer30dList);
+        $totVuVencidos = count($vidaUtilVencidaList);
+        $totGeral = $totCaVencidos + $totCaAVencer30 + $totVuVencidos;
+
+        $html = '<div class="alert-central-toolbar d-flex flex-wrap align-items-center justify-content-between gap-2 p-3 mb-3 bg-body-tertiary rounded-3 border">';
+        $html .= '  <div>';
+        $html .= '    <span class="fw-bold text-body" style="font-size: 14px;"><i class="bi bi-shield-check text-success me-2 fs-5"></i>Resumo da Central: <strong class="text-danger">' . $totGeral . '</strong> alerta(s) ativo(s)</span>';
+        $html .= '  </div>';
+        $html .= '  <div class="d-flex align-items-center gap-2 flex-wrap">';
+        $html .= '    <button type="button" class="btn btn-sm btn-outline-danger fw-bold rounded-2 px-3 shadow-sm d-inline-flex align-items-center gap-1" onclick="exportarCentralAlertasPDF()"><i class="bi bi-file-earmark-pdf-fill"></i> Emitir PDF</button>';
+        $html .= '    <button type="button" class="btn btn-sm btn-outline-success fw-bold rounded-2 px-3 shadow-sm d-inline-flex align-items-center gap-1" onclick="compartilharCentralAlertas()"><i class="bi bi-share-fill"></i> Compartilhar</button>';
+        $html .= '  </div>';
+        $html .= '</div>';
+
+        $html .= '<ul class="nav nav-pills nav-fill mb-3 gap-2" id="pills-tab-central-alertas" role="tablist" style="font-size: 13px;">';
+        
+        $html .= '<li class="nav-item" role="presentation">';
+        $html .= '<button class="nav-link active fw-bold py-2 rounded-3 text-danger" id="pills-ca-vencido-tab" data-bs-toggle="pill" data-bs-target="#pills-ca-vencido" type="button" role="tab"><i class="bi bi-shield-x me-1"></i>1. C.A. Vencido (<span id="badge-count-ca-vencido">' . $totCaVencidos . '</span>)</button>';
+        $html .= '</li>';
+
+        $html .= '<li class="nav-item" role="presentation">';
+        $html .= '<button class="nav-link fw-bold py-2 rounded-3 text-warning-emphasis" id="pills-ca-30d-tab" data-bs-toggle="pill" data-bs-target="#pills-ca-30d" type="button" role="tab"><i class="bi bi-hourglass-split me-1"></i>2. C.A. a Vencer (30d) (<span id="badge-count-ca-30d">' . $totCaAVencer30 . '</span>)</button>';
+        $html .= '</li>';
+
+        $html .= '<li class="nav-item" role="presentation">';
+        $html .= '<button class="nav-link fw-bold py-2 rounded-3 text-primary" id="pills-vu-vencida-tab" data-bs-toggle="pill" data-bs-target="#pills-vu-vencida" type="button" role="tab"><i class="bi bi-arrow-repeat me-1"></i>3. Substituição EPI (<span id="badge-count-vu">' . $totVuVencidos . '</span>)</button>';
+        $html .= '</li>';
+
+        $html .= '</ul>';
+
+        $html .= '<div class="tab-content" id="pills-tabContent-central-alertas">';
+
+        $html .= '<div class="tab-pane fade show active" id="pills-ca-vencido" role="tabpanel">';
+        $html .= renderTabelaCaVencidosCentralAux($caVencidosList);
+        $html .= '</div>';
+
+        $html .= '<div class="tab-pane fade" id="pills-ca-30d" role="tabpanel">';
+        $html .= renderTabelaCa30DiasCentralAux($caAVencer30dList);
+        $html .= '</div>';
+
+        $html .= '<div class="tab-pane fade" id="pills-vu-vencida" role="tabpanel">';
+        $html .= renderTabelaVidaUtilCentralAux($vidaUtilVencidaList);
+        $html .= '</div>';
+
+        $html .= '</div>';
+
+        return $html;
+    }
+}
+
+if (!function_exists('renderTabelaCaVencidosCentralAux')) {
+    function renderTabelaCaVencidosCentralAux(array $list): string {
+        if (empty($list)) {
+            return '<div class="alert alert-success text-center py-4 rounded-3 m-0"><i class="bi bi-check-circle-fill me-2 fs-5"></i>Nenhum EPI com C.A. Vencido cadastrado no catálogo.</div>';
+        }
+        $html = '<div class="table-responsive"><table class="table table-hover align-middle mb-0" style="font-size: 13.5px;"><thead class="table-light"><tr><th>Equipamento (EPI)</th><th>Fabricante</th><th>C.A.</th><th>Data Vencimento</th><th>Status</th><th class="text-end">Ações Rápidas</th></tr></thead><tbody>';
+        foreach ($list as $item) {
+            $venc = !empty($item['epi_vencimento_ca']) ? date('d/m/Y', strtotime($item['epi_vencimento_ca'])) : '---';
+            $epiNome = htmlspecialchars((string)($item['epi_nome'] ?? ''));
+            $caNum = htmlspecialchars((string)($item['epi_ca'] ?: 'Isento'));
+            $html .= '<tr>'
+                . '<td class="fw-bold text-dark">' . $epiNome . '</td>'
+                . '<td>' . htmlspecialchars((string)($item['epi_fabricante'] ?: '---')) . '</td>'
+                . '<td class="fw-bold text-primary">' . $caNum . '</td>'
+                . '<td class="fw-bold text-danger">' . $venc . '</td>'
+                . '<td><span class="badge bg-danger"><i class="bi bi-exclamation-octagon me-1"></i>C.A. VENCIDO</span></td>'
+                . '<td class="text-end">'
+                . '<a href="epis.php?acao=controle_ca" class="btn btn-sm btn-outline-danger me-1 py-1 px-2 fw-semibold" style="font-size: 11.5px;" title="Ver no Estoque"><i class="bi bi-box-seam me-1"></i>Estoque</a>'
+                . '<button type="button" class="btn btn-sm btn-outline-success py-1 px-2 fw-semibold" style="font-size: 11.5px;" onclick="notificarAlertaItem(\'' . addslashes($epiNome) . '\', \'' . addslashes($caNum) . '\', \'C.A. Vencido\')" title="Notificar Gestor"><i class="bi bi-whatsapp me-1"></i>Notificar</button>'
+                . '</td>'
+                . '</tr>';
+        }
+        $html .= '</tbody></table></div>';
+        return $html;
+    }
+}
+
+if (!function_exists('renderTabelaCa30DiasCentralAux')) {
+    function renderTabelaCa30DiasCentralAux(array $list): string {
+        if (empty($list)) {
+            return '<div class="alert alert-success text-center py-4 rounded-3 m-0"><i class="bi bi-check-circle-fill me-2 fs-5"></i>Nenhum C.A. a vencer nos próximos 30 dias.</div>';
+        }
+        $html = '<div class="table-responsive"><table class="table table-hover align-middle mb-0" style="font-size: 13.5px;"><thead class="table-light"><tr><th>Colaborador / Destino</th><th>Equipamento (EPI)</th><th>C.A.</th><th>Vencimento</th><th>Prazo</th><th class="text-end">Ações Rápidas</th></tr></thead><tbody>';
+        foreach ($list as $item) {
+            $dtVenc = !empty($item['data_vencimento']) ? $item['data_vencimento'] : ($item['epi_vencimento_ca'] ?? null);
+            $venc = !empty($dtVenc) ? date('d/m/Y', strtotime((string)$dtVenc)) : '---';
+            $dias = (int)($item['dias_restantes'] ?? 0);
+            $epiNome = htmlspecialchars((string)($item['epi_nome'] ?? ''));
+            $caNum = htmlspecialchars((string)($item['epi_ca'] ?: 'Isento'));
+            $funInfo = !empty($item['fun_nome']) 
+                ? ('<div class="fw-bold text-primary">' . htmlspecialchars((string)$item['fun_nome']) . '</div><small class="text-muted">' . htmlspecialchars((string)($item['fun_cargo'] ?: '---')) . '</small>') 
+                : '<span class="badge bg-light text-dark border">Estoque Geral</span>';
+
+            $html .= '<tr>'
+                . '<td>' . $funInfo . '</td>'
+                . '<td class="fw-bold text-dark">' . $epiNome . '</td>'
+                . '<td class="fw-bold text-primary">' . $caNum . '</td>'
+                . '<td class="fw-bold text-warning-emphasis">' . $venc . '</td>'
+                . '<td><span class="badge bg-warning text-dark">Em ' . $dias . ' dia(s)</span></td>'
+                . '<td class="text-end">'
+                . '<a href="epis.php?acao=controle_ca" class="btn btn-sm btn-outline-warning text-dark me-1 py-1 px-2 fw-semibold" style="font-size: 11.5px;"><i class="bi bi-eye me-1"></i>Ver</a>'
+                . '<button type="button" class="btn btn-sm btn-outline-success py-1 px-2 fw-semibold" style="font-size: 11.5px;" onclick="notificarAlertaItem(\'' . addslashes($epiNome) . '\', \'' . addslashes($caNum) . '\', \'Vencimento em ' . $dias . ' dia(s)\')"><i class="bi bi-whatsapp me-1"></i>Notificar</button>'
+                . '</td>'
+                . '</tr>';
+        }
+        $html .= '</tbody></table></div>';
+        return $html;
+    }
+}
+
+if (!function_exists('renderTabelaVidaUtilCentralAux')) {
+    function renderTabelaVidaUtilCentralAux(array $list): string {
+        if (empty($list)) {
+            return '<div class="alert alert-success text-center py-4 rounded-3 m-0"><i class="bi bi-check-circle-fill me-2 fs-5"></i>Nenhum EPI em uso com vida útil expirada.</div>';
+        }
+        $html = '<div class="table-responsive"><table class="table table-hover align-middle mb-0" style="font-size: 13.5px;"><thead class="table-light"><tr><th>Colaborador</th><th>Equipamento (EPI)</th><th>C.A.</th><th>Data Entrega</th><th>Limite Vida Útil</th><th class="text-end">Ações Rápidas</th></tr></thead><tbody>';
+        foreach ($list as $item) {
+            $entr = formatarDataHoraBr($item['entr_data_entrega'] ?? null, 'd/m/Y');
+            $lim = !empty($item['data_vencimento_uso']) ? date('d/m/Y', strtotime($item['data_vencimento_uso'])) : '---';
+            $epiNome = htmlspecialchars((string)($item['epi_nome'] ?? ''));
+            $funNome = htmlspecialchars((string)($item['fun_nome'] ?? ''));
+            $html .= '<tr>'
+                . '<td><div class="fw-bold text-primary">' . $funNome . '</div><small class="text-muted">' . htmlspecialchars((string)($item['fun_cargo'] ?: '---')) . '</small></td>'
+                . '<td class="fw-bold text-dark">' . $epiNome . '</td>'
+                . '<td class="fw-semibold text-secondary">' . htmlspecialchars((string)($item['epi_ca'] ?: 'Isento')) . '</td>'
+                . '<td>' . $entr . '</td>'
+                . '<td class="fw-bold text-danger">' . $lim . '</td>'
+                . '<td class="text-end">'
+                . '<a href="entregas.php" class="btn btn-sm btn-outline-primary me-1 py-1 px-2 fw-semibold" style="font-size: 11.5px;"><i class="bi bi-arrow-repeat me-1"></i>Substituir</a>'
+                . '<button type="button" class="btn btn-sm btn-outline-success py-1 px-2 fw-semibold" style="font-size: 11.5px;" onclick="notificarAlertaItem(\'' . addslashes($epiNome) . '\', \'' . addslashes($funNome) . '\', \'Vida Útil Expirada\')"><i class="bi bi-whatsapp me-1"></i>Notificar</button>'
+                . '</td>'
+                . '</tr>';
+        }
+        $html .= '</tbody></table></div>';
+        return $html;
+    }
 }
 
 // Renderizadores HTML dos modais para carga inicial e atualizações AJAX em tempo real
@@ -1124,6 +1316,8 @@ if (isset($_GET['ajax']) || (isset($_GET['action']) && $_GET['action'] === 'real
         'top5EpisMensalHtml' => renderTop5EpisHtml($top5EpisMensal),
         'entregas7Dias' => $entregas7Dias,
         'entregasMensal' => $entregasMensal,
+        'modalCentralAlertasHtml' => renderModalCentralAlertasHtml($caVencidosList, $caAVencer30dList, $vidaUtilVencidaList),
+        'totCentralAlertas' => count($caVencidosList) + count($caAVencer30dList) + count($vidaUtilVencidaList),
         'modalCaVencidosHtml' => renderModalCaVencidosHtml($caVencidosList, $vidaUtilVencidaList),
         'modalVidaUtilVencidaHtml' => renderModalVidaUtilVencidaHtml($vidaUtilVencidaList),
         'modalCaAVencerHtml' => renderModalCaAVencerHtml($caAVencerList),
@@ -1640,37 +1834,224 @@ require_once __DIR__ . '/../components/sidebar.php';
 }
 
 /* Regras de Alto Contraste para Modo Escuro no Dashboard */
-body.dark-mode .top5-name,
-html.dark-mode .top5-name {
+html.dark-mode body,
+body.dark-mode {
+    background-color: #090d16 !important;
     color: #f8fafc !important;
 }
 
-body.dark-mode .top5-rank-num,
-html.dark-mode .top5-rank-num {
-    color: #38bdf8 !important;
-}
-
-body.dark-mode .top5-val,
-html.dark-mode .top5-val {
-    color: #f8fafc !important;
-}
-
-body.dark-mode .top5-progress-bg,
-html.dark-mode .top5-progress-bg {
-    background-color: #334155 !important;
-}
-
-body.dark-mode .activity-feed-item,
-html.dark-mode .activity-feed-item {
-    background-color: #0f172a !important;
+html.dark-mode .welcome-card,
+body.dark-mode .welcome-card {
+    background-color: #131929 !important;
     border-color: #1e293b !important;
 }
 
-body.dark-mode .activity-text,
-html.dark-mode .activity-text {
+html.dark-mode .welcome-title,
+body.dark-mode .welcome-title {
     color: #f8fafc !important;
 }
-</style>
+
+html.dark-mode .welcome-date,
+body.dark-mode .welcome-date {
+    color: #94a3b8 !important;
+}
+
+html.dark-mode .alert-banner-box,
+body.dark-mode .alert-banner-box {
+    background-color: #1a0f12 !important;
+    border-color: #451a1a !important;
+}
+
+html.dark-mode .alert-banner-header,
+body.dark-mode .alert-banner-header {
+    color: #fca5a5 !important;
+}
+
+html.dark-mode .alert-banner-header i,
+body.dark-mode .alert-banner-header i {
+    color: #f87171 !important;
+}
+
+html.dark-mode .alert-card-item,
+body.dark-mode .alert-card-item {
+    background-color: #261214 !important;
+    border-color: #5c1d1d !important;
+}
+
+html.dark-mode .alert-card-item:hover,
+body.dark-mode .alert-card-item:hover {
+    background-color: #381619 !important;
+    border-color: #7f1d1d !important;
+}
+
+html.dark-mode .alert-card-text,
+body.dark-mode .alert-card-text {
+    color: #fca5a5 !important;
+}
+
+html.dark-mode .btn-ver-alert,
+body.dark-mode .btn-ver-alert {
+    background-color: #451a1a !important;
+    color: #fca5a5 !important;
+    border-color: #7f1d1d !important;
+}
+
+html.dark-mode .btn-ver-alert:hover,
+body.dark-mode .btn-ver-alert:hover {
+    background-color: #7f1d1d !important;
+    color: #ffffff !important;
+}
+
+html.dark-mode .section-header-title,
+body.dark-mode .section-header-title {
+    color: #60a5fa !important;
+}
+
+html.dark-mode .dash-card,
+body.dark-mode .dash-card {
+    background: #131929 !important;
+    border-color: #1e293b !important;
+}
+
+html.dark-mode .dash-card-title,
+body.dark-mode .dash-card-title {
+    color: #60a5fa !important;
+}
+
+html.dark-mode .metric-pill-card,
+body.dark-mode .metric-pill-card {
+    background: #131929 !important;
+    border-color: #1e293b !important;
+}
+
+html.dark-mode .metric-pill-val,
+body.dark-mode .metric-pill-val {
+    color: #f8fafc !important;
+}
+
+html.dark-mode .metric-pill-sub,
+body.dark-mode .metric-pill-sub {
+    color: #94a3b8 !important;
+}
+
+html.dark-mode #val-custo-mensal,
+body.dark-mode #val-custo-mensal {
+    color: #34d399 !important;
+}
+
+html.dark-mode #val-custo-acumulado,
+body.dark-mode #val-custo-acumulado {
+    color: #60a5fa !important;
+}
+
+html.dark-mode #val-sem-pin,
+body.dark-mode #val-sem-pin {
+    color: #fbbf24 !important;
+}
+
+html.dark-mode .top5-name,
+body.dark-mode .top5-name {
+    color: #f8fafc !important;
+}
+
+html.dark-mode .top5-rank-num,
+body.dark-mode .top5-rank-num {
+    color: #38bdf8 !important;
+}
+
+html.dark-mode .top5-val,
+body.dark-mode .top5-val {
+    color: #f8fafc !important;
+}
+
+html.dark-mode .top5-progress-bg,
+body.dark-mode .top5-progress-bg {
+    background-color: #1e293b !important;
+}
+
+html.dark-mode .activity-feed-item,
+body.dark-mode .activity-feed-item {
+    background-color: #0d121f !important;
+    border-color: #1e293b !important;
+}
+
+html.dark-mode .activity-text,
+body.dark-mode .activity-text {
+    color: #f8fafc !important;
+}
+
+html.dark-mode .activity-date,
+body.dark-mode .activity-date {
+    color: #94a3b8 !important;
+}
+
+/* Modais no Modo Escuro */
+html.dark-mode .modal-content,
+body.dark-mode .modal-content {
+    background-color: #131929 !important;
+    border-color: #1e293b !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode .modal-header,
+body.dark-mode .modal-header,
+html.dark-mode .modal-footer,
+body.dark-mode .modal-footer {
+    border-color: #1e293b !important;
+    background-color: #0d121f !important;
+}
+
+html.dark-mode .modal-header .btn-close,
+body.dark-mode .modal-header .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+html.dark-mode .modal-title,
+body.dark-mode .modal-title {
+    color: #f8fafc !important;
+}
+
+html.dark-mode .table,
+body.dark-mode .table {
+    color: #f8fafc !important;
+}
+
+html.dark-mode .table th,
+body.dark-mode .table th,
+html.dark-mode .table td,
+body.dark-mode .table td {
+    color: #f8fafc !important;
+    border-color: #1e293b !important;
+}
+
+html.dark-mode .table-hover tbody tr:hover,
+body.dark-mode .table-hover tbody tr:hover {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+}
+
+html.dark-mode .alert-central-toolbar,
+body.dark-mode .alert-central-toolbar {
+    background-color: #0d121f !important;
+    border-color: #1e293b !important;
+}
+
+html.dark-mode .alert-central-toolbar span,
+body.dark-mode .alert-central-toolbar span {
+    color: #f8fafc !important;
+}
+
+html.dark-mode .nav-pills .nav-link,
+body.dark-mode .nav-pills .nav-link {
+    color: #94a3b8 !important;
+}
+
+html.dark-mode .nav-pills .nav-link.active,
+body.dark-mode .nav-pills .nav-link.active {
+    background-color: #1e293b !important;
+    color: #38bdf8 !important;
+    border: 1px solid #38bdf8 !important;
+}</style>
 
 <div id="main-content">
     <?php require_once __DIR__ . '/../components/topbar.php'; ?>
@@ -1682,7 +2063,11 @@ html.dark-mode .activity-text {
                 <h2 class="welcome-title">Olá, <?= $userName ?> 👋</h2>
                 <div class="welcome-date">Hoje é <?= htmlspecialchars($dataHojeFormatada) ?></div>
             </div>
-            <div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <button type="button" class="btn btn-danger btn-sm fw-bold px-3 py-2 rounded-3 shadow-sm d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCentralAlertas" title="Abrir Central de Alertas">
+                    <i class="bi bi-bell-fill fs-6"></i> Central de Alertas
+                    <span class="badge bg-white text-danger fw-bold rounded-pill" id="badge-total-central-alertas"><?= (count($caVencidosList) + count($caAVencer30dList) + count($vidaUtilVencidaList)) ?></span>
+                </button>
                 <span class="badge-sincronizado">
                     <i class="bi bi-circle-fill" style="font-size: 6px;"></i> SINCRONIZADO
                 </span>
@@ -1691,9 +2076,14 @@ html.dark-mode .activity-text {
 
         <!-- 2. Banner de Alertas de Validade & Vida Útil (Fiel ao Android Print 2) -->
         <div class="alert-banner-box">
-            <div class="alert-banner-header">
-                <i class="bi bi-bell-fill"></i>
-                <span>Atenção - Alertas de Validade & Vida Útil:</span>
+            <div class="alert-banner-header justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-bell-fill"></i>
+                    <span>Atenção - Alertas de Validade & Vida Útil:</span>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger fw-bold rounded-pill px-3 py-1 text-uppercase" style="font-size: 0.75rem;" data-bs-toggle="modal" data-bs-target="#modalCentralAlertas">
+                    Abrir Central Completa ›
+                </button>
             </div>
             <div class="alert-card-list">
                 <!-- Item 1: C.A. Vencido -->
@@ -1911,6 +2301,31 @@ html.dark-mode .activity-text {
 </div>
 
 <!-- ================= MODAIS COMPLETOS E INTERATIVOS ================= -->
+
+<!-- 0. Modal Central de Alertas (Paridade Android 100%) -->
+<div class="modal fade" id="modalCentralAlertas" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-bottom-0 pb-2 bg-body-tertiary">
+                <div>
+                    <h5 class="modal-title fw-bold text-danger d-flex align-items-center gap-2" id="modal-title-central-alertas">
+                        <i class="bi bi-bell-fill fs-5 text-danger"></i> Central de Alertas & Notificações de EPI
+                    </h5>
+                    <p class="text-muted small m-0">Monitoramento centralizado de Vencimento de C.A. e Substituição por Vida Útil (Paridade Android)</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-3" id="body-modal-central-alertas">
+                <?= renderModalCentralAlertasHtml($caVencidosList, $caAVencer30dList, $vidaUtilVencidaList) ?>
+            </div>
+            <div class="modal-footer border-top-0 pt-0 bg-body-tertiary">
+                <button type="button" class="btn btn-light border rounded-3 fw-bold" data-bs-dismiss="modal">Fechar</button>
+                <a href="epis.php?acao=controle_ca" class="btn btn-danger rounded-3 fw-bold">Controle C.A.</a>
+                <a href="entregas.php" class="btn btn-primary rounded-3 fw-bold">Gerenciar Trocas</a>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- 1. Modal EPIs / CA Vencidos -->
 <div class="modal fade" id="modalCaVencidos" tabindex="-1" aria-hidden="true">
@@ -2433,6 +2848,13 @@ function atualizarDashboardDOM(data) {
     }
 
     // 7. Conteúdo HTML dos Modais e Atividades (Preservando Abas Ativas e Posição de Rolagem)
+    if (data.totCentralAlertas !== undefined) {
+        const badgeTotal = document.getElementById('badge-total-central-alertas');
+        if (badgeTotal) badgeTotal.textContent = data.totCentralAlertas;
+    }
+    if (data.modalCentralAlertasHtml) {
+        atualizarModalBodyComAbas('body-modal-central-alertas', data.modalCentralAlertasHtml);
+    }
     if (data.modalCaVencidosHtml) {
         atualizarModalBodyComAbas('body-modal-ca-vencidos', data.modalCaVencidosHtml);
     }
@@ -2539,6 +2961,103 @@ function iniciarAtualizacaoTempoReal() {
             buscarDadosDashboardRealtime();
         }
     });
+}
+
+/**
+ * Emissão Direta de PDF da Central de Alertas (com html2pdf.js)
+ */
+function exportarCentralAlertasPDF() {
+    const activeTab = document.querySelector('#pills-tab-central-alertas .nav-link.active');
+    const tabName = activeTab ? activeTab.innerText.trim() : 'Central de Alertas';
+
+    const pdfContainer = document.createElement('div');
+    pdfContainer.style.padding = '20px';
+    pdfContainer.style.fontFamily = 'Arial, sans-serif';
+    pdfContainer.style.color = '#1e293b';
+
+    const headerHtml = `
+        <div style="border-bottom: 2px solid #dc2626; padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h2 style="color: #dc2626; margin: 0; font-size: 20px; font-weight: bold;">GESTÃO EPI — CENTRAL DE ALERTAS</h2>
+                <p style="margin: 3px 0 0 0; font-size: 12px; color: #64748b;">Relatório Técnico de Validade de C.A. e Substituição de EPI</p>
+            </div>
+            <div style="text-align: right; font-size: 11px; color: #64748b;">
+                Emissão: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}<br>
+                Categoria: <strong>${tabName}</strong>
+            </div>
+        </div>
+    `;
+
+    const activePane = document.querySelector('#pills-tabContent-central-alertas .tab-pane.active');
+    const tableContent = activePane ? activePane.innerHTML : '';
+
+    pdfContainer.innerHTML = headerHtml + '<div style="font-size: 11px;">' + tableContent + '</div>';
+
+    // Remove a coluna de ações rápidas do PDF para ficar limpo
+    pdfContainer.querySelectorAll('.text-end, th:last-child, td:last-child').forEach(el => {
+        if (el.textContent.includes('Ações') || el.querySelector('button, a')) {
+            el.remove();
+        }
+    });
+
+    const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `central_alertas_${new Date().toISOString().slice(0,10)}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+    };
+
+    if (typeof html2pdf !== 'undefined') {
+        html2pdf().set(opt).from(pdfContainer).save();
+    } else {
+        window.print();
+    }
+}
+
+/**
+ * Compartilhamento Web / WhatsApp da Central de Alertas
+ */
+function compartilharCentralAlertas() {
+    const countVencidos = document.getElementById('badge-count-ca-vencido')?.innerText || '0';
+    const count30d = document.getElementById('badge-count-ca-30d')?.innerText || '0';
+    const countVu = document.getElementById('badge-count-vu')?.innerText || '0';
+
+    const textoCompartilhar = `🚨 *GESTÃO EPI - CENTRAL DE ALERTAS*\n` +
+        `📅 Data: ${new Date().toLocaleDateString('pt-BR')}\n\n` +
+        `📌 *Resumo do Sistema:*\n` +
+        `• 🔴 C.A. Vencidos: ${countVencidos}\n` +
+        `• 🟡 C.A. a Vencer (30d): ${count30d}\n` +
+        `• 🔵 Substituição de EPI Exigida: ${countVu}\n\n` +
+        `Acesse o sistema para regularizar os equipamentos: ${window.location.origin}`;
+
+    if (navigator.share) {
+        navigator.share({
+            title: 'Central de Alertas - Gestão EPI',
+            text: textoCompartilhar,
+            url: window.location.href
+        }).catch(err => console.log('Compartilhamento cancelado', err));
+    } else {
+        navigator.clipboard.writeText(textoCompartilhar).then(() => {
+            alert('Resumo dos alertas copiado para a área de transferência com sucesso!');
+        }).catch(() => {
+            const encoded = encodeURIComponent(textoCompartilhar);
+            window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
+        });
+    }
+}
+
+/**
+ * Notificação Rápida via WhatsApp para um Item/Colaborador
+ */
+function notificarAlertaItem(nome, detail, motivo) {
+    const msg = `🚨 *GESTÃO EPI - ALERTA DE EQUIPAMENTO*\n\n` +
+        `Equipamento: *${nome}*\n` +
+        `Detalhe/C.A./Colaborador: ${detail}\n` +
+        `Motivo do Alerta: *${motivo}*\n\n` +
+        `Por favor, providencie a regularização ou substituição imediata.`;
+    const encoded = encodeURIComponent(msg);
+    window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
 }
 </script>
 

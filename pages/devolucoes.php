@@ -488,6 +488,103 @@ html.dark-mode .form-control, body.dark-mode .form-control {
     </div>
 </div>
 
+<!-- Modal Termo de Devolução e Quitação de Posse de EPI -->
+<div class="modal fade" id="modalReciboDevolucao" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" style="color: var(--color-primary);"><i class="bi bi-file-earmark-check-fill me-2"></i>Termo de Devolução Eletrônica de EPI</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body bg-light" id="area-impressao-devolucao">
+                <div class="card p-4 border shadow-sm bg-white" style="font-size: 13px; line-height: 1.6;">
+                    
+                    <!-- Cabeçalho Termo -->
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                        <div>
+                            <h5 class="fw-bold m-0" style="color: var(--color-primary);">Comprovante de Devolução de EPI nº <span id="dev-id">DEV-00001</span></h5>
+                            <span class="text-muted" style="font-size: 11px;">Emitido em: <span id="dev-data"></span></span>
+                        </div>
+                        <div class="text-end" style="font-size: 11px;">
+                            <span class="badge bg-success bg-opacity-15 text-success border border-success-subtle px-2 py-1"><i class="bi bi-check-circle-fill me-1"></i> BAIXA CONCLUÍDA</span>
+                        </div>
+                    </div>
+
+                    <!-- Dados do Colaborador -->
+                    <h6 class="fw-bold mb-3 text-secondary"><i class="bi bi-person-fill me-1"></i>Dados do Colaborador (Devolvedor)</h6>
+                    <div class="row g-2 mb-4 border p-3 rounded bg-light">
+                        <div class="col-md-6"><strong>Colaborador:</strong> <span id="dev-nome">---</span></div>
+                        <div class="col-md-6"><strong>CPF:</strong> <span id="dev-cpf">---</span></div>
+                        <div class="col-md-6"><strong>Cargo:</strong> <span id="dev-cargo">---</span></div>
+                        <div class="col-md-6"><strong>Setor:</strong> <span id="dev-setor">---</span></div>
+                    </div>
+
+                    <!-- Tabela de Itens Devolvidos -->
+                    <h6 class="fw-bold mb-3 text-secondary"><i class="bi bi-box-arrow-in-left me-1"></i>Equipamentos Retornados / Baixados</h6>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered table-sm align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>EPI / Classificação</th>
+                                    <th>C.A.</th>
+                                    <th>Qtd</th>
+                                    <th>Motivo do Retorno</th>
+                                    <th>Condição</th>
+                                    <th>Destino</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dev-tabela-itens">
+                                <!-- Dinâmico via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Texto do Termo Legal -->
+                    <h6 class="fw-bold mb-2 text-secondary"><i class="bi bi-journal-check me-1"></i>Termo de Quitação e Baixa de Posse (Art. 158 CLT & NR-06)</h6>
+                    <div class="border p-3 rounded mb-4 text-muted bg-light" style="text-align: justify; font-size: 12px;" id="dev-texto-termo">
+                        Declaro ter efetuado a devolução física dos Equipamentos de Proteção Individual (EPIs) discriminados nesta ficha nas datas e condições especificadas, para os devidos fins de baixa de responsabilidade sob a guarda dos referidos itens, conforme diretrizes da empresa e legislação trabalhista vigente.
+                    </div>
+
+                    <!-- Validação da Assinatura / Registro -->
+                    <h6 class="fw-bold mb-2 text-secondary"><i class="bi bi-shield-lock-fill me-1"></i>Validação Eletrônica da Baixa (Auditoria de Almoxarifado)</h6>
+                    <div class="border p-3 rounded bg-light" style="font-family: monospace; font-size: 11px;">
+                        <div class="d-flex justify-content-between py-1 border-bottom">
+                            <span class="text-muted">Recepção Registrada por:</span>
+                            <span class="fw-semibold" id="dev-responsavel">---</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 border-bottom">
+                            <span class="text-muted">Data/Hora da Operação:</span>
+                            <span class="fw-semibold" id="dev-data-operacao">---</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-1">
+                            <span class="text-muted">Protocolo da Transação:</span>
+                            <span class="fw-bold text-primary text-break" id="dev-protocolo">---</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i> Fechar
+                </button>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="button" id="btn-devolucao-pdf-download" class="btn btn-danger" onclick="baixarReciboDevolucaoPDF()">
+                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> <span>Baixar PDF</span>
+                    </button>
+                    <button type="button" id="btn-devolucao-pdf-share" class="btn btn-success" onclick="compartilharReciboDevolucaoPDF()">
+                        <i class="bi bi-share-fill me-1"></i> <span>Compartilhar PDF</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="imprimirReciboDevolucao()">
+                        <i class="bi bi-printer me-1"></i> Imprimir Termo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ================= JAVASCRIPT ================= -->
 <script>
 const PROXY_URL = 'api_proxy.php';
@@ -727,6 +824,236 @@ document.addEventListener('click', function(e) {
     const wrapper = document.getElementById('wrapper-busca-colab');
     if (wrapper && !wrapper.contains(e.target)) fecharDropdown();
 });
+
+let isGeneratingDevolucaoPDF = false;
+
+function formatarDataTimestampDevolucao() {
+    const agora = new Date();
+    const ano = agora.getFullYear();
+    const mes = String(agora.getMonth() + 1).padStart(2, '0');
+    const dia = String(agora.getDate()).padStart(2, '0');
+    const hora = String(agora.getHours()).padStart(2, '0');
+    const min = String(agora.getMinutes()).padStart(2, '0');
+    const seg = String(agora.getSeconds()).padStart(2, '0');
+    return `${ano}${mes}${dia}_${hora}${min}${seg}`;
+}
+
+function obterNomeArquivoDevolucaoPDF() {
+    const funId = document.getElementById('fun_id_selecionado')?.value || '0';
+    const timestamp = formatarDataTimestampDevolucao();
+    return `termo_devolucao_${funId}_${timestamp}.pdf`;
+}
+
+function gerarReciboDevolucaoPDFBlob() {
+    return new Promise((resolve, reject) => {
+        const elementoOriginal = document.getElementById('area-impressao-devolucao');
+        if (!elementoOriginal) {
+            reject(new Error('Elemento do comprovante de devolução não encontrado.'));
+            return;
+        }
+
+        const clone = elementoOriginal.cloneNode(true);
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
+        container.style.top = '0';
+        container.style.width = '790px';
+        container.style.background = '#FFFFFF';
+        container.style.padding = '15px';
+        container.appendChild(clone);
+        document.body.appendChild(container);
+
+        const filename = obterNomeArquivoDevolucaoPDF();
+
+        const opt = {
+            margin: [10, 10, 10, 10],
+            filename: filename,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#FFFFFF',
+                windowWidth: 790
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        if (typeof html2pdf !== 'function') {
+            document.body.removeChild(container);
+            reject(new Error('Biblioteca html2pdf não carregada.'));
+            return;
+        }
+
+        html2pdf()
+            .set(opt)
+            .from(clone)
+            .toPdf()
+            .output('blob')
+            .then(blob => {
+                document.body.removeChild(container);
+                resolve({ blob, filename });
+            })
+            .catch(err => {
+                if (document.body.contains(container)) {
+                    document.body.removeChild(container);
+                }
+                reject(err);
+            });
+    });
+}
+
+async function baixarReciboDevolucaoPDF() {
+    if (isGeneratingDevolucaoPDF) return;
+    const btnDownload = document.getElementById('btn-devolucao-pdf-download');
+    const btnShare = document.getElementById('btn-devolucao-pdf-share');
+
+    try {
+        isGeneratingDevolucaoPDF = true;
+        if (btnDownload) {
+            btnDownload.disabled = true;
+            btnDownload.innerHTML = '<i class="bi bi-hourglass-split me-1 spinner-border spinner-border-sm"></i> <span>Gerando PDF...</span>';
+        }
+        if (btnShare) btnShare.disabled = true;
+
+        const { blob, filename } = await gerarReciboDevolucaoPDFBlob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+        console.error('Erro ao gerar PDF de Devolução:', err);
+        alert('Ocorreu um erro ao gerar o PDF de Devolução.');
+    } finally {
+        isGeneratingDevolucaoPDF = false;
+        if (btnDownload) {
+            btnDownload.disabled = false;
+            btnDownload.innerHTML = '<i class="bi bi-file-earmark-pdf-fill me-1"></i> <span>Baixar PDF</span>';
+        }
+        if (btnShare) btnShare.disabled = false;
+    }
+}
+
+async function compartilharReciboDevolucaoPDF() {
+    if (isGeneratingDevolucaoPDF) return;
+    const btnDownload = document.getElementById('btn-devolucao-pdf-download');
+    const btnShare = document.getElementById('btn-devolucao-pdf-share');
+
+    try {
+        isGeneratingDevolucaoPDF = true;
+        if (btnShare) {
+            btnShare.disabled = true;
+            btnShare.innerHTML = '<i class="bi bi-hourglass-split me-1 spinner-border spinner-border-sm"></i> <span>Gerando PDF...</span>';
+        }
+        if (btnDownload) btnDownload.disabled = true;
+
+        const { blob, filename } = await gerarReciboDevolucaoPDFBlob();
+        const file = new File([blob], filename, { type: 'application/pdf' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            const nomeColab = document.getElementById('dev-nome')?.innerText || '';
+            await navigator.share({
+                title: 'Termo de Devolução de EPI',
+                text: `Comprovante de Devolução de EPI — ${nomeColab}`,
+                files: [file]
+            });
+        } else {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+    } catch (err) {
+        if (err.name !== 'AbortError') {
+            console.error('Erro ao compartilhar PDF de Devolução:', err);
+            alert('Não foi possível compartilhar o PDF. O arquivo será baixado.');
+            await baixarReciboDevolucaoPDF();
+        }
+    } finally {
+        isGeneratingDevolucaoPDF = false;
+        if (btnShare) {
+            btnShare.disabled = false;
+            btnShare.innerHTML = '<i class="bi bi-share-fill me-1"></i> <span>Compartilhar PDF</span>';
+        }
+        if (btnDownload) btnDownload.disabled = false;
+    }
+}
+
+function imprimirReciboDevolucao() {
+    const area = document.getElementById('area-impressao-devolucao').innerHTML;
+    const janela = window.open('', '_blank', 'width=800,height=600');
+    
+    janela.document.write('<html><head><title>Imprimir Termo de Devolução de EPI</title>');
+    janela.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">');
+    janela.document.write('<style>body { font-family: sans-serif; padding: 20px; }</style>');
+    janela.document.write('</head><body>');
+    janela.document.write(area);
+    janela.document.write('</body></html>');
+    
+    janela.document.close();
+    janela.focus();
+    
+    setTimeout(() => {
+        janela.print();
+        janela.close();
+    }, 500);
+}
+
+function exibirModalDevolucao(dadosDevolucao) {
+    if (!dadosDevolucao) return;
+    
+    const timestamp = formatarDataTimestampDevolucao();
+    document.getElementById('dev-id').innerText = dadosDevolucao.id || `DEV-${timestamp.slice(0, 8)}`;
+    document.getElementById('dev-data').innerText = dadosDevolucao.data || new Date().toLocaleString('pt-BR');
+    document.getElementById('dev-nome').innerText = dadosDevolucao.colaboradorNome || 'Colaborador';
+    document.getElementById('dev-cpf').innerText = dadosDevolucao.colaboradorCpf ? mascaraCpf(dadosDevolucao.colaboradorCpf) : '---';
+    document.getElementById('dev-cargo').innerText = dadosDevolucao.colaboradorCargo || '---';
+    document.getElementById('dev-setor').innerText = dadosDevolucao.colaboradorSetor || '---';
+    
+    let htmlItens = '';
+    if (dadosDevolucao.itens && Array.isArray(dadosDevolucao.itens)) {
+        dadosDevolucao.itens.forEach(it => {
+            htmlItens += `
+                <tr>
+                    <td class="fw-semibold">${escapar(it.nome || 'EPI')}</td>
+                    <td>${escapar(it.ca || 'Isento')}</td>
+                    <td>${it.qtd || 1}</td>
+                    <td>${escapar(it.motivo || 'Devolução')}</td>
+                    <td><span class="badge bg-secondary">${escapar(it.condicao || 'USADO')}</span></td>
+                    <td><span class="badge bg-info text-dark">${escapar(it.destino || 'DESCARTE')}</span></td>
+                </tr>
+            `;
+        });
+    } else {
+        htmlItens = `
+            <tr>
+                <td class="fw-semibold">${escapar(dadosDevolucao.epiNome || 'EPI')}</td>
+                <td>${escapar(dadosDevolucao.epiCa || 'Isento')}</td>
+                <td>${dadosDevolucao.qtd || 1}</td>
+                <td>${escapar(dadosDevolucao.motivo || 'Devolução')}</td>
+                <td><span class="badge bg-secondary">${escapar(dadosDevolucao.condicao || 'USADO')}</span></td>
+                <td><span class="badge bg-info text-dark">${escapar(dadosDevolucao.destino || 'DESCARTE')}</span></td>
+            </tr>
+        `;
+    }
+    document.getElementById('dev-tabela-itens').innerHTML = htmlItens;
+    
+    document.getElementById('dev-responsavel').innerText = dadosDevolucao.operador || 'Almoxarifado (Sistema)';
+    document.getElementById('dev-data-operacao').innerText = dadosDevolucao.data || new Date().toLocaleString('pt-BR');
+    document.getElementById('dev-protocolo').innerText = dadosDevolucao.protocolo || `DEV-HASH-${timestamp}-${Math.floor(Math.random()*10000)}`;
+
+    const modal = new bootstrap.Modal(document.getElementById('modalReciboDevolucao'));
+    modal.show();
+}
 </script>
 
 <?php require_once __DIR__ . '/../components/footer.php'; ?>

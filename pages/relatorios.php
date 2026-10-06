@@ -105,6 +105,12 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                             <button type="button" class="btn btn-rel-acao" onclick="imprimirRelatorioGeral()">
                                 <i class="bi bi-clipboard-check"></i> EXPORTAR PDF
                             </button>
+                            <button type="button" class="btn btn-rel-acao" id="btn-geral-baixar-pdf-top" onclick="baixarRelatorioGeralPDF(this)">
+                                <i class="bi bi-download"></i> Baixar PDF
+                            </button>
+                            <button type="button" class="btn btn-rel-acao" id="btn-geral-compartilhar-pdf-top" onclick="compartilharRelatorioGeralPDF(this)">
+                                <i class="bi bi-share"></i> Compartilhar PDF
+                            </button>
                             <button type="button" class="btn btn-rel-acao" onclick="abrirModeloOficial('geral')">
                                 <i class="bi bi-printer"></i> Imprimir PDF
                             </button>
@@ -189,6 +195,12 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                             </button>
                             <button type="button" class="btn btn-rel-acao" id="btn-acao-geral-pdf" onclick="ativarBotaoAcaoRelGeral(this); imprimirRelatorioGeral();">
                                 <i class="bi bi-printer"></i> Imprimir PDF
+                            </button>
+                            <button type="button" class="btn btn-rel-acao" id="btn-acao-geral-baixar-pdf" onclick="ativarBotaoAcaoRelGeral(this); baixarRelatorioGeralPDF(this);">
+                                <i class="bi bi-download"></i> Baixar PDF
+                            </button>
+                            <button type="button" class="btn btn-rel-acao" id="btn-acao-geral-compartilhar-pdf" onclick="ativarBotaoAcaoRelGeral(this); compartilharRelatorioGeralPDF(this);">
+                                <i class="bi bi-share"></i> Compartilhar PDF
                             </button>
                             <button type="button" class="btn btn-rel-acao" id="btn-acao-geral-imprimir" onclick="ativarBotaoAcaoRelGeral(this); abrirModeloOficial('geral');">
                                 <i class="bi bi-file-earmark-text"></i> Imprimir Modelo Oficial
@@ -397,16 +409,21 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                             <button type="button" class="btn btn-rel-acao" onclick="exportarCSV()">
                                 <i class="bi bi-file-earmark-excel"></i> EXPORTAR EXCEL / CSV
                             </button>
-                            <button type="button" class="btn btn-rel-acao" onclick="imprimirRelatorio()">
-                                <i class="bi bi-clipboard-check"></i> EXPORTAR PDF
+                            <button type="button" class="btn btn-rel-acao" id="btn-ca-top-baixar-pdf" onclick="baixarRelatorioCaPanelPDF(this)">
+                                <i class="bi bi-download"></i> Baixar PDF
+                            </button>
+                            <button type="button" class="btn btn-rel-acao" id="btn-ca-top-compartilhar-pdf" onclick="compartilharRelatorioCaPanelPDF(this)">
+                                <i class="bi bi-share"></i> Compartilhar PDF
                             </button>
                             <button type="button" class="btn btn-rel-acao" onclick="imprimirRelatorio()">
                                 <i class="bi bi-printer"></i> Imprimir PDF
                             </button>
                         </div>
                     </div>
-                    <div class="d-flex gap-2 col-md-8 mb-4">
+                    <div class="d-flex gap-2 col-md-12 mb-4 flex-wrap">
                         <button class="btn btn-primary" onclick="gerarRelatorioCaVencidos()"><i class="bi bi-play-fill me-1"></i> Carregar Relatório</button>
+                        <button class="btn btn-outline-primary text-nowrap" id="btn-ca-panel-baixar-pdf" onclick="baixarRelatorioCaPanelPDF(this)"><i class="bi bi-download me-1"></i> Baixar PDF</button>
+                        <button class="btn btn-outline-primary text-nowrap" id="btn-ca-panel-compartilhar-pdf" onclick="compartilharRelatorioCaPanelPDF(this)"><i class="bi bi-share me-1"></i> Compartilhar PDF</button>
                         <button class="btn btn-outline-primary" onclick="abrirModeloOficial('ca')"><i class="bi bi-printer me-1"></i> Imprimir Modelo Oficial</button>
                     </div>
                 </div>
@@ -475,8 +492,10 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                                     overflow:hidden;max-height:300px;overflow-y:auto;z-index:99999;"></div>
                             </div>
                         </div>
-                        <div class="col-md-12 d-flex gap-2 justify-content-end mt-3">
+                        <div class="col-md-12 d-flex gap-2 justify-content-end mt-3 flex-wrap">
                             <button class="btn btn-primary px-4" onclick="gerarRelatorioCustos()"><i class="bi bi-play-fill me-1"></i> Consultar Relatório Financeiro</button>
+                            <button class="btn btn-outline-primary text-nowrap" id="btn-custos-baixar-pdf" onclick="baixarRelatorioCustosPDF(this)"><i class="bi bi-download me-1"></i> Baixar PDF</button>
+                            <button class="btn btn-outline-primary text-nowrap" id="btn-custos-compartilhar-pdf" onclick="compartilharRelatorioCustosPDF(this)"><i class="bi bi-share me-1"></i> Compartilhar PDF</button>
                             <button class="btn btn-outline-primary text-nowrap" onclick="abrirModeloOficial('custos')"><i class="bi bi-printer me-1"></i> Imprimir Demonstrativo A4</button>
                         </div>
                     </div>
@@ -943,12 +962,11 @@ function buscarRelEpi(termo) {
             dropdown.innerHTML = '<div style="padding:12px;text-align:center;color:#94a3b8;font-size:13px;">Nenhum EPI localizado</div>';
         } else {
             dropdown.innerHTML = matches.map(e => `
-                <div onclick="selecionarRelEpi(${e.epi_id}, '${(e.epi_nome || '').replace(/'/g, "\\'")}', '${e.epi_ca || ''}', '${(e.epi_fabricante || '').replace(/'/g, "\\'")}')"
-                     style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;"
-                     onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                <div class="dd-rel-item" onclick="selecionarRelEpi(${e.epi_id}, '${(e.epi_nome || '').replace(/'/g, "\\'")}', '${e.epi_ca || ''}', '${(e.epi_fabricante || '').replace(/'/g, "\\'")}')"
+                     style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--color-border, #f1f5f9);display:flex;justify-content:space-between;align-items:center;">
                     <div>
-                        <strong style="font-size:13.5px;color:#1e293b;display:block;">${e.epi_nome}</strong>
-                        <small style="color:#64748b;font-size:11.5px;">Fabricante: ${e.epi_fabricante || 'N/A'}</small>
+                        <strong class="dd-rel-title" style="font-size:13.5px;display:block;">${e.epi_nome}</strong>
+                        <small class="text-muted" style="font-size:11.5px;">Fabricante: ${e.epi_fabricante || 'N/A'}</small>
                     </div>
                     <span class="badge bg-primary-light text-primary" style="font-size:11px;">C.A. ${e.epi_ca || 'Isento'}</span>
                 </div>
@@ -1307,6 +1325,300 @@ function gerarRelatorioCaVencidos() {
     .catch(() => exibirErro('Erro na chamada.'));
 }
 
+/**
+ * PILOTO ETAPA 3E: Geração de PDF e compartilhamento para o Relatório de Validade do C.A.
+ */
+async function gerarRelatorioCaPanelPDFBlob() {
+    if (typeof html2pdf !== 'function') {
+        throw new Error('A biblioteca de geração de PDF ainda não foi carregada. Tente novamente em instantes.');
+    }
+
+    let response = await fetch(`${PROXY_URL}?route=relatorios/ca-vencidos`).then(r => r.json());
+    if (!response.success || !response.data || response.data.length === 0) {
+        response = await fetch(`${PROXY_URL}?route=epis`).then(r => r.json());
+    }
+
+    if (!response.success || !Array.isArray(response.data) || response.data.length === 0) {
+        throw new Error(response.message || 'Nenhum equipamento encontrado para análise de C.A.');
+    }
+
+    const lista = response.data;
+    const hoje = new Date();
+    let totalVencidos = 0;
+    let totalVencendo = 0;
+    let totalValidos = 0;
+
+    const episValidade = [];
+
+    lista.forEach(epi => {
+        const nome = epi.epi_nome || epi.nome || 'EPI sem nome';
+        const ca = epi.epi_ca || epi.ca || '';
+        const fabricante = epi.epi_fabricante || epi.fabricante || 'Fabricante Nacional';
+        const dataVencStr = epi.epi_validade_ca || epi.vencimento_ca || epi.validade_ca || '';
+
+        if (!ca) return;
+
+        let diasRestantes = null;
+        let vencimentoFormatado = 'Não informada';
+        let status = 'VÁLIDO';
+        let acao = 'Em conformidade legal.';
+
+        if (dataVencStr) {
+            try {
+                const dtVenc = new Date(dataVencStr);
+                if (!isNaN(dtVenc.getTime())) {
+                    vencimentoFormatado = dtVenc.toLocaleDateString('pt-BR');
+                    const diffTime = dtVenc.getTime() - hoje.getTime();
+                    diasRestantes = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diasRestantes < 0) {
+                        status = 'VENCIDO';
+                        acao = 'Bloqueio imediato de fornecimento e descarte/recolhimento do estoque.';
+                        totalVencidos++;
+                    } else if (diasRestantes <= 30) {
+                        status = 'VENCENDO';
+                        acao = 'Iniciar cotação de novo lote e verificar prorrogação de laudo MTE.';
+                        totalVencendo++;
+                    } else {
+                        status = 'VÁLIDO';
+                        acao = 'Em conformidade com NR-06.';
+                        totalValidos++;
+                    }
+                }
+            } catch (e) {
+                vencimentoFormatado = dataVencStr;
+            }
+        } else {
+            status = 'SEM_DATA';
+            acao = 'Atualizar cadastro do C.A. com a data de validade oficial do MTE.';
+        }
+
+        episValidade.push({
+            nome, ca, fabricante, vencimento_ca: vencimentoFormatado, dias_restantes: diasRestantes, status, acao
+        });
+    });
+
+    episValidade.sort((a, b) => {
+        const prioridade = { 'VENCIDO': 1, 'VENCENDO': 2, 'SEM_DATA': 3, 'VÁLIDO': 4 };
+        const pa = prioridade[a.status] || 5;
+        const pb = prioridade[b.status] || 5;
+        if (pa !== pb) return pa - pb;
+        return (a.dias_restantes ?? 9999) - (b.dias_restantes ?? 9999);
+    });
+
+    // Monta container de documento limpo e formatado especificamente para o PDF
+    const pdfContainer = document.createElement('div');
+    pdfContainer.style.padding = '15px';
+    pdfContainer.style.fontFamily = 'Arial, sans-serif';
+    pdfContainer.style.color = '#0f172a';
+    pdfContainer.style.backgroundColor = '#ffffff';
+    pdfContainer.style.width = '100%';
+
+    const dataEmissaoStr = new Date().toLocaleString('pt-BR');
+
+    let pdfHeaderHtml = `
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #2563eb; padding-bottom:10px; margin-bottom:15px;">
+            <div>
+                <h3 style="margin:0; font-size:18px; font-weight:bold; color:#1e3a8a; text-transform:uppercase;">Gestão de EPIs</h3>
+                <h4 style="margin:4px 0 0 0; font-size:14px; font-weight:600; color:#2563eb;">Relatório de Validade e Vencimento de C.A.</h4>
+            </div>
+            <div style="text-align:right; font-size:11px; color:#475569;">
+                <div><strong>Emitido em:</strong> ${dataEmissaoStr}</div>
+                <div><strong>Ambiente:</strong> SST / Controle Legal</div>
+            </div>
+        </div>
+    `;
+
+    let pdfKpisHtml = `
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <div style="flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:8px 10px; background-color:#fef2f2; text-align:center;">
+                <div style="font-size:14px; font-weight:bold; color:#dc2626;">${totalVencidos} itens</div>
+                <div style="font-size:9px; color:#991b1b; text-transform:uppercase;">C.A. Vencidos (Crítico)</div>
+            </div>
+            <div style="flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:8px 10px; background-color:#fffbeb; text-align:center;">
+                <div style="font-size:14px; font-weight:bold; color:#d97706;">${totalVencendo} itens</div>
+                <div style="font-size:9px; color:#92400e; text-transform:uppercase;">Vencendo em até 30 dias</div>
+            </div>
+            <div style="flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:8px 10px; background-color:#f0fdf4; text-align:center;">
+                <div style="font-size:14px; font-weight:bold; color:#16a34a;">${totalValidos} itens</div>
+                <div style="font-size:9px; color:#166534; text-transform:uppercase;">Em Conformidade (Válidos)</div>
+            </div>
+        </div>
+    `;
+
+    let pdfTabelaHtml = `
+        <h4 style="font-size:12px; font-weight:bold; color:#1e3a8a; margin:10px 0 6px 0;">Equipamentos e Status do Certificado de Aprovação</h4>
+        <table style="width:100%; border-collapse:collapse; font-size:10px; margin-bottom:15px;">
+            <thead>
+                <tr style="background-color:#e2e8f0; border-bottom:2px solid #94a3b8; text-align:left;">
+                    <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold; width:25%;">Equipamento (EPI)</th>
+                    <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold; text-align:center; width:10%;">C.A.</th>
+                    <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold; width:18%;">Fabricante</th>
+                    <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold; text-align:center; width:14%;">Vencimento C.A.</th>
+                    <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold; text-align:center; width:13%;">Situação</th>
+                    <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold; width:20%;">Ação Preventiva</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+    episValidade.forEach((item, idx) => {
+        const bgRow = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
+        let badgeHtml = '<span style="background-color:#dcfce7; color:#166534; padding:2px 5px; border-radius:4px; font-weight:bold; font-size:8px;">REGULAR</span>';
+        if (item.status === 'VENCIDO') {
+            badgeHtml = `<span style="background-color:#fee2e2; color:#991b1b; padding:2px 5px; border-radius:4px; font-weight:bold; font-size:8px;">VENCIDO (${Math.abs(item.dias_restantes)}d atrás)</span>`;
+        } else if (item.status === 'VENCENDO') {
+            badgeHtml = `<span style="background-color:#fef3c7; color:#92400e; padding:2px 5px; border-radius:4px; font-weight:bold; font-size:8px;">VENCE EM ${item.dias_restantes} DIAS</span>`;
+        } else if (item.status === 'SEM_DATA') {
+            badgeHtml = '<span style="background-color:#f1f5f9; color:#475569; padding:2px 5px; border-radius:4px; font-weight:bold; font-size:8px;">SEM DATA</span>';
+        }
+
+        pdfTabelaHtml += `
+            <tr style="background-color:${bgRow};">
+                <td style="padding:5px 6px; border:1px solid #e2e8f0;"><b>${item.nome}</b></td>
+                <td style="padding:5px 6px; border:1px solid #e2e8f0; text-align:center;"><b>${item.ca}</b></td>
+                <td style="padding:5px 6px; border:1px solid #e2e8f0;">${item.fabricante}</td>
+                <td style="padding:5px 6px; border:1px solid #e2e8f0; text-align:center;">${item.vencimento_ca}</td>
+                <td style="padding:5px 6px; border:1px solid #e2e8f0; text-align:center;">${badgeHtml}</td>
+                <td style="padding:5px 6px; border:1px solid #e2e8f0;">${item.acao}</td>
+            </tr>`;
+    });
+
+    pdfTabelaHtml += '</tbody></table>';
+
+    let pdfFooterHtml = `
+        <div style="border-top:1px solid #cbd5e1; padding-top:6px; font-size:9px; color:#64748b; display:flex; justify-content:space-between; align-items:center;">
+            <span>Gestão de EPIs Web — Setor de Segurança do Trabalho (SST)</span>
+            <span>Documento gerado eletronicamente em ${dataEmissaoStr}</span>
+        </div>
+    `;
+
+    pdfContainer.innerHTML = pdfHeaderHtml + pdfKpisHtml + pdfTabelaHtml + pdfFooterHtml;
+
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    const mm = pad(now.getMonth() + 1);
+    const dd = pad(now.getDate());
+    const hh = pad(now.getHours());
+    const mi = pad(now.getMinutes());
+    const ss = pad(now.getSeconds());
+    const filename = `relatorio_validade_ca_${yyyy}${mm}${dd}_${hh}${mi}${ss}.pdf`;
+
+    const opt = {
+        margin:       [8, 8, 8, 8],
+        filename:     filename,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    const pdfWorker = html2pdf().set(opt).from(pdfContainer);
+    const pdfBlob = await pdfWorker.outputPdf('blob');
+
+    return { blob: pdfBlob, filename: filename };
+}
+
+async function baixarRelatorioCaPanelPDF(btnElement) {
+    const btnTop = document.getElementById('btn-ca-top-baixar-pdf');
+    const btnPanel = document.getElementById('btn-ca-panel-baixar-pdf');
+    const btn = btnElement || btnPanel || btnTop;
+
+    const htmlOriginalTop = btnTop ? btnTop.innerHTML : '';
+    const htmlOriginalPanel = btnPanel ? btnPanel.innerHTML : '';
+
+    const labelCarregando = '<span class="spinner-border spinner-border-sm me-1"></span> Gerando PDF...';
+
+    if (btnTop) { btnTop.innerHTML = labelCarregando; btnTop.disabled = true; }
+    if (btnPanel) { btnPanel.innerHTML = labelCarregando; btnPanel.disabled = true; }
+
+    function restaurarBotoesCaPDF() {
+        if (btnTop) { btnTop.innerHTML = htmlOriginalTop || '<i class="bi bi-download"></i> Baixar PDF'; btnTop.disabled = false; }
+        if (btnPanel) { btnPanel.innerHTML = htmlOriginalPanel || '<i class="bi bi-download me-1"></i> Baixar PDF'; btnPanel.disabled = false; }
+    }
+
+    try {
+        const result = await gerarRelatorioCaPanelPDFBlob();
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(result.blob);
+        link.download = result.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+
+        registrarExportacaoAuditoria('CA_VALIDADE_PDF_DOWNLOAD');
+    } catch (err) {
+        if (err.message !== 'CONSULTA_CANCELADA') {
+            console.error('Erro ao gerar PDF do Relatório de C.A.:', err);
+            alert('Não foi possível gerar o PDF. Tente novamente.');
+        }
+    } finally {
+        restaurarBotoesCaPDF();
+    }
+}
+
+async function compartilharRelatorioCaPanelPDF(btnElement) {
+    const btnTop = document.getElementById('btn-ca-top-compartilhar-pdf');
+    const btnPanel = document.getElementById('btn-ca-panel-compartilhar-pdf');
+    const btn = btnElement || btnPanel || btnTop;
+
+    const htmlOriginalTop = btnTop ? btnTop.innerHTML : '';
+    const htmlOriginalPanel = btnPanel ? btnPanel.innerHTML : '';
+
+    const labelCarregando = '<span class="spinner-border spinner-border-sm me-1"></span> Preparando...';
+
+    if (btnTop) { btnTop.innerHTML = labelCarregando; btnTop.disabled = true; }
+    if (btnPanel) { btnPanel.innerHTML = labelCarregando; btnPanel.disabled = true; }
+
+    function restaurarBotoesCaCompartilhar() {
+        if (btnTop) { btnTop.innerHTML = htmlOriginalTop || '<i class="bi bi-share"></i> Compartilhar PDF'; btnTop.disabled = false; }
+        if (btnPanel) { btnPanel.innerHTML = htmlOriginalPanel || '<i class="bi bi-share me-1"></i> Compartilhar PDF'; btnPanel.disabled = false; }
+    }
+
+    try {
+        const result = await gerarRelatorioCaPanelPDFBlob();
+        const pdfFile = new File([result.blob], result.filename, { type: 'application/pdf' });
+
+        const podeCompartilharArquivo = navigator.canShare && navigator.canShare({ files: [pdfFile] });
+
+        if (podeCompartilharArquivo && typeof navigator.share === 'function') {
+            try {
+                await navigator.share({
+                    title: 'Relatório de Validade do C.A.',
+                    text: 'Relatório de Validade e Vencimento de C.A.',
+                    files: [pdfFile]
+                });
+                registrarExportacaoAuditoria('CA_VALIDADE_PDF_SHARE');
+            } catch (shareErr) {
+                if (shareErr.name === 'AbortError' || shareErr.message?.includes('canceled')) {
+                    console.log('Compartilhamento cancelado pelo usuário.');
+                } else {
+                    throw shareErr;
+                }
+            }
+        } else {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(result.blob);
+            link.download = result.filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+
+            registrarExportacaoAuditoria('CA_VALIDADE_PDF_SHARE_FALLBACK');
+            alert('O compartilhamento direto não está disponível neste navegador. O PDF foi baixado para que você possa compartilhá-lo manualmente.');
+        }
+    } catch (err) {
+        if (err.message !== 'CONSULTA_CANCELADA') {
+            console.error('Erro ao compartilhar PDF do Relatório de C.A.:', err);
+            alert('Não foi possível gerar o PDF. Tente novamente.');
+        }
+    } finally {
+        restaurarBotoesCaCompartilhar();
+    }
+}
+
 let chartInstanceSetor = null;
 let chartInstanceEpis = null;
 
@@ -1397,6 +1709,247 @@ function gerarRelatorioCustos() {
 }
 
 window.carregarRelatorioCustos = gerarRelatorioCustos;
+
+/**
+ * PILOTO ETAPA 3D: Geração de PDF e compartilhamento para o Relatório Financeiro/Custos
+ */
+async function gerarRelatorioCustosPDFBlob() {
+    if (typeof html2pdf !== 'function') {
+        throw new Error('A biblioteca de geração de PDF ainda não foi carregada. Tente novamente em instantes.');
+    }
+
+    const dataInicio = document.getElementById('custos-data-inicio')?.value || '';
+    const dataFim = document.getElementById('custos-data-fim')?.value || '';
+    const setor = document.getElementById('custos-departamento')?.value.trim() || '';
+    const funcionario = document.getElementById('custos-funcionario')?.value.trim() || '';
+
+    if (!dataInicio || !dataFim) {
+        alert('Informe as datas de início e fim para a consulta financeira.');
+        throw new Error('CONSULTA_CANCELADA');
+    }
+
+    const params = new URLSearchParams();
+    params.append('data_inicial', `${dataInicio} 00:00:00`);
+    params.append('data_final', `${dataFim} 23:59:59`);
+    if (setor) params.append('departamento', setor);
+    if (funcionario) params.append('funcionario', funcionario);
+
+    const res = await fetch(`${PROXY_URL}?route=relatorios/epis/geral&${params.toString()}`).then(r => r.json());
+    if (!res.success || !res.data) {
+        throw new Error(res.message || 'Nenhum registro financeiro encontrado no período.');
+    }
+
+    const registros = res.data.registros || res.data.itens || (Array.isArray(res.data) ? res.data : []);
+
+    let custoBruto = 0;
+    let estornos = 0;
+    let descartes = 0;
+
+    registros.forEach(r => {
+        const val = parseFloat(r.valor_total || r.ite_custo_total || 0);
+        const status = String(r.status || r.ite_status_item || r.entr_motivo || '').toUpperCase();
+        const mot = String(r.item_motivo_entrega || r.entr_motivo || '').toUpperCase();
+
+        custoBruto += val;
+        if (status.includes('DEVOLVIDO') || mot.includes('DEVOLUCAO')) {
+            estornos += val;
+        } else if (status.includes('DESCARTE') || status.includes('DANIFICADO') || mot.includes('DANO') || mot.includes('PERDA')) {
+            descartes += val;
+        }
+    });
+
+    const custoLiquido = custoBruto - estornos;
+
+    // Monta container off-screen do Relatório Financeiro
+    const pdfContainer = document.createElement('div');
+    pdfContainer.style.padding = '15px';
+    pdfContainer.style.fontFamily = 'Arial, sans-serif';
+    pdfContainer.style.color = '#0f172a';
+    pdfContainer.style.backgroundColor = '#ffffff';
+    pdfContainer.style.width = '100%';
+
+    const dataEmissaoStr = new Date().toLocaleString('pt-BR');
+    const periodoStr = `${formatarDataBR(dataInicio)} a ${formatarDataBR(dataFim)}`;
+
+    let headerHtml = `
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #2563eb; padding-bottom:10px; margin-bottom:15px;">
+            <div>
+                <h3 style="margin:0; font-size:18px; font-weight:bold; color:#1e3a8a; text-transform:uppercase;">Gestão de EPIs</h3>
+                <h4 style="margin:4px 0 0 0; font-size:14px; font-weight:600; color:#2563eb;">Demonstrativo Financeiro e Custos de EPIs</h4>
+            </div>
+            <div style="text-align:right; font-size:11px; color:#475569;">
+                <div><strong>Emitido em:</strong> ${dataEmissaoStr}</div>
+                <div><strong>Período:</strong> ${periodoStr}</div>
+            </div>
+        </div>
+    `;
+
+    let kpisHtml = `
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <div style="flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:8px 10px; background-color:#f8fafc; text-align:center;">
+                <div style="font-size:13px; font-weight:bold; color:#1e3a8a;">${custoBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                <div style="font-size:9px; color:#64748b; text-transform:uppercase;">Custo Bruto Fornecido</div>
+            </div>
+            <div style="flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:8px 10px; background-color:#f8fafc; text-align:center;">
+                <div style="font-size:13px; font-weight:bold; color:#10b981;">${estornos.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                <div style="font-size:9px; color:#64748b; text-transform:uppercase;">Estornos / Devoluções</div>
+            </div>
+            <div style="flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:8px 10px; background-color:#f8fafc; text-align:center;">
+                <div style="font-size:13px; font-weight:bold; color:#ef4444;">${descartes.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                <div style="font-size:9px; color:#64748b; text-transform:uppercase;">Descartes / Inservíveis</div>
+            </div>
+            <div style="flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:8px 10px; background-color:#f8fafc; text-align:center;">
+                <div style="font-size:13px; font-weight:bold; color:#059669;">${custoLiquido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                <div style="font-size:9px; color:#64748b; text-transform:uppercase;">Custo Líquido Efetivo</div>
+            </div>
+        </div>
+    `;
+
+    let tabelaHtml = `
+        <h4 style="font-size:12px; font-weight:bold; color:#1e3a8a; margin:10px 0 6px 0;">Histórico Financeiro Detalhado</h4>
+        <table style="width:100%; border-collapse:collapse; font-size:10px; margin-bottom:15px;">
+            <thead>
+                <tr style="background-color:#e2e8f0; border-bottom:2px solid #94a3b8; text-align:left;">
+                    <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold;">Data</th>
+                    <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold;">Colaborador</th>
+                    <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold;">EPI</th>
+                    <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold;">C.A.</th>
+                    <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold; text-align:center;">Qtd</th>
+                    <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold;">Motivo</th>
+                    <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold;">Status</th>
+                    <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold; text-align:right;">Valor Total</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+    registros.forEach((r, idx) => {
+        const bgRow = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
+        const val = parseFloat(r.valor_total || r.ite_custo_total || 0);
+        tabelaHtml += `
+            <tr style="background-color:${bgRow};">
+                <td style="padding:5px 6px; border:1px solid #e2e8f0; white-space:nowrap;">${formatarDataHoraBR(r.entr_data_entrega)}</td>
+                <td style="padding:5px 6px; border:1px solid #e2e8f0;">${r.fun_nome || '---'}</td>
+                <td style="padding:5px 6px; border:1px solid #e2e8f0;">${r.epi_nome || '---'}</td>
+                <td style="padding:5px 6px; border:1px solid #e2e8f0;">${r.epi_ca || 'Isento'}</td>
+                <td style="padding:5px 6px; border:1px solid #e2e8f0; text-align:center;">${r.item_quantidade ?? 1}</td>
+                <td style="padding:5px 6px; border:1px solid #e2e8f0;">${traduzirMotivo(r.item_motivo_entrega || r.entr_motivo)}</td>
+                <td style="padding:5px 6px; border:1px solid #e2e8f0;">${r.status || 'EM USO'}</td>
+                <td style="padding:5px 6px; border:1px solid #e2e8f0; text-align:right; white-space:nowrap;">${val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }).replace(/\s/g, '\u00a0')}</td>
+            </tr>`;
+    });
+    tabelaHtml += '</tbody></table>';
+
+    let footerHtml = `
+        <div style="border-top:1px solid #cbd5e1; padding-top:6px; font-size:9px; color:#64748b; display:flex; justify-content:space-between; align-items:center;">
+            <span>Gestão de EPIs Web — Relatório Financeiro e Custos</span>
+            <span>Documento gerado eletronicamente em ${dataEmissaoStr}</span>
+        </div>
+    `;
+
+    pdfContainer.innerHTML = headerHtml + kpisHtml + tabelaHtml + footerHtml;
+
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    const mm = pad(now.getMonth() + 1);
+    const dd = pad(now.getDate());
+    const hh = pad(now.getHours());
+    const mi = pad(now.getMinutes());
+    const ss = pad(now.getSeconds());
+    const filename = `relatorio_financeiro_epi_${yyyy}${mm}${dd}_${hh}${mi}${ss}.pdf`;
+
+    const opt = {
+        margin:       [8, 8, 8, 8],
+        filename:     filename,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    const pdfWorker = html2pdf().set(opt).from(pdfContainer);
+    const pdfBlob = await pdfWorker.outputPdf('blob');
+
+    return { blob: pdfBlob, filename: filename };
+}
+
+async function baixarRelatorioCustosPDF(btnElement) {
+    const btn = btnElement || document.getElementById('btn-custos-baixar-pdf');
+    const htmlOriginal = btn ? btn.innerHTML : '';
+    const labelCarregando = '<span class="spinner-border spinner-border-sm me-1"></span> Gerando PDF...';
+
+    if (btn) { btn.innerHTML = labelCarregando; btn.disabled = true; }
+
+    try {
+        const result = await gerarRelatorioCustosPDFBlob();
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(result.blob);
+        link.download = result.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+
+        registrarExportacaoAuditoria('FINANCEIRO_PDF_DOWNLOAD');
+    } catch (err) {
+        if (err.message !== 'CONSULTA_CANCELADA') {
+            console.error('Erro ao gerar PDF Financeiro:', err);
+            alert('Não foi possível gerar o PDF. Tente novamente.');
+        }
+    } finally {
+        if (btn) { btn.innerHTML = htmlOriginal || '<i class="bi bi-download me-1"></i> Baixar PDF'; btn.disabled = false; }
+    }
+}
+
+async function compartilharRelatorioCustosPDF(btnElement) {
+    const btn = btnElement || document.getElementById('btn-custos-compartilhar-pdf');
+    const htmlOriginal = btn ? btn.innerHTML : '';
+    const labelCarregando = '<span class="spinner-border spinner-border-sm me-1"></span> Preparando...';
+
+    if (btn) { btn.innerHTML = labelCarregando; btn.disabled = true; }
+
+    try {
+        const result = await gerarRelatorioCustosPDFBlob();
+        const pdfFile = new File([result.blob], result.filename, { type: 'application/pdf' });
+
+        const podeCompartilharArquivo = navigator.canShare && navigator.canShare({ files: [pdfFile] });
+
+        if (podeCompartilharArquivo && typeof navigator.share === 'function') {
+            try {
+                await navigator.share({
+                    title: 'Relatório Financeiro de EPIs',
+                    text: 'Demonstrativo Financeiro e Custos de EPIs',
+                    files: [pdfFile]
+                });
+                registrarExportacaoAuditoria('FINANCEIRO_PDF_SHARE');
+            } catch (shareErr) {
+                if (shareErr.name === 'AbortError' || shareErr.message?.includes('canceled')) {
+                    console.log('Compartilhamento cancelado pelo usuário.');
+                } else {
+                    throw shareErr;
+                }
+            }
+        } else {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(result.blob);
+            link.download = result.filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+
+            registrarExportacaoAuditoria('FINANCEIRO_PDF_SHARE_FALLBACK');
+            alert('O compartilhamento direto não está disponível neste navegador. O PDF foi baixado para que você possa compartilhá-lo manualmente.');
+        }
+    } catch (err) {
+        if (err.message !== 'CONSULTA_CANCELADA') {
+            console.error('Erro ao compartilhar PDF Financeiro:', err);
+            alert('Não foi possível gerar o PDF. Tente novamente.');
+        }
+    } finally {
+        if (btn) { btn.innerHTML = htmlOriginal || '<i class="bi bi-share me-1"></i> Compartilhar PDF'; btn.disabled = false; }
+    }
+}
 
 function renderizarGraficosFinanceiros(setoresMap, episMap) {
     const setoresSorted = Object.entries(setoresMap)
@@ -2211,6 +2764,298 @@ async function imprimirRelatorioGeral() {
         alert(e.message);
     } finally {
         geralPaginaAtual = paginaAtual;
+    }
+}
+
+/**
+ * PILOTO ETAPA 3C: Função auxiliar unificada que gera o Blob do PDF do Relatório Geral de EPIs
+ */
+async function gerarRelatorioGeralPDFBlob() {
+    if (typeof html2pdf !== 'function') {
+        throw new Error('A biblioteca de geração de PDF ainda não foi carregada. Tente novamente em instantes.');
+    }
+
+    const paginaAtual = geralPaginaAtual;
+    geralPaginaAtual = 1;
+    const queryString = montarQueryGeral(10000);
+    if (queryString === null) {
+        geralPaginaAtual = paginaAtual;
+        throw new Error('CONSULTA_CANCELADA');
+    }
+
+    try {
+        const res = await fetch(`${PROXY_URL}?route=relatorios/epis/geral&${queryString}`).then(r => r.json());
+        if (!res.success || !res.data) {
+            throw new Error(res.message || 'Falha ao carregar os dados para exportação do PDF.');
+        }
+
+        const dados = res.data;
+        const permiteCustos = dados.permite_visualizar_custos === true;
+        const ind = dados.indicadores || {};
+
+        // Montar container de documento limpo e formatado especificamente para o PDF
+        const pdfContainer = document.createElement('div');
+        pdfContainer.style.padding = '15px';
+        pdfContainer.style.fontFamily = 'Arial, sans-serif';
+        pdfContainer.style.color = '#0f172a';
+        pdfContainer.style.backgroundColor = '#ffffff';
+        pdfContainer.style.width = '100%';
+
+        const dataEmissaoStr = new Date().toLocaleString('pt-BR');
+        const dataInicioFiltro = document.getElementById('geral-data-inicio')?.value || '';
+        const dataFimFiltro = document.getElementById('geral-data-fim')?.value || '';
+        let filtroPeriodoStr = 'Todo o período';
+        if (dataInicioFiltro && dataFimFiltro) {
+            filtroPeriodoStr = `${formatarDataBR(dataInicioFiltro)} a ${formatarDataBR(dataFimFiltro)}`;
+        }
+
+        // Cabeçalho do PDF
+        let pdfHeaderHtml = `
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #2563eb; padding-bottom:10px; margin-bottom:15px;">
+                <div>
+                    <h3 style="margin:0; font-size:18px; font-weight:bold; color:#1e3a8a; text-transform:uppercase;">Gestão de EPIs</h3>
+                    <h4 style="margin:4px 0 0 0; font-size:14px; font-weight:600; color:#2563eb;">Relatório Geral de Fornecimento de EPIs</h4>
+                </div>
+                <div style="text-align:right; font-size:11px; color:#475569;">
+                    <div><strong>Emitido em:</strong> ${dataEmissaoStr}</div>
+                    <div><strong>Período:</strong> ${filtroPeriodoStr}</div>
+                </div>
+            </div>
+        `;
+
+        // Cartões Indicadores (KPIs)
+        let pdfKpisHtml = `
+            <div style="display:flex; gap:8px; margin-bottom:15px; flex-wrap:nowrap;">
+                <div style="flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:6px 8px; background-color:#f8fafc; text-align:center;">
+                    <div style="font-size:13px; font-weight:bold; color:#0f172a;">${ind.total_entregas ?? 0}</div>
+                    <div style="font-size:9px; color:#64748b;">Entregas Realizadas</div>
+                </div>
+                <div style="flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:6px 8px; background-color:#f8fafc; text-align:center;">
+                    <div style="font-size:13px; font-weight:bold; color:#0f172a;">${ind.total_unidades ?? 0}</div>
+                    <div style="font-size:9px; color:#64748b;">Unidades Fornecidas</div>
+                </div>
+                <div style="flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:6px 8px; background-color:#f8fafc; text-align:center;">
+                    <div style="font-size:13px; font-weight:bold; color:#0f172a;">${ind.funcionarios_atendidos ?? 0}</div>
+                    <div style="font-size:9px; color:#64748b;">Funcionários Atendidos</div>
+                </div>
+                <div style="flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:6px 8px; background-color:#f8fafc; text-align:center;">
+                    <div style="font-size:13px; font-weight:bold; color:#0f172a;">${ind.epis_diferentes ?? 0}</div>
+                    <div style="font-size:9px; color:#64748b;">EPIs Diferentes</div>
+                </div>
+                <div style="flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:6px 8px; background-color:#f8fafc; text-align:center;">
+                    <div style="font-size:13px; font-weight:bold; color:#0f172a;">${ind.total_devolucoes ?? 0}</div>
+                    <div style="font-size:9px; color:#64748b;">Devoluções</div>
+                </div>
+                <div style="flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:6px 8px; background-color:#f8fafc; text-align:center;">
+                    <div style="font-size:13px; font-weight:bold; color:#0f172a;">${ind.total_substituicoes ?? 0}</div>
+                    <div style="font-size:9px; color:#64748b;">Substituições</div>
+                </div>
+                ${permiteCustos ? `
+                <div style="flex:1; border:1px solid #cbd5e1; border-radius:6px; padding:6px 8px; background-color:#f8fafc; text-align:center;">
+                    <div style="font-size:13px; font-weight:bold; color:#10b981;">${(parseFloat(ind.custo_total ?? 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                    <div style="font-size:9px; color:#64748b;">Custo Total</div>
+                </div>` : ''}
+            </div>
+        `;
+
+        // Tabela de Registros
+        let pdfTabelaHtml = `
+            <table style="width:100%; border-collapse:collapse; font-size:10px; margin-bottom:15px;">
+                <thead>
+                    <tr style="background-color:#e2e8f0; border-bottom:2px solid #94a3b8; text-align:left;">
+                        <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold;">Data</th>
+                        <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold;">Funcionário</th>
+                        <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold;">Setor</th>
+                        <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold;">EPI</th>
+                        <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold;">C.A.</th>
+                        <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold;">Tam</th>
+                        <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold; text-align:center;">Qtd</th>
+                        <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold;">Motivo</th>
+                        <th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold;">Responsável</th>
+                        ${permiteCustos ? '<th style="padding:6px 6px; border:1px solid #cbd5e1; font-weight:bold; text-align:right;">Valor Total</th>' : ''}
+                    </tr>
+                </thead>
+                <tbody>`;
+
+        (dados.registros || []).forEach((r, idx) => {
+            const bgRow = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
+            pdfTabelaHtml += `
+                <tr style="background-color:${bgRow};">
+                    <td style="padding:5px 6px; border:1px solid #e2e8f0; white-space:nowrap;">${formatarDataHoraBR(r.entr_data_entrega)}</td>
+                    <td style="padding:5px 6px; border:1px solid #e2e8f0;">${r.fun_nome || '---'}</td>
+                    <td style="padding:5px 6px; border:1px solid #e2e8f0;">${r.fun_departamento || '---'}</td>
+                    <td style="padding:5px 6px; border:1px solid #e2e8f0;">${r.epi_nome || '---'}</td>
+                    <td style="padding:5px 6px; border:1px solid #e2e8f0;">${r.epi_ca || 'Isento'}</td>
+                    <td style="padding:5px 6px; border:1px solid #e2e8f0;">${r.item_tamanho || '---'}</td>
+                    <td style="padding:5px 6px; border:1px solid #e2e8f0; text-align:center;">${r.item_quantidade ?? 1}</td>
+                    <td style="padding:5px 6px; border:1px solid #e2e8f0;">${traduzirMotivo(r.item_motivo_entrega || r.entr_motivo)}</td>
+                    <td style="padding:5px 6px; border:1px solid #e2e8f0;">${r.usu_login || '---'}</td>
+                    ${permiteCustos ? `<td style="padding:5px 6px; border:1px solid #e2e8f0; text-align:right; white-space:nowrap;">${r.valor_total !== null && r.valor_total !== undefined ? parseFloat(r.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }).replace(/\s/g, '\u00a0') : '---'}</td>` : ''}
+                </tr>`;
+        });
+
+        pdfTabelaHtml += '</tbody></table>';
+
+        // Rodapé do PDF
+        let pdfFooterHtml = `
+            <div style="border-top:1px solid #cbd5e1; padding-top:6px; font-size:9px; color:#64748b; display:flex; justify-content:space-between; align-items:center;">
+                <span>Gestão de EPIs Web — Sistema de Gestão de Equipamentos de Proteção Individual</span>
+                <span>Documento gerado eletronicamente em ${dataEmissaoStr}</span>
+            </div>
+        `;
+
+        pdfContainer.innerHTML = pdfHeaderHtml + pdfKpisHtml + pdfTabelaHtml + pdfFooterHtml;
+
+        // Padrão de Nome do Arquivo: relatorio_geral_epi_YYYYMMDD_HHMMSS.pdf
+        const now = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        const yyyy = now.getFullYear();
+        const mm = pad(now.getMonth() + 1);
+        const dd = pad(now.getDate());
+        const hh = pad(now.getHours());
+        const mi = pad(now.getMinutes());
+        const ss = pad(now.getSeconds());
+        const filename = `relatorio_geral_epi_${yyyy}${mm}${dd}_${hh}${mi}${ss}.pdf`;
+
+        const opt = {
+            margin:       [8, 8, 8, 8],
+            filename:     filename,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, logging: false },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
+            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        const pdfWorker = html2pdf().set(opt).from(pdfContainer);
+        const pdfBlob = await pdfWorker.outputPdf('blob');
+
+        return { blob: pdfBlob, filename: filename };
+    } finally {
+        geralPaginaAtual = paginaAtual;
+    }
+}
+
+/**
+ * Baixa o PDF do Relatório Geral de EPIs no dispositivo (ETAPA 3B)
+ */
+async function baixarRelatorioGeralPDF(btnElement) {
+    const btnTop = document.getElementById('btn-geral-baixar-pdf-top');
+    const btnBottom = document.getElementById('btn-acao-geral-baixar-pdf');
+
+    const htmlOriginalTop = btnTop ? btnTop.innerHTML : '';
+    const htmlOriginalBottom = btnBottom ? btnBottom.innerHTML : '';
+    const htmlOriginalCurrent = btnElement ? btnElement.innerHTML : '';
+
+    const labelCarregando = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Gerando PDF...';
+
+    if (btnTop) { btnTop.innerHTML = labelCarregando; btnTop.disabled = true; }
+    if (btnBottom) { btnBottom.innerHTML = labelCarregando; btnBottom.disabled = true; }
+    if (btnElement && btnElement !== btnTop && btnElement !== btnBottom) {
+        btnElement.innerHTML = labelCarregando; btnElement.disabled = true;
+    }
+
+    function restaurarBotoesPDF() {
+        if (btnTop) { btnTop.innerHTML = htmlOriginalTop || '<i class="bi bi-download"></i> Baixar PDF'; btnTop.disabled = false; }
+        if (btnBottom) { btnBottom.innerHTML = htmlOriginalBottom || '<i class="bi bi-download"></i> Baixar PDF'; btnBottom.disabled = false; }
+        if (btnElement && btnElement !== btnTop && btnElement !== btnBottom) {
+            btnElement.innerHTML = htmlOriginalCurrent || '<i class="bi bi-download"></i> Baixar PDF'; btnElement.disabled = false;
+        }
+    }
+
+    try {
+        const result = await gerarRelatorioGeralPDFBlob();
+        if (!result) return;
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(result.blob);
+        link.download = result.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+
+        registrarExportacaoAuditoria('PDF_DOWNLOAD');
+    } catch (err) {
+        if (err.message !== 'CONSULTA_CANCELADA') {
+            console.error('Erro ao gerar o PDF do Relatório Geral:', err);
+            alert('Não foi possível gerar o PDF. Tente novamente.');
+        }
+    } finally {
+        restaurarBotoesPDF();
+    }
+}
+
+/**
+ * PILOTO ETAPA 3C: Compartilhamento do PDF do Relatório Geral de EPIs via Web Share API com fallback seguro
+ */
+async function compartilharRelatorioGeralPDF(btnElement) {
+    const btnTop = document.getElementById('btn-geral-compartilhar-pdf-top');
+    const btnBottom = document.getElementById('btn-acao-geral-compartilhar-pdf');
+
+    const htmlOriginalTop = btnTop ? btnTop.innerHTML : '';
+    const htmlOriginalBottom = btnBottom ? btnBottom.innerHTML : '';
+    const htmlOriginalCurrent = btnElement ? btnElement.innerHTML : '';
+
+    const labelCarregando = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Preparando...';
+
+    if (btnTop) { btnTop.innerHTML = labelCarregando; btnTop.disabled = true; }
+    if (btnBottom) { btnBottom.innerHTML = labelCarregando; btnBottom.disabled = true; }
+    if (btnElement && btnElement !== btnTop && btnElement !== btnBottom) {
+        btnElement.innerHTML = labelCarregando; btnElement.disabled = true;
+    }
+
+    function restaurarBotoesCompartilhar() {
+        if (btnTop) { btnTop.innerHTML = htmlOriginalTop || '<i class="bi bi-share"></i> Compartilhar PDF'; btnTop.disabled = false; }
+        if (btnBottom) { btnBottom.innerHTML = htmlOriginalBottom || '<i class="bi bi-share"></i> Compartilhar PDF'; btnBottom.disabled = false; }
+        if (btnElement && btnElement !== btnTop && btnElement !== btnBottom) {
+            btnElement.innerHTML = htmlOriginalCurrent || '<i class="bi bi-share"></i> Compartilhar PDF'; btnElement.disabled = false;
+        }
+    }
+
+    try {
+        const result = await gerarRelatorioGeralPDFBlob();
+        if (!result) return;
+
+        const pdfFile = new File([result.blob], result.filename, { type: 'application/pdf' });
+
+        // Verificar se o navegador suporta Web Share API com arquivos
+        const podeCompartilharArquivo = navigator.canShare && navigator.canShare({ files: [pdfFile] });
+
+        if (podeCompartilharArquivo && typeof navigator.share === 'function') {
+            try {
+                await navigator.share({
+                    title: 'Relatório Geral de EPIs',
+                    text: 'Relatório Geral de Fornecimento de EPIs',
+                    files: [pdfFile]
+                });
+                registrarExportacaoAuditoria('PDF_SHARE');
+            } catch (shareErr) {
+                if (shareErr.name === 'AbortError' || shareErr.message?.includes('canceled')) {
+                    console.log('Compartilhamento cancelado pelo usuário.');
+                } else {
+                    throw shareErr;
+                }
+            }
+        } else {
+            // CENÁRIO B: Fallback seguro se o navegador não tiver suporte ao compartilhamento direto de arquivos
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(result.blob);
+            link.download = result.filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+
+            registrarExportacaoAuditoria('PDF_SHARE_FALLBACK');
+            alert('O compartilhamento direto não está disponível neste navegador. O PDF foi baixado para que você possa compartilhá-lo manualmente.');
+        }
+    } catch (err) {
+        if (err.message !== 'CONSULTA_CANCELADA') {
+            console.error('Erro ao compartilhar PDF do Relatório Geral:', err);
+            alert('Não foi possível gerar o PDF. Tente novamente.');
+        }
+    } finally {
+        restaurarBotoesCompartilhar();
     }
 }
 

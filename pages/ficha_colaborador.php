@@ -155,6 +155,7 @@ $periodoFim = !empty($dataFim) ? (new DateTime($dataFim))->format('d/m/Y') : (ne
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ficha Individual de Fornecimento de EPI — <?= $colaborador ? htmlspecialchars($colaborador['fun_nome']) : 'Documento' ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         @page {
             size: A4 portrait;
@@ -209,6 +210,14 @@ $periodoFim = !empty($dataFim) ? (new DateTime($dataFim))->format('d/m/Y') : (ne
         }
         .btn-print {
             background-color: #2563EB;
+            color: #FFFFFF;
+        }
+        .btn-pdf {
+            background-color: #DC2626;
+            color: #FFFFFF;
+        }
+        .btn-share {
+            background-color: #10B981;
             color: #FFFFFF;
         }
         .btn-close-view {
@@ -381,8 +390,14 @@ $periodoFim = !empty($dataFim) ? (new DateTime($dataFim))->format('d/m/Y') : (ne
         <span>Gestão EPI — Emissão de Ficha Individual de EPI (NR-06)</span>
     </div>
     <div class="buttons">
+        <button type="button" id="btn-ficha-pdf-download" class="btn-action btn-pdf" onclick="baixarFichaColaboradorPDF()">
+            <i class="bi bi-file-earmark-pdf-fill"></i> <span>Baixar PDF</span>
+        </button>
+        <button type="button" id="btn-ficha-pdf-share" class="btn-action btn-share" onclick="compartilharFichaColaboradorPDF()">
+            <i class="bi bi-share-fill"></i> <span>Compartilhar PDF</span>
+        </button>
         <button type="button" class="btn-action btn-print" onclick="window.print()">
-            <i class="bi bi-printer-fill"></i> Imprimir / Salvar PDF
+            <i class="bi bi-printer-fill"></i> Imprimir
         </button>
         <button type="button" class="btn-action btn-close-view" onclick="window.close(); if(window.opener){window.opener.focus();}else{location.href='funcionarios.php';}">
             <i class="bi bi-arrow-left"></i> Voltar
@@ -504,6 +519,166 @@ $periodoFim = !empty($dataFim) ? (new DateTime($dataFim))->format('d/m/Y') : (ne
 
     <?php endif; ?>
 </div>
+
+<script>
+let isGeneratingFichaPDF = false;
+
+function formatarDataTimestamp() {
+    const agora = new Date();
+    const ano = agora.getFullYear();
+    const mes = String(agora.getMonth() + 1).padStart(2, '0');
+    const dia = String(agora.getDate()).padStart(2, '0');
+    const hora = String(agora.getHours()).padStart(2, '0');
+    const min = String(agora.getMinutes()).padStart(2, '0');
+    const seg = String(agora.getSeconds()).padStart(2, '0');
+    return `${ano}${mes}${dia}_${hora}${min}${seg}`;
+}
+
+function obterNomeArquivoFichaPDF() {
+    const nomeRaw = <?= json_encode($colaborador['fun_nome'] ?? 'colaborador') ?>;
+    const nomeLimpo = nomeRaw.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
+    const funcId = <?= json_encode($funcionarioId) ?>;
+    const timestamp = formatarDataTimestamp();
+    return `ficha_colaborador_${funcId}_${nomeLimpo}_${timestamp}.pdf`;
+}
+
+function gerarFichaColaboradorPDFBlob() {
+    return new Promise((resolve, reject) => {
+        const elementoOriginal = document.querySelector('.document-container');
+        if (!elementoOriginal) {
+            reject(new Error('Elemento do documento não encontrado.'));
+            return;
+        }
+
+        const clone = elementoOriginal.cloneNode(true);
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
+        container.style.top = '0';
+        container.style.width = '790px';
+        container.style.background = '#FFFFFF';
+        container.style.padding = '0';
+        container.appendChild(clone);
+        document.body.appendChild(container);
+
+        const filename = obterNomeArquivoFichaPDF();
+
+        const opt = {
+            margin: [10, 10, 10, 10],
+            filename: filename,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#FFFFFF',
+                windowWidth: 790
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        html2pdf()
+            .set(opt)
+            .from(clone)
+            .toPdf()
+            .output('blob')
+            .then(blob => {
+                document.body.removeChild(container);
+                resolve({ blob, filename });
+            })
+            .catch(err => {
+                if (document.body.contains(container)) {
+                    document.body.removeChild(container);
+                }
+                reject(err);
+            });
+    });
+}
+
+async function baixarFichaColaboradorPDF() {
+    if (isGeneratingFichaPDF) return;
+    const btnDownload = document.getElementById('btn-ficha-pdf-download');
+    const btnShare = document.getElementById('btn-ficha-pdf-share');
+
+    try {
+        isGeneratingFichaPDF = true;
+        if (btnDownload) {
+            btnDownload.disabled = true;
+            btnDownload.innerHTML = '<i class="bi bi-hourglass-split me-1 spinner-border spinner-border-sm"></i> <span>Gerando PDF...</span>';
+        }
+        if (btnShare) btnShare.disabled = true;
+
+        const { blob, filename } = await gerarFichaColaboradorPDFBlob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+        console.error('Erro ao gerar PDF da Ficha:', err);
+        alert('Ocorreu um erro ao gerar o PDF da Ficha do Colaborador.');
+    } finally {
+        isGeneratingFichaPDF = false;
+        if (btnDownload) {
+            btnDownload.disabled = false;
+            btnDownload.innerHTML = '<i class="bi bi-file-earmark-pdf-fill"></i> <span>Baixar PDF</span>';
+        }
+        if (btnShare) btnShare.disabled = false;
+    }
+}
+
+async function compartilharFichaColaboradorPDF() {
+    if (isGeneratingFichaPDF) return;
+    const btnDownload = document.getElementById('btn-ficha-pdf-download');
+    const btnShare = document.getElementById('btn-ficha-pdf-share');
+
+    try {
+        isGeneratingFichaPDF = true;
+        if (btnShare) {
+            btnShare.disabled = true;
+            btnShare.innerHTML = '<i class="bi bi-hourglass-split me-1 spinner-border spinner-border-sm"></i> <span>Gerando PDF...</span>';
+        }
+        if (btnDownload) btnDownload.disabled = true;
+
+        const { blob, filename } = await gerarFichaColaboradorPDFBlob();
+        const file = new File([blob], filename, { type: 'application/pdf' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                title: 'Ficha Individual de EPI',
+                text: `Ficha Individual de Fornecimento de EPI — ${<?= json_encode($colaborador['fun_nome'] ?? 'Colaborador') ?>}`,
+                files: [file]
+            });
+        } else {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+    } catch (err) {
+        if (err.name !== 'AbortError') {
+            console.error('Erro ao compartilhar PDF da Ficha:', err);
+            alert('Não foi possível compartilhar o PDF. O arquivo será baixado.');
+            await baixarFichaColaboradorPDF();
+        }
+    } finally {
+        isGeneratingFichaPDF = false;
+        if (btnShare) {
+            btnShare.disabled = false;
+            btnShare.innerHTML = '<i class="bi bi-share-fill"></i> <span>Compartilhar PDF</span>';
+        }
+        if (btnDownload) btnDownload.disabled = false;
+    }
+}
+</script>
 
 </body>
 </html>

@@ -103,6 +103,8 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão EPI — Relatório de Auditoria de Logs de Sistema</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* Estilos Globais */
         body {
@@ -149,6 +151,20 @@ try {
         }
         .btn-print:hover {
             background-color: #2446A8;
+        }
+        .btn-pdf {
+            background-color: #DC2626;
+            color: #FFFFFF;
+        }
+        .btn-pdf:hover {
+            background-color: #B91C1C;
+        }
+        .btn-share {
+            background-color: #10B981;
+            color: #FFFFFF;
+        }
+        .btn-share:hover {
+            background-color: #059669;
         }
         .btn-close-window {
             background-color: #E2E8F0;
@@ -249,15 +265,22 @@ try {
         <strong>Visualização de Impressão (A4 Paisagem)</strong>
         <span style="color: #64748B; margin-left: 8px;">Modelo v2 Oficial</span>
     </div>
-    <div style="display: flex; gap: 8px;">
-        <button class="btn-action btn-print" onclick="window.print()">
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button type="button" id="btn-auditoria-pdf-download" class="btn-action btn-pdf" onclick="baixarRelatorioAuditoriaPDF()">
+            <i class="bi bi-file-earmark-pdf-fill"></i> Baixar PDF
+        </button>
+        <button type="button" id="btn-auditoria-pdf-share" class="btn-action btn-share" onclick="compartilharRelatorioAuditoriaPDF()">
+            <i class="bi bi-share-fill"></i> Compartilhar PDF
+        </button>
+        <button type="button" class="btn-action btn-print" onclick="window.print()">
             <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/><path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/></svg>
             Imprimir / Salvar PDF
         </button>
-        <button class="btn-action btn-close-window" onclick="window.close()">Fechar</button>
+        <button type="button" class="btn-action btn-close-window" onclick="window.close()">Fechar</button>
     </div>
 </div>
 
+<div id="area-impressao-auditoria">
 <div class="report-header">
     <h1>Gestão EPI — Relatório de Auditoria de Logs de Sistema</h1>
     <div class="metadata"><b>Emissão:</b> <?= $dataEmissao ?> | <b>Emitido por:</b> <?= htmlspecialchars($userLogin) ?> (<?= htmlspecialchars($userProfile) ?>)</div>
@@ -337,6 +360,170 @@ try {
 <div class="report-footer">
     Página 1 — Exportação: <?= $idExportacao ?> — Documento gerado automaticamente pelo sistema em <?= $dataEmissao ?>
 </div>
+</div><!-- /#area-impressao-auditoria -->
+
+<script>
+let isGeneratingAuditoriaPDF = false;
+
+function formatarDataTimestampAuditoria() {
+    const agora = new Date();
+    const ano = agora.getFullYear();
+    const mes = String(agora.getMonth() + 1).padStart(2, '0');
+    const dia = String(agora.getDate()).padStart(2, '0');
+    const hora = String(agora.getHours()).padStart(2, '0');
+    const min = String(agora.getMinutes()).padStart(2, '0');
+    const seg = String(agora.getSeconds()).padStart(2, '0');
+    return `${ano}${mes}${dia}_${hora}${min}${seg}`;
+}
+
+function obterNomeArquivoAuditoriaPDF() {
+    const timestamp = formatarDataTimestampAuditoria();
+    return `relatorio_auditoria_${timestamp}.pdf`;
+}
+
+function gerarRelatorioAuditoriaPDFBlob() {
+    return new Promise((resolve, reject) => {
+        const elementoOriginal = document.getElementById('area-impressao-auditoria');
+        if (!elementoOriginal) {
+            reject(new Error('Elemento do relatório de auditoria não encontrado.'));
+            return;
+        }
+
+        const clone = elementoOriginal.cloneNode(true);
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
+        container.style.top = '0';
+        container.style.width = '1100px';
+        container.style.background = '#FFFFFF';
+        container.style.padding = '15px';
+        container.appendChild(clone);
+        document.body.appendChild(container);
+
+        const filename = obterNomeArquivoAuditoriaPDF();
+
+        const opt = {
+            margin: [10, 10, 10, 10],
+            filename: filename,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#FFFFFF',
+                windowWidth: 1100
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        if (typeof html2pdf !== 'function') {
+            document.body.removeChild(container);
+            reject(new Error('Biblioteca html2pdf não carregada.'));
+            return;
+        }
+
+        html2pdf()
+            .set(opt)
+            .from(clone)
+            .toPdf()
+            .output('blob')
+            .then(blob => {
+                document.body.removeChild(container);
+                resolve({ blob, filename });
+            })
+            .catch(err => {
+                if (document.body.contains(container)) {
+                    document.body.removeChild(container);
+                }
+                reject(err);
+            });
+    });
+}
+
+async function baixarRelatorioAuditoriaPDF() {
+    if (isGeneratingAuditoriaPDF) return;
+    const btnDownload = document.getElementById('btn-auditoria-pdf-download');
+    const btnShare = document.getElementById('btn-auditoria-pdf-share');
+
+    try {
+        isGeneratingAuditoriaPDF = true;
+        if (btnDownload) {
+            btnDownload.disabled = true;
+            btnDownload.innerHTML = '<i class="bi bi-hourglass-split me-1 spinner-border spinner-border-sm"></i> Gerando PDF...';
+        }
+        if (btnShare) btnShare.disabled = true;
+
+        const { blob, filename } = await gerarRelatorioAuditoriaPDFBlob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+        console.error('Erro ao gerar PDF de Auditoria:', err);
+        alert('Ocorreu um erro ao gerar o PDF de Auditoria.');
+    } finally {
+        isGeneratingAuditoriaPDF = false;
+        if (btnDownload) {
+            btnDownload.disabled = false;
+            btnDownload.innerHTML = '<i class="bi bi-file-earmark-pdf-fill me-1"></i> Baixar PDF';
+        }
+        if (btnShare) btnShare.disabled = false;
+    }
+}
+
+async function compartilharRelatorioAuditoriaPDF() {
+    if (isGeneratingAuditoriaPDF) return;
+    const btnDownload = document.getElementById('btn-auditoria-pdf-download');
+    const btnShare = document.getElementById('btn-auditoria-pdf-share');
+
+    try {
+        isGeneratingAuditoriaPDF = true;
+        if (btnShare) {
+            btnShare.disabled = true;
+            btnShare.innerHTML = '<i class="bi bi-hourglass-split me-1 spinner-border spinner-border-sm"></i> Gerando PDF...';
+        }
+        if (btnDownload) btnDownload.disabled = true;
+
+        const { blob, filename } = await gerarRelatorioAuditoriaPDFBlob();
+        const file = new File([blob], filename, { type: 'application/pdf' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                title: 'Relatório de Auditoria de Logs',
+                text: 'Relatório de Auditoria de Logs de Sistema — Gestão EPI',
+                files: [file]
+            });
+        } else {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+    } catch (err) {
+        if (err.name !== 'AbortError') {
+            console.error('Erro ao compartilhar PDF de Auditoria:', err);
+            alert('Não foi possível compartilhar o PDF. O arquivo será baixado.');
+            await baixarRelatorioAuditoriaPDF();
+        }
+    } finally {
+        isGeneratingAuditoriaPDF = false;
+        if (btnShare) {
+            btnShare.disabled = false;
+            btnShare.innerHTML = '<i class="bi bi-share-fill me-1"></i> Compartilhar PDF';
+        }
+        if (btnDownload) btnDownload.disabled = false;
+    }
+}
+</script>
 
 </body>
 </html>

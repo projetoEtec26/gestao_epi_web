@@ -332,6 +332,12 @@ try {
         <button type="button" class="btn-action btn-print" onclick="window.print()">
             <i class="bi bi-printer-fill"></i> Imprimir / Salvar PDF
         </button>
+        <button type="button" class="btn-action" id="btn-ca-baixar-pdf" onclick="baixarRelatorioValidadeCaPDF(this)" style="background-color:#10B981; color:#FFFFFF;">
+            <i class="bi bi-download"></i> Baixar PDF
+        </button>
+        <button type="button" class="btn-action" id="btn-ca-compartilhar-pdf" onclick="compartilharRelatorioValidadeCaPDF(this)" style="background-color:#8B5CF6; color:#FFFFFF;">
+            <i class="bi bi-share"></i> Compartilhar PDF
+        </button>
         <button type="button" class="btn-action btn-close-view" onclick="window.close(); if(window.opener){window.opener.focus();}else{location.href='relatorios.php';}">
             <i class="bi bi-arrow-left"></i> Voltar
         </button>
@@ -411,5 +417,114 @@ try {
     </div>
 </div>
 
+<!-- html2pdf.js Bundle (Geração Direta de PDF) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+async function gerarRelatorioValidadeCaPDFBlob() {
+    if (typeof html2pdf !== 'function') {
+        throw new Error('A biblioteca de geração de PDF ainda não foi carregada. Tente novamente em instantes.');
+    }
+
+    const element = document.querySelector('.document-container');
+    if (!element) {
+        throw new Error('Elemento do relatório não encontrado.');
+    }
+
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    const mm = pad(now.getMonth() + 1);
+    const dd = pad(now.getDate());
+    const hh = pad(now.getHours());
+    const mi = pad(now.getMinutes());
+    const ss = pad(now.getSeconds());
+    const filename = `relatorio_validade_ca_${yyyy}${mm}${dd}_${hh}${mi}${ss}.pdf`;
+
+    const opt = {
+        margin:       [8, 8, 8, 8],
+        filename:     filename,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    const pdfWorker = html2pdf().set(opt).from(element);
+    const pdfBlob = await pdfWorker.outputPdf('blob');
+
+    return { blob: pdfBlob, filename: filename };
+}
+
+async function baixarRelatorioValidadeCaPDF(btnElement) {
+    const btn = btnElement || document.getElementById('btn-ca-baixar-pdf');
+    const htmlOriginal = btn ? btn.innerHTML : '';
+    const labelCarregando = '<span class="spinner-border spinner-border-sm me-1"></span> Gerando PDF...';
+
+    if (btn) { btn.innerHTML = labelCarregando; btn.disabled = true; }
+
+    try {
+        const result = await gerarRelatorioValidadeCaPDFBlob();
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(result.blob);
+        link.download = result.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+    } catch (err) {
+        console.error('Erro ao gerar PDF do Relatório de C.A.:', err);
+        alert('Não foi possível gerar o PDF. Tente novamente.');
+    } finally {
+        if (btn) { btn.innerHTML = htmlOriginal || '<i class="bi bi-download"></i> Baixar PDF'; btn.disabled = false; }
+    }
+}
+
+async function compartilharRelatorioValidadeCaPDF(btnElement) {
+    const btn = btnElement || document.getElementById('btn-ca-compartilhar-pdf');
+    const htmlOriginal = btn ? btn.innerHTML : '';
+    const labelCarregando = '<span class="spinner-border spinner-border-sm me-1"></span> Preparando...';
+
+    if (btn) { btn.innerHTML = labelCarregando; btn.disabled = true; }
+
+    try {
+        const result = await gerarRelatorioValidadeCaPDFBlob();
+        const pdfFile = new File([result.blob], result.filename, { type: 'application/pdf' });
+
+        const podeCompartilharArquivo = navigator.canShare && navigator.canShare({ files: [pdfFile] });
+
+        if (podeCompartilharArquivo && typeof navigator.share === 'function') {
+            try {
+                await navigator.share({
+                    title: 'Relatório de Validade do C.A.',
+                    text: 'Relatório de Validade e Vencimento de C.A.',
+                    files: [pdfFile]
+                });
+            } catch (shareErr) {
+                if (shareErr.name === 'AbortError' || shareErr.message?.includes('canceled')) {
+                    console.log('Compartilhamento cancelado pelo usuário.');
+                } else {
+                    throw shareErr;
+                }
+            }
+        } else {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(result.blob);
+            link.download = result.filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+
+            alert('O compartilhamento direto não está disponível neste navegador. O PDF foi baixado para que você possa compartilhá-lo manualmente.');
+        }
+    } catch (err) {
+        console.error('Erro ao compartilhar PDF do Relatório de C.A.:', err);
+        alert('Não foi possível gerar o PDF. Tente novamente.');
+    } finally {
+        if (btn) { btn.innerHTML = htmlOriginal || '<i class="bi bi-share"></i> Compartilhar PDF'; btn.disabled = false; }
+    }
+}
+</script>
 </body>
 </html>

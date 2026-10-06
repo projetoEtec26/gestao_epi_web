@@ -408,9 +408,21 @@ $userProfile = $_SESSION['usuario']['usu_perfil'] ?? '';
                 </div>
             </div>
             
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-outline-primary" onclick="imprimirTermo()"><i class="bi bi-printer me-1"></i> Imprimir Termo</button>
+            <div class="modal-footer d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i> Fechar
+                </button>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="button" id="btn-recibo-pdf-download" class="btn btn-danger" onclick="baixarReciboEntregaPDF()">
+                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> <span>Baixar PDF</span>
+                    </button>
+                    <button type="button" id="btn-recibo-pdf-share" class="btn btn-success" onclick="compartilharReciboEntregaPDF()">
+                        <i class="bi bi-share-fill me-1"></i> <span>Compartilhar PDF</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="imprimirTermo()">
+                        <i class="bi bi-printer me-1"></i> Imprimir Termo
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -587,6 +599,170 @@ function imprimirTermo() {
         janela.print();
         janela.close();
     }, 500);
+}
+
+let isGeneratingReciboPDF = false;
+
+function formatarDataTimestampRecibo() {
+    const agora = new Date();
+    const ano = agora.getFullYear();
+    const mes = String(agora.getMonth() + 1).padStart(2, '0');
+    const dia = String(agora.getDate()).padStart(2, '0');
+    const hora = String(agora.getHours()).padStart(2, '0');
+    const min = String(agora.getMinutes()).padStart(2, '0');
+    const seg = String(agora.getSeconds()).padStart(2, '0');
+    return `${ano}${mes}${dia}_${hora}${min}${seg}`;
+}
+
+function obterNomeArquivoReciboPDF() {
+    const entrId = document.getElementById('termo-id')?.innerText || '0';
+    const timestamp = formatarDataTimestampRecibo();
+    return `recibo_entrega_${entrId}_${timestamp}.pdf`;
+}
+
+function gerarReciboEntregaPDFBlob() {
+    return new Promise((resolve, reject) => {
+        const elementoOriginal = document.getElementById('area-impressao-termo');
+        if (!elementoOriginal) {
+            reject(new Error('Elemento do recibo de entrega não encontrado.'));
+            return;
+        }
+
+        const clone = elementoOriginal.cloneNode(true);
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
+        container.style.top = '0';
+        container.style.width = '790px';
+        container.style.background = '#FFFFFF';
+        container.style.padding = '15px';
+        container.appendChild(clone);
+        document.body.appendChild(container);
+
+        const filename = obterNomeArquivoReciboPDF();
+
+        const opt = {
+            margin: [10, 10, 10, 10],
+            filename: filename,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#FFFFFF',
+                windowWidth: 790
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        if (typeof html2pdf !== 'function') {
+            document.body.removeChild(container);
+            reject(new Error('Biblioteca html2pdf não carregada.'));
+            return;
+        }
+
+        html2pdf()
+            .set(opt)
+            .from(clone)
+            .toPdf()
+            .output('blob')
+            .then(blob => {
+                document.body.removeChild(container);
+                resolve({ blob, filename });
+            })
+            .catch(err => {
+                if (document.body.contains(container)) {
+                    document.body.removeChild(container);
+                }
+                reject(err);
+            });
+    });
+}
+
+async function baixarReciboEntregaPDF() {
+    if (isGeneratingReciboPDF) return;
+    const btnDownload = document.getElementById('btn-recibo-pdf-download');
+    const btnShare = document.getElementById('btn-recibo-pdf-share');
+
+    try {
+        isGeneratingReciboPDF = true;
+        if (btnDownload) {
+            btnDownload.disabled = true;
+            btnDownload.innerHTML = '<i class="bi bi-hourglass-split me-1 spinner-border spinner-border-sm"></i> <span>Gerando PDF...</span>';
+        }
+        if (btnShare) btnShare.disabled = true;
+
+        const { blob, filename } = await gerarReciboEntregaPDFBlob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+        console.error('Erro ao gerar PDF do Recibo de Entrega:', err);
+        mostrarToast('Ocorreu um erro ao gerar o PDF do Recibo de Entrega.');
+    } finally {
+        isGeneratingReciboPDF = false;
+        if (btnDownload) {
+            btnDownload.disabled = false;
+            btnDownload.innerHTML = '<i class="bi bi-file-earmark-pdf-fill me-1"></i> <span>Baixar PDF</span>';
+        }
+        if (btnShare) btnShare.disabled = false;
+    }
+}
+
+async function compartilharReciboEntregaPDF() {
+    if (isGeneratingReciboPDF) return;
+    const btnDownload = document.getElementById('btn-recibo-pdf-download');
+    const btnShare = document.getElementById('btn-recibo-pdf-share');
+
+    try {
+        isGeneratingReciboPDF = true;
+        if (btnShare) {
+            btnShare.disabled = true;
+            btnShare.innerHTML = '<i class="bi bi-hourglass-split me-1 spinner-border spinner-border-sm"></i> <span>Gerando PDF...</span>';
+        }
+        if (btnDownload) btnDownload.disabled = true;
+
+        const { blob, filename } = await gerarReciboEntregaPDFBlob();
+        const file = new File([blob], filename, { type: 'application/pdf' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            const entrId = document.getElementById('termo-id')?.innerText || '';
+            const nomeColab = document.getElementById('termo-nome')?.innerText || '';
+            await navigator.share({
+                title: `Recibo de Entrega de EPI nº ${entrId}`,
+                text: `Recibo de Entrega Eletrônica de EPI nº ${entrId} — ${nomeColab}`,
+                files: [file]
+            });
+        } else {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+    } catch (err) {
+        if (err.name !== 'AbortError') {
+            console.error('Erro ao compartilhar PDF do Recibo:', err);
+            mostrarToast('Não foi possível compartilhar o PDF. O arquivo será baixado.');
+            await baixarReciboEntregaPDF();
+        }
+    } finally {
+        isGeneratingReciboPDF = false;
+        if (btnShare) {
+            btnShare.disabled = false;
+            btnShare.innerHTML = '<i class="bi bi-share-fill me-1"></i> <span>Compartilhar PDF</span>';
+        }
+        if (btnDownload) btnDownload.disabled = false;
+    }
 }
 
 
