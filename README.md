@@ -218,6 +218,17 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
 
+### 📅 Versão 8.1.0 (06/10/2026) – Ajuste de Rótulo EPI, Correção do Filtro Status C.A. e Higienização/Padronização de Setores no Banco
+* **Ajuste de Rótulo nos Modais de EPI (`pages/epis.php`):**
+  - Atualizada a rotulagem do campo de `Controle da Vida Útil` para **`Tipo de controle`** nos modais de *Cadastro* (`#modalCadastrar`) e *Edição de EPI* (`#modalEditar`).
+* **Correção do Filtro por Status do C.A. (`pages/epis.php`, `assets/css/style.css`):**
+  - Corrigida a divergência de chave entre a opção do seletor (`vigente`) e o atributo de linha (`data-castatus="vigente"`).
+  - Atualizada a função `aplicarFiltrosEpi()` em JavaScript para tratar os grupos *Vigente* (`vigente`/`ativo`), *Vencido / Próximo* (`vencido`/`a-vencer`) e *Isento de C.A.* (`isento`).
+  - Adicionada a classe `.status-badge.vigente` no CSS para manter o destaque em verde de conformidade.
+* **Higienização de Cadastros de Teste e Padronização de Setores (`tb_funcionario`):**
+  - Removidos 24 funcionários de teste associados a setores inválidos ou temporários (`111`, `teste`, `teste 1-3`, `Compras`, `Indústria`, `Logística`, `Manutenção`, `Projetos`).
+  - Padronizadas as grafias dos departamentos remanescentes para a lista oficial enxuta: `Administrativo`, `Engenharia`, `Gestão`, `Produção`, `Produção - Web` e `RH`.
+
 ### 📅 Versão 8.0.0 (06/10/2026) – Auditorias de Segurança, Validação Funcional Cross-Platform, Paridade Geral Android × Web 14 e Congelamento da Versão 14
 * **Etapa 10 – Auditoria de Segurança da Versão Atual (`gestao_epi_web_14`):**
   - Executada auditoria técnica e de segurança da versão Web 14 em modo READ-ONLY, confirmando 100% de integridade estrutural e ausência de vulnerabilidades de injeção ou exposição de segredos no repositório.
