@@ -495,6 +495,19 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 *   **Coluna Fixa Anti-Corte (Sticky Actions):** A coluna de "Ações" recebeu a propriedade `position: sticky; right: 0;`, garantindo que os botões (Ver e Editar) permaneçam permanentemente visíveis ancorados à direita da tela, resolvendo definitivamente o problema de interface cortada.
 *   **Limpeza da Barra Lateral (`components/sidebar.php`):** Removido o item obsoleto "Pendências de Envio", enxugando as opções de navegação e mantendo foco estrito nas operações essenciais.
 
+### 📅 Versão 7.5.0 (07/10/2026) – Padronização Visual Azul dos Botões de Ação de Relatórios, Correção de PDF/WebShare e Ajustes Multiplataforma
+*   **Padronização Visual em Azul Corporativo (`assets/css/style.css`, `pages/relatorios.php`):**
+    - Padronizada a classe `.btn-rel-acao` para azul corporativo (`#2563eb`) com variação suave em repouso e azul sólido no estado ativo (`.active`), aplicando suporte total ao Dark Mode (`body.dark-mode .btn-rel-acao`).
+    - Alinhamento uniforme das ações em todas as 6 sub-interfaces de relatórios (*Rel. Geral EPIs*, *Rel. Funcionário*, *Rel. EPI*, *C.A. Vencidos*, *Rel. Financeiro* e *Auditoria de Logs*).
+*   **Eliminação de Botões Redundantes (`pages/relatorios.php`):**
+    - Removido o botão duplicado `Baixar PDF` na aba de *Relatório Financeiro*, mantendo foco no botão oficial `Exportar PDF`.
+*   **Correção dos Botões `Imprimir PDF` e `Imprimir Modelo Oficial` (`pages/relatorios.php`, `pages/relatorio_consumo_epi.php`):**
+    - Corrigido erro de sintaxe JS causado pela interpolação de `${APP_ROOT}` e eliminados os bloqueios de pop-up do navegador com a abertura síncrona de janela (`window.open('')`) antes do processamento assíncrono.
+*   **Correção da Web Share API & Geração de PDF Blob (`pages/relatorios.php`):**
+    - Adicionada a função auxiliar `formatarDataBR()` e garantida a injeção do elemento `#pdfContainer` diretamente no `document.body` para o renderizador `html2pdf.js`, solucionando falhas no compartilhamento de PDF.
+*   **Otimização do Filtro de Status de C.A. e Higienização de Setores (`pages/relatorios.php`):**
+    - Atualizado o combo de filtro de C.A. para os status reais (`Vigente`, `Vencido / Próximo`, `Isento`) e higienizada a lista de setores da empresa.
+
 ### 📅 Versão 7.0.0 (05/10/2026) – Paridade 1:1 Dashboard Web × Android (`gestao_epi_8`), Audit Git/GitHub (Commit `19299fa`) e Homologação em Produção Locaweb (`http://gestaoepi.tecnologia.ws/`)
 *   **Paridade 1:1 de Regras de Negócio do Dashboard Web com o Android (`gestao_epi_8`):**
     - **Card 1 (EPIs Vencidos):** Consolidação dos equipamentos com Certificado de Aprovação (C.A.) vencidos no estoque com os equipamentos em uso ativo com Vida Útil vencida (5 itens: 2 C.A. + 3 Vida Útil).
