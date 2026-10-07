@@ -703,7 +703,7 @@ require_once __DIR__ . '/../components/sidebar.php';
                                         $caStatus = 'a-vencer';
                                         $caStatusLabel = 'A vencer';
                                     } else {
-                                        $caStatus = 'ativo';
+                                        $caStatus = 'vigente';
                                         $caStatusLabel = 'Vigente';
                                     }
                                 }
@@ -1507,7 +1507,19 @@ function aplicarFiltrosEpi() {
         }
 
         const bateTipo = (tipo === '' || rTipo === tipo);
-        const bateCaStatus = (caStatus === '' || rCaStatus === caStatus);
+        
+        let bateCaStatus = false;
+        if (caStatus === '') {
+            bateCaStatus = true;
+        } else if (caStatus === 'vigente') {
+            bateCaStatus = (rCaStatus === 'vigente' || rCaStatus === 'ativo');
+        } else if (caStatus === 'vencido') {
+            bateCaStatus = (rCaStatus === 'vencido' || rCaStatus === 'a-vencer');
+        } else if (caStatus === 'isento') {
+            bateCaStatus = (rCaStatus === 'isento');
+        } else {
+            bateCaStatus = (rCaStatus === caStatus);
+        }
 
         if (bateBusca && bateTipo && bateCaStatus) {
             row.style.display = '';

@@ -750,7 +750,8 @@ body.dark-mode .card-custom:hover {
     gap: 6px;
 }
 
-.status-badge.ativo {
+.status-badge.ativo,
+.status-badge.vigente {
     background-color: rgba(16, 185, 129, 0.12);
     color: var(--color-success);
 }
