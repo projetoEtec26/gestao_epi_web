@@ -2647,6 +2647,16 @@ async function imprimirRelatorioGeral() {
 /**
  * PILOTO ETAPA 3C: Função auxiliar unificada que gera o Blob do PDF do Relatório Geral de EPIs
  */
+function formatarDataBR(str) {
+    if (!str) return '---';
+    const partes = String(str).split('-');
+    if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    return str;
+}
+
+/**
+ * PILOTO ETAPA 3C: Função auxiliar unificada que gera o Blob do PDF do Relatório Geral de EPIs
+ */
 async function gerarRelatorioGeralPDFBlob() {
     if (typeof html2pdf !== 'function') {
         throw new Error('A biblioteca de geração de PDF ainda não foi carregada. Tente novamente em instantes.');
@@ -2660,6 +2670,7 @@ async function gerarRelatorioGeralPDFBlob() {
         throw new Error('CONSULTA_CANCELADA');
     }
 
+    let pdfContainer = null;
     try {
         const res = await fetch(`${PROXY_URL}?route=relatorios/epis/geral&${queryString}`).then(r => r.json());
         if (!res.success || !res.data) {
@@ -2671,12 +2682,15 @@ async function gerarRelatorioGeralPDFBlob() {
         const ind = dados.indicadores || {};
 
         // Montar container de documento limpo e formatado especificamente para o PDF
-        const pdfContainer = document.createElement('div');
+        pdfContainer = document.createElement('div');
+        pdfContainer.style.position = 'absolute';
+        pdfContainer.style.left = '-9999px';
+        pdfContainer.style.top = '0';
         pdfContainer.style.padding = '15px';
         pdfContainer.style.fontFamily = 'Arial, sans-serif';
         pdfContainer.style.color = '#0f172a';
         pdfContainer.style.backgroundColor = '#ffffff';
-        pdfContainer.style.width = '100%';
+        pdfContainer.style.width = '1100px';
 
         const dataEmissaoStr = new Date().toLocaleString('pt-BR');
         const dataInicioFiltro = document.getElementById('geral-data-inicio')?.value || '';
@@ -2782,6 +2796,7 @@ async function gerarRelatorioGeralPDFBlob() {
         `;
 
         pdfContainer.innerHTML = pdfHeaderHtml + pdfKpisHtml + pdfTabelaHtml + pdfFooterHtml;
+        document.body.appendChild(pdfContainer);
 
         // Padrão de Nome do Arquivo: relatorio_geral_epi_YYYYMMDD_HHMMSS.pdf
         const now = new Date();
@@ -2808,6 +2823,9 @@ async function gerarRelatorioGeralPDFBlob() {
 
         return { blob: pdfBlob, filename: filename };
     } finally {
+        if (pdfContainer && pdfContainer.parentNode) {
+            pdfContainer.parentNode.removeChild(pdfContainer);
+        }
         geralPaginaAtual = paginaAtual;
     }
 }
