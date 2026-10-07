@@ -93,28 +93,9 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
             <div class="col-12">
                 <!-- Relatório 0: Relatório Geral de Fornecimento de EPIs -->
                 <div class="card-custom painel-relatorio <?= $tipoInicial === 'geral' ? '' : 'd-none' ?>" id="painel-geral">
-                    <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
-                        <div>
-                            <h5 class="fw-bold mb-1 text-color-primary">Relatório Geral de Fornecimento de EPIs</h5>
-                            <p class="text-muted m-0" style="font-size: 13px;">Consolidação gerencial de todos os fornecimentos de EPIs realizados no período, com indicadores, agrupamentos e registros detalhados.</p>
-                        </div>
-                        <div class="d-flex gap-2 align-items-center flex-wrap">
-                            <button type="button" class="btn btn-rel-acao" onclick="exportarCSV()">
-                                <i class="bi bi-file-earmark-excel"></i> EXPORTAR EXCEL / CSV
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" onclick="imprimirRelatorioGeral()">
-                                <i class="bi bi-clipboard-check"></i> EXPORTAR PDF
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" id="btn-geral-baixar-pdf-top" onclick="baixarRelatorioGeralPDF(this)">
-                                <i class="bi bi-download"></i> Baixar PDF
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" id="btn-geral-compartilhar-pdf-top" onclick="compartilharRelatorioGeralPDF(this)">
-                                <i class="bi bi-share"></i> Compartilhar PDF
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" onclick="abrirModeloOficial('geral')">
-                                <i class="bi bi-printer"></i> Imprimir PDF
-                            </button>
-                        </div>
+                    <div class="mb-3">
+                        <h5 class="fw-bold mb-1 text-color-primary">Relatório Geral de Fornecimento de EPIs</h5>
+                        <p class="text-muted m-0" style="font-size: 13px;">Consolidação gerencial de todos os fornecimentos de EPIs realizados no período, com indicadores, agrupamentos e registros detalhados.</p>
                     </div>
 
                     <div class="row g-3">
@@ -217,19 +198,8 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
 
                 <!-- Relatório 1: Entregas Gerais (Rel. Funcionário / Ficha Individual de EPIs) -->
                 <div class="card-custom painel-relatorio <?= $tipoInicial === 'entregas' ? '' : 'd-none' ?>" id="painel-entregas">
-                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div class="mb-3">
                         <h5 class="fw-bold m-0 text-color-primary">Ficha Individual de EPIs (Ficha de Entrega) — Histórico Geral</h5>
-                        <div class="d-flex gap-2 align-items-center flex-wrap">
-                            <button type="button" class="btn btn-rel-acao" onclick="exportarCSV()">
-                                <i class="bi bi-file-earmark-excel"></i> EXPORTAR EXCEL / CSV
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" onclick="imprimirRelatorio()">
-                                <i class="bi bi-clipboard-check"></i> EXPORTAR PDF
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" onclick="imprimirRelatorio()">
-                                <i class="bi bi-printer"></i> Imprimir PDF
-                            </button>
-                        </div>
                     </div>
                     <div class="row g-3 mb-3">
                         <div class="col-md-6 col-lg-6">
@@ -286,22 +256,9 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
 
                 <!-- Relatório 2: Relatório de Consumo por Equipamento (EPI) (Rel. EPI) -->
                 <div class="card-custom painel-relatorio <?= $tipoInicial === 'epis-vencidos' || $tipoInicial === 'epi' ? '' : 'd-none' ?>" id="painel-epis-vencidos">
-                    <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
-                        <div>
-                            <h5 class="fw-bold mb-1 text-color-primary"><i class="bi bi-shield-check me-2 text-primary"></i>Relatório de Consumo por Equipamento (EPI)</h5>
-                            <p class="text-muted m-0" style="font-size: 13px;">Consulte o consumo detalhado e o histórico de fornecimento de equipamentos por item individual ou visão geral consolidada.</p>
-                        </div>
-                        <div class="d-flex gap-2 align-items-center flex-wrap">
-                            <button type="button" class="btn btn-rel-acao" onclick="acaoExportarCSVConsumoEpi()">
-                                <i class="bi bi-file-earmark-excel"></i> EXPORTAR EXCEL / CSV
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" onclick="acaoExportarPdfConsumoEpi()">
-                                <i class="bi bi-clipboard-check"></i> EXPORTAR PDF
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" onclick="acaoExportarPdfConsumoEpi()">
-                                <i class="bi bi-printer"></i> Imprimir PDF
-                            </button>
-                        </div>
+                    <div class="mb-3">
+                        <h5 class="fw-bold mb-1 text-color-primary"><i class="bi bi-shield-check me-2 text-primary"></i>Relatório de Consumo por Equipamento (EPI)</h5>
+                        <p class="text-muted m-0" style="font-size: 13px;">Consulte o consumo detalhado e o histórico de fornecimento de equipamentos por item individual ou visão geral consolidada.</p>
                     </div>
 
                     <!-- Selecione o tipo de relatório -->
@@ -400,25 +357,9 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
 
                 <!-- Relatório 3: C.A. Vencidos -->
                 <div class="card-custom painel-relatorio <?= $tipoInicial === 'ca-vencidos' ? '' : 'd-none' ?>" id="painel-ca-vencidos">
-                    <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
-                        <div>
-                            <h5 class="fw-bold mb-1 text-color-primary">EPIs com C.A. Vencido no Catálogo</h5>
-                            <p class="text-muted m-0" style="font-size: 13px;">Identifica equipamentos de proteção cuja validade do Certificado de Aprovação (C.A.) no Ministério do Trabalho expirou, impossibilitando novos fornecimentos.</p>
-                        </div>
-                        <div class="d-flex gap-2 align-items-center flex-wrap">
-                            <button type="button" class="btn btn-rel-acao" onclick="exportarCSV()">
-                                <i class="bi bi-file-earmark-excel"></i> EXPORTAR EXCEL / CSV
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" id="btn-ca-top-baixar-pdf" onclick="baixarRelatorioCaPanelPDF(this)">
-                                <i class="bi bi-download"></i> Baixar PDF
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" id="btn-ca-top-compartilhar-pdf" onclick="compartilharRelatorioCaPanelPDF(this)">
-                                <i class="bi bi-share"></i> Compartilhar PDF
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" onclick="imprimirRelatorio()">
-                                <i class="bi bi-printer"></i> Imprimir PDF
-                            </button>
-                        </div>
+                    <div class="mb-3">
+                        <h5 class="fw-bold mb-1 text-color-primary">EPIs com C.A. Vencido no Catálogo</h5>
+                        <p class="text-muted m-0" style="font-size: 13px;">Identifica equipamentos de proteção cuja validade do Certificado de Aprovação (C.A.) no Ministério do Trabalho expirou, impossibilitando novos fornecimentos.</p>
                     </div>
                     <div class="d-flex gap-2 col-md-12 mb-4 flex-wrap">
                         <button class="btn btn-primary" onclick="gerarRelatorioCaVencidos()"><i class="bi bi-play-fill me-1"></i> Carregar Relatório</button>
@@ -430,22 +371,9 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
 
                 <!-- Relatório 4: Custos Consolidados (Rel. Financeiro) -->
                 <div class="card-custom painel-relatorio <?= $tipoInicial === 'custos' ? '' : 'd-none' ?>" id="painel-custos">
-                    <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
-                        <div>
-                            <h5 class="fw-bold mb-1 text-color-primary"><i class="bi bi-currency-dollar me-2 text-success"></i>Relatório Financeiro de EPIs por Período</h5>
-                            <p class="text-muted m-0" style="font-size: 13px;">Consolidação financeira detalhada de investimentos em EPIs por centro de custos, departamentos e valores médios com gráficos analíticos.</p>
-                        </div>
-                        <div class="d-flex gap-2 align-items-center flex-wrap">
-                            <button type="button" class="btn btn-rel-acao" onclick="exportarCSV()">
-                                <i class="bi bi-file-earmark-excel"></i> EXPORTAR EXCEL / CSV
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" onclick="imprimirRelatorio()">
-                                <i class="bi bi-clipboard-check"></i> EXPORTAR PDF
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" onclick="imprimirRelatorio()">
-                                <i class="bi bi-printer"></i> Imprimir PDF
-                            </button>
-                        </div>
+                    <div class="mb-3">
+                        <h5 class="fw-bold mb-1 text-color-primary"><i class="bi bi-currency-dollar me-2 text-success"></i>Relatório Financeiro de EPIs por Período</h5>
+                        <p class="text-muted m-0" style="font-size: 13px;">Consolidação financeira detalhada de investimentos em EPIs por centro de custos, departamentos e valores médios com gráficos analíticos.</p>
                     </div>
 
                     <div class="row g-3">
@@ -554,22 +482,9 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
 
                 <!-- Relatório 5: Auditoria de Logs de Sistema (Modelo v2) -->
                 <div class="card-custom painel-relatorio <?= $tipoInicial === 'auditoria' ? '' : 'd-none' ?>" id="painel-auditoria">
-                    <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
-                        <div>
-                            <h5 class="fw-bold mb-1 text-color-primary">Relatório de Auditoria de Logs de Sistema</h5>
-                            <p class="text-muted m-0" style="font-size: 13px;">Geração e exportação do relatório oficial de auditoria, rastreando operações, usuários, entidades e descrições detalhadas (Modelo v2 em A4 Paisagem).</p>
-                        </div>
-                        <div class="d-flex gap-2 align-items-center flex-wrap">
-                            <button type="button" class="btn btn-rel-acao" onclick="exportarCSV()">
-                                <i class="bi bi-file-earmark-excel"></i> EXPORTAR EXCEL / CSV
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" onclick="abrirImpressaoAuditoriaV2()">
-                                <i class="bi bi-clipboard-check"></i> EXPORTAR PDF
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" onclick="abrirImpressaoAuditoriaV2()">
-                                <i class="bi bi-printer"></i> Imprimir PDF
-                            </button>
-                        </div>
+                    <div class="mb-3">
+                        <h5 class="fw-bold mb-1 text-color-primary">Relatório de Auditoria de Logs de Sistema</h5>
+                        <p class="text-muted m-0" style="font-size: 13px;">Geração e exportação do relatório oficial de auditoria, rastreando operações, usuários, entidades e descrições detalhadas (Modelo v2 em A4 Paisagem).</p>
                     </div>
 
                     <div class="row g-3 mb-3">
@@ -630,19 +545,8 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
 
                 <!-- Painel de Resultados Comum -->
                 <div class="card-custom mt-4 d-none" id="bloco-resultados">
-                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div class="mb-3">
                         <h5 class="fw-bold m-0 text-color-primary" id="titulo-resultados">Resultados do Relatório</h5>
-                        <div class="d-flex gap-2 align-items-center flex-wrap">
-                            <button type="button" class="btn btn-rel-acao" onclick="exportarCSV()">
-                                <i class="bi bi-file-earmark-excel"></i> EXPORTAR EXCEL / CSV
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" onclick="imprimirRelatorio()">
-                                <i class="bi bi-clipboard-check"></i> EXPORTAR PDF
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" onclick="imprimirRelatorio()">
-                                <i class="bi bi-printer"></i> Imprimir PDF
-                            </button>
-                        </div>
                     </div>
 
                     <!-- Agrupamentos exclusivos do Relatório Geral -->
