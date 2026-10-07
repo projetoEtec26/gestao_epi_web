@@ -239,10 +239,10 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                     </div>
 
                     <div class="d-flex gap-2 justify-content-end align-items-center mt-3 flex-wrap">
-                        <button type="button" class="btn btn-primary px-4 py-2 fw-semibold" style="height:42px; border-radius:10px;" onclick="gerarRelatorioEntregas()">
+                        <button type="button" class="btn btn-rel-acao active" onclick="gerarRelatorioEntregas()">
                             <i class="bi bi-play-fill me-1"></i> Carregar Relatório
                         </button>
-                        <button type="button" class="btn btn-outline-primary px-4 py-2 fw-semibold text-nowrap" style="height:42px; border-radius:10px;" onclick="abrirModeloOficial('ficha')">
+                        <button type="button" class="btn btn-rel-acao text-nowrap" onclick="abrirModeloOficial('ficha')">
                             <i class="bi bi-file-earmark-person me-1"></i> Ficha NR-06 (Modelo Oficial)
                         </button>
                     </div>
@@ -355,11 +355,11 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                         <h5 class="fw-bold mb-1 text-color-primary">EPIs com C.A. Vencido no Catálogo</h5>
                         <p class="text-muted m-0" style="font-size: 13px;">Identifica equipamentos de proteção cuja validade do Certificado de Aprovação (C.A.) no Ministério do Trabalho expirou, impossibilitando novos fornecimentos.</p>
                     </div>
-                    <div class="d-flex gap-2 col-md-12 mb-4 flex-wrap">
-                        <button class="btn btn-primary" onclick="gerarRelatorioCaVencidos()"><i class="bi bi-play-fill me-1"></i> Carregar Relatório</button>
-                        <button class="btn btn-outline-primary text-nowrap" id="btn-ca-panel-baixar-pdf" onclick="baixarRelatorioCaPanelPDF(this)"><i class="bi bi-download me-1"></i> Baixar PDF</button>
-                        <button class="btn btn-outline-primary text-nowrap" id="btn-ca-panel-compartilhar-pdf" onclick="compartilharRelatorioCaPanelPDF(this)"><i class="bi bi-share me-1"></i> Compartilhar PDF</button>
-                        <button class="btn btn-outline-primary" onclick="abrirModeloOficial('ca')"><i class="bi bi-printer me-1"></i> Imprimir Modelo Oficial</button>
+                    <div class="d-flex gap-2 col-md-12 mb-4 flex-wrap justify-content-end">
+                        <button type="button" class="btn btn-rel-acao active" onclick="gerarRelatorioCaVencidos()"><i class="bi bi-play-fill me-1"></i> Carregar Relatório</button>
+                        <button type="button" class="btn btn-rel-acao text-nowrap" id="btn-ca-panel-baixar-pdf" onclick="baixarRelatorioCaPanelPDF(this)"><i class="bi bi-download me-1"></i> Baixar PDF</button>
+                        <button type="button" class="btn btn-rel-acao text-nowrap" id="btn-ca-panel-compartilhar-pdf" onclick="compartilharRelatorioCaPanelPDF(this)"><i class="bi bi-share me-1"></i> Compartilhar PDF</button>
+                        <button type="button" class="btn btn-rel-acao" onclick="abrirModeloOficial('ca')"><i class="bi bi-printer me-1"></i> Imprimir Modelo Oficial</button>
                     </div>
                 </div>
 
@@ -415,10 +415,10 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                             </div>
                         </div>
                         <div class="col-md-12 d-flex gap-2 justify-content-end mt-3 flex-wrap">
-                            <button class="btn btn-primary px-4" onclick="gerarRelatorioCustos()"><i class="bi bi-play-fill me-1"></i> Consultar Relatório Financeiro</button>
-                            <button class="btn btn-outline-primary text-nowrap" id="btn-custos-baixar-pdf" onclick="baixarRelatorioCustosPDF(this)"><i class="bi bi-download me-1"></i> Baixar PDF</button>
-                            <button class="btn btn-outline-primary text-nowrap" id="btn-custos-compartilhar-pdf" onclick="compartilharRelatorioCustosPDF(this)"><i class="bi bi-share me-1"></i> Compartilhar PDF</button>
-                            <button class="btn btn-outline-primary text-nowrap" onclick="abrirModeloOficial('custos')"><i class="bi bi-printer me-1"></i> Imprimir Demonstrativo A4</button>
+                            <button type="button" class="btn btn-rel-acao active" onclick="gerarRelatorioCustos()"><i class="bi bi-play-fill me-1"></i> Consultar Relatório Financeiro</button>
+                            <button type="button" class="btn btn-rel-acao text-nowrap" id="btn-custos-baixar-pdf" onclick="baixarRelatorioCustosPDF(this)"><i class="bi bi-download me-1"></i> Baixar PDF</button>
+                            <button type="button" class="btn btn-rel-acao text-nowrap" id="btn-custos-compartilhar-pdf" onclick="compartilharRelatorioCustosPDF(this)"><i class="bi bi-share me-1"></i> Compartilhar PDF</button>
+                            <button type="button" class="btn btn-rel-acao text-nowrap" onclick="abrirModeloOficial('custos')"><i class="bi bi-printer me-1"></i> Imprimir Demonstrativo A4</button>
                         </div>
                     </div>
 
@@ -531,8 +531,8 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                             <input type="text" id="auditoria-palavra-chave" class="form-control" placeholder="Buscar por palavra-chave na descrição da ocorrência...">
                         </div>
                         <div class="col-md-5 d-flex gap-2">
-                            <button class="btn btn-primary w-100" onclick="gerarRelatorioAuditoria()"><i class="bi bi-search me-1"></i> Consultar</button>
-                            <button class="btn btn-outline-primary w-100" onclick="abrirImpressaoAuditoriaV2()"><i class="bi bi-printer me-1"></i> Imprimir (v2)</button>
+                            <button type="button" class="btn btn-rel-acao active w-100 justify-content-center" onclick="gerarRelatorioAuditoria()"><i class="bi bi-search me-1"></i> Consultar</button>
+                            <button type="button" class="btn btn-rel-acao w-100 justify-content-center text-nowrap" onclick="abrirImpressaoAuditoriaV2()"><i class="bi bi-printer me-1"></i> Imprimir (v2)</button>
                         </div>
                     </div>
                 </div>

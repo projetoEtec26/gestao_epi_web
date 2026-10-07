@@ -1128,16 +1128,16 @@ body.dark-mode .modo-card.active-modo {
     color: #ffffff !important;
 }
 
-/* Botões de Ação do Relatório de Consumo (Consultar, Exportar PDF, Imprimir Modelo Oficial) */
+/* Botões de Ação dos Relatórios (Consultar, Exportar PDF, Imprimir Modelo Oficial) */
 .btn-rel-acao {
     height: 42px !important;
     padding: 0 18px !important;
     font-size: 13px !important;
     font-weight: 600 !important;
     border-radius: 8px !important;
-    border: 1.5px solid #cbd5e1 !important;
+    border: 1.5px solid #2563eb !important;
     background-color: #ffffff !important;
-    color: #334155 !important;
+    color: #2563eb !important;
     display: inline-flex !important;
     align-items: center !important;
     gap: 8px !important;
@@ -1146,17 +1146,25 @@ body.dark-mode .modo-card.active-modo {
     box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
 }
 
+.btn-rel-acao i {
+    color: #2563eb !important;
+}
+
 .btn-rel-acao:hover {
-    background-color: #f1f5f9 !important;
-    border-color: #94a3b8 !important;
-    color: #0f172a !important;
+    background-color: #eff6ff !important;
+    border-color: #1d4ed8 !important;
+    color: #1d4ed8 !important;
+}
+
+.btn-rel-acao:hover i {
+    color: #1d4ed8 !important;
 }
 
 .btn-rel-acao.active {
-    background-color: #475569 !important;
-    border-color: #334155 !important;
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(71, 85, 105, 0.2) !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
 }
 
 .btn-rel-acao.active i {
@@ -1165,18 +1173,31 @@ body.dark-mode .modo-card.active-modo {
 
 body.dark-mode .btn-rel-acao {
     background-color: #1e293b !important;
-    border-color: #334155 !important;
-    color: #f8fafc !important;
+    border-color: #3b82f6 !important;
+    color: #60a5fa !important;
+}
+
+body.dark-mode .btn-rel-acao i {
+    color: #60a5fa !important;
 }
 
 body.dark-mode .btn-rel-acao:hover {
-    background-color: #334155 !important;
+    background-color: rgba(59, 130, 246, 0.2) !important;
+    border-color: #60a5fa !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .btn-rel-acao:hover i {
     color: #ffffff !important;
 }
 
 body.dark-mode .btn-rel-acao.active {
-    background-color: #475569 !important;
-    border-color: #64748b !important;
+    background-color: #2563eb !important;
+    border-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .btn-rel-acao.active i {
     color: #ffffff !important;
 }
 
