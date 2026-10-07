@@ -1102,21 +1102,19 @@ async function acaoExportarCSVConsumoEpi() {
     }
 }
 
-async function acaoExportarPdfConsumoEpi() {
-    const res = await gerarRelatorioConsumoEpi();
-    if (res !== false) {
-        exportarPdfConsumoEpi();
+function acaoExportarPdfConsumoEpi() {
+    if (abrirModeloConsumoEpi(true)) {
+        gerarRelatorioConsumoEpi();
     }
 }
 
-async function acaoImprimirModeloConsumoEpi() {
-    const res = await gerarRelatorioConsumoEpi();
-    if (res !== false) {
-        abrirModeloConsumoEpi();
+function acaoImprimirModeloConsumoEpi() {
+    if (abrirModeloConsumoEpi(false)) {
+        gerarRelatorioConsumoEpi();
     }
 }
 
-async function abrirModeloConsumoEpi(autoprint = false) {
+function abrirModeloConsumoEpi(autoprint = false) {
     let epiIdInput = document.getElementById('epi-consumo-id');
     const dataInicioInput = document.getElementById('epi-consumo-data-inicio');
     const dataFimInput = document.getElementById('epi-consumo-data-fim');
@@ -1151,17 +1149,18 @@ async function abrirModeloConsumoEpi(autoprint = false) {
 
     if (modoEpiAtual === 'especifico' && !epiId) {
         alert('Por favor, busque e selecione um EPI específico ou altere o modo para "Todos os EPIs".');
-        return;
+        return false;
     }
     
-    let url = `${APP_ROOT}pages/relatorio_consumo_epi.php?data_inicial=${dataInicio}&data_final=${dataFim}&data_inicio=${dataInicio}&data_fim=${dataFim}`;
+    let url = `relatorio_consumo_epi.php?data_inicial=${encodeURIComponent(dataInicio)}&data_final=${encodeURIComponent(dataFim)}&data_inicio=${encodeURIComponent(dataInicio)}&data_fim=${encodeURIComponent(dataFim)}`;
     if (modoEpiAtual === 'especifico' && epiId) {
-        url += `&epi_id=${epiId}`;
+        url += `&epi_id=${encodeURIComponent(epiId)}`;
     }
     if (autoprint) {
         url += `&autoprint=1`;
     }
     window.open(url, '_blank');
+    return true;
 }
 
 function gerarRelatorioEpisVencidos() {
