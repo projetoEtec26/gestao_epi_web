@@ -174,12 +174,6 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                             <button type="button" class="btn btn-rel-acao" id="btn-acao-geral-csv" onclick="ativarBotaoAcaoRelGeral(this); exportarCSV();">
                                 <i class="bi bi-file-earmark-excel"></i> EXPORTAR EXCEL / CSV
                             </button>
-                            <button type="button" class="btn btn-rel-acao" id="btn-acao-geral-pdf" onclick="ativarBotaoAcaoRelGeral(this); imprimirRelatorioGeral();">
-                                <i class="bi bi-printer"></i> Imprimir PDF
-                            </button>
-                            <button type="button" class="btn btn-rel-acao" id="btn-acao-geral-baixar-pdf" onclick="ativarBotaoAcaoRelGeral(this); baixarRelatorioGeralPDF(this);">
-                                <i class="bi bi-download"></i> Baixar PDF
-                            </button>
                             <button type="button" class="btn btn-rel-acao" id="btn-acao-geral-compartilhar-pdf" onclick="ativarBotaoAcaoRelGeral(this); compartilharRelatorioGeralPDF(this);">
                                 <i class="bi bi-share"></i> Compartilhar PDF
                             </button>
