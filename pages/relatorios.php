@@ -1100,7 +1100,7 @@ function acaoExportarPdfConsumoEpi() {
 }
 
 function acaoImprimirModeloConsumoEpi() {
-    abrirModeloConsumoEpi(false);
+    abrirModeloConsumoEpi(true);
 }
 
 function abrirModeloConsumoEpi(autoprint = false) {
@@ -2029,7 +2029,7 @@ function abrirModeloOficial(tipo) {
         const query = params.toString();
         window.open('relatorio_financeiro.php' + (query ? '?' + query : ''), '_blank');
     } else if (tipo === 'consumo') {
-        window.open('relatorio_consumo_epi.php', '_blank');
+        abrirModeloConsumoEpi(true);
     }
 }
 
