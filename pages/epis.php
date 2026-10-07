@@ -990,7 +990,7 @@ require_once __DIR__ . '/../components/sidebar.php';
                 <!-- Vida Útil -->
                 <div class="row">
                     <div class="col-md-4 mb-3">
-                        <label class="form-label">Tipo e controle</label>
+                        <label class="form-label">Tipo de controle</label>
                         <select class="form-select" name="epi_vida_util_tipo" id="cad-vida-util-tipo" onchange="toggleVidaUtil('cad')">
                             <option value="CONTROLADO">Controlado</option>
                             <option value="ILIMITADO">Ilimitado / Não controlado</option>
@@ -1124,7 +1124,7 @@ require_once __DIR__ . '/../components/sidebar.php';
                 <!-- Vida Útil -->
                 <div class="row">
                     <div class="col-md-4 mb-3">
-                        <label class="form-label">Tipo e controle</label>
+                        <label class="form-label">Tipo de controle</label>
                         <select class="form-select" name="epi_vida_util_tipo" id="edit-vida-util-tipo" onchange="toggleVidaUtil('edit')">
                             <option value="CONTROLADO">Controlado</option>
                             <option value="ILIMITADO">Ilimitado / Não controlado</option>
