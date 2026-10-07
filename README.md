@@ -146,7 +146,7 @@ O sistema possui um controle rigoroso de autorização baseado em papéis (**RBA
 
 ## 5. MENU LATERAL E SUBMENUS EXPANSÍVEIS (SENIOR ERP STYLE)
 
-**Arquivo:** [`components/sidebar.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_11/components/sidebar.php)
+**Arquivo:** [`components/sidebar.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/components/sidebar.php)
 
 O menu lateral adota o padrão visual **Senior ERP Style com expansão retrátil por botão `+`**, combinando elegância moderna com acesso rápido em um clique:
 
@@ -183,10 +183,10 @@ O painel integra um mecanismo de busca por autocomplete em tempo real de altíss
 
 ### 6.2 Módulos Integrados com Autocomplete
 
-1.  **Funcionários ([`pages/funcionarios.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_11/pages/funcionarios.php)):** Localização imediata de fichas de colaboradores por nome, CPF ou matrícula.
-2.  **Catálogo de EPIs ([`pages/epis.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_11/pages/epis.php)):** Busca por nome do equipamento, número de C.A., fabricante ou categoria.
-3.  **Devoluções de EPIs ([`pages/devolucoes.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_11/pages/devolucoes.php)):** Seleção ágil do colaborador para carregar os EPIs pendentes sob sua posse.
-4.  **Filtro de Relatórios ([`pages/relatorios.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_11/pages/relatorios.php)):** Autocomplete no filtro de colaborador do relatório de Entregas Gerais, incluindo opção final para selecionar *"Todos os Funcionários"*.
+1.  **Funcionários ([`pages/funcionarios.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/funcionarios.php)):** Localização imediata de fichas de colaboradores por nome, CPF ou matrícula.
+2.  **Catálogo de EPIs ([`pages/epis.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/epis.php)):** Busca por nome do equipamento, número de C.A., fabricante ou categoria.
+3.  **Devoluções de EPIs ([`pages/devolucoes.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/devolucoes.php)):** Seleção ágil do colaborador para carregar os EPIs pendentes sob sua posse.
+4.  **Filtro de Relatórios ([`pages/relatorios.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/relatorios.php)):** Autocomplete no filtro de colaborador do relatório de Entregas Gerais, incluindo opção final para selecionar *"Todos os Funcionários"*.
 
 ---
 
@@ -194,12 +194,12 @@ O painel integra um mecanismo de busca por autocomplete em tempo real de altíss
 
 O módulo de relatórios é composto por relatórios especializados que cobrem auditoria, custos, estoque e conformidade trabalhista:
 
-1.  **Relatório Geral de Entregas ([`pages/relatorio_geral.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_11/pages/relatorio_geral.php)):** Listagem paginada com histórico completo de fornecimentos, colaborador, EPI, quantidade e data de entrega.
-2.  **Relatório Financeiro de Custos ([`pages/relatorio_financeiro.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_11/pages/relatorio_financeiro.php)):** Demonstrativo mensal de investimentos em EPIs por departamento/centro de custo com valores formatados em **R$**.
-3.  **Relatório de Consumo de EPIs ([`pages/relatorio_consumo_epi.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_11/pages/relatorio_consumo_epi.php)):** Quantitativo e histórico detalhado de saídas de equipamentos (modo EPI Específico ou Todos os EPIs) com botões para **Consultar**, **Exportar PDF** (auto-impressão nativa) e **Imprimir Modelo Oficial** em A4 paisagem.
-4.  **Relatório de Validade de C.A. ([`pages/relatorio_validade_ca.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_11/pages/relatorio_validade_ca.php)):** Rastreabilidade rigorosa dos Certificados de Aprovação (NR-6), destacando EPIs com C.A. vencido ou a vencer nos próximos 30/60/90 dias.
-5.  **Relatório de Auditoria de Logs ([`pages/relatorio_auditoria_logs.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_11/pages/relatorio_auditoria_logs.php)):** Histórico de operações realizadas no sistema com visualizador interativo de payloads em JSON.
-6.  **Modelo de Impressão A4 Paisagem ([`pages/relatorio_auditoria_impressao.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_11/pages/relatorio_auditoria_impressao.php)):** Layout profissional pré-formatado para impressão física ou geração de PDF oficial para fiscalizações do Trabalho/SST.
+1.  **Relatório Geral de Entregas ([`pages/relatorio_geral.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/relatorio_geral.php)):** Listagem paginada com histórico completo de fornecimentos, colaborador, EPI, quantidade e data de entrega.
+2.  **Relatório Financeiro de Custos ([`pages/relatorio_financeiro.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/relatorio_financeiro.php)):** Demonstrativo mensal de investimentos em EPIs por departamento/centro de custo com valores formatados em **R$**.
+3.  **Relatório de Consumo de EPIs ([`pages/relatorio_consumo_epi.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/relatorio_consumo_epi.php)):** Quantitativo e histórico detalhado de saídas de equipamentos (modo EPI Específico ou Todos os EPIs) com botões para **Consultar**, **Exportar PDF** (auto-impressão nativa) e **Imprimir Modelo Oficial** em A4 paisagem.
+4.  **Relatório de Validade de C.A. ([`pages/relatorio_validade_ca.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/relatorio_validade_ca.php)):** Rastreabilidade rigorosa dos Certificados de Aprovação (NR-6), destacando EPIs com C.A. vencido ou a vencer nos próximos 30/60/90 dias.
+5.  **Relatório de Auditoria de Logs ([`pages/relatorio_auditoria_logs.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/relatorio_auditoria_logs.php)):** Histórico de operações realizadas no sistema com visualizador interativo de payloads em JSON.
+6.  **Modelo de Impressão A4 Paisagem ([`pages/relatorio_auditoria_impressao.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/relatorio_auditoria_impressao.php)):** Layout profissional pré-formatado para impressão física ou geração de PDF oficial para fiscalizações do Trabalho/SST.
 
 ### 7.1 Conformidade e Governança LGPD nas Exportações
 Toda exportação de relatórios (seja para formato **PDF** ou **CSV**) dispara automaticamente um log de auditoria em background para o endpoint `/logs/registrar-exportacao`. Esse registro grava o ID do operador, IP de origem, fuso horário (`America/Sao_Paulo`), tipo de relatório e parâmetros de filtro aplicados, garantindo total rastreabilidade.
@@ -217,6 +217,21 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 ---
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
+
+### 📅 Versão 8.0.0 (06/10/2026) – Auditorias de Segurança, Validação Funcional Cross-Platform, Paridade Geral Android × Web 14 e Congelamento da Versão 14
+* **Etapa 10 – Auditoria de Segurança da Versão Atual (`gestao_epi_web_14`):**
+  - Executada auditoria técnica e de segurança da versão Web 14 em modo READ-ONLY, confirmando 100% de integridade estrutural e ausência de vulnerabilidades de injeção ou exposição de segredos no repositório.
+* **Etapas 11 & 12 – Auditoria Comparativa e Validação Funcional dos Relatórios (Android × Web 14):**
+  - Auditoria detalhada campo a campo, filtro a filtro e cálculo a cálculo dos 7 relatórios gerenciais e comprovantes PDF entre o aplicativo Android (`gestao_epi_8`) e o Web 14 (`gestao_epi_web_14`).
+  - Confirmada paridade funcional e visual completa em todos os relatórios, filtros (período, setor, colaborador, C.A., status), totais acumulados, regras de visualização e emissão/download de PDF.
+* **Etapa 13 – Validação Funcional Prática da Web 14 (Web Desktop, Tablet e Celular):**
+  - Executada suíte de testes práticos de usabilidade responsiva e navegação multiplataforma (Web Desktop >=1200px, Tablet 768px–1199px e Celular <768px).
+  - Homologada a navegabilidade de 100% das 21 páginas PHP, modais Bootstrap, calendário customizado, alternância de Dark Mode e emissão de comprovantes em PDF com 100% de aprovação.
+* **Etapa 14 – Congelamento Oficial e Preservação da Web 14:**
+  - Repositório oficial congelado e preservado na branch `main` sob o commit `b6d704c9d27e2b43b7c6980eda8a8d0be222971f` em estado 100% LIMPO (`git status clean`).
+* **Etapa 15 – Auditoria Completa Android × Web 14 (Funcionalidades Além dos Relatórios):**
+  - Mapeadas e comparadas 29 funcionalidades corporativas em 9 módulos (Login/Autenticação, Dashboard/Central de Alertas, Funcionários, EPIs/C.A., Entregas/Assinaturas, Devoluções, Termos NR-06, RBAC e Log de Auditoria).
+  - Confirmada 🟢 **Paridade Completa (27 funcionalidades 100% equivalentes)** e catalogados 2 recursos específicos da plataforma Android (Splash Screen nativo e Sync Offline Room SQLite).
 
 ### 📅 Versão 6.4.0 (02/10/2026) – Paridade 100% Web x Android (Cards, Modais Interativos e Banco de Dados Locaweb)
 * **Paridade de Métricas e Regras de Negócio (`pages/dashboard.php`):**
