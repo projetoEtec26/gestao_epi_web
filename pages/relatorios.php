@@ -1095,23 +1095,12 @@ function exportarPdfConsumoEpi() {
     abrirModeloConsumoEpi(true);
 }
 
-async function acaoExportarCSVConsumoEpi() {
-    const res = await gerarRelatorioConsumoEpi();
-    if (res !== false) {
-        exportarCSV();
-    }
-}
-
 function acaoExportarPdfConsumoEpi() {
-    if (abrirModeloConsumoEpi(true)) {
-        gerarRelatorioConsumoEpi();
-    }
+    abrirModeloConsumoEpi(true);
 }
 
 function acaoImprimirModeloConsumoEpi() {
-    if (abrirModeloConsumoEpi(false)) {
-        gerarRelatorioConsumoEpi();
-    }
+    abrirModeloConsumoEpi(false);
 }
 
 function abrirModeloConsumoEpi(autoprint = false) {
@@ -1121,21 +1110,18 @@ function abrirModeloConsumoEpi(autoprint = false) {
     const inputNome = document.getElementById('input-busca-rel-epi');
     
     let epiId = epiIdInput ? epiIdInput.value : '';
-    const dataInicio = dataInicioInput ? dataInicioInput.value : '';
-    const dataFim = dataFimInput ? dataFimInput.value : '';
+    let dataInicio = dataInicioInput ? dataInicioInput.value : '';
+    let dataFim = dataFimInput ? dataFimInput.value : '';
     const textoBusca = inputNome ? inputNome.value.trim() : '';
 
-    if (modoEpiAtual === 'especifico' && !epiId && textoBusca) {
-        if (typeof listaEpisGlobal === 'undefined' || listaEpisGlobal.length === 0) {
-            try {
-                const res = await fetch(`${PROXY_URL}?route=epis`).then(r => r.json());
-                if (res.success && Array.isArray(res.data)) {
-                    listaEpisGlobal = res.data;
-                }
-            } catch(e) {}
-        }
+    if (!dataInicio || !dataFim) {
+        const agora = new Date();
+        if (!dataFim) dataFim = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
+        if (!dataInicio) dataInicio = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-01`;
+    }
 
-        if (typeof listaEpisGlobal !== 'undefined' && listaEpisGlobal.length > 0) {
+    if (modoEpiAtual === 'especifico' && !epiId && textoBusca) {
+        if (typeof listaEpisGlobal !== 'undefined' && Array.isArray(listaEpisGlobal) && listaEpisGlobal.length > 0) {
             const match = listaEpisGlobal.find(e => 
                 (e.epi_ca && String(e.epi_ca).length > 2 && textoBusca.includes(String(e.epi_ca))) ||
                 (e.epi_nome && (textoBusca.toLowerCase().includes(e.epi_nome.toLowerCase()) || e.epi_nome.toLowerCase().includes(textoBusca.toLowerCase())))
@@ -1145,11 +1131,6 @@ function abrirModeloConsumoEpi(autoprint = false) {
                 if (epiIdInput) epiIdInput.value = match.epi_id;
             }
         }
-    }
-
-    if (modoEpiAtual === 'especifico' && !epiId) {
-        alert('Por favor, busque e selecione um EPI específico ou altere o modo para "Todos os EPIs".');
-        return false;
     }
     
     let url = `relatorio_consumo_epi.php?data_inicial=${encodeURIComponent(dataInicio)}&data_final=${encodeURIComponent(dataFim)}&data_inicio=${encodeURIComponent(dataInicio)}&data_fim=${encodeURIComponent(dataFim)}`;
