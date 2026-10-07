@@ -416,7 +416,6 @@ if ($tipoParam === 'financeiro' || $tipoParam === 'custos') {
                         </div>
                         <div class="col-md-12 d-flex gap-2 justify-content-end mt-3 flex-wrap">
                             <button type="button" class="btn btn-rel-acao active" onclick="gerarRelatorioCustos()"><i class="bi bi-play-fill me-1"></i> Consultar Relatório Financeiro</button>
-                            <button type="button" class="btn btn-rel-acao text-nowrap" id="btn-custos-baixar-pdf" onclick="baixarRelatorioCustosPDF(this)"><i class="bi bi-download me-1"></i> Baixar PDF</button>
                             <button type="button" class="btn btn-rel-acao text-nowrap" id="btn-custos-compartilhar-pdf" onclick="compartilharRelatorioCustosPDF(this)"><i class="bi bi-share me-1"></i> Compartilhar PDF</button>
                             <button type="button" class="btn btn-rel-acao text-nowrap" onclick="abrirModeloOficial('custos')"><i class="bi bi-printer me-1"></i> Imprimir Demonstrativo A4</button>
                         </div>
