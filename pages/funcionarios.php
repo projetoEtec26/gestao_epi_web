@@ -1833,7 +1833,13 @@ function aplicarFiltrosFuncionario(skipAutocomplete = false) {
         let bateStatus = false;
         if (selStatusUpper === '') {
             bateStatus = true;
+        } else if (selStatusUpper === 'ATIVO') {
+            bateStatus = (rStatusUpper === 'ATIVO');
+        } else if (selStatusUpper === 'INATIVO') {
+            // O filtro 'Inativo' inclui todos os colaboradores não-ativos (INATIVO, DEMITIDO, AFASTADO)
+            bateStatus = (rStatusUpper !== 'ATIVO');
         } else {
+            // Filtro específico (ex: DEMITIDO, AFASTADO)
             bateStatus = (rStatusUpper === selStatusUpper);
         }
 
@@ -1875,6 +1881,10 @@ function renderizarAutocompleteFunc(rawQuery, queryNorm, queryCleanCpf, setor, s
         let bateStatus = false;
         if (selStatusUpper === '') {
             bateStatus = true;
+        } else if (selStatusUpper === 'ATIVO') {
+            bateStatus = (fStatusUpper === 'ATIVO');
+        } else if (selStatusUpper === 'INATIVO') {
+            bateStatus = (fStatusUpper !== 'ATIVO');
         } else {
             bateStatus = (fStatusUpper === selStatusUpper);
         }
