@@ -1833,10 +1833,11 @@ function aplicarFiltrosFuncionario(skipAutocomplete = false) {
         let bateStatus = false;
         if (selStatusUpper === '') {
             bateStatus = true;
-        } else if (selStatusUpper === 'INATIVO') {
-            bateStatus = (rStatusUpper !== 'ATIVO');
+        } else if (selStatusUpper === 'ATIVO') {
+            bateStatus = (rStatusUpper === 'ATIVO');
         } else {
-            bateStatus = (rStatusUpper === selStatusUpper);
+            // Qualquer status de desligamento/inatividade (INATIVO, DEMITIDO, AFASTADO) engloba colaboradores não-ativos
+            bateStatus = (rStatusUpper !== 'ATIVO');
         }
 
         if (bateBusca && bateSetor && bateStatus) {
@@ -1877,10 +1878,10 @@ function renderizarAutocompleteFunc(rawQuery, queryNorm, queryCleanCpf, setor, s
         let bateStatus = false;
         if (selStatusUpper === '') {
             bateStatus = true;
-        } else if (selStatusUpper === 'INATIVO') {
-            bateStatus = (fStatusUpper !== 'ATIVO');
+        } else if (selStatusUpper === 'ATIVO') {
+            bateStatus = (fStatusUpper === 'ATIVO');
         } else {
-            bateStatus = (fStatusUpper === selStatusUpper);
+            bateStatus = (fStatusUpper !== 'ATIVO');
         }
 
         if (!bateSetor || !bateStatus) return false;
