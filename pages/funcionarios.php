@@ -291,6 +291,7 @@ try {
 }
 
 // Enriquece a lista de funcionários com o status real da Assinatura Eletrônica (PIN Universal 123456)
+// E complementa com funcionários NÃO-ATIVOS que a API REST não retorna (INATIVO, AFASTADO, DEMITIDO)
 try {
     $configData = require __DIR__ . '/../config/api.php';
     $dsn = sprintf("mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4", $configData['db_host'], $configData['db_port'], $configData['db_name']);
@@ -300,6 +301,7 @@ try {
         PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false
     ]);
     if ($pdoAss) {
+        // Mapa de assinaturas eletrônicas
         $assMap = $pdoAss->query("
             SELECT fun_id, COALESCE(ass_status, 'ATIVO') as ass_status 
             FROM assinatura_eletronica 
@@ -319,6 +321,37 @@ try {
             }
         }
         unset($f);
+
+        // Complementa: busca do banco funcionários com situação diferente de ATIVO
+        // que a API REST não retorna, para que os filtros Inativo/Afastado/Demitido funcionem
+        $idsJaCarregados = array_map(function($f) { return (int)($f['fun_id'] ?? 0); }, $funcionarios);
+        $stmtNaoAtivos = $pdoAss->query("
+            SELECT fun_id, fun_nome, fun_cpf, fun_esocial, fun_departamento, 
+                   fun_cargo, fun_dataadmissao, fun_situacao, fun_qrcode
+            FROM funcionarios 
+            WHERE UPPER(fun_situacao) IN ('INATIVO', 'AFASTADO', 'DEMITIDO')
+            ORDER BY fun_nome
+        ");
+        if ($stmtNaoAtivos) {
+            $naoAtivos = $stmtNaoAtivos->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($naoAtivos as $na) {
+                $naId = (int)($na['fun_id'] ?? 0);
+                // Só adiciona se ainda não está na lista (evita duplicatas)
+                if (!in_array($naId, $idsJaCarregados, true)) {
+                    // Adiciona campos padrão de matrícula para compatibilidade com a tabela
+                    $na['fun_matricula'] = $na['fun_esocial'] ?? ('mat-' . str_pad((string)$naId, 5, '0', STR_PAD_LEFT));
+                    // Enriquece com status de assinatura
+                    if (isset($assMap[$naId])) {
+                        $na['assinatura_status'] = strtoupper((string)$assMap[$naId]);
+                        $na['ass_status'] = strtoupper((string)$assMap[$naId]);
+                    } else {
+                        $na['assinatura_status'] = 'PENDENTE';
+                        $na['ass_status'] = 'PENDENTE';
+                    }
+                    $funcionarios[] = $na;
+                }
+            }
+        }
     }
 } catch (Throwable $t) {
     // Silencioso
@@ -1827,7 +1860,9 @@ function aplicarFiltrosFuncionario(skipAutocomplete = false) {
         }
 
         const bateSetor = (setor === '' || normalizarTexto(row.getAttribute('data-setor') || '') === normalizarTexto(setor));
-        const bateStatus = (status === '' || rStatus.toUpperCase() === status.toUpperCase());
+        const normalizedStatus = (status || '').trim().toUpperCase();
+        const rowStatus = (rStatus || '').trim().toUpperCase();
+        const bateStatus = (normalizedStatus === '' || rowStatus === normalizedStatus);
 
         if (bateBusca && bateSetor && bateStatus) {
             row.style.display = '';
