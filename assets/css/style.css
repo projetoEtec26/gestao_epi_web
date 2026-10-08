@@ -3102,4 +3102,74 @@ body.dark-mode [id^="dropdown-rel-"] span[style*="background:#f1f5f9"] {
     border-color: #475569 !important;
 }
 
+/* ========================================================
+   MODO ESCURO - ALTO CONTRASTE PARA ITENS VIGENTES / ATIVOS E ELEMENTOS DE TABELA
+   ======================================================== */
+html.dark-mode .status-badge.ativo,
+html.dark-mode .status-badge.vigente,
+body.dark-mode .status-badge.ativo,
+body.dark-mode .status-badge.vigente {
+    background-color: rgba(52, 211, 153, 0.25) !important;
+    color: #34d399 !important;
+    border: 1px solid rgba(52, 211, 153, 0.3) !important;
+    font-weight: 700 !important;
+}
+
+html.dark-mode .text-primary,
+body.dark-mode .text-primary {
+    color: #60a5fa !important;
+}
+
+html.dark-mode .text-success,
+body.dark-mode .text-success {
+    color: #34d399 !important;
+}
+
+html.dark-mode .text-danger,
+body.dark-mode .text-danger {
+    color: #f87171 !important;
+}
+
+html.dark-mode .text-info,
+body.dark-mode .text-info {
+    color: #38bdf8 !important;
+}
+
+html.dark-mode .text-warning,
+body.dark-mode .text-warning {
+    color: #fbbf24 !important;
+}
+
+html.dark-mode .btn-light,
+body.dark-mode .btn-light {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+html.dark-mode .btn-light:hover,
+body.dark-mode .btn-light:hover {
+    background-color: #334155 !important;
+    color: #ffffff !important;
+    border-color: #475569 !important;
+}
+
+html.dark-mode .table-custom div[style*="background-color: var(--color-primary-light)"],
+body.dark-mode .table-custom div[style*="background-color: var(--color-primary-light)"],
+html.dark-mode .table-custom div[style*="background-color:#eff6ff"],
+body.dark-mode .table-custom div[style*="background-color:#eff6ff"] {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+    color: #60a5fa !important;
+}
+
+html.dark-mode .table-custom .fw-semibold,
+body.dark-mode .table-custom .fw-semibold,
+html.dark-mode .table-custom .fw-medium,
+body.dark-mode .table-custom .fw-medium,
+html.dark-mode .table-custom .fw-bold,
+body.dark-mode .table-custom .fw-bold {
+    color: #f8fafc !important;
+}
+
+
 
