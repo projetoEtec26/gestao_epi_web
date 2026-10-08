@@ -715,41 +715,41 @@ require_once __DIR__ . '/../components/sidebar.php';
                                 ?>
                                 <tr class="epi-row" 
                                     data-id="<?= (int)$epi['epi_id'] ?>"
-                                    data-nome="<?= htmlspecialchars(strtolower($epi['epi_nome'])) ?>"
-                                    data-fabricante="<?= htmlspecialchars(strtolower($epi['epi_fabricante'])) ?>"
-                                    data-ca="<?= htmlspecialchars($epi['epi_ca'] ?? '') ?>"
-                                    data-tipo="<?= htmlspecialchars($epi['epi_tipo_item']) ?>"
-                                    data-castatus="<?= htmlspecialchars($caStatus) ?>"
-                                    data-situacao="<?= htmlspecialchars($epi['epi_status']) ?>">
+                                    data-nome="<?= htmlspecialchars(mb_strtolower((string)$epi['epi_nome'], 'UTF-8')) ?>"
+                                    data-fabricante="<?= htmlspecialchars(mb_strtolower((string)$epi['epi_fabricante'], 'UTF-8')) ?>"
+                                    data-ca="<?= htmlspecialchars((string)($epi['epi_ca'] ?? '')) ?>"
+                                    data-tipo="<?= htmlspecialchars((string)$epi['epi_tipo_item']) ?>"
+                                    data-castatus="<?= htmlspecialchars((string)$caStatus) ?>"
+                                    data-situacao="<?= htmlspecialchars((string)$epi['epi_status']) ?>">
                                     
                                     <td>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background-color: #eff6ff; color: #2563eb;">
+                                        <div class="d-flex align-items-center gap-2" style="max-width: 320px;">
+                                            <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background-color: var(--color-primary-light); color: var(--color-primary);">
                                                 <?= getIconeEpiSvgPHP($epi['epi_nome']) ?>
                                             </div>
-                                            <div>
-                                                <div class="fw-semibold"><?= htmlspecialchars($epi['epi_nome']) ?></div>
+                                            <div class="min-w-0 flex-grow-1">
+                                                <div class="fw-semibold text-wrap" style="line-height: 1.35; font-size: 13.5px; word-break: break-word;"><?= htmlspecialchars($epi['epi_nome']) ?></div>
                                                 <div class="text-muted" style="font-size: 11px;"><?= htmlspecialchars($tipoLabel) ?></div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td><?= htmlspecialchars($epi['epi_fabricante']) ?></td>
-                                    <td class="fw-medium"><?= htmlspecialchars($ca) ?></td>
-                                    <td>
+                                    <td style="max-width: 200px;" class="text-wrap style-cell-fab"><?= htmlspecialchars($epi['epi_fabricante']) ?></td>
+                                    <td class="fw-medium text-nowrap"><?= htmlspecialchars($ca) ?></td>
+                                    <td class="text-nowrap">
                                         <?php if ($epi['epi_tipo_item'] === 'EPI_COM_CA'): ?>
                                             <span class="status-badge <?= $caStatus ?>"><?= $vencimentoCa ?> (<?= $caStatusLabel ?>)</span>
                                         <?php else: ?>
                                             <span class="text-muted">---</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="text-muted"><?= htmlspecialchars($vidaUtil) ?></td>
+                                    <td class="text-muted text-nowrap"><?= htmlspecialchars($vidaUtil) ?></td>
                                     <?php if ($podeVerCustos): ?>
-                                        <td class="fw-bold text-success"><?= formatarValorMonetario((float)$epi['epi_valor']) ?></td>
+                                        <td class="fw-bold text-success text-nowrap"><?= formatarValorMonetario((float)$epi['epi_valor']) ?></td>
                                     <?php endif; ?>
-                                    <td>
+                                    <td class="text-nowrap">
                                         <span class="status-badge <?= strtolower($epi['epi_status']) ?>"><?= htmlspecialchars($epi['epi_status']) ?></span>
                                     </td>
-                                    <td class="text-end">
+                                    <td class="text-end text-nowrap">
                                         <div class="d-inline-flex gap-2">
                                             <button type="button" class="btn btn-sm btn-light border py-1 px-2 btn-ver-epi" data-id="<?= (int)$epi['epi_id'] ?>" onclick="verFichaEpiById(<?= (int)$epi['epi_id'] ?>)" title="Ver Detalhes e Rastreabilidade">
                                                 <i class="bi bi-eye"></i>

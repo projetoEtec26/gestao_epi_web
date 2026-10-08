@@ -787,6 +787,43 @@ body.dark-mode .card-custom:hover {
     color: var(--color-info);
 }
 
+/* Suporte de Alto Contraste para status-badge no Modo Escuro (Dark Mode) */
+html.dark-mode .status-badge.ativo,
+html.dark-mode .status-badge.vigente,
+body.dark-mode .status-badge.ativo,
+body.dark-mode .status-badge.vigente {
+    background-color: rgba(52, 211, 153, 0.2) !important;
+    color: #34d399 !important;
+}
+
+html.dark-mode .status-badge.vencido,
+html.dark-mode .status-badge.inativo,
+html.dark-mode .status-badge.bloqueado,
+body.dark-mode .status-badge.vencido,
+body.dark-mode .status-badge.inativo,
+body.dark-mode .status-badge.bloqueado {
+    background-color: rgba(248, 113, 113, 0.25) !important;
+    color: #f87171 !important;
+}
+
+html.dark-mode .status-badge.a-vencer,
+body.dark-mode .status-badge.a-vencer {
+    background-color: rgba(251, 191, 36, 0.25) !important;
+    color: #fbbf24 !important;
+}
+
+html.dark-mode .status-badge.obsoleto,
+body.dark-mode .status-badge.obsoleto {
+    background-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode .status-badge.pendente,
+body.dark-mode .status-badge.pendente {
+    background-color: rgba(56, 189, 248, 0.25) !important;
+    color: #38bdf8 !important;
+}
+
 /* Tabelas Customizadas */
 .table-responsive-custom {
     width: 100%;
