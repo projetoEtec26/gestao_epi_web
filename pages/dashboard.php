@@ -539,17 +539,17 @@ try {
             JOIN itens_entrega i ON e.entr_id = i.entr_id
             JOIN epis ep ON i.epi_id = ep.epi_id
             WHERE f.fun_situacao = 'ATIVO'
-              AND ep.epi_vencimento_ca IS NOT NULL 
-              AND ep.epi_vencimento_ca < CURDATE()
+              AND ep.epi_status = 'VENCIDO'
         ";
         $numComVencidos = (int)$pdo->query($sqlVencidos)->fetchColumn();
         $emDia = max(0, $totAtivos - $numComVencidos);
-        $pctConformidade = $totAtivos > 0 ? (int)round(($emDia / $totAtivos) * 100) : 100;
+        $pctConformidade = $totAtivos > 0 ? (int)floor(($emDia / $totAtivos) * 100) : 100;
         $conformidade = [
             'pct' => $pctConformidade,
             'em_dia' => $emDia,
             'tot_func' => $totAtivos
         ];
+
 
 
         // 8. TOP 5 EPIs GERAL (Regra Oficial Android: SEM filtro entr_status = 'FINALIZADA')
