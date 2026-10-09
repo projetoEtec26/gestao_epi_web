@@ -530,15 +530,27 @@ try {
         $custos['acumulado'] = 'R$ ' . number_format($cA, 2, ',', '.');
         $custos['legenda_acumulado'] = 'Acumulado (' . $legendaAcumuladoData . ')';
 
-        // 7. CONFORMIDADE (Fórmula Oficial do Android: Ativos / Total * 100)
-        $totFunc = (int)$pdo->query("SELECT COUNT(*) FROM funcionarios")->fetchColumn();
+        // 7. CONFORMIDADE (Fórmula Oficial do Android: Ativos Em Dia / Total de Ativos * 100)
         $totAtivos = (int)$pdo->query("SELECT COUNT(*) FROM funcionarios WHERE fun_situacao = 'ATIVO'")->fetchColumn();
-        $pctConformidade = $totFunc > 0 ? (int)round(($totAtivos / $totFunc) * 100) : 100;
+        $sqlVencidos = "
+            SELECT COUNT(DISTINCT f.fun_id) 
+            FROM funcionarios f
+            JOIN entrega_epis e ON f.fun_id = e.fun_id
+            JOIN itens_entrega i ON e.entr_id = i.entr_id
+            JOIN epis ep ON i.epi_id = ep.epi_id
+            WHERE f.fun_situacao = 'ATIVO'
+              AND ep.epi_vencimento_ca IS NOT NULL 
+              AND ep.epi_vencimento_ca < CURDATE()
+        ";
+        $numComVencidos = (int)$pdo->query($sqlVencidos)->fetchColumn();
+        $emDia = max(0, $totAtivos - $numComVencidos);
+        $pctConformidade = $totAtivos > 0 ? (int)round(($emDia / $totAtivos) * 100) : 100;
         $conformidade = [
             'pct' => $pctConformidade,
-            'em_dia' => $totAtivos,
-            'tot_func' => $totFunc
+            'em_dia' => $emDia,
+            'tot_func' => $totAtivos
         ];
+
 
         // 8. TOP 5 EPIs GERAL (Regra Oficial Android: SEM filtro entr_status = 'FINALIZADA')
         $stmtT = $pdo->query("
