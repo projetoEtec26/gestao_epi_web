@@ -323,8 +323,7 @@ try {
         unset($f);
 
         // Complementa: busca do banco funcionários com situação diferente de ATIVO
-        // que a API REST não retorna, para que os filtros Inativo/Afastado/Demitido funcionem
-        $idsJaCarregados = array_map(function($f) { return (int)($f['fun_id'] ?? 0); }, $funcionarios);
+        // que a API REST não retorna ou retorna em branco, para que os filtros funcionem
         $stmtNaoAtivos = $pdoAss->query("
             SELECT fun_id, fun_nome, fun_cpf, fun_esocial, fun_departamento, 
                    fun_cargo, fun_dataadmissao, fun_situacao, fun_qrcode
@@ -336,18 +335,32 @@ try {
             $naoAtivos = $stmtNaoAtivos->fetchAll(PDO::FETCH_ASSOC);
             foreach ($naoAtivos as $na) {
                 $naId = (int)($na['fun_id'] ?? 0);
-                // Só adiciona se ainda não está na lista (evita duplicatas)
-                if (!in_array($naId, $idsJaCarregados, true)) {
-                    // Adiciona campos padrão de matrícula para compatibilidade com a tabela
-                    $na['fun_matricula'] = $na['fun_esocial'] ?? ('mat-' . str_pad((string)$naId, 5, '0', STR_PAD_LEFT));
-                    // Enriquece com status de assinatura
-                    if (isset($assMap[$naId])) {
-                        $na['assinatura_status'] = strtoupper((string)$assMap[$naId]);
-                        $na['ass_status'] = strtoupper((string)$assMap[$naId]);
-                    } else {
-                        $na['assinatura_status'] = 'PENDENTE';
-                        $na['ass_status'] = 'PENDENTE';
+                // Verifica se já está na lista da API
+                $indexEncontrado = false;
+                foreach ($funcionarios as $idx => $fApi) {
+                    if ((int)($fApi['fun_id'] ?? 0) === $naId) {
+                        $indexEncontrado = $idx;
+                        break;
                     }
+                }
+
+                // Adiciona campos padrão de matrícula para compatibilidade com a tabela
+                $na['fun_matricula'] = $na['fun_esocial'] ?? ('mat-' . str_pad((string)$naId, 5, '0', STR_PAD_LEFT));
+                
+                // Enriquece com status de assinatura
+                if (isset($assMap[$naId])) {
+                    $na['assinatura_status'] = strtoupper((string)$assMap[$naId]);
+                    $na['ass_status'] = strtoupper((string)$assMap[$naId]);
+                } else {
+                    $na['assinatura_status'] = 'PENDENTE';
+                    $na['ass_status'] = 'PENDENTE';
+                }
+
+                if ($indexEncontrado !== false) {
+                    // API retornou, mas pode estar sem nome/cpf. Vamos mesclar usando os dados reais do BD.
+                    $funcionarios[$indexEncontrado] = array_merge($funcionarios[$indexEncontrado], $na);
+                } else {
+                    // API não retornou, adiciona novo
                     $funcionarios[] = $na;
                 }
             }
@@ -513,13 +526,13 @@ $acao = $_GET['acao'] ?? 'lista';
                             <?php else: ?>
                                 <?php foreach ($funcionarios as $func): ?>
                                     <?php
-                                    $cpf = $func['fun_cpf'];
+                                    $cpf = (string)($func['fun_cpf'] ?? '');
                                     if (strlen($cpf) === 11) {
                                         $cpf = substr($cpf, 0, 3) . '.***.***-' . substr($cpf, 9, 2);
                                     }
                                     $statusPin = $func['assinatura_status'] ?? 'PENDENTE';
-                                    $statusPinClass = strtolower(str_replace(' ', '-', $statusPin));
-                                    $situacaoClass = strtolower($func['fun_situacao']);
+                                    $statusPinClass = strtolower(str_replace(' ', '-', (string)$statusPin));
+                                    $situacaoClass = strtolower((string)($func['fun_situacao'] ?? ''));
                                     $dataAdmissao = $func['fun_dataadmissao'] ?? '';
                                     $dataAdmissaoFormatada = '---';
                                     if (!empty($dataAdmissao) && $dataAdmissao !== '0000-00-00' && $dataAdmissao !== '0000-00-00 00:00:00') {
@@ -538,18 +551,18 @@ $acao = $_GET['acao'] ?? 'lista';
                                         data-setor="<?= htmlspecialchars(mb_strtolower((string)($func['fun_departamento'] ?? ''), 'UTF-8')) ?>"
                                         data-status="<?= htmlspecialchars((string)($func['fun_situacao'] ?? 'ATIVO')) ?>">
                                         
-                                        <td class="fw-semibold"><?= htmlspecialchars($func['fun_nome']) ?></td>
+                                        <td class="fw-semibold"><?= htmlspecialchars((string)($func['fun_nome'] ?? '')) ?></td>
                                         <td class="text-muted"><?= htmlspecialchars($cpf) ?></td>
                                         <td>
-                                            <div class="fw-medium"><?= htmlspecialchars($func['fun_cargo']) ?></div>
-                                            <div class="text-muted" style="font-size: 12px;"><?= htmlspecialchars($func['fun_departamento']) ?></div>
+                                            <div class="fw-medium"><?= htmlspecialchars((string)($func['fun_cargo'] ?? '')) ?></div>
+                                            <div class="text-muted" style="font-size: 12px;"><?= htmlspecialchars((string)($func['fun_departamento'] ?? '')) ?></div>
                                         </td>
                                         <td><?= $dataAdmissaoFormatada ?></td>
                                         <td>
-                                            <span class="status-badge <?= $statusPinClass ?>"><?= htmlspecialchars($statusPin) ?></span>
+                                            <span class="status-badge <?= $statusPinClass ?>"><?= htmlspecialchars((string)$statusPin) ?></span>
                                         </td>
                                         <td>
-                                            <span class="status-badge <?= $situacaoClass ?>"><?= htmlspecialchars($func['fun_situacao']) ?></span>
+                                            <span class="status-badge <?= $situacaoClass ?>"><?= htmlspecialchars((string)($func['fun_situacao'] ?? '')) ?></span>
                                         </td>
                                         <td class="text-end">
                                             <div class="d-inline-flex gap-2">
@@ -563,8 +576,8 @@ $acao = $_GET['acao'] ?? 'lista';
                                                     </button>
                                                 <?php endif; ?>
                                                 
-                                                <?php if ($podeExcluir && $func['fun_situacao'] === 'ATIVO'): ?>
-                                                    <button class="btn btn-sm btn-light border text-danger py-1 px-2" onclick="confirmarExclusao(<?= $func['fun_id'] ?>, '<?= htmlspecialchars($func['fun_nome']) ?>')" title="Inativar Colaborador">
+                                                <?php if ($podeExcluir && ($func['fun_situacao'] ?? '') === 'ATIVO'): ?>
+                                                    <button class="btn btn-sm btn-light border text-danger py-1 px-2" onclick="confirmarExclusao(<?= $func['fun_id'] ?>, '<?= htmlspecialchars((string)($func['fun_nome'] ?? '')) ?>')" title="Inativar Colaborador">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 <?php endif; ?>
@@ -642,7 +655,7 @@ $acao = $_GET['acao'] ?? 'lista';
                         $badgeLabel = 'PIN Bloqueado';
                         $badgeBg = '#ef4444';
                     } elseif ($funcStatus !== 'ATIVO') {
-                        $badgeLabel = htmlspecialchars($f['fun_situacao']);
+                        $badgeLabel = htmlspecialchars((string)($f['fun_situacao'] ?? ''));
                         $badgeBg = '#6b7280';
                     }
 
@@ -660,7 +673,7 @@ $acao = $_GET['acao'] ?? 'lista';
                          onmouseout="this.style.transform='none'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.05)';"
                          title="Clique para ver a Ficha e Histórico do Colaborador">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="fw-bold" style="color: #2563eb !important; font-size: 16px;"><?= htmlspecialchars($f['fun_nome']) ?></span>
+                            <span class="fw-bold" style="color: #2563eb !important; font-size: 16px;"><?= htmlspecialchars((string)($f['fun_nome'] ?? '')) ?></span>
                             <span class="badge" style="background-color: <?= $badgeBg ?>; color: #ffffff; font-size: 11px; padding: 5px 12px; border-radius: 6px; font-weight: 600; text-transform: none;"><?= $badgeLabel ?></span>
                         </div>
                         <div class="text-muted mb-1" style="font-size: 13px; color: #64748b !important;">
@@ -721,12 +734,12 @@ $acao = $_GET['acao'] ?? 'lista';
                     <div class="card border-0 shadow-sm rounded-4 p-3 style-card-pin" style="background:#ffffff;">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
-                                <div class="fw-bold fs-6" style="color: #1d4ed8 !important;"><?= htmlspecialchars($f['fun_nome']) ?></div>
+                                <div class="fw-bold fs-6" style="color: #1d4ed8 !important;"><?= htmlspecialchars((string)($f['fun_nome'] ?? '')) ?></div>
                                 <div class="text-muted small" style="font-size: 12.5px;">Matrícula: <?= htmlspecialchars($matr) ?> | CPF: <?= htmlspecialchars($cpfM) ?></div>
                                 <div class="text-muted small" style="font-size: 12.5px;">Cargo: <?= htmlspecialchars($f['fun_cargo'] ?? '---') ?> | Setor: <?= htmlspecialchars($f['fun_departamento'] ?? '---') ?></div>
                             </div>
                             <div class="text-end">
-                                <span class="badge mb-2 d-inline-block" style="background-color: <?= $badgeBg ?>; color: #ffffff; font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: 600;"><?= htmlspecialchars($pinStatus) ?></span>
+                                <span class="badge mb-2 d-inline-block" style="background-color: <?= $badgeBg ?>; color: #ffffff; font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: 600;"><?= htmlspecialchars((string)$pinStatus) ?></span>
                                 <div>
                                     <button class="btn btn-sm btn-outline-primary rounded-3 px-3 py-1" style="font-size:12px;" onclick="verDetalhes(<?= (int)$f['fun_id'] ?>)">
                                         <i class="bi bi-key me-1"></i>Gerenciar PIN
