@@ -787,6 +787,43 @@ body.dark-mode .card-custom:hover {
     color: var(--color-info);
 }
 
+/* Suporte de Alto Contraste para status-badge no Modo Escuro (Dark Mode) */
+html.dark-mode .status-badge.ativo,
+html.dark-mode .status-badge.vigente,
+body.dark-mode .status-badge.ativo,
+body.dark-mode .status-badge.vigente {
+    background-color: rgba(52, 211, 153, 0.2) !important;
+    color: #34d399 !important;
+}
+
+html.dark-mode .status-badge.vencido,
+html.dark-mode .status-badge.inativo,
+html.dark-mode .status-badge.bloqueado,
+body.dark-mode .status-badge.vencido,
+body.dark-mode .status-badge.inativo,
+body.dark-mode .status-badge.bloqueado {
+    background-color: rgba(248, 113, 113, 0.25) !important;
+    color: #f87171 !important;
+}
+
+html.dark-mode .status-badge.a-vencer,
+body.dark-mode .status-badge.a-vencer {
+    background-color: rgba(251, 191, 36, 0.25) !important;
+    color: #fbbf24 !important;
+}
+
+html.dark-mode .status-badge.obsoleto,
+body.dark-mode .status-badge.obsoleto {
+    background-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+html.dark-mode .status-badge.pendente,
+body.dark-mode .status-badge.pendente {
+    background-color: rgba(56, 189, 248, 0.25) !important;
+    color: #38bdf8 !important;
+}
+
 /* Tabelas Customizadas */
 .table-responsive-custom {
     width: 100%;
@@ -826,30 +863,35 @@ body.dark-mode .table-custom tr:hover td {
 }
 
 /* Cabeçalhos de Tabela Fixos durante a Rolagem (Sticky Table Headers) */
-.table thead th,
-.table-custom thead th,
-table thead th,
-#tabela-relatorio-gerado thead th,
-#tabela-entregas thead th,
-#tabela-funcionarios thead th,
-#tabela-epis thead th,
-#tabela-auditoria thead th,
-#tabela-usuarios thead th {
-    position: sticky !important;
-    top: var(--topbar-height, 70px) !important;
-    z-index: 99 !important;
-    background-color: var(--color-card-bg) !important;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-}
-
-/* Suporte para tabelas com container responsivo ou rolagem interna */
 .table-responsive table thead th,
 .table-responsive-custom table thead th,
 .table-responsive .table thead th,
 .table-responsive-custom .table-custom thead th,
+.table-responsive #tabela-funcionarios thead th,
+.table-responsive-custom #tabela-funcionarios thead th,
+.table-responsive #tabela-entregas thead th,
+.table-responsive-custom #tabela-entregas thead th,
+.table-responsive #tabela-epis thead th,
+.table-responsive-custom #tabela-epis thead th,
+.table-responsive #tabela-auditoria thead th,
+.table-responsive-custom #tabela-auditoria thead th,
+.table-responsive #tabela-usuarios thead th,
+.table-responsive-custom #tabela-usuarios thead th,
+.table-responsive #tabela-relatorio-gerado thead th,
+.table-responsive-custom #tabela-relatorio-gerado thead th,
+#tabela-funcionarios thead th,
+#tabela-entregas thead th,
+#tabela-epis thead th,
+#tabela-auditoria thead th,
+#tabela-usuarios thead th,
+#tabela-relatorio-gerado thead th,
 #tabela-resultados-wrapper table thead th,
 #tabela-resultados-wrapper .table thead th {
+    position: sticky !important;
     top: 0 !important;
+    z-index: 20 !important;
+    background-color: var(--color-card-bg) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 }
 
 /* Evita transparência ao rolar dados sob o cabeçalho no Modo Claro */
@@ -2834,13 +2876,14 @@ body.dark-mode .btn-group-toggle-view .btn-view.active {
     table thead th,
     .table-responsive .table thead th,
     .table-responsive-custom .table-custom thead th,
+    .table-responsive-custom table thead th,
     #tabela-relatorio-gerado thead th,
     #tabela-entregas thead th,
     #tabela-funcionarios thead th,
     #tabela-epis thead th,
     #tabela-auditoria thead th,
     #tabela-usuarios thead th {
-        top: var(--topbar-height, 65px) !important;
+        top: 0 !important;
     }
 
     .table th, .table td,
@@ -3064,5 +3107,75 @@ body.dark-mode [id^="dropdown-rel-"] span[style*="background:#f1f5f9"] {
     color: #cbd5e1 !important;
     border-color: #475569 !important;
 }
+
+/* ========================================================
+   MODO ESCURO - ALTO CONTRASTE PARA ITENS VIGENTES / ATIVOS E ELEMENTOS DE TABELA
+   ======================================================== */
+html.dark-mode .status-badge.ativo,
+html.dark-mode .status-badge.vigente,
+body.dark-mode .status-badge.ativo,
+body.dark-mode .status-badge.vigente {
+    background-color: rgba(52, 211, 153, 0.25) !important;
+    color: #34d399 !important;
+    border: 1px solid rgba(52, 211, 153, 0.3) !important;
+    font-weight: 700 !important;
+}
+
+html.dark-mode .text-primary,
+body.dark-mode .text-primary {
+    color: #60a5fa !important;
+}
+
+html.dark-mode .text-success,
+body.dark-mode .text-success {
+    color: #34d399 !important;
+}
+
+html.dark-mode .text-danger,
+body.dark-mode .text-danger {
+    color: #f87171 !important;
+}
+
+html.dark-mode .text-info,
+body.dark-mode .text-info {
+    color: #38bdf8 !important;
+}
+
+html.dark-mode .text-warning,
+body.dark-mode .text-warning {
+    color: #fbbf24 !important;
+}
+
+html.dark-mode .btn-light,
+body.dark-mode .btn-light {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+html.dark-mode .btn-light:hover,
+body.dark-mode .btn-light:hover {
+    background-color: #334155 !important;
+    color: #ffffff !important;
+    border-color: #475569 !important;
+}
+
+html.dark-mode .table-custom div[style*="background-color: var(--color-primary-light)"],
+body.dark-mode .table-custom div[style*="background-color: var(--color-primary-light)"],
+html.dark-mode .table-custom div[style*="background-color:#eff6ff"],
+body.dark-mode .table-custom div[style*="background-color:#eff6ff"] {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+    color: #60a5fa !important;
+}
+
+html.dark-mode .table-custom .fw-semibold,
+body.dark-mode .table-custom .fw-semibold,
+html.dark-mode .table-custom .fw-medium,
+body.dark-mode .table-custom .fw-medium,
+html.dark-mode .table-custom .fw-bold,
+body.dark-mode .table-custom .fw-bold {
+    color: #f8fafc !important;
+}
+
 
 

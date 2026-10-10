@@ -549,7 +549,7 @@ $acao = $_GET['acao'] ?? 'lista';
                                         data-matricula="<?= htmlspecialchars(mb_strtolower((string)($func['fun_matricula'] ?? (!empty($func['fun_esocial']) ? $func['fun_esocial'] : ('mat-' . str_pad((string)$func['fun_id'], 5, '0', STR_PAD_LEFT)))), 'UTF-8')) ?>"
                                         data-cargo="<?= htmlspecialchars(mb_strtolower((string)($func['fun_cargo'] ?? ''), 'UTF-8')) ?>"
                                         data-setor="<?= htmlspecialchars(mb_strtolower((string)($func['fun_departamento'] ?? ''), 'UTF-8')) ?>"
-                                        data-status="<?= htmlspecialchars((string)($func['fun_situacao'] ?? 'ATIVO')) ?>">
+                                        data-status="<?= htmlspecialchars(strtoupper(trim((string)($func['fun_situacao'] ?? 'ATIVO')))) ?>">
                                         
                                         <td class="fw-semibold"><?= htmlspecialchars((string)($func['fun_nome'] ?? '')) ?></td>
                                         <td class="text-muted"><?= htmlspecialchars($cpf) ?></td>
@@ -1873,9 +1873,16 @@ function aplicarFiltrosFuncionario(skipAutocomplete = false) {
         }
 
         const bateSetor = (setor === '' || normalizarTexto(row.getAttribute('data-setor') || '') === normalizarTexto(setor));
-        const normalizedStatus = (status || '').trim().toUpperCase();
-        const rowStatus = (rStatus || '').trim().toUpperCase();
-        const bateStatus = (normalizedStatus === '' || rowStatus === normalizedStatus);
+
+        const rStatusUpper = (rStatus || '').trim().toUpperCase();
+        const selStatusUpper = (status || '').trim().toUpperCase();
+        let bateStatus = false;
+        if (selStatusUpper === '') {
+            bateStatus = true;
+        } else {
+            // Filtragem estrita e exata por Situação (ATIVO, INATIVO, DEMITIDO, AFASTADO)
+            bateStatus = (rStatusUpper === selStatusUpper);
+        }
 
         if (bateBusca && bateSetor && bateStatus) {
             row.style.display = '';
@@ -1908,10 +1915,17 @@ function renderizarAutocompleteFunc(rawQuery, queryNorm, queryCleanCpf, setor, s
     // Filtra colaboradores cadastrados por inclusão (.includes)
     sugestoesAtuais = listaFuncionariosCadastrados.filter(f => {
         const fSetor = f.fun_departamento || '';
-        const fStatus = f.fun_situacao || 'ATIVO';
+        const fStatusUpper = (f.fun_situacao || 'ATIVO').trim().toUpperCase();
+        const selStatusUpper = (status || '').trim().toUpperCase();
 
         const bateSetor = (setor === '' || fSetor === setor);
-        const bateStatus = (status === '' || fStatus === status);
+        let bateStatus = false;
+        if (selStatusUpper === '') {
+            bateStatus = true;
+        } else {
+            bateStatus = (fStatusUpper === selStatusUpper);
+        }
+
         if (!bateSetor || !bateStatus) return false;
 
         if (!queryNorm) return true;
