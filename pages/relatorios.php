@@ -972,8 +972,8 @@ async function gerarRelatorioConsumoEpi() {
             let totDevolvidos = 0;
 
             registros.forEach(r => {
-                const qtd = parseInt(r.quantidade || r.ite_quantidade || 1);
-                const st = String(r.status || r.ite_status_item || r.ent_status || '').toUpperCase();
+                const qtd = parseInt(r.item_quantidade || r.quantidade || r.ite_quantidade || 1);
+                const st = String(r.item_status || r.status || r.ite_status_item || r.ent_status || '').toUpperCase();
                 totUnidades += qtd;
                 if (st.includes('DEVOLVIDO')) {
                     totDevolvidos += qtd;
@@ -1042,23 +1042,25 @@ async function gerarRelatorioConsumoEpi() {
                 html += `<tr><td colspan="8" class="text-center text-muted py-4">Nenhum registro de consumo encontrado para este equipamento no período selecionado.</td></tr>`;
             } else {
                 registros.forEach(r => {
-                    const dt = (r.data || r.ent_data_retirada) ? new Date(r.data || r.ent_data_retirada).toLocaleDateString('pt-BR') : '---';
-                    const st = String(r.status || r.ite_status_item || r.ent_status || 'EM USO').toUpperCase();
+                    const dt = formatarDataHoraBR(r.entr_data_entrega || r.data || r.ent_data_retirada);
+                    const stRaw = String(r.item_status || r.status || r.ite_status_item || 'EM USO').toUpperCase();
+                    const st = stRaw === 'ENTREGUE' ? 'EM USO' : stRaw;
                     const isDevolvido = st.includes('DEVOLVIDO');
                     const badgeClass = isDevolvido ? 'bg-success' : 'bg-primary';
+                    const dataDevolucao = r.item_data_devolucao || r.data_devolucao;
 
                     html += `
                         <tr>
-                            <td>${dt}</td>
-                            <td class="fw-semibold">${r.funcionario || r.fun_nome || '---'}</td>
-                            <td>${r.setor || r.fun_departamento || '---'}</td>
-                            <td>${r.epi || r.epi_nome || '---'} <small class="text-muted">(C.A. ${r.ca || r.epi_ca || 'N/A'})</small></td>
-                            <td>${r.quantidade || r.ite_quantidade || 1}</td>
-                            <td><span class="badge bg-light text-dark border">${r.motivo || r.ent_motivo || 'FORNECIMENTO'}</span></td>
-                            <td><small class="text-muted">${r.responsavel || r.usuario_responsavel || 'almoxarifado'}</small></td>
+                            <td class="text-nowrap">${dt}</td>
+                            <td class="fw-semibold">${r.fun_nome || r.funcionario || '---'}</td>
+                            <td>${r.fun_departamento || r.setor || '---'}</td>
+                            <td>${r.epi_nome || r.epi || '---'} <small class="text-muted">(C.A. ${r.epi_ca || r.ca || 'N/A'})</small></td>
+                            <td>${r.item_quantidade || r.quantidade || 1}</td>
+                            <td><span class="badge bg-light text-dark border">${traduzirMotivo(r.item_motivo_entrega || r.entr_motivo || r.motivo) }</span></td>
+                            <td><small class="text-muted">${r.usu_login || r.responsavel || '---'}</small></td>
                             <td>
                                 <span class="badge ${badgeClass}">${st}</span>
-                                ${isDevolvido && r.data_devolucao ? `<small class="d-block text-muted" style="font-size:10px;">Devolvido em ${new Date(r.data_devolucao).toLocaleDateString('pt-BR')}</small>` : ''}
+                                ${isDevolvido && dataDevolucao ? `<small class="d-block text-muted" style="font-size:10px;">Devolvido em ${formatarDataHoraBR(dataDevolucao)}</small>` : ''}
                             </td>
                         </tr>
                     `;
@@ -2421,17 +2423,19 @@ async function exportarCSV() {
         } else {
             let linha = [];
             if (relatorioAtivo === 'epis-vencidos' || relatorioAtivo === 'epi') {
-                const dt = (row.data || row.ent_data_retirada) ? new Date(row.data || row.ent_data_retirada).toLocaleDateString('pt-BR') : (row.epi_vencimento_ca ? new Date(row.epi_vencimento_ca).toLocaleDateString('pt-BR') : '---');
-                const st = String(row.status || row.ite_status_item || row.ent_status || row.epi_status || 'EM USO').toUpperCase();
+                const dataBase = row.entr_data_entrega || row.data || row.ent_data_retirada;
+                const dt = dataBase ? formatarDataHoraBR(dataBase) : (row.epi_vencimento_ca ? new Date(row.epi_vencimento_ca).toLocaleDateString('pt-BR') : '---');
+                const stRaw = String(row.item_status || row.status || row.ite_status_item || row.epi_status || 'EM USO').toUpperCase();
+                const st = stRaw === 'ENTREGUE' ? 'EM USO' : stRaw;
                 linha = [
                     dt,
-                    row.funcionario || row.fun_nome || row.epi_nome || '---',
-                    row.setor || row.fun_departamento || row.epi_fabricante || '---',
-                    row.epi || row.epi_nome || '---',
-                    row.ca || row.epi_ca || 'Isento',
-                    row.quantidade || row.ite_quantidade || 1,
-                    row.motivo || row.ent_motivo || 'FORNECIMENTO',
-                    row.responsavel || row.usuario_responsavel || 'almoxarifado',
+                    row.fun_nome || row.funcionario || row.epi_nome || '---',
+                    row.fun_departamento || row.setor || row.epi_fabricante || '---',
+                    row.epi_nome || row.epi || '---',
+                    row.epi_ca || row.ca || 'Isento',
+                    row.item_quantidade || row.quantidade || 1,
+                    traduzirMotivo(row.item_motivo_entrega || row.entr_motivo || row.motivo),
+                    row.usu_login || row.responsavel || '---',
                     st
                 ];
             } else if (relatorioAtivo === 'ca-vencidos') {
