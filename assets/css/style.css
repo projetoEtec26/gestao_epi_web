@@ -686,7 +686,6 @@ html.dark-mode .page-item.active .page-link, body.dark-mode .page-item.active .p
 }
 
 .card-custom:hover {
-    transform: translateY(-2px);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
 }
 
@@ -1323,6 +1322,28 @@ body.dark-mode .autocomplete-item.active {
 
 .autocomplete-item:last-child {
     border-bottom: 0 !important;
+}
+
+/* Camada estável do autocomplete: evita que cards/badges vizinhos "troquem" de posição com a lista no hover */
+.autocomplete-colab-wrapper {
+    z-index: 60;
+}
+
+.autocomplete-colab-wrapper:focus-within {
+    z-index: 70;
+}
+
+#dropdown-autocomplete-colab,
+#dropdown-autocomplete-epi {
+    isolation: isolate;
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+#dropdown-autocomplete-colab .list-group-item,
+#dropdown-autocomplete-epi .list-group-item {
+    z-index: auto !important;
 }
 
 /* Overlay Backdrop Semitransparente para Menu Mobile (Off-Canvas) */
@@ -2503,7 +2524,7 @@ body.dark-mode .md-picker-year-item {
 .dash-card,
 .welcome-card,
 .search-card {
-    z-index: 10 !important;
+    z-index: 10;
 }
 
 /* Dropdowns e sugestões internas aos cards */

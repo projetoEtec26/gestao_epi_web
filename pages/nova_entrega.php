@@ -86,7 +86,7 @@ try {
             <div class="col-lg-8">
                 
                 <!-- PASSO 1: Seleção do Colaborador -->
-                <div class="card-custom mb-4">
+                <div class="card-custom mb-4" id="card-passo-colaborador" style="position: relative; z-index: 50 !important;">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold m-0 text-color-primary">
                             <span class="badge bg-primary text-white rounded-circle me-1" style="width: 22px; height: 22px; line-height: 14px; font-size: 11px;">1</span>
@@ -98,7 +98,7 @@ try {
                     </div>
 
                     <div class="row g-3 align-items-end">
-                        <div class="col-md-9 position-relative">
+                        <div class="col-md-9 position-relative autocomplete-colab-wrapper">
                             <label for="input-busca-colaborador" class="form-label fw-semibold" style="font-size: 12px;">
                                 <i class="bi bi-search text-primary me-1"></i> Buscar Colaborador (Tempo Real) *
                             </label>
@@ -127,7 +127,7 @@ try {
                             <!-- Dropdown Flutuante de Autocomplete -->
                             <div id="dropdown-autocomplete-colab" 
                                  class="shadow-lg mt-1 p-0 border autocomplete-dropdown-container" 
-                                 style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; width: 100%; max-height: 320px; overflow-y: auto; z-index: 100; border-radius: 12px;">
+                                 style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; width: 100%; max-height: 320px; overflow-y: auto; z-index: 1050; border-radius: 12px;">
                             </div>
                         </div>
                         <div class="col-md-3">
@@ -138,7 +138,7 @@ try {
                     </div>
 
                     <!-- Card de Detalhes do Colaborador Selecionado -->
-                    <div id="card-detalhes-colab" class="mt-3 p-3 rounded bg-light border d-none">
+                    <div id="card-detalhes-colab" class="mt-3 p-3 rounded bg-light border d-none" style="position: relative; z-index: 1;">
                         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                             <div>
                                 <h6 class="fw-bold mb-1" id="info-colab-nome" style="color: var(--color-primary);">---</h6>
@@ -157,7 +157,7 @@ try {
                 </div>
 
                 <!-- PASSO 2: EPIs Atualmente em Posse (Para Substituição Rápida) -->
-                <div id="card-epis-em-posse" class="card-custom mb-4 d-none" style="position: relative; z-index: 1000;">
+                <div id="card-epis-em-posse" class="card-custom mb-4 d-none" style="position: relative; z-index: 20 !important;">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="fw-bold m-0 text-color-primary">
                             <i class="bi bi-box-seam me-1"></i> EPIs Atualmente em Posse do Colaborador
@@ -187,7 +187,7 @@ try {
                 </div>
 
                 <!-- PASSO 3: Seleção e Adição de Novos EPIs ao Carrinho -->
-                <div class="card-custom mb-4" style="position: relative; z-index: 950;">
+                <div class="card-custom mb-4" id="card-passo-epis" style="position: relative; z-index: 15 !important;">
                     <h6 class="fw-bold mb-3 text-color-primary">
                         <span class="badge bg-primary text-white rounded-circle me-1" style="width: 22px; height: 22px; line-height: 14px; font-size: 11px;">2</span>
                         Adicionar Equipamentos (EPIs) ao Carrinho
@@ -289,7 +289,7 @@ try {
                 </div>
 
                 <!-- Tabela de Itens no Carrinho -->
-                <div class="card-custom mb-4">
+                <div class="card-custom mb-4" style="position: relative; z-index: 10 !important;">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold m-0 text-color-primary">
                             <i class="bi bi-cart-check me-1"></i> Itens no Carrinho de Fornecimento
@@ -823,6 +823,7 @@ function renderizarDropdownAutocomplete(termoDigitado) {
  * Destaca visualmente o item no dropdown
  */
 function destacarItemAutocomplete(idx) {
+    if (indexFocadoAutocomplete === idx) return;
     indexFocadoAutocomplete = idx;
     const items = document.querySelectorAll('.autocomplete-item');
     items.forEach((el, i) => {
@@ -995,6 +996,7 @@ function renderizarDropdownAutocompleteEpi(termoDigitado) {
 }
 
 function destacarItemEpiEntrega(idx) {
+    if (indexFocadoAutocompleteEpi === idx) return;
     indexFocadoAutocompleteEpi = idx;
     const items = document.querySelectorAll('.auto-epi-entrega-item');
     items.forEach((el, i) => {
