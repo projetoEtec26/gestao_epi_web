@@ -229,6 +229,10 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
   - Alinhada a leitura de dados do frontend com o contrato real retornado pela API REST (`entr_data_entrega`, `item_quantidade`, `item_motivo_entrega`, `usu_login`, `item_status`, `item_data_devolucao`).
   - Implementada a formatação completa com `formatarDataHoraBR()` no fuso horário oficial `America/Sao_Paulo` (`DD/MM/AAAA HH:mm`).
   - Sincronizada a exportação de dados em CSV para incluir os mesmos valores reais de data, quantidade e responsáveis formatados.
+* **Ativação e Correção do Botão "Exportar Excel / CSV" no Relatório de EPIs (`pages/relatorios.php`):**
+  - Implementada a função `acaoExportarCSVConsumoEpi()` ausente no script do cliente, eliminando a falha silenciosa de execução (`ReferenceError`) ao clicar no botão.
+  - Adicionado tratamento automático de datas padrão (início e fim do mês corrente) e validação visual amigável com foco no campo ao tentar exportar sem selecionar um EPI ou sem alternar para "Todos os EPIs".
+  - Sincronizada a geração do arquivo CSV com codificação UTF-8 BOM e delimitador `;` para compatibilidade imediata no Microsoft Excel e Google Sheets.
 * **Estabilização de Cabeçalho Sticky e Tratamento de Exceções (`pages/funcionarios.php`):**
   - Ajustados os cabeçalhos fixos com `position: sticky` para evitar sobreposição de elementos na rolagem.
   - Tratamento defensivo de tipos para campos nulos de funcionários inativos, eliminando erros `TypeError` em funções de manipulação de strings.

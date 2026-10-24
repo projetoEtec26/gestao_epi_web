@@ -628,6 +628,7 @@ const GERAL_LIMITE_PAGINA = 25;
  */
 function mostrarPainelRelatorio(tipo, btn) {
     relatorioAtivo = tipo;
+    dadosAtivos = [];
 
     // Altera active na lista lateral de tipos de relatórios
     document.querySelectorAll('#lista-tipos-relatorios button').forEach(b => b.classList.remove('active'));
@@ -920,8 +921,15 @@ async function gerarRelatorioConsumoEpi() {
     const inputNome = document.getElementById('input-busca-rel-epi');
     
     let epiId = epiIdInput ? epiIdInput.value : '';
-    const dataInicio = dataInicioInput ? dataInicioInput.value : '';
-    const dataFim = dataFimInput ? dataFimInput.value : '';
+    let dataInicio = dataInicioInput ? dataInicioInput.value : '';
+    let dataFim = dataFimInput ? dataFimInput.value : '';
+    if (!dataInicio || !dataFim) {
+        const agora = new Date();
+        if (!dataFim) dataFim = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
+        if (!dataInicio) dataInicio = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-01`;
+        if (dataInicioInput && !dataInicioInput.value) dataInicioInput.value = dataInicio;
+        if (dataFimInput && !dataFimInput.value) dataFimInput.value = dataFim;
+    }
     const textoBusca = inputNome ? inputNome.value.trim() : '';
 
     if (modoEpiAtual === 'especifico' && !epiId && textoBusca) {
@@ -947,7 +955,19 @@ async function gerarRelatorioConsumoEpi() {
     }
 
     if (modoEpiAtual === 'especifico' && !epiId) {
-        exibirErro('Por favor, busque e selecione um EPI específico ou altere o modo para "Todos os EPIs".');
+        const msg = 'Por favor, busque e selecione um EPI específico ou altere o modo para "Todos os EPIs".';
+        const blocoEpi = document.getElementById('bloco-resultados-epi-consumo');
+        if (blocoEpi) {
+            blocoEpi.innerHTML = `
+                <div class="alert alert-warning m-0 d-flex align-items-center">
+                    <i class="bi bi-exclamation-triangle-fill me-2 fs-5 text-warning"></i>
+                    <div>${msg}</div>
+                </div>
+            `;
+            blocoEpi.classList.remove('d-none');
+        }
+        exibirErro(msg);
+        if (inputNome) inputNome.focus();
         return false;
     }
 
@@ -1076,11 +1096,16 @@ async function gerarRelatorioConsumoEpi() {
             }
             const blocoGlobal = document.getElementById('bloco-resultados');
             if (blocoGlobal) blocoGlobal.classList.add('d-none');
+            return true;
         } else {
             exibirErro(res.message || 'Nenhum registro de consumo encontrado.');
+            return false;
         }
     })
-    .catch(err => exibirErro('Erro ao carregar relatório de consumo: ' + err.message));
+    .catch(err => {
+        exibirErro('Erro ao carregar relatório de consumo: ' + err.message);
+        return false;
+    });
 }
 
 function ativarBotaoAcaoRel(btn) {
@@ -1103,6 +1128,35 @@ function acaoExportarPdfConsumoEpi() {
 
 function acaoImprimirModeloConsumoEpi() {
     abrirModeloConsumoEpi(true);
+}
+
+/**
+ * Disparado pelo botão "EXPORTAR EXCEL / CSV" no painel de Relatório de Consumo por EPI
+ */
+async function acaoExportarCSVConsumoEpi() {
+    relatorioAtivo = 'epis-vencidos';
+
+    const epiIdInput = document.getElementById('epi-consumo-id');
+    const inputNome = document.getElementById('input-busca-rel-epi');
+    const textoBusca = inputNome ? inputNome.value.trim() : '';
+    let epiId = epiIdInput ? epiIdInput.value : '';
+
+    if (modoEpiAtual === 'especifico' && !epiId && !textoBusca) {
+        alert('Por favor, busque e selecione um EPI específico ou selecione o card "Todos os EPIs" para exportar.');
+        if (inputNome) inputNome.focus();
+        return;
+    }
+
+    // Consulta os dados da API garantindo que o CSV seja gerado com os parâmetros atuais
+    const sucesso = await gerarRelatorioConsumoEpi();
+    if (sucesso === false) return;
+
+    if (!dadosAtivos || dadosAtivos.length === 0) {
+        alert('Nenhum registro de fornecimento de EPI encontrado no período selecionado para exportar.');
+        return;
+    }
+
+    await exportarCSV();
 }
 
 function abrirModeloConsumoEpi(autoprint = false) {
@@ -2490,7 +2544,10 @@ async function exportarCSV() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `relatorio_${relatorioAtivo}_${Date.now()}.csv`);
+    const nomeArquivo = (relatorioAtivo === 'epis-vencidos' || relatorioAtivo === 'epi')
+        ? `relatorio_consumo_epi_${Date.now()}.csv`
+        : `relatorio_${relatorioAtivo}_${Date.now()}.csv`;
+    link.setAttribute("download", nomeArquivo);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
