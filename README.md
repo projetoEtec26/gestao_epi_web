@@ -218,6 +218,13 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
 
+### 📅 Versão 8.4.1 (23/10/2026) – Paridade Visual 1:1 entre Mouse e Teclado no Autocomplete dos Relatórios
+* **Resolução da "Tela Branca" na Navegação por Setas (▲ / ▼) (`pages/relatorios.php`, `assets/css/style.css`):**
+  - Identificado problema visual no modo escuro onde, ao navegar com as setas do teclado nos dropdowns de filtro de colaboradores e EPIs, o item selecionado recebia fundo branco inline (`#eff6ff`) com texto claro, tornando-o ilegível ("tela branca").
+  - Substituída a injeção inline fixa por controle de classes CSS `.active` com detecção dinâmica de tema (`isDark ? '#334155' : '#eff6ff'`).
+  - Atualizadas as regras de CSS em `style.css` para atribuir exatamente a mesma estilização escura (`#334155` com texto branco) tanto ao estado `:hover` do cursor do mouse quanto ao estado `.active` da navegação por setas do teclado.
+  - Sincronizados todos os dropdowns de relatórios (`dropdown-rel-entregas`, `dropdown-rel-geral`, `dropdown-rel-custos` e `dropdown-rel-epi`).
+
 ### 📅 Versão 8.4.0 (23/10/2026) – Correção de Fuso Horário Brasil (America/Sao_Paulo) na Auditoria de Logs, Dashboard e Relatórios
 * **Correção da Subtração Indevida de Horário na Auditoria de Logs (`pages/auditoria.php`):**
   - Identificada e eliminada a conversão errônea que tratava as datas salvas no banco/API como UTC (`new DateTimeZone('UTC') -> setTimezone('America/Sao_Paulo')`), o que subtraía indevidamente 3 horas do horário real dos eventos (ex.: registros das 21:30 eram exibidos como 18:30).

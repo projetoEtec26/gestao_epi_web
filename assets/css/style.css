@@ -3101,14 +3101,34 @@ body.dark-mode [id^="dropdown-autocomplete-"] small {
     color: #94a3b8 !important;
 }
 
+.dd-rel-item:hover,
+.dd-rel-item.active {
+    background-color: #eff6ff !important;
+}
+
+html.dark-mode [id^="dropdown-rel-"] .dd-rel-item,
+body.dark-mode [id^="dropdown-rel-"] .dd-rel-item {
+    border-color: #334155 !important;
+}
+
 html.dark-mode [id^="dropdown-rel-"] div[onclick]:hover,
 body.dark-mode [id^="dropdown-rel-"] div[onclick]:hover,
+html.dark-mode [id^="dropdown-rel-"] div[onclick].active,
+body.dark-mode [id^="dropdown-rel-"] div[onclick].active,
 html.dark-mode [id^="dropdown-rel-"] .dd-rel-item:hover,
 body.dark-mode [id^="dropdown-rel-"] .dd-rel-item:hover,
+html.dark-mode [id^="dropdown-rel-"] .dd-rel-item.active,
+body.dark-mode [id^="dropdown-rel-"] .dd-rel-item.active,
 html.dark-mode [id^="dropdown-autocomplete-"] div[onclick]:hover,
 body.dark-mode [id^="dropdown-autocomplete-"] div[onclick]:hover,
+html.dark-mode [id^="dropdown-autocomplete-"] div[onclick].active,
+body.dark-mode [id^="dropdown-autocomplete-"] div[onclick].active,
+html.dark-mode [id^="dropdown-autocomplete-"] .autocomplete-item.active,
+body.dark-mode [id^="dropdown-autocomplete-"] .autocomplete-item.active,
 html.dark-mode .auto-epi-entrega-item:hover,
-body.dark-mode .auto-epi-entrega-item:hover {
+body.dark-mode .auto-epi-entrega-item:hover,
+html.dark-mode .auto-epi-entrega-item.active,
+body.dark-mode .auto-epi-entrega-item.active {
     background-color: #334155 !important;
     color: #ffffff !important;
 }

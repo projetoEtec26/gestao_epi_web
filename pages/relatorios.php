@@ -856,11 +856,13 @@ function buscarRelEpi(termo) {
             (e.epi_fabricante && e.epi_fabricante.toLowerCase().includes(t))
         ).slice(0, 10);
 
+        relEpisMatches = matches;
+        relEpiIdx = -1;
         if (matches.length === 0) {
             dropdown.innerHTML = '<div style="padding:12px;text-align:center;color:#94a3b8;font-size:13px;">Nenhum EPI localizado</div>';
         } else {
-            dropdown.innerHTML = matches.map(e => `
-                <div class="dd-rel-item" onclick="selecionarRelEpi(${e.epi_id}, '${(e.epi_nome || '').replace(/'/g, "\\'")}', '${e.epi_ca || ''}', '${(e.epi_fabricante || '').replace(/'/g, "\\'")}')"
+            dropdown.innerHTML = matches.map((e, idx) => `
+                <div class="dd-rel-item" id="dd-rel-epi-${idx}" onclick="selecionarRelEpi(${e.epi_id}, '${(e.epi_nome || '').replace(/'/g, "\\'")}', '${e.epi_ca || ''}', '${(e.epi_fabricante || '').replace(/'/g, "\\'")}')" onmouseover="focarRelEpiItem(${idx})"
                      style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--color-border, #f1f5f9);display:flex;justify-content:space-between;align-items:center;">
                     <div>
                         <strong class="dd-rel-title" style="font-size:13.5px;display:block;">${e.epi_nome}</strong>
@@ -887,10 +889,51 @@ function buscarRelEpi(termo) {
     }
 }
 
+let relEpisMatches = [];
+let relEpiIdx = -1;
+
+function focarRelEpiItem(idx) {
+    relEpiIdx = idx;
+    const isDark = document.documentElement.classList.contains('dark-mode') || document.body.classList.contains('dark-mode');
+    document.querySelectorAll('#dropdown-rel-epi .dd-rel-item').forEach((el, i) => {
+        if (i === idx) {
+            el.classList.add('active');
+            el.style.backgroundColor = isDark ? '#334155' : '#eff6ff';
+        } else {
+            el.classList.remove('active');
+            el.style.backgroundColor = '';
+        }
+    });
+}
+
 function teclarRelEpi(e) {
-    if (e.key === 'Escape') {
-        const dropdown = document.getElementById('dropdown-rel-epi');
-        if (dropdown) dropdown.style.display = 'none';
+    const dropdown = document.getElementById('dropdown-rel-epi');
+    if (!dropdown || dropdown.style.display === 'none') return;
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (relEpisMatches.length > 0) {
+            relEpiIdx = (relEpiIdx + 1) % relEpisMatches.length;
+            focarRelEpiItem(relEpiIdx);
+            const el = document.getElementById('dd-rel-epi-' + relEpiIdx);
+            if (el) el.scrollIntoView({ block: 'nearest' });
+        }
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (relEpisMatches.length > 0) {
+            relEpiIdx = (relEpiIdx - 1 + relEpisMatches.length) % relEpisMatches.length;
+            focarRelEpiItem(relEpiIdx);
+            const el = document.getElementById('dd-rel-epi-' + relEpiIdx);
+            if (el) el.scrollIntoView({ block: 'nearest' });
+        }
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const item = relEpiIdx >= 0 ? relEpisMatches[relEpiIdx] : (relEpisMatches.length === 1 ? relEpisMatches[0] : null);
+        if (item) {
+            selecionarRelEpi(item.epi_id, item.epi_nome, item.epi_ca, item.epi_fabricante);
+        }
+    } else if (e.key === 'Escape') {
+        dropdown.style.display = 'none';
+        relEpiIdx = -1;
     }
 }
 
@@ -3098,17 +3141,43 @@ function renderDdRelEntregas(termo){
 }
 
 function focarRelItem(idx){
-    relEntregasIdx=idx;
-    document.querySelectorAll('.dd-rel-item').forEach((el,i)=>{el.style.background=i===idx?'#eff6ff':'';});
+    relEntregasIdx = idx;
+    const isDark = document.documentElement.classList.contains('dark-mode') || document.body.classList.contains('dark-mode');
+    document.querySelectorAll('#dropdown-rel-entregas .dd-rel-item').forEach((el, i) => {
+        if (i === idx) {
+            el.classList.add('active');
+            el.style.backgroundColor = isDark ? '#334155' : '#eff6ff';
+        } else {
+            el.classList.remove('active');
+            el.style.backgroundColor = '';
+        }
+    });
 }
 
 function teclarRelEntregas(e){
-    const dd=document.getElementById('dropdown-rel-entregas');
-    if(!dd||dd.style.display==='none')return;
-    if(e.key==='ArrowDown'){e.preventDefault();relEntregasIdx=(relEntregasIdx+1)%Math.min(relEntregasResultados.length,8);focarRelItem(relEntregasIdx);const el=document.getElementById('dd-rel-'+relEntregasIdx);if(el)el.scrollIntoView({block:'nearest'});}
-    else if(e.key==='ArrowUp'){e.preventDefault();relEntregasIdx=(relEntregasIdx-1+Math.min(relEntregasResultados.length,8))%Math.min(relEntregasResultados.length,8);focarRelItem(relEntregasIdx);const el=document.getElementById('dd-rel-'+relEntregasIdx);if(el)el.scrollIntoView({block:'nearest'});}
-    else if(e.key==='Enter'){e.preventDefault();const item=relEntregasIdx>=0?relEntregasResultados[relEntregasIdx]:(relEntregasResultados.length===1?relEntregasResultados[0]:null);if(item)escolherRelEntregas(item.fun_id,item.fun_nome);}
-    else if(e.key==='Escape'){fecharDdRelEntregas();}
+    const dd = document.getElementById('dropdown-rel-entregas');
+    if (!dd || dd.style.display === 'none') return;
+    const totalItens = Math.min(relEntregasResultados.length, 8);
+    if (totalItens === 0) return;
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        relEntregasIdx = (relEntregasIdx + 1) % totalItens;
+        focarRelItem(relEntregasIdx);
+        const el = document.getElementById('dd-rel-' + relEntregasIdx);
+        if (el) el.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        relEntregasIdx = (relEntregasIdx - 1 + totalItens) % totalItens;
+        focarRelItem(relEntregasIdx);
+        const el = document.getElementById('dd-rel-' + relEntregasIdx);
+        if (el) el.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const item = relEntregasIdx >= 0 ? relEntregasResultados[relEntregasIdx] : (relEntregasResultados.length === 1 ? relEntregasResultados[0] : null);
+        if (item) escolherRelEntregas(item.fun_id, item.fun_nome);
+    } else if (e.key === 'Escape') {
+        fecharDdRelEntregas();
+    }
 }
 
 function escolherRelEntregas(funId, nome){
@@ -3184,16 +3253,42 @@ function renderDdRelGeral(termo){
 
 function focarRelGeralItem(idx){
     relGeralIdx = idx;
-    document.querySelectorAll('#dropdown-rel-geral .dd-rel-item').forEach((el, i) => { el.style.background = i === idx ? '#eff6ff' : ''; });
+    const isDark = document.documentElement.classList.contains('dark-mode') || document.body.classList.contains('dark-mode');
+    document.querySelectorAll('#dropdown-rel-geral .dd-rel-item').forEach((el, i) => {
+        if (i === idx) {
+            el.classList.add('active');
+            el.style.backgroundColor = isDark ? '#334155' : '#eff6ff';
+        } else {
+            el.classList.remove('active');
+            el.style.backgroundColor = '';
+        }
+    });
 }
 
 function teclarRelGeral(e){
     const dd = document.getElementById('dropdown-rel-geral');
-    if(!dd || dd.style.display === 'none') return;
-    if(e.key === 'ArrowDown'){ e.preventDefault(); relGeralIdx = (relGeralIdx + 1) % Math.min(relGeralResultados.length, 8); focarRelGeralItem(relGeralIdx); const el = document.getElementById('dd-rel-g-' + relGeralIdx); if(el) el.scrollIntoView({block:'nearest'}); }
-    else if(e.key === 'ArrowUp'){ e.preventDefault(); relGeralIdx = (relGeralIdx - 1 + Math.min(relGeralResultados.length, 8)) % Math.min(relGeralResultados.length, 8); focarRelGeralItem(relGeralIdx); const el = document.getElementById('dd-rel-g-' + relGeralIdx); if(el) el.scrollIntoView({block:'nearest'}); }
-    else if(e.key === 'Enter'){ e.preventDefault(); const item = relGeralIdx >= 0 ? relGeralResultados[relGeralIdx] : (relGeralResultados.length === 1 ? relGeralResultados[0] : null); if(item) escolherRelGeral(item.fun_id, item.fun_nome, item.fun_departamento, item.fun_cargo); }
-    else if(e.key === 'Escape'){ fecharDdRelGeral(); }
+    if (!dd || dd.style.display === 'none') return;
+    const totalItens = Math.min(relGeralResultados.length, 8);
+    if (totalItens === 0) return;
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        relGeralIdx = (relGeralIdx + 1) % totalItens;
+        focarRelGeralItem(relGeralIdx);
+        const el = document.getElementById('dd-rel-g-' + relGeralIdx);
+        if (el) el.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        relGeralIdx = (relGeralIdx - 1 + totalItens) % totalItens;
+        focarRelGeralItem(relGeralIdx);
+        const el = document.getElementById('dd-rel-g-' + relGeralIdx);
+        if (el) el.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const item = relGeralIdx >= 0 ? relGeralResultados[relGeralIdx] : (relGeralResultados.length === 1 ? relGeralResultados[0] : null);
+        if (item) escolherRelGeral(item.fun_id, item.fun_nome, item.fun_departamento, item.fun_cargo);
+    } else if (e.key === 'Escape') {
+        fecharDdRelGeral();
+    }
 }
 
 function escolherRelGeral(funId, nome, depto, cargo){
@@ -3290,16 +3385,42 @@ function renderDdRelCustos(termo){
 
 function focarRelCustosItem(idx){
     relCustosIdx = idx;
-    document.querySelectorAll('#dropdown-rel-custos .dd-rel-item').forEach((el, i) => { el.style.background = i === idx ? '#eff6ff' : ''; });
+    const isDark = document.documentElement.classList.contains('dark-mode') || document.body.classList.contains('dark-mode');
+    document.querySelectorAll('#dropdown-rel-custos .dd-rel-item').forEach((el, i) => {
+        if (i === idx) {
+            el.classList.add('active');
+            el.style.backgroundColor = isDark ? '#334155' : '#eff6ff';
+        } else {
+            el.classList.remove('active');
+            el.style.backgroundColor = '';
+        }
+    });
 }
 
 function teclarRelCustos(e){
     const dd = document.getElementById('dropdown-rel-custos');
-    if(!dd || dd.style.display === 'none') return;
-    if(e.key === 'ArrowDown'){ e.preventDefault(); relCustosIdx = (relCustosIdx + 1) % Math.min(relCustosResultados.length, 8); focarRelCustosItem(relCustosIdx); const el = document.getElementById('dd-rel-c-' + relCustosIdx); if(el) el.scrollIntoView({block:'nearest'}); }
-    else if(e.key === 'ArrowUp'){ e.preventDefault(); relCustosIdx = (relCustosIdx - 1 + Math.min(relCustosResultados.length, 8)) % Math.min(relCustosResultados.length, 8); focarRelCustosItem(relCustosIdx); const el = document.getElementById('dd-rel-c-' + relCustosIdx); if(el) el.scrollIntoView({block:'nearest'}); }
-    else if(e.key === 'Enter'){ e.preventDefault(); const item = relCustosIdx >= 0 ? relCustosResultados[relCustosIdx] : (relCustosResultados.length === 1 ? relCustosResultados[0] : null); if(item) escolherRelCustos(item.fun_id, item.fun_nome, item.fun_departamento); }
-    else if(e.key === 'Escape'){ fecharDdRelCustos(); }
+    if (!dd || dd.style.display === 'none') return;
+    const totalItens = Math.min(relCustosResultados.length, 8);
+    if (totalItens === 0) return;
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        relCustosIdx = (relCustosIdx + 1) % totalItens;
+        focarRelCustosItem(relCustosIdx);
+        const el = document.getElementById('dd-rel-c-' + relCustosIdx);
+        if (el) el.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        relCustosIdx = (relCustosIdx - 1 + totalItens) % totalItens;
+        focarRelCustosItem(relCustosIdx);
+        const el = document.getElementById('dd-rel-c-' + relCustosIdx);
+        if (el) el.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const item = relCustosIdx >= 0 ? relCustosResultados[relCustosIdx] : (relCustosResultados.length === 1 ? relCustosResultados[0] : null);
+        if (item) escolherRelCustos(item.fun_id, item.fun_nome, item.fun_departamento);
+    } else if (e.key === 'Escape') {
+        fecharDdRelCustos();
+    }
 }
 
 function escolherRelCustos(funId, nome, depto){
