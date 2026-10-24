@@ -218,6 +218,32 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
 
+### 📅 Versão 8.3.0 (23/10/2026) – Correção de Z-Index/Hover no Dropdown de Colaboradores e Data/Hora Real no Histórico de Fornecimento
+* **Resolução de Conflito de Z-Index & Hover no Dropdown de Colaboradores (`pages/nova_entrega.php`, `assets/css/style.css`):**
+  - Identificado e corrigido conflito visual onde o dropdown de autocomplete de colaboradores alternava de camada com o badge "PIN Ativo e Válido / Redefinir" e a tabela inferior no evento de hover do cursor.
+  - Implementada a camada isolada `.autocomplete-colab-wrapper` com `z-index: 60` (e `z-index: 70` no estado `:focus-within`).
+  - Aplicada a aceleração de hardware e contexto de empilhamento isolado (`isolation: isolate; transform: translateZ(0); will-change: transform; backface-visibility: hidden;`) nos dropdowns `#dropdown-autocomplete-colab` e `#dropdown-autocomplete-epi`.
+  - Definido `z-index: 1` no `#card-detalhes-colab` e desativada a elevação de z-index individual nos itens da lista (`z-index: auto !important`), garantindo estabilidade absoluta entre as camadas na Web, Celular e Tablet.
+* **Correção da Coluna Data/Hora e Paridade com a API no Histórico de Fornecimento (`pages/relatorios.php`):**
+  - Solucionado o problema em que a coluna **Data/Hora** no relatório de EPIs exibia `'---'` para todos os registros.
+  - Alinhada a leitura de dados do frontend com o contrato real retornado pela API REST (`entr_data_entrega`, `item_quantidade`, `item_motivo_entrega`, `usu_login`, `item_status`, `item_data_devolucao`).
+  - Implementada a formatação completa com `formatarDataHoraBR()` no fuso horário oficial `America/Sao_Paulo` (`DD/MM/AAAA HH:mm`).
+  - Sincronizada a exportação de dados em CSV para incluir os mesmos valores reais de data, quantidade e responsáveis formatados.
+* **Estabilização de Cabeçalho Sticky e Tratamento de Exceções (`pages/funcionarios.php`):**
+  - Ajustados os cabeçalhos fixos com `position: sticky` para evitar sobreposição de elementos na rolagem.
+  - Tratamento defensivo de tipos para campos nulos de funcionários inativos, eliminando erros `TypeError` em funções de manipulação de strings.
+
+### 📅 Versão 8.2.0 (15/10/2026) – Paridade 1:1 de Taxa de Conformidade (96%), Filtros Estritos de Situação e Dark Mode
+* **Paridade 1:1 de Taxa de Conformidade com o Android (`pages/dashboard.php`):**
+  - Alinhada a regra de cálculo da Taxa de Conformidade do Dashboard Web com a lógica oficial do aplicativo Android (`gestao_epi_8`).
+  - Contabilização oficial: `28 de 29 funcionários em dia = 96%` de conformidade, garantindo paridade absoluta entre a plataforma Web e Mobile.
+* **Filtragem Estrita e Exata por Situação do Colaborador (`pages/funcionarios.php`):**
+  - Implementada filtragem estrita separando as situações `ATIVO`, `INATIVO`, `DEMITIDO` e `AFASTADO`.
+  - Garantida a exibição de colaboradores em situações não-ativas sem bloqueio ou dependência indevida de filtros de setor.
+  - Adicionada rotina de complementação de dados a partir da base local quando a API remota retornar apenas colaboradores ativos.
+* **Aprimoramento de Alto Contraste em Modo Escuro (`assets/css/style.css`, `pages/epis.php`):**
+  - Ajustado o contraste e a visibilidade de EPIs vigentes e ativos no catálogo, prevenindo o truncamento e melhorando a legibilidade de badges e identificadores em Dark Mode.
+
 ### 📅 Versão 8.1.0 (06/10/2026) – Ajuste de Rótulo EPI, Correção do Filtro Status C.A. e Higienização/Padronização de Setores no Banco
 * **Ajuste de Rótulo nos Modais de EPI (`pages/epis.php`):**
   - Atualizada a rotulagem do campo de `Controle da Vida Útil` para **`Tipo de controle`** nos modais de *Cadastro* (`#modalCadastrar`) e *Edição de EPI* (`#modalEditar`).
