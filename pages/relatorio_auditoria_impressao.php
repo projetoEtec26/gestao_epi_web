@@ -318,7 +318,7 @@ try {
                 $dataLog = '---';
                 if (!empty($log['log_datahora'])) {
                     try {
-                        $dt = new DateTime($log['log_datahora'], new DateTimeZone('UTC'));
+                        $dt = new DateTime((string)$log['log_datahora'], $tzBrasil);
                         $dt->setTimezone($tzBrasil);
                         $dataLog = $dt->format('d/m/Y H:i');
                     } catch (\Throwable $e) {

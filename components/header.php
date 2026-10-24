@@ -28,12 +28,13 @@ if (!function_exists('formatarValorMonetario')) {
 // Funções helper globais para conversão automática de datas e horários em UTC para São Paulo/Brasil (America/Sao_Paulo)
 if (!function_exists('formatarDataHoraBr')) {
     function formatarDataHoraBr(?string $datetimeStr, string $format = 'd/m/Y H:i'): string {
-        if (empty($datetimeStr) || $datetimeStr === '0000-00-00 00:00:00') {
+        if (empty($datetimeStr) || $datetimeStr === '0000-00-00 00:00:00' || $datetimeStr === '0000-00-00') {
             return '---';
         }
         try {
-            $dt = new DateTime((string)$datetimeStr, new DateTimeZone('UTC'));
-            $dt->setTimezone(new DateTimeZone('America/Sao_Paulo'));
+            $tzBrasil = new DateTimeZone('America/Sao_Paulo');
+            $dt = new DateTime((string)$datetimeStr, $tzBrasil);
+            $dt->setTimezone($tzBrasil);
             return $dt->format($format);
         } catch (\Throwable $e) {
             $ts = strtotime((string)$datetimeStr);

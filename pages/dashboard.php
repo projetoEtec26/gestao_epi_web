@@ -77,13 +77,9 @@ function formatarLogAuditoria(array $log): array {
 
     $dataStr = 'Atividade recente';
     if (!empty($log['log_datahora'])) {
-        try {
-            $dtObj = new DateTime((string)$log['log_datahora'], new DateTimeZone('UTC'));
-            $dtObj->setTimezone(new DateTimeZone('America/Sao_Paulo'));
-            $dataStr = 'Atividade em ' . $dtObj->format('d/m \à\s H:i');
-        } catch (\Throwable $t) {
-            $ts = strtotime((string)$log['log_datahora']);
-            $dataStr = 'Atividade em ' . ($ts ? date('d/m \à\s H:i', $ts) : (string)$log['log_datahora']);
+        $dataFormatada = formatarDataHoraBr((string)$log['log_datahora'], 'd/m \à\s H:i');
+        if ($dataFormatada !== '---') {
+            $dataStr = 'Atividade em ' . $dataFormatada;
         }
     }
 

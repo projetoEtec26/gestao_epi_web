@@ -2008,15 +2008,7 @@ function gerarRelatorioAuditoria() {
                 html += `<tr><td colspan="7" class="text-center text-muted py-4">Nenhum log correspondente aos filtros foi localizado.</td></tr>`;
             } else {
                 dadosAtivos.forEach(row => {
-                    let dataFormat = '---';
-                    if (row.log_datahora) {
-                        try {
-                            const dt = new Date(String(row.log_datahora).replace(' ', 'T') + 'Z');
-                            dataFormat = isNaN(dt.getTime()) ? row.log_datahora : dt.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) + ' ' + dt.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
-                        } catch (e) {
-                            dataFormat = row.log_datahora;
-                        }
-                    }
+                    const dataFormat = formatarDataHoraBR(row.log_datahora);
 
                     let ocorrencia = row.log_ocorrencia || '';
                     if (!ocorrencia && row.log_detalhes) {
@@ -2109,6 +2101,10 @@ function traduzirMotivo(motivo) {
 
 function formatarDataHoraBR(valor) {
     if (!valor) return '---';
+    const m = String(valor).trim().match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/);
+    if (m) {
+        return `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`;
+    }
     let s = String(valor).trim();
     if (!s.includes('T') && s.includes(' ')) s = s.replace(' ', 'T');
     const d = new Date(s);
@@ -2508,13 +2504,7 @@ async function exportarCSV() {
                     (row.custo_total ?? 0).toString().replace('.', ',')
                 ];
             } else if (relatorioAtivo === 'auditoria') {
-                let dataFormat = row.log_datahora || '';
-                try {
-                    const dt = new Date(String(row.log_datahora).replace(' ', 'T') + 'Z');
-                    if (!isNaN(dt.getTime())) {
-                        dataFormat = dt.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) + ' ' + dt.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
-                    }
-                } catch(e) {}
+                let dataFormat = formatarDataHoraBR(row.log_datahora);
 
                 let ocorrencia = row.log_ocorrencia || '';
                 if (!ocorrencia && row.log_detalhes) {

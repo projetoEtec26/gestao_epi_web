@@ -382,10 +382,8 @@ body.dark-mode .audit-btn-limpar {
                                         $acaoClass = 'vencido';
                                     }
                                     
-                                    // Converte UTC para America/Sao_Paulo
-                                    $dataLog = (new DateTime($log['log_datahora'], new DateTimeZone('UTC')))
-                                        ->setTimezone(new DateTimeZone('America/Sao_Paulo'))
-                                        ->format('d/m/Y H:i:s');
+                                    // Garante data e hora no fuso oficial de São Paulo / Brasil (America/Sao_Paulo)
+                                    $dataLog = formatarDataHoraBr($log['log_datahora'] ?? null, 'd/m/Y H:i:s');
 
                                     $ocorrencia = $log['log_ocorrencia'] ?? null;
                                     if (empty($ocorrencia)) {
@@ -514,7 +512,16 @@ function verDetalhesLog(logId) {
             if (res.success && res.data) {
                 const log = res.data;
                 document.getElementById('det-log-id').innerText = log.log_id;
-                document.getElementById('det-log-data').innerText = new Date(String(log.log_datahora).replace(' ', 'T') + 'Z').toLocaleString('pt-BR');
+                let dtDisplay = '---';
+                if (log.log_datahora) {
+                    const m = String(log.log_datahora).match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/);
+                    if (m) {
+                        dtDisplay = `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}` + (m[6] !== undefined ? `:${m[6]}` : '');
+                    } else {
+                        dtDisplay = String(log.log_datahora);
+                    }
+                }
+                document.getElementById('det-log-data').innerText = dtDisplay;
                 document.getElementById('det-log-resp').innerText = log.usu_login || 'Sistema';
                 document.getElementById('det-log-tabela').innerText = `${log.log_tabela} (ID Reg: ${log.log_registro_id || '---'})`;
                 let detalheOcorrencia = (log.log_ocorrencia || '');

@@ -218,6 +218,19 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
 
+### 📅 Versão 8.4.0 (23/10/2026) – Correção de Fuso Horário Brasil (America/Sao_Paulo) na Auditoria de Logs, Dashboard e Relatórios
+* **Correção da Subtração Indevida de Horário na Auditoria de Logs (`pages/auditoria.php`):**
+  - Identificada e eliminada a conversão errônea que tratava as datas salvas no banco/API como UTC (`new DateTimeZone('UTC') -> setTimezone('America/Sao_Paulo')`), o que subtraía indevidamente 3 horas do horário real dos eventos (ex.: registros das 21:30 eram exibidos como 18:30).
+  - Alinhada a exibição da coluna **Data e hora** para consumir diretamente o helper oficial `formatarDataHoraBr($log['log_datahora'], 'd/m/Y H:i:s')`, garantindo precisão absoluta no fuso oficial de São Paulo / Brasil (`America/Sao_Paulo`).
+  - Corrigido o modal de detalhes do registro (`verDetalhesLog`) no JavaScript para formatar a string de data/hora via expressão regular determinística em `DD/MM/AAAA HH:mm:ss`, eliminando a adição de sufixo `'Z'` que forçava interpretação em UTC pelo navegador.
+* **Padronização dos Helpers Globais de Data e Hora (`config/api.php`, `components/header.php`):**
+  - Corrigida a função `formatarDataHoraBr(?string $datetimeStr, string $format)` para interpretar datas de entrada já no fuso de referência `America/Sao_Paulo`, mantendo conversão correta apenas quando o carimbo contiver deslocamento explícito ISO 8601.
+  - Blindagem de valores nulos e vazios (`0000-00-00 00:00:00` / `0000-00-00`) retornando `'---'`.
+* **Sincronização nos Módulos Dashboard e Relatórios (`pages/dashboard.php`, `pages/relatorios.php`, `pages/relatorio_auditoria_impressao.php`):**
+  - No feed de "Atividade recente" do Dashboard, substituída a conversão manual de UTC pelo helper `formatarDataHoraBr()`.
+  - Na Central de Relatórios (`pages/relatorios.php`), eliminada a injeção de `'Z'` na visualização da tabela e na exportação CSV de logs de auditoria.
+  - No Relatório Impresso de Auditoria (`pages/relatorio_auditoria_impressao.php`), padronizado o uso de `$tzBrasil` (`America/Sao_Paulo`) na formatação da coluna de data/hora.
+
 ### 📅 Versão 8.3.0 (23/10/2026) – Correção de Z-Index/Hover no Dropdown de Colaboradores e Data/Hora Real no Histórico de Fornecimento
 * **Resolução de Conflito de Z-Index & Hover no Dropdown de Colaboradores (`pages/nova_entrega.php`, `assets/css/style.css`):**
   - Identificado e corrigido conflito visual onde o dropdown de autocomplete de colaboradores alternava de camada com o badge "PIN Ativo e Válido / Redefinir" e a tabela inferior no evento de hover do cursor.
