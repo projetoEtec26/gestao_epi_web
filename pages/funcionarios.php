@@ -87,6 +87,15 @@ if (!function_exists('garantirPinsPadraoTodosFuncionarios')) {
                     $stmtInsert->execute([':fid' => $fid, ':hash' => $hash, ':salt' => $salt]);
                 }
             }
+
+            // Garante que colaboradores demitidos ou inativos não permaneçam com PIN ativo
+            $pdo->query("
+                UPDATE assinatura_eletronica a 
+                JOIN funcionarios f ON a.fun_id = f.fun_id 
+                SET a.ass_status = 'INATIVO' 
+                WHERE UPPER(f.fun_situacao) IN ('DEMITIDO', 'INATIVO') 
+                  AND (a.ass_status IS NULL OR a.ass_status != 'INATIVO')
+            ");
         } catch (Throwable $t) {
             // Silencioso
         }
@@ -279,19 +288,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
 // Garante que qualquer funcionário ativo sem PIN receba a senha universal 123456
 garantirPinsPadraoTodosFuncionarios('123456');
 
-// Carrega listagem de funcionários
+// Carrega listagem de funcionários via API REST
 $funcionarios = [];
 try {
     $listaRes = $api->get('funcionarios');
-    if (isset($listaRes['success']) && $listaRes['success']) {
+    if (isset($listaRes['success']) && $listaRes['success'] && !empty($listaRes['data']) && is_array($listaRes['data'])) {
         $funcionarios = $listaRes['data'];
     }
-} catch (Exception $e) {
-    $erro = 'Não foi possível carregar a lista de funcionários: ' . $e->getMessage();
+} catch (Throwable $e) {
+    // API indisponível; o carregamento direto do banco de dados garantirá 100% dos colaboradores
 }
 
-// Enriquece a lista de funcionários com o status real da Assinatura Eletrônica (PIN Universal 123456)
-// E complementa com funcionários NÃO-ATIVOS que a API REST não retorna (INATIVO, AFASTADO, DEMITIDO)
+// Conexão direta com o banco de dados MySQL para garantir integridade,
+// carregar TODOS os funcionários (Ativos, Afastados, Demitidos, Inativos)
+// e enriquecer com o status real da Assinatura Eletrônica (PIN)
 try {
     $configData = require __DIR__ . '/../config/api.php';
     $dsn = sprintf("mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4", $configData['db_host'], $configData['db_port'], $configData['db_name']);
@@ -300,74 +310,103 @@ try {
         PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT,
         PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false
     ]);
+
     if ($pdoAss) {
-        // Mapa de assinaturas eletrônicas
+        // 1. Atualiza no banco: colaboradores desligados ou inativos devem ter PIN com status INATIVO
+        $pdoAss->query("
+            UPDATE assinatura_eletronica a 
+            JOIN funcionarios f ON a.fun_id = f.fun_id 
+            SET a.ass_status = 'INATIVO' 
+            WHERE UPPER(f.fun_situacao) IN ('DEMITIDO', 'INATIVO') 
+              AND (a.ass_status IS NULL OR a.ass_status != 'INATIVO')
+        ");
+
+        // 2. Mapa de assinaturas eletrônicas mais recentes
         $assMap = $pdoAss->query("
-            SELECT fun_id, COALESCE(ass_status, 'ATIVO') as ass_status 
+            SELECT fun_id, COALESCE(ass_status, 'PENDENTE') as ass_status 
             FROM assinatura_eletronica 
             WHERE ass_id IN (
                 SELECT MAX(ass_id) FROM assinatura_eletronica GROUP BY fun_id
             )
         ")->fetchAll(PDO::FETCH_KEY_PAIR);
 
-        foreach ($funcionarios as &$f) {
-            $fid = (int)($f['fun_id'] ?? 0);
-            if (isset($assMap[$fid])) {
-                $f['assinatura_status'] = strtoupper((string)$assMap[$fid]);
-                $f['ass_status'] = strtoupper((string)$assMap[$fid]);
-            } else {
-                $f['assinatura_status'] = 'ATIVO';
-                $f['ass_status'] = 'ATIVO';
-            }
-        }
-        unset($f);
-
-        // Complementa: busca do banco funcionários com situação diferente de ATIVO
-        // que a API REST não retorna ou retorna em branco, para que os filtros funcionem
-        $stmtNaoAtivos = $pdoAss->query("
+        // 3. Busca TODOS os funcionários cadastrados no banco (sem exceção de situação)
+        $stmtTodos = $pdoAss->query("
             SELECT fun_id, fun_nome, fun_cpf, fun_esocial, fun_departamento, 
                    fun_cargo, fun_dataadmissao, fun_situacao, fun_qrcode
             FROM funcionarios 
-            WHERE UPPER(fun_situacao) IN ('INATIVO', 'AFASTADO', 'DEMITIDO')
             ORDER BY fun_nome
         ");
-        if ($stmtNaoAtivos) {
-            $naoAtivos = $stmtNaoAtivos->fetchAll(PDO::FETCH_ASSOC);
-            foreach ($naoAtivos as $na) {
-                $naId = (int)($na['fun_id'] ?? 0);
-                // Verifica se já está na lista da API
-                $indexEncontrado = false;
-                foreach ($funcionarios as $idx => $fApi) {
-                    if ((int)($fApi['fun_id'] ?? 0) === $naId) {
-                        $indexEncontrado = $idx;
-                        break;
-                    }
-                }
+        $todosBanco = $stmtTodos ? $stmtTodos->fetchAll(PDO::FETCH_ASSOC) : [];
 
-                // Adiciona campos padrão de matrícula para compatibilidade com a tabela
-                $na['fun_matricula'] = $na['fun_esocial'] ?? ('mat-' . str_pad((string)$naId, 5, '0', STR_PAD_LEFT));
-                
-                // Enriquece com status de assinatura
-                if (isset($assMap[$naId])) {
-                    $na['assinatura_status'] = strtoupper((string)$assMap[$naId]);
-                    $na['ass_status'] = strtoupper((string)$assMap[$naId]);
-                } else {
-                    $na['assinatura_status'] = 'PENDENTE';
-                    $na['ass_status'] = 'PENDENTE';
-                }
-
-                if ($indexEncontrado !== false) {
-                    // API retornou, mas pode estar sem nome/cpf. Vamos mesclar usando os dados reais do BD.
-                    $funcionarios[$indexEncontrado] = array_merge($funcionarios[$indexEncontrado], $na);
-                } else {
-                    // API não retornou, adiciona novo
-                    $funcionarios[] = $na;
+        // Mapeia funcionários retornados pela API (se houver) por ID
+        $mapApi = [];
+        if (!empty($funcionarios) && is_array($funcionarios)) {
+            foreach ($funcionarios as $fApi) {
+                $fid = (int)($fApi['fun_id'] ?? 0);
+                if ($fid > 0) {
+                    $mapApi[$fid] = $fApi;
                 }
             }
         }
+
+        $listaFinal = [];
+        foreach ($todosBanco as $bancoFunc) {
+            $fid = (int)($bancoFunc['fun_id'] ?? 0);
+            $situacao = strtoupper(trim((string)($bancoFunc['fun_situacao'] ?? 'ATIVO')));
+
+            // Adiciona campos padrão de matrícula para compatibilidade
+            $bancoFunc['fun_matricula'] = !empty($bancoFunc['fun_esocial']) 
+                ? $bancoFunc['fun_esocial'] 
+                : ('mat-' . str_pad((string)$fid, 5, '0', STR_PAD_LEFT));
+
+            // Status PIN / Assinatura
+            if (in_array($situacao, ['DEMITIDO', 'INATIVO'], true)) {
+                // Colaboradores desligados ou inativos não podem constar com PIN ativo
+                $bancoFunc['assinatura_status'] = 'INATIVO';
+                $bancoFunc['ass_status'] = 'INATIVO';
+            } elseif (isset($assMap[$fid])) {
+                $bancoFunc['assinatura_status'] = strtoupper((string)$assMap[$fid]);
+                $bancoFunc['ass_status'] = strtoupper((string)$assMap[$fid]);
+            } else {
+                $bancoFunc['assinatura_status'] = ($situacao === 'ATIVO') ? 'ATIVO' : 'PENDENTE';
+                $bancoFunc['ass_status'] = $bancoFunc['assinatura_status'];
+            }
+
+            if (isset($mapApi[$fid])) {
+                // Mescla dados da API com os dados consolidados do banco
+                $listaFinal[] = array_merge($mapApi[$fid], $bancoFunc);
+                unset($mapApi[$fid]);
+            } else {
+                $listaFinal[] = $bancoFunc;
+            }
+        }
+
+        // Se a API retornou algum colaborador não listado no SELECT do banco
+        foreach ($mapApi as $fRestante) {
+            $fid = (int)($fRestante['fun_id'] ?? 0);
+            $situacao = strtoupper(trim((string)($fRestante['fun_situacao'] ?? 'ATIVO')));
+            if (in_array($situacao, ['DEMITIDO', 'INATIVO'], true)) {
+                $fRestante['assinatura_status'] = 'INATIVO';
+                $fRestante['ass_status'] = 'INATIVO';
+            } elseif (empty($fRestante['assinatura_status'])) {
+                $fRestante['assinatura_status'] = isset($assMap[$fid]) ? strtoupper((string)$assMap[$fid]) : (($situacao === 'ATIVO') ? 'ATIVO' : 'PENDENTE');
+                $fRestante['ass_status'] = $fRestante['assinatura_status'];
+            }
+            $listaFinal[] = $fRestante;
+        }
+
+        // Ordena alfabeticamente pelo nome do colaborador (padrão Brasil)
+        usort($listaFinal, function ($a, $b) {
+            $nomeA = normalizarParaOrdenacaoPHP((string)($a['fun_nome'] ?? ''));
+            $nomeB = normalizarParaOrdenacaoPHP((string)($b['fun_nome'] ?? ''));
+            return strcmp($nomeA, $nomeB);
+        });
+
+        $funcionarios = $listaFinal;
     }
 } catch (Throwable $t) {
-    // Silencioso
+    // Se ocorrer erro na conexão direta, mantém a lista da API
 }
 
 $podeEditar = in_array($userProfile, ['ADMINISTRADOR', 'RH_ADMINISTRATIVO'], true);
@@ -725,7 +764,7 @@ $acao = $_GET['acao'] ?? 'lista';
                     $pinStatus = $f['assinatura_status'] ?? 'PENDENTE';
                     $badgeBg = '#f59e0b';
                     if ($pinStatus === 'CADASTRADO' || $pinStatus === 'ATIVO') $badgeBg = '#10b981';
-                    if ($pinStatus === 'BLOQUEADO') $badgeBg = '#ef4444';
+                    if ($pinStatus === 'BLOQUEADO' || $pinStatus === 'INATIVO') $badgeBg = '#ef4444';
 
                     $cpfRaw = $f['fun_cpf'] ?? '';
                     $cpfM = (strlen($cpfRaw) === 11) ? (substr($cpfRaw, 0, 3) . '.***.***-' . substr($cpfRaw, 9, 2)) : $cpfRaw;
@@ -2348,6 +2387,9 @@ async function consultarAssinatura(funId) {
         if (status === 'ATIVO' || status === 'BLOQUEADO') {
             pinBadge.className = `status-badge ${status.toLowerCase()}`;
             pinBadge.innerText = status;
+        } else if (status === 'INATIVO') {
+            pinBadge.className = 'status-badge inativo';
+            pinBadge.innerText = 'INATIVO';
         } else {
             pinBadge.className = 'status-badge inativo';
             pinBadge.innerText = 'NÃO CADASTRADO';

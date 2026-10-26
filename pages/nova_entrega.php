@@ -20,13 +20,13 @@ $erro = null;
 try {
     // 1. Carrega lista de funcionários
     $resFunc = $api->get('funcionarios');
-    if (isset($resFunc['success']) && $resFunc['success']) {
+    if (isset($resFunc['success']) && $resFunc['success'] && !empty($resFunc['data']) && is_array($resFunc['data'])) {
         $funcionarios = $resFunc['data'];
     }
 
     // 2. Carrega catálogo de EPIs
     $resEpis = $api->get('epis');
-    if (isset($resEpis['success']) && $resEpis['success']) {
+    if (isset($resEpis['success']) && $resEpis['success'] && !empty($resEpis['data']) && is_array($resEpis['data'])) {
         $episCatalogo = $resEpis['data'];
     }
 
@@ -36,7 +36,36 @@ try {
         $termoVigente = $resTermo['data'];
     }
 } catch (\Throwable $e) {
-    $erro = 'Erro ao carregar dados iniciais: ' . $e->getMessage();
+    // Fallback via banco de dados abaixo
+}
+
+// Fallback robusto direto do banco de dados MySQL
+if (empty($funcionarios) || empty($episCatalogo)) {
+    try {
+        $cfgNE = require __DIR__ . '/../config/api.php';
+        $pdoNE = new PDO(
+            sprintf("mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4", $cfgNE['db_host'], $cfgNE['db_port'], $cfgNE['db_name']),
+            $cfgNE['db_user'], $cfgNE['db_pass'],
+            [PDO::ATTR_TIMEOUT => 4, PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT]
+        );
+        if ($pdoNE) {
+            if (empty($funcionarios)) {
+                $funcionarios = $pdoNE->query("
+                    SELECT fun_id, fun_nome, fun_cpf, fun_esocial, fun_departamento, fun_cargo, fun_dataadmissao, fun_situacao
+                    FROM funcionarios
+                    WHERE UPPER(fun_situacao) = 'ATIVO'
+                    ORDER BY fun_nome
+                ")->fetchAll(PDO::FETCH_ASSOC);
+            }
+            if (empty($episCatalogo)) {
+                $episCatalogo = $pdoNE->query("
+                    SELECT epi_id, epi_nome, epi_ca, epi_validade_ca, epi_status, epi_fabricante, epi_descricao
+                    FROM epis
+                    ORDER BY epi_nome
+                ")->fetchAll(PDO::FETCH_ASSOC);
+            }
+        }
+    } catch (\Throwable $e) {}
 }
 ?>
 

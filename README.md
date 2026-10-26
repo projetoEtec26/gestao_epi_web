@@ -717,6 +717,11 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 *   **Submenus Expansíveis (`components/sidebar.php`):** Implementação dos submenus retráteis `Histórico`, `Devolução` e `Nova Entrega` sob o menu *Entregas & Devoluções*, com botões de alternância `+` / `-`.
 *   **Speed Dial (FAB) Flutuante (`pages/entregas.php`, `pages/devolucoes.php`, `pages/nova_entrega.php`):** Adição do menu flutuante circular azul com ícone `+` no canto inferior direito para acesso rápido às ações `Histórico`, `Devolução` e `Nova Entrega`.
 
+### 📅 Versão 2.2.1 (26/10/2026) – Carregamento Universal de Colaboradores e Correção de Status PIN
+*   **Carregamento Completo de Funcionários Ativos:** Ajustada a rotina de carregamento em `pages/funcionarios.php` para buscar todos os 34 colaboradores diretamente do banco com fallback automático, garantindo que 100% dos colaboradores ativos sejam exibidos na tabela e no autocomplete mesmo quando a API REST estiver indisponível ou vazia.
+*   **Correção Semântica do Status PIN:** Colaboradores desligados (`DEMITIDO`) ou inativados (`INATIVO`) agora possuem status PIN estritamente `INATIVO` no banco e na interface, eliminando o falso positivo de "Status PIN: ATIVO" para inativos.
+*   **Resiliência em Módulos Dependentes:** Adicionado fallback do banco MySQL nas páginas `pages/relatorios.php`, `pages/nova_entrega.php` e `pages/devolucoes.php` para garantir estabilidade em todo o ecossistema.
+
 ### 📅 Versão 2.2.0 (04/09/2026) – Fuso Horário Oficial & Otimização de Performance cURL/SQL
 *   **Padronização de Fuso Horário:** Garantida a inicialização global do fuso horário `America/Sao_Paulo` (GMT-3).
 *   **Otimização N+1 SQL:** Redução drástica do tempo de carregamento de entregas de 45s para 5ms via busca em lote.

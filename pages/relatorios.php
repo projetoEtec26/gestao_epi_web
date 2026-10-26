@@ -19,19 +19,57 @@ $erro = null;
 $funcionarios = [];
 try {
     $funcRes = $api->get('funcionarios');
-    if (isset($funcRes['success']) && $funcRes['success']) {
+    if (isset($funcRes['success']) && $funcRes['success'] && !empty($funcRes['data']) && is_array($funcRes['data'])) {
         $funcionarios = $funcRes['data'];
     }
 } catch (\Throwable $e) {}
+
+if (empty($funcionarios)) {
+    try {
+        $cfgRel = require __DIR__ . '/../config/api.php';
+        $pdoRel = new PDO(
+            sprintf("mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4", $cfgRel['db_host'], $cfgRel['db_port'], $cfgRel['db_name']),
+            $cfgRel['db_user'], $cfgRel['db_pass'],
+            [PDO::ATTR_TIMEOUT => 4, PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT]
+        );
+        if ($pdoRel) {
+            $funcionarios = $pdoRel->query("
+                SELECT fun_id, fun_nome, fun_cpf, fun_esocial, fun_departamento, fun_cargo, fun_dataadmissao, fun_situacao
+                FROM funcionarios
+                ORDER BY fun_nome
+            ")->fetchAll(PDO::FETCH_ASSOC);
+        }
+    } catch (\Throwable $e) {}
+}
 
 // Lista de Usuários/Operadores para o filtro de auditoria
 $usuariosOperadores = [];
 try {
     $usuRes = $api->get('usuarios');
-    if (isset($usuRes['success']) && $usuRes['success']) {
+    if (isset($usuRes['success']) && $usuRes['success'] && !empty($usuRes['data']) && is_array($usuRes['data'])) {
         $usuariosOperadores = $usuRes['data'];
     }
 } catch (\Throwable $e) {}
+
+if (empty($usuariosOperadores)) {
+    try {
+        if (!isset($pdoRel) || !$pdoRel) {
+            $cfgRel = require __DIR__ . '/../config/api.php';
+            $pdoRel = new PDO(
+                sprintf("mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4", $cfgRel['db_host'], $cfgRel['db_port'], $cfgRel['db_name']),
+                $cfgRel['db_user'], $cfgRel['db_pass'],
+                [PDO::ATTR_TIMEOUT => 4, PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT]
+            );
+        }
+        if ($pdoRel) {
+            $usuariosOperadores = $pdoRel->query("
+                SELECT usu_id, usu_nome, usu_login, usu_perfil, usu_status
+                FROM usuarios
+                ORDER BY usu_nome
+            ")->fetchAll(PDO::FETCH_ASSOC);
+        }
+    } catch (\Throwable $e) {}
+}
 
 $podeVerCustos = in_array($userProfile, ['ADMINISTRADOR', 'GESTOR'], true);
 $podeVerEntregasGerais = in_array($userProfile, ['ADMINISTRADOR', 'TECNICO_SST', 'GESTOR'], true);
