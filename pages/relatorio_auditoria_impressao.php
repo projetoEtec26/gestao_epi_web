@@ -269,9 +269,6 @@ try {
         <button type="button" id="btn-auditoria-pdf-download" class="btn-action btn-pdf" onclick="baixarRelatorioAuditoriaPDF()">
             <i class="bi bi-file-earmark-pdf-fill"></i> Baixar PDF
         </button>
-        <button type="button" id="btn-auditoria-pdf-share" class="btn-action btn-share" onclick="compartilharRelatorioAuditoriaPDF()">
-            <i class="bi bi-share-fill"></i> Compartilhar PDF
-        </button>
         <button type="button" class="btn-action btn-print" onclick="window.print()">
             <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/><path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/></svg>
             Imprimir / Salvar PDF

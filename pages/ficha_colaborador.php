@@ -393,9 +393,6 @@ $periodoFim = !empty($dataFim) ? (new DateTime($dataFim))->format('d/m/Y') : (ne
         <button type="button" id="btn-ficha-pdf-download" class="btn-action btn-pdf" onclick="baixarFichaColaboradorPDF()">
             <i class="bi bi-file-earmark-pdf-fill"></i> <span>Baixar PDF</span>
         </button>
-        <button type="button" id="btn-ficha-pdf-share" class="btn-action btn-share" onclick="compartilharFichaColaboradorPDF()">
-            <i class="bi bi-share-fill"></i> <span>Compartilhar PDF</span>
-        </button>
         <button type="button" class="btn-action btn-print" onclick="window.print()">
             <i class="bi bi-printer-fill"></i> Imprimir
         </button>

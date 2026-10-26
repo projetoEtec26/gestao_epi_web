@@ -361,9 +361,6 @@ try {
         <button type="button" class="btn-action" id="btn-fin-baixar-pdf" onclick="baixarRelatorioFinanceiroPDF(this)" style="background-color:#10B981; color:#FFFFFF;">
             <i class="bi bi-download"></i> Baixar PDF
         </button>
-        <button type="button" class="btn-action" id="btn-fin-compartilhar-pdf" onclick="compartilharRelatorioFinanceiroPDF(this)" style="background-color:#8B5CF6; color:#FFFFFF;">
-            <i class="bi bi-share"></i> Compartilhar PDF
-        </button>
         <button type="button" class="btn-action btn-close-view" onclick="window.close(); if(window.opener){window.opener.focus();}else{location.href='relatorios.php';}">
             <i class="bi bi-arrow-left"></i> Voltar
         </button>

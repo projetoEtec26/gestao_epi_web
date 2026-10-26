@@ -717,6 +717,9 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 *   **Submenus Expansíveis (`components/sidebar.php`):** Implementação dos submenus retráteis `Histórico`, `Devolução` e `Nova Entrega` sob o menu *Entregas & Devoluções*, com botões de alternância `+` / `-`.
 *   **Speed Dial (FAB) Flutuante (`pages/entregas.php`, `pages/devolucoes.php`, `pages/nova_entrega.php`):** Adição do menu flutuante circular azul com ícone `+` no canto inferior direito para acesso rápido às ações `Histórico`, `Devolução` e `Nova Entrega`.
 
+### 📅 Versão 2.2.3 (26/10/2026) – Remoção do Botão "Compartilhar PDF" nas Páginas de Relatórios
+*   **Limpeza de Interface:** Removido o botão "Compartilhar PDF" de todas as abas e páginas de relatórios (`pages/relatorios.php`, `pages/relatorio_validade_ca.php`, `pages/relatorio_financeiro.php`, `pages/relatorio_auditoria_impressao.php` e `pages/ficha_colaborador.php`), mantendo os fluxos diretos e oficiais de *Consultar*, *Exportar Excel/CSV*, *Baixar PDF* e *Imprimir Modelo Oficial*.
+
 ### 📅 Versão 2.2.2 (26/10/2026) – Alto Contraste e Legibilidade no Autocomplete (Dark e Light Mode)
 *   **Correção de Contraste no Destaque de Busca (`pages/nova_entrega.php`):** Substituída a tag `<mark>` com fundo amarelo por `<strong class="highlight-match text-primary fw-bold">`, eliminando a combinação ilegível de letras claras/brancas em fundo amarelo no Modo Escuro.
 *   **Blindagem Global de Legibilidade CSS (`assets/css/style.css`):** Implementadas regras de contraste estrito para `.highlight-match` e tags `<mark>` em todos os autocompletes e dropdowns do sistema (`colab`, `epi`, `func`), garantindo excelente contraste (WCAG AAA) nas três plataformas (Desktop, Celular e Tablet).
