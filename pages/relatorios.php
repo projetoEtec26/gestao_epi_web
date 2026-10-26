@@ -3127,7 +3127,7 @@ function _rlHL(t,b){
     if(!b||!t)return _rlEsc(t);
     const tn=_rlNorm(t),bn=_rlNorm(b),p=tn.indexOf(bn);
     if(p===-1)return _rlEsc(t);
-    return _rlEsc(t.slice(0,p))+'<strong style="color:#3b82f6;">'+_rlEsc(t.slice(p,p+b.length))+'</strong>'+_rlEsc(t.slice(p+b.length));
+    return _rlEsc(t.slice(0,p))+'<strong class="highlight-match text-primary fw-bold" style="color:#3b82f6;">'+_rlEsc(t.slice(p,p+b.length))+'</strong>'+_rlEsc(t.slice(p+b.length));
 }
 function _rlCor(n){const c=['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#ec4899'];let h=0;for(let i=0;i<n.length;i++)h=n.charCodeAt(i)+((h<<5)-h);return c[Math.abs(h)%c.length];}
 function _rlIni(n){return(n||'??').split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');}

@@ -1324,6 +1324,82 @@ body.dark-mode .autocomplete-item.active {
     border-bottom: 0 !important;
 }
 
+/* Destaque de texto em buscas e autocompletes com alto contraste (Light e Dark Mode) */
+.highlight-match,
+strong.highlight-match {
+    color: #2563eb !important;
+    font-weight: 700 !important;
+}
+
+html.dark-mode .highlight-match,
+body.dark-mode .highlight-match,
+html.dark-mode strong.highlight-match,
+body.dark-mode strong.highlight-match {
+    color: #38bdf8 !important;
+    font-weight: 700 !important;
+}
+
+/* Proteção global de alto contraste para qualquer tag <mark> ou fundo amarelo */
+mark,
+mark.bg-warning-subtle,
+.autocomplete-item mark,
+#dropdown-autocomplete-colab mark,
+#dropdown-autocomplete-epi mark,
+#dropdown-autocomplete-func mark,
+#autocomplete-lista mark {
+    background-color: #fef08a !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    padding: 0 3px !important;
+    border-radius: 3px !important;
+}
+
+html.dark-mode mark,
+body.dark-mode mark,
+html.dark-mode mark.bg-warning-subtle,
+body.dark-mode mark.bg-warning-subtle,
+html.dark-mode .autocomplete-item mark,
+body.dark-mode .autocomplete-item mark,
+html.dark-mode #dropdown-autocomplete-colab mark,
+body.dark-mode #dropdown-autocomplete-colab mark,
+html.dark-mode #dropdown-autocomplete-epi mark,
+body.dark-mode #dropdown-autocomplete-epi mark,
+html.dark-mode #dropdown-autocomplete-func mark,
+body.dark-mode #dropdown-autocomplete-func mark,
+html.dark-mode #autocomplete-lista mark,
+body.dark-mode #autocomplete-lista mark {
+    background-color: rgba(56, 189, 248, 0.25) !important;
+    color: #38bdf8 !important;
+    font-weight: 700 !important;
+    padding: 0 3px !important;
+    border-radius: 3px !important;
+}
+
+/* Subtítulo e metadados de colaboradores e EPIs no autocomplete com excelente legibilidade */
+.colab-nome-auto,
+.epi-nome-auto {
+    color: #0f172a;
+}
+
+html.dark-mode .colab-nome-auto,
+body.dark-mode .colab-nome-auto,
+html.dark-mode .epi-nome-auto,
+body.dark-mode .epi-nome-auto {
+    color: #f8fafc !important;
+}
+
+html.dark-mode .colab-sub-auto,
+body.dark-mode .colab-sub-auto,
+html.dark-mode .epi-sub-auto,
+body.dark-mode .epi-sub-auto {
+    color: #cbd5e1 !important;
+}
+
+html.dark-mode .badge-cpf-auto,
+body.dark-mode .badge-cpf-auto {
+    color: #fb7185 !important;
+}
+
 /* Camada estável do autocomplete: evita que cards/badges vizinhos "troquem" de posição com a lista no hover */
 .autocomplete-colab-wrapper {
     z-index: 60;

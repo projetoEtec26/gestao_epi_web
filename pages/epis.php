@@ -1428,7 +1428,7 @@ function destacarTrecho(texto, query) {
     const antes = texto.substring(0, idx);
     const meio = texto.substring(idx, idx + query.length);
     const depois = texto.substring(idx + query.length);
-    return `${htmlEscape(antes)}<strong class="text-primary">${htmlEscape(meio)}</strong>${htmlEscape(depois)}`;
+    return `${htmlEscape(antes)}<strong class="highlight-match text-primary fw-bold">${htmlEscape(meio)}</strong>${htmlEscape(depois)}`;
 }
 
 function aoDigitarBuscaEpi(termo) {

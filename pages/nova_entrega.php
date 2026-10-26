@@ -724,14 +724,24 @@ function htmlEscape(str) {
 }
 
 /**
- * Destaca trechos pesquisados no autocomplete
+ * Destaca trechos pesquisados no autocomplete com alto contraste e legibilidade
  */
 function destacarTrecho(texto, query) {
     if (!texto) return '';
     if (!query || !query.trim()) return htmlEscape(texto);
     const termoClean = query.trim();
-    const regex = new RegExp(`(${termoClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    return htmlEscape(texto).replace(regex, '<mark class="bg-warning-subtle text-dark p-0 rounded-1">$1</mark>');
+    const textoNorm = typeof normalizarTexto === 'function' ? normalizarTexto(texto) : texto.toLowerCase();
+    const queryNorm = typeof normalizarTexto === 'function' ? normalizarTexto(termoClean) : termoClean.toLowerCase();
+    const idx = textoNorm.indexOf(queryNorm);
+    if (idx === -1) {
+        const regex = new RegExp(`(${termoClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return htmlEscape(texto).replace(regex, '<strong class="highlight-match text-primary fw-bold">$1</strong>');
+    }
+
+    const antes = texto.substring(0, idx);
+    const meio = texto.substring(idx, idx + termoClean.length);
+    const depois = texto.substring(idx + termoClean.length);
+    return `${htmlEscape(antes)}<strong class="highlight-match text-primary fw-bold">${htmlEscape(meio)}</strong>${htmlEscape(depois)}`;
 }
 
 /**
@@ -828,15 +838,15 @@ function renderizarDropdownAutocomplete(termoDigitado) {
                 </div>
                 <div class="flex-grow-1 min-w-0" style="line-height: 1.25;">
                     <div class="d-flex align-items-center justify-content-between">
-                        <span class="fw-semibold text-truncate" style="font-size: 13px;">${destacarTrecho(f.fun_nome, termoDigitado)}</span>
+                        <span class="fw-semibold text-truncate colab-nome-auto" style="font-size: 13.5px;">${destacarTrecho(f.fun_nome, termoDigitado)}</span>
                         <span class="badge bg-light text-secondary border ms-1" style="font-size: 10px;">ID #${f.fun_id}</span>
                     </div>
-                    <div class="text-muted d-flex flex-wrap align-items-center gap-1 mt-1" style="font-size: 11px;">
-                        <span><i class="bi bi-briefcase me-1"></i>${htmlEscape(f.fun_cargo)}</span>
+                    <div class="colab-sub-auto text-muted d-flex flex-wrap align-items-center gap-1 mt-1" style="font-size: 11.5px;">
+                        <span><i class="bi bi-briefcase me-1 text-secondary"></i>${htmlEscape(f.fun_cargo)}</span>
                         <span>•</span>
-                        <span><i class="bi bi-building me-1"></i>${htmlEscape(f.fun_departamento)}</span>
+                        <span><i class="bi bi-building me-1 text-secondary"></i>${htmlEscape(f.fun_departamento)}</span>
                         <span>•</span>
-                        <span class="text-muted">CPF: ${cpfFmt}</span>
+                        <span class="badge-cpf-auto fw-semibold">CPF: ${cpfFmt}</span>
                     </div>
                 </div>
             </a>
@@ -1006,10 +1016,10 @@ function renderizarDropdownAutocompleteEpi(termoDigitado) {
                 </div>
                 <div class="flex-grow-1 min-w-0" style="line-height: 1.3;">
                     <div class="d-flex align-items-center justify-content-between gap-2">
-                        <span class="fw-semibold text-body text-truncate" style="font-size: 13px;">${nomeDestacado}</span>
+                        <span class="fw-semibold text-truncate epi-nome-auto" style="font-size: 13.5px;">${nomeDestacado}</span>
                         <span class="badge bg-light text-secondary border flex-shrink-0" style="font-size: 10px; padding: 3px 8px; border-radius: 6px;">ID #${e.epi_id}</span>
                     </div>
-                    <div class="text-muted d-flex flex-wrap align-items-center gap-1 mt-1" style="font-size: 11px;">
+                    <div class="epi-sub-auto text-muted d-flex flex-wrap align-items-center gap-1 mt-1" style="font-size: 11.5px;">
                         <span><i class="bi bi-building me-1 text-secondary"></i>${fab}</span> • 
                         <span><i class="bi bi-shield me-1 text-secondary"></i>${caDesc}</span>
                         ${statusCaHtml ? ' • ' + statusCaHtml : ''}

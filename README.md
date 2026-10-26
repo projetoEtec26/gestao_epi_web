@@ -717,6 +717,11 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 *   **Submenus Expansíveis (`components/sidebar.php`):** Implementação dos submenus retráteis `Histórico`, `Devolução` e `Nova Entrega` sob o menu *Entregas & Devoluções*, com botões de alternância `+` / `-`.
 *   **Speed Dial (FAB) Flutuante (`pages/entregas.php`, `pages/devolucoes.php`, `pages/nova_entrega.php`):** Adição do menu flutuante circular azul com ícone `+` no canto inferior direito para acesso rápido às ações `Histórico`, `Devolução` e `Nova Entrega`.
 
+### 📅 Versão 2.2.2 (26/10/2026) – Alto Contraste e Legibilidade no Autocomplete (Dark e Light Mode)
+*   **Correção de Contraste no Destaque de Busca (`pages/nova_entrega.php`):** Substituída a tag `<mark>` com fundo amarelo por `<strong class="highlight-match text-primary fw-bold">`, eliminando a combinação ilegível de letras claras/brancas em fundo amarelo no Modo Escuro.
+*   **Blindagem Global de Legibilidade CSS (`assets/css/style.css`):** Implementadas regras de contraste estrito para `.highlight-match` e tags `<mark>` em todos os autocompletes e dropdowns do sistema (`colab`, `epi`, `func`), garantindo excelente contraste (WCAG AAA) nas três plataformas (Desktop, Celular e Tablet).
+*   **Harmonização Tipográfica:** Ajustados os tamanhos de fonte e paleta de metadados (cargo, departamento e CPF) dos itens de busca para leitura nítida e confortável.
+
 ### 📅 Versão 2.2.1 (26/10/2026) – Carregamento Universal de Colaboradores e Correção de Status PIN
 *   **Carregamento Completo de Funcionários Ativos:** Ajustada a rotina de carregamento em `pages/funcionarios.php` para buscar todos os 34 colaboradores diretamente do banco com fallback automático, garantindo que 100% dos colaboradores ativos sejam exibidos na tabela e no autocomplete mesmo quando a API REST estiver indisponível ou vazia.
 *   **Correção Semântica do Status PIN:** Colaboradores desligados (`DEMITIDO`) ou inativados (`INATIVO`) agora possuem status PIN estritamente `INATIVO` no banco e na interface, eliminando o falso positivo de "Status PIN: ATIVO" para inativos.
