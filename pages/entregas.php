@@ -17,7 +17,7 @@ $entregas = [];
 
 try {
     $response = $api->get('entregas');
-    if (isset($response['success']) && $response['success']) {
+    if (isset($response['success']) && $response['success'] && !empty($response['data']) && is_array($response['data'])) {
         $entregas = $response['data'];
     } else {
         $erro = $response['message'] ?? 'Falha ao buscar o histórico de entregas.';
@@ -25,6 +25,111 @@ try {
 } catch (Exception $e) {
     $erro = 'Erro de conexão: ' . $e->getMessage();
 }
+
+// Enriquecimento e fallback defensivo via Banco de Dados Direto (PDO Locaweb)
+try {
+    $cfgEntr = require __DIR__ . '/../config/api.php';
+    $pdoEntr = new PDO(
+        sprintf("mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4", $cfgEntr['db_host'], $cfgEntr['db_port'], $cfgEntr['db_name']),
+        $cfgEntr['db_user'], $cfgEntr['db_pass'],
+        [PDO::ATTR_TIMEOUT => 4, PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT]
+    );
+
+    if ($pdoEntr) {
+        // Se a API não retornou dados (ex.: ambiente local ou timeout), busca direto com JOINs completos
+        if (empty($entregas)) {
+            $sqlAll = "SELECT e.*, f.fun_nome, f.fun_cpf, f.fun_cargo, f.fun_departamento, u.usu_login, u.usu_perfil
+                       FROM entrega_epis e
+                       LEFT JOIN funcionarios f ON e.fun_id = f.fun_id
+                       LEFT JOIN usuarios u ON e.usu_id = u.usu_id
+                       ORDER BY e.entr_data_entrega DESC";
+            $stmtAll = $pdoEntr->query($sqlAll);
+            if ($stmtAll) {
+                $entregasRaw = $stmtAll->fetchAll(PDO::FETCH_ASSOC);
+                if (!empty($entregasRaw)) {
+                    $sqlItensAll = "SELECT i.*, e.epi_nome, e.epi_ca, e.epi_fabricante, e.epi_numero_lote, e.epi_identificacao, e.epi_modelo
+                                    FROM itens_entrega i
+                                    LEFT JOIN epis e ON i.epi_id = e.epi_id
+                                    ORDER BY i.item_id ASC";
+                    $stmtItensAll = $pdoEntr->query($sqlItensAll);
+                    $itensByEntrega = [];
+                    if ($stmtItensAll) {
+                        while ($it = $stmtItensAll->fetch(PDO::FETCH_ASSOC)) {
+                            if (empty($it['item_numero_lote'])) {
+                                $it['item_numero_lote'] = !empty($it['epi_numero_lote']) 
+                                    ? $it['epi_numero_lote'] 
+                                    : (!empty($it['epi_identificacao']) ? $it['epi_identificacao'] : '');
+                            }
+                            $itensByEntrega[(int)$it['entr_id']][] = $it;
+                        }
+                    }
+                    foreach ($entregasRaw as &$er) {
+                        $eId = (int)$er['entr_id'];
+                        $er['itens'] = $itensByEntrega[$eId] ?? [];
+                    }
+                    unset($er);
+                    $entregas = $entregasRaw;
+                    $erro = null;
+                }
+            }
+        } else {
+            // Se a API retornou entregas, enriquece com dados cadastrais de funcionários (CPF, Cargo, Setor) e lotes de EPIs
+            $funcMap = [];
+            $stF = $pdoEntr->query("SELECT fun_id, fun_nome, fun_cpf, fun_cargo, fun_departamento FROM funcionarios");
+            if ($stF) {
+                while ($rf = $stF->fetch(PDO::FETCH_ASSOC)) {
+                    $funcMap[(int)$rf['fun_id']] = $rf;
+                }
+            }
+
+            $epiMap = [];
+            $stE = $pdoEntr->query("SELECT epi_id, epi_nome, epi_ca, epi_fabricante, epi_numero_lote, epi_identificacao, epi_modelo FROM epis");
+            if ($stE) {
+                while ($re = $stE->fetch(PDO::FETCH_ASSOC)) {
+                    $epiMap[(int)$re['epi_id']] = $re;
+                }
+            }
+
+            $itensLoteMap = [];
+            $stItens = $pdoEntr->query("SELECT item_id, item_numero_lote FROM itens_entrega WHERE item_numero_lote IS NOT NULL AND item_numero_lote != ''");
+            if ($stItens) {
+                while ($ri = $stItens->fetch(PDO::FETCH_ASSOC)) {
+                    $itensLoteMap[(int)$ri['item_id']] = $ri['item_numero_lote'];
+                }
+            }
+
+            foreach ($entregas as &$entr) {
+                $fId = (int)($entr['fun_id'] ?? 0);
+                if (isset($funcMap[$fId])) {
+                    $f = $funcMap[$fId];
+                    if (empty($entr['fun_cpf'])) $entr['fun_cpf'] = $f['fun_cpf'] ?? '';
+                    if (empty($entr['fun_cargo'])) $entr['fun_cargo'] = $f['fun_cargo'] ?? '';
+                    if (empty($entr['fun_departamento'])) $entr['fun_departamento'] = $f['fun_departamento'] ?? '';
+                }
+
+                if (!empty($entr['itens']) && is_array($entr['itens'])) {
+                    foreach ($entr['itens'] as &$item) {
+                        $itemId = (int)($item['item_id'] ?? 0);
+                        $epiId = (int)($item['epi_id'] ?? 0);
+
+                        if (empty($item['item_numero_lote']) && isset($itensLoteMap[$itemId])) {
+                            $item['item_numero_lote'] = $itensLoteMap[$itemId];
+                        }
+
+                        if (empty($item['item_numero_lote']) && isset($epiMap[$epiId])) {
+                            $epiInfo = $epiMap[$epiId];
+                            $item['item_numero_lote'] = !empty($epiInfo['epi_numero_lote']) 
+                                ? $epiInfo['epi_numero_lote'] 
+                                : (!empty($epiInfo['epi_identificacao']) ? $epiInfo['epi_identificacao'] : '');
+                        }
+                    }
+                    unset($item);
+                }
+            }
+            unset($entr);
+        }
+    }
+} catch (Throwable $e) {}
 
 $userProfile = $_SESSION['usuario']['usu_perfil'] ?? '';
 ?>
@@ -535,31 +640,35 @@ function exibirTermo(entr) {
     document.getElementById('termo-data').innerText = new Date(entr.entr_data_entrega).toLocaleString('pt-BR');
     document.getElementById('termo-nome').innerText = entr.fun_nome || '---';
     
+    // Formatação de CPF com máscara e proteção LGPD (padrão 000.***.***-00)
     let cpf = entr.fun_cpf || '';
-    if (cpf.length === 11) {
-        cpf = `***.***.***-${cpf.slice(-2)}`;
+    const cpfLimpo = String(cpf).replace(/\D/g, '');
+    if (cpfLimpo.length === 11) {
+        cpf = `${cpfLimpo.substring(0, 3)}.***.***-${cpfLimpo.substring(9)}`;
     }
-    document.getElementById('termo-cpf').innerText = cpf;
+    document.getElementById('termo-cpf').innerText = cpf || '---';
     document.getElementById('termo-cargo').innerText = entr.fun_cargo || '---';
-    document.getElementById('termo-setor').innerText = entr.fun_departamento || '---';
+    document.getElementById('termo-setor').innerText = entr.fun_departamento || entr.fun_setor || '---';
     
     let htmlItens = '';
-    entr.itens.forEach(item => {
+    (entr.itens || []).forEach(item => {
         let vencCa = '---';
         if (item.item_epi_validade_ca_snapshot) {
             const parts = item.item_epi_validade_ca_snapshot.split('-');
             vencCa = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : item.item_epi_validade_ca_snapshot;
         }
         
+        const loteVal = item.item_numero_lote || item.epi_numero_lote || item.epi_identificacao || item.lote || '---';
+        
         htmlItens += `
             <tr>
-                <td class="fw-semibold">${item.item_epi_nome_snapshot || 'EPI'}</td>
-                <td>${item.item_epi_fabricante_snapshot || '---'}</td>
-                <td>${item.item_epi_ca_snapshot || '---'}</td>
+                <td class="fw-semibold">${item.item_epi_nome_snapshot || item.epi_nome || 'EPI'}</td>
+                <td>${item.item_epi_fabricante_snapshot || item.epi_fabricante || '---'}</td>
+                <td>${item.item_epi_ca_snapshot || item.epi_ca || '---'}</td>
                 <td>${vencCa}</td>
-                <td>${item.item_quantidade}</td>
+                <td>${item.item_quantidade || 1}</td>
                 <td>${item.item_tamanho || '---'}</td>
-                <td>${item.item_numero_lote || '---'}</td>
+                <td>${loteVal}</td>
             </tr>
         `;
     });

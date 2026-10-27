@@ -218,6 +218,12 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
 
+### 📅 Versão 8.4.3 (26/10/2026) – Exibição de CPF, Cargo, Setor e Lote no Recibo de Entrega Eletrônica
+* **Enriquecimento e Correção dos Dados do Receptor e Lote (`pages/entregas.php`):**
+  - Identificada ausência de campos cadastrais (`fun_cpf`, `fun_cargo`, `fun_departamento`) na carga padrão da listagem de entregas, o que deixava CPF vazio e Cargo/Setor como `---` no modal de Recibo de Entrega.
+  - Implementado enriquecimento automático e fallback defensivo via PDO com o banco Locaweb, garantindo exibição de CPF (com máscara LGPD `000.***.***-00`), Cargo e Setor/Departamento do colaborador receptor.
+  - No grid de equipamentos fornecidos do modal, adicionada resolução abrangente de lote considerando `item_numero_lote`, `epi_numero_lote` e `epi_identificacao`.
+
 ### 📅 Versão 8.4.2 (26/10/2026) – Remoção dos Botões Baixar PDF e Compartilhar PDF nos Modais de Recibo
 * **Remoção dos Botões nos Modais de Recibo (`pages/entregas.php`, `pages/devolucoes.php`):**
   - Removidos os botões "Baixar PDF" (`btn-danger`) e "Compartilhar PDF" (`btn-success`) do rodapé do modal de "Recibo de Entrega Eletrônica de EPI" (`pages/entregas.php`) e do modal de "Comprovante de Devolução de EPI" (`pages/devolucoes.php`).
