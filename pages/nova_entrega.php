@@ -1109,6 +1109,11 @@ function selecionarEpiEntrega(epiId) {
         }
     }
 
+    const inputLote = document.getElementById('input-lote-item');
+    if (inputLote) {
+        inputLote.value = epi.epi_numero_lote || epi.epi_identificacao || `LT-${new Date().getFullYear()}-${String(epi.epi_id || 1).padStart(3, '0')}`;
+    }
+
     fecharDropdownAutocompleteEpi();
 }
 
@@ -1413,7 +1418,10 @@ function adicionarItemAoCarrinho(devolucaoVinculadaObj = null) {
     const motivo = document.getElementById('input-motivo-item').value;
     const qtd = parseInt(document.getElementById('input-qtd-item').value) || 1;
     const tamanho = document.getElementById('input-tamanho-item').value;
-    const lote = document.getElementById('input-lote-item').value.trim();
+    let lote = document.getElementById('input-lote-item').value.trim();
+    if (!lote) {
+        lote = epi.epi_numero_lote || epi.epi_identificacao || `LT-${new Date().getFullYear()}-${String(epi.epi_id || 1).padStart(3, '0')}`;
+    }
 
     carrinhoEpi.push({
         epi_id: parseInt(epi.epi_id),
@@ -1421,7 +1429,7 @@ function adicionarItemAoCarrinho(devolucaoVinculadaObj = null) {
         epi_ca: epi.epi_ca || 'Isento',
         quantidade: qtd,
         tamanho: tamanho,
-        lote: lote || null,
+        lote: lote,
         motivo_especifico: motivo,
         tipo_item: (epi.epi_ca && epi.epi_ca !== 'Isento') ? 'EPI_COM_CA' : 'ITEM_SEGURANCA_SEM_CA',
         devolucao_vinculada: devolucaoVinculadaObj

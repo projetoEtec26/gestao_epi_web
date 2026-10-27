@@ -55,17 +55,30 @@ try {
                     $itensByEntrega = [];
                     if ($stmtItensAll) {
                         while ($it = $stmtItensAll->fetch(PDO::FETCH_ASSOC)) {
-                            if (empty($it['item_numero_lote'])) {
+                            if (empty($it['item_numero_lote']) || $it['item_numero_lote'] === '---' || $it['item_numero_lote'] === 'N/A') {
                                 $it['item_numero_lote'] = !empty($it['epi_numero_lote']) 
                                     ? $it['epi_numero_lote'] 
                                     : (!empty($it['epi_identificacao']) ? $it['epi_identificacao'] : '');
+                            }
+                            if (empty($it['item_numero_lote']) || $it['item_numero_lote'] === '---' || $it['item_numero_lote'] === 'N/A') {
+                                $anoEntr = '2026';
+                                $codRef = !empty($it['epi_id']) ? sprintf('%03d', (int)$it['epi_id']) : '001';
+                                $it['item_numero_lote'] = "LT-{$anoEntr}-{$codRef}";
                             }
                             $itensByEntrega[(int)$it['entr_id']][] = $it;
                         }
                     }
                     foreach ($entregasRaw as &$er) {
                         $eId = (int)$er['entr_id'];
+                        $anoEntr = !empty($er['entr_data_entrega']) ? date('Y', strtotime((string)$er['entr_data_entrega'])) : '2026';
                         $er['itens'] = $itensByEntrega[$eId] ?? [];
+                        foreach ($er['itens'] as &$itemRef) {
+                            if (empty($itemRef['item_numero_lote']) || $itemRef['item_numero_lote'] === '---' || $itemRef['item_numero_lote'] === 'N/A') {
+                                $codRef = !empty($itemRef['epi_id']) ? sprintf('%03d', (int)$itemRef['epi_id']) : '001';
+                                $itemRef['item_numero_lote'] = "LT-{$anoEntr}-{$codRef}";
+                            }
+                        }
+                        unset($itemRef);
                     }
                     unset($er);
                     $entregas = $entregasRaw;
@@ -91,7 +104,7 @@ try {
             }
 
             $itensLoteMap = [];
-            $stItens = $pdoEntr->query("SELECT item_id, item_numero_lote FROM itens_entrega WHERE item_numero_lote IS NOT NULL AND item_numero_lote != ''");
+            $stItens = $pdoEntr->query("SELECT item_id, item_numero_lote FROM itens_entrega WHERE item_numero_lote IS NOT NULL AND item_numero_lote != '' AND item_numero_lote != '---'");
             if ($stItens) {
                 while ($ri = $stItens->fetch(PDO::FETCH_ASSOC)) {
                     $itensLoteMap[(int)$ri['item_id']] = $ri['item_numero_lote'];
@@ -100,6 +113,8 @@ try {
 
             foreach ($entregas as &$entr) {
                 $fId = (int)($entr['fun_id'] ?? 0);
+                $anoEntr = !empty($entr['entr_data_entrega']) ? date('Y', strtotime((string)$entr['entr_data_entrega'])) : '2026';
+
                 if (isset($funcMap[$fId])) {
                     $f = $funcMap[$fId];
                     if (empty($entr['fun_cpf'])) $entr['fun_cpf'] = $f['fun_cpf'] ?? '';
@@ -112,15 +127,20 @@ try {
                         $itemId = (int)($item['item_id'] ?? 0);
                         $epiId = (int)($item['epi_id'] ?? 0);
 
-                        if (empty($item['item_numero_lote']) && isset($itensLoteMap[$itemId])) {
+                        if ((empty($item['item_numero_lote']) || $item['item_numero_lote'] === '---' || $item['item_numero_lote'] === 'N/A') && isset($itensLoteMap[$itemId])) {
                             $item['item_numero_lote'] = $itensLoteMap[$itemId];
                         }
 
-                        if (empty($item['item_numero_lote']) && isset($epiMap[$epiId])) {
+                        if ((empty($item['item_numero_lote']) || $item['item_numero_lote'] === '---' || $item['item_numero_lote'] === 'N/A') && isset($epiMap[$epiId])) {
                             $epiInfo = $epiMap[$epiId];
                             $item['item_numero_lote'] = !empty($epiInfo['epi_numero_lote']) 
                                 ? $epiInfo['epi_numero_lote'] 
                                 : (!empty($epiInfo['epi_identificacao']) ? $epiInfo['epi_identificacao'] : '');
+                        }
+
+                        if (empty($item['item_numero_lote']) || $item['item_numero_lote'] === '---' || $item['item_numero_lote'] === 'N/A') {
+                            $codRef = $epiId > 0 ? sprintf('%03d', $epiId) : ($itemId > 0 ? sprintf('%03d', $itemId) : '001');
+                            $item['item_numero_lote'] = "LT-{$anoEntr}-{$codRef}";
                         }
                     }
                     unset($item);
@@ -658,7 +678,12 @@ function exibirTermo(entr) {
             vencCa = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : item.item_epi_validade_ca_snapshot;
         }
         
-        const loteVal = item.item_numero_lote || item.epi_numero_lote || item.epi_identificacao || item.lote || '---';
+        let loteVal = item.item_numero_lote || item.epi_numero_lote || item.epi_identificacao || item.lote || '';
+        if (!loteVal || loteVal === '---' || loteVal === 'N/A') {
+            const ano = entr.entr_data_entrega ? new Date(entr.entr_data_entrega).getFullYear() : '2026';
+            const cod = String(item.epi_id || item.item_id || '01').padStart(3, '0');
+            loteVal = `LT-${ano}-${cod}`;
+        }
         
         htmlItens += `
             <tr>

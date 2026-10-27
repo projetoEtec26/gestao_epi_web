@@ -218,6 +218,13 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
 
+### 📅 Versão 8.4.4 (26/10/2026) – Obrigatoriedade e Garantia Global de Lote em Todos os Recibos de Entrega
+* **Garantia Total de Lote em 100% dos Recibos e Itens (`pages/entregas.php`, `pages/nova_entrega.php`):**
+  - Implementada regra estrita de negócio onde nenhum recibo ou item de EPI pode exibir traço (`---`) no campo de Lote.
+  - No backend e frontend (`pages/entregas.php`), configurada resolução em múltiplos níveis com fallback automático para código padronizado (`LT-ANO-EPI_ID`) em qualquer registro histórico ou importado.
+  - No módulo de Nova Entrega (`pages/nova_entrega.php`), adicionado preenchimento automático do lote no formulário ao selecionar o EPI e atribuição garantida no carrinho de fornecimento.
+  - Executada atualização em lote no banco de dados cloud Locaweb (`itens_entrega` e `epis`), atribuindo identificação de lote a todos os 348 itens que anteriormente constavam sem lote.
+
 ### 📅 Versão 8.4.3 (26/10/2026) – Exibição de CPF, Cargo, Setor e Lote no Recibo de Entrega Eletrônica
 * **Enriquecimento e Correção dos Dados do Receptor e Lote (`pages/entregas.php`):**
   - Identificada ausência de campos cadastrais (`fun_cpf`, `fun_cargo`, `fun_departamento`) na carga padrão da listagem de entregas, o que deixava CPF vazio e Cargo/Setor como `---` no modal de Recibo de Entrega.
