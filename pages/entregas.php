@@ -413,12 +413,6 @@ $userProfile = $_SESSION['usuario']['usu_perfil'] ?? '';
                     <i class="bi bi-x-lg me-1"></i> Fechar
                 </button>
                 <div class="d-flex gap-2 flex-wrap">
-                    <button type="button" id="btn-recibo-pdf-download" class="btn btn-danger" onclick="baixarReciboEntregaPDF()">
-                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> <span>Baixar PDF</span>
-                    </button>
-                    <button type="button" id="btn-recibo-pdf-share" class="btn btn-success" onclick="compartilharReciboEntregaPDF()">
-                        <i class="bi bi-share-fill me-1"></i> <span>Compartilhar PDF</span>
-                    </button>
                     <button type="button" class="btn btn-outline-primary" onclick="imprimirTermo()">
                         <i class="bi bi-printer me-1"></i> Imprimir Termo
                     </button>

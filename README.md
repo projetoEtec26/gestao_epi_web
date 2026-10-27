@@ -218,6 +218,11 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
 
+### 📅 Versão 8.4.2 (26/10/2026) – Remoção dos Botões Baixar PDF e Compartilhar PDF nos Modais de Recibo
+* **Remoção dos Botões nos Modais de Recibo (`pages/entregas.php`, `pages/devolucoes.php`):**
+  - Removidos os botões "Baixar PDF" (`btn-danger`) e "Compartilhar PDF" (`btn-success`) do rodapé do modal de "Recibo de Entrega Eletrônica de EPI" (`pages/entregas.php`) e do modal de "Comprovante de Devolução de EPI" (`pages/devolucoes.php`).
+  - Mantidas as ações essenciais "Fechar" e "Imprimir Termo", preservando a responsividade e o layout limpo em Web Desktop, Celulares e Tablets.
+
 ### 📅 Versão 8.4.1 (23/10/2026) – Paridade Visual 1:1 entre Mouse e Teclado no Autocomplete dos Relatórios
 * **Resolução da "Tela Branca" na Navegação por Setas (▲ / ▼) (`pages/relatorios.php`, `assets/css/style.css`):**
   - Identificado problema visual no modo escuro onde, ao navegar com as setas do teclado nos dropdowns de filtro de colaboradores e EPIs, o item selecionado recebia fundo branco inline (`#eff6ff`) com texto claro, tornando-o ilegível ("tela branca").

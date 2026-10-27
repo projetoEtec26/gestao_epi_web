@@ -587,12 +587,6 @@ html.dark-mode .form-control, body.dark-mode .form-control {
                     <i class="bi bi-x-lg me-1"></i> Fechar
                 </button>
                 <div class="d-flex gap-2 flex-wrap">
-                    <button type="button" id="btn-devolucao-pdf-download" class="btn btn-danger" onclick="baixarReciboDevolucaoPDF()">
-                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> <span>Baixar PDF</span>
-                    </button>
-                    <button type="button" id="btn-devolucao-pdf-share" class="btn btn-success" onclick="compartilharReciboDevolucaoPDF()">
-                        <i class="bi bi-share-fill me-1"></i> <span>Compartilhar PDF</span>
-                    </button>
                     <button type="button" class="btn btn-outline-primary" onclick="imprimirReciboDevolucao()">
                         <i class="bi bi-printer me-1"></i> Imprimir Termo
                     </button>
