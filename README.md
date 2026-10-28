@@ -1,24 +1,81 @@
-# Painel Administrativo Web — Gestão EPI
+# Ecossistema Corporativo de Segurança do Trabalho — Gestão EPI
 
-Este projeto é uma aplicação Web responsiva desenvolvida em **PHP 8+, HTML5, CSS3, JS e Bootstrap 5** para atuar como o módulo administrativo e gerencial unificado do ecossistema de conformidade **Gestão EPI**. Ele opera em sincronia em tempo real com o aplicativo Android corporativo e consome a API REST remota/local do ecossistema.
+O **Gestão EPI** é uma solução corporativa integrada e multiplataforma desenvolvida para atender rigorosamente à **Norma Regulamentadora NR-6** (Ministério do Trabalho e Emprego) e às diretrizes da **LGPD (Lei Geral de Proteção de Dados - Lei nº 13.709/2018)** no controle, distribuição, higienização, devolução e auditoria judicial do fornecimento de Equipamentos de Proteção Individual.
+
+---
+
+## 📚 DOCUMENTAÇÕES ESPECIALIZADAS DO ECOSSISTEMA
+
+Para aprofundamento técnico em cada módulo e camada da solução, consulte os manuais específicos disponíveis na pasta [`docs/`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/):
+
+* 🏛️ **[Arquitetura do Ecossistema Integrado](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/ARQUITETURA_ECOSSISTEMA.md):** Visão completa da topologia dos 3 projetos (Web, API REST e Mobile Android), diagrama de fluxo de dados, políticas de sincronização e comunicação segura.
+* 🔌 **[Especificação de Endpoints da API REST](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/API_REST_ENDPOINTS.md):** Contratos de dados em JSON, rotas autenticadas via JWT, payloads de entrega com lote e auditoria de exportações.
+* 📱 **[Módulo Mobile Android](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/MOBILE_ANDROID.md):** Arquitetura do aplicativo Android (Kotlin/Java, Room, Retrofit, WorkManager), fluxo de coleta de assinatura eletrônica offline e validação de PIN de 6 dígitos.
+* 🛡️ **[Banco de Dados & Governança LGPD](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/BANCO_DE_DADOS_LGPD.md):** Dicionário de dados das tabelas, regras de integridade referencial, criptografia AES-256-GCM para dados sensíveis e imutabilidade dos logs de auditoria.
+
+---
+
+## 🌐 VISÃO GERAL DOS PROJETOS INTEGRADOS
+
+O ecossistema é formado por 3 pilares de código sincronizados:
+
+```text
+                             ┌─────────────────────────────────┐
+                             │       Banco MySQL Cloud         │
+                             │        (db_gestao_epi)          │
+                             │  Criptografia AES-256-GCM/LGPD  │
+                             └──────▲───────────────────▲──────┘
+                                    │                   │
+                        Consultas   │                   │  Persistência
+                        e Fallback  │                   │  Transacional
+                                    │                   │
+                     ┌──────────────┴────┐         ┌────┴──────────────┐
+                     │  Gestão EPI Web   │◄───────►│  Gestão EPI API   │
+                     │ (Painel Gerencial)│  cURL   │(Backend REST/JWT) │
+                     └───────────────────┘  Proxy  └─────────▲─────────┘
+                                                             │
+                                                       HTTP  │ Sync
+                                                     Retrofit│ Offline
+                                                             │
+                                                   ┌─────────┴─────────┐
+                                                   │ Gestão EPI Mobile │
+                                                   │ (App Android/Room)│
+                                                   └───────────────────┘
+```
+
+1. **Gestão EPI Web ([Repositório GitHub](https://github.com/projetoEtec26/gestao_epi_web)):**
+   - **Tecnologias:** PHP 8+, Bootstrap 5, Vanilla JavaScript, CSS3 Design System (HSL / Dark Mode nativo), Chart.js.
+   - **Público:** Administradores, Técnicos de Segurança do Trabalho (SST), Gestores de Contratos, Encarregados de RH e Almoxarifes.
+   - **Plataformas:** 100% responsivo para Web Desktop (≥ 1200px), Tablet (768px – 1199px) e Celular (< 768px).
+   - **Deploy Contínuo:** GitHub Actions com deploy automatizado via FTP para Locaweb (`http://gestaoepi.tecnologia.ws/`).
+
+2. **Gestão EPI API ([Repositório GitHub](https://github.com/projetoEtec26/gestao_epi_api)):**
+   - **Tecnologias:** PHP 8+ Puro, Arquitetura MVC RESTful, PDO, Autenticação JWT (`HS256`), Bcrypt e OpenSSL.
+   - **Finalidade:** Servir como o gateway central de negócios, validação de integridade de dados e auditoria em nuvem.
+   - **Ambientes Homologados:** Nuvem (Render / Locaweb) e Local (XAMPP).
+
+3. **Gestão EPI Mobile (Projeto Android Nativo):**
+   - **Tecnologias:** Kotlin / Java Moderno, Room Database (SQLite), Retrofit 2, OkHttp 3, WorkManager, Jetpack.
+   - **Finalidade:** Operação em campo e chão de fábrica com assinatura de termos de entrega via PIN ou biometria e resiliência offline.
 
 ---
 
 ## 1. DIRETRIZES DE LOCALIZAÇÃO E CONFORMIDADE BRASIL
 
-Conforme as diretrizes globais do projeto, toda a aplicação Web e suas documentações operam estritamente sob os padrões corporativos e legais do **Brasil**:
+Conforme as diretrizes globais do projeto, toda a aplicação Web, o aplicativo e suas documentações operam estritamente sob os padrões corporativos e legais do **Brasil**:
 
 *   **Idioma Padrão:** Português do Brasil (`pt-BR`).
 *   **Moeda Oficial:** Real Brasileiro (`BRL / R$`), formatado via helper global `formatarValorMonetario()`.
 *   **Formato de Datas:** `DD/MM/AAAA` (com suporte a exibição de horário no padrão 24h `HH:mm:ss`).
 *   **Fuso Horário Oficial:** `America/Sao_Paulo` (GMT-3), inicializado obrigatoriamente no topo de `config/api.php` e `components/header.php`.
-*   **Legislação e Normas Aplicáveis:** Norma Regulamentadora **NR-6** (Ministério do Trabalho e Emprego), controle rigoroso de **C.A. (Certificado de Aprovação)** e conformidade com a **LGPD (Lei Geral de Proteção de Dados - Lei nº 13.709/2018)** na auditoria de exportações e mascaramento preventivo de dados sensíveis (CPF).
+*   **Legislação e Normas Aplicáveis:** Norma Regulamentadora **NR-6** (Ministério do Trabalho e Emprego), controle rigoroso de **C.A. (Certificado de Aprovação)** com validade atualizada e conformidade com a **LGPD (Lei Geral de Proteção de Dados - Lei nº 13.709/2018)** na auditoria de exportações e mascaramento preventivo de dados sensíveis (CPF).
+*   **Obrigatoriedade e Rastreabilidade de Lote:** Todo EPI fornecido possui registro obrigatório de número de lote visível em 100% dos recibos eletrônicos de entrega (sem exibição de traços ou campos vazios).
 
 ---
 
-## 2. ARQUITETURA DO PROJETO E ESTRUTURA DE DIRETÓRIOS
+## 2. ARQUITETURA DO PROJETO WEB E ESTRUTURA DE DIRETÓRIOS
 
-O painel Web foi estruturado com uma arquitetura modular limpa (SoC - *Separation of Concerns*), eliminando acoplamentos diretos com o banco de dados para trafegar 100% dos dados por meio do cliente HTTP `ApiService`:
+O painel Web foi estruturado com uma arquitetura modular limpa (SoC - *Separation of Concerns*), integrando o cliente HTTP `ApiService` com fallback transparente PDO de alta performance:
 
 ```text
 gestao_epi_web/
@@ -28,7 +85,13 @@ gestao_epi_web/
 ├── recuperar-senha.php                   # Fluxo de redefinição de senhas provisórias via API REST
 ├── logout.php                            # Destruição segura da sessão PHP e token JWT no cliente/servidor
 ├── template_relatorio_php.php            # Template estruturado para geração e exportação de relatórios PHP
-├── README.md                             # Documentação técnica oficial e arquitetural do projeto
+├── README.md                             # Documentação técnica master do ecossistema e do painel Web
+│
+├── docs/                                 # Documentações técnicas detalhadas de todos os módulos
+│   ├── ARQUITETURA_ECOSSISTEMA.md        # Topologia de comunicação entre Web, API, Mobile e Cloud DB
+│   ├── API_REST_ENDPOINTS.md             # Dicionário completo de rotas e contratos da API REST
+│   ├── MOBILE_ANDROID.md                 # Arquitetura, fluxo offline e validação de PIN no app Android
+│   └── BANCO_DE_DADOS_LGPD.md            # Modelagem relacional, dicionário de tabelas e segurança LGPD
 │
 ├── config/
 │   └── api.php                           # Centralização da URL base da API, fuso America/Sao_Paulo e APP_ROOT dinâmico
@@ -53,8 +116,8 @@ gestao_epi_web/
 │   ├── dashboard.php                    # Painel gerencial com KPIs, custos, consumo e gráficos dinâmicos (Chart.js)
 │   ├── funcionarios.php                 # CRUD de funcionários, autocomplete multi-campo, avatares e modal de filtro
 │   ├── epis.php                         # Catálogo de EPIs, reajuste em lote de preços, estoque e controle de C.A. (NR-6)
-│   ├── entregas.php                     # Histórico de entregas de EPIs, filtro por status e Termo de Ciência assinado
-│   ├── nova_entrega.php                 # Workflow em etapas de emissão de EPIs, validação de C.A. e assinatura digital
+│   ├── entregas.php                     # Histórico de entregas de EPIs, filtro por status, Lote obrigatório e Recibo
+│   ├── nova_entrega.php                 # Workflow em etapas de emissão de EPIs, validação de C.A., Lote e assinatura
 │   ├── devolucoes.php                   # Registro de devoluções de EPIs, inspeção de estado e retorno ao almoxarifado
 │   ├── ficha_colaborador.php            # Ficha individual completa com histórico de entregas, posse atual e assinaturas
 │   ├── relatorios.php                   # Central de relatórios gerenciais com autocomplete no filtro de colaborador
@@ -71,17 +134,6 @@ gestao_epi_web/
 │   ├── api_proxy.php                    # Gateway Server-to-Server (anti-CORS) para chamadas AJAX assíncronas
 │   ├── 403.php                          # Página personalizada de Acesso Negado (Bloqueio RBAC)
 │   └── 404.php                          # Página personalizada de Recurso Não Encontrado
-│
-└── scratch/                             # Scripts utilitários de benchmark e diagnósticos
-    ├── benchmark_entregas.php           # Benchmark de velocidade da listagem de entregas
-    ├── check_db.php                     # Verificação rápida de conexão com o banco de dados
-    ├── render_funcionarios.php          # Teste de renderização e performance da lista de colaboradores
-    ├── test_api.php                     # Validação de comunicação e conectividade com a API REST
-    ├── test_db_speed.php                # Teste comparativo de velocidade de consultas SQL
-    ├── test_entregas_fast.php           # Teste de otimização da busca em lote de itens de entrega
-    ├── test_login_entregas.php          # Teste de autenticação JWT e obtenção de entregas
-    ├── test_security_service.php        # Validação do SecurityService (AES-256-GCM, Bcrypt, SHA-256, RBAC)
-    └── update_api.php                   # Script utilitário para atualização/validação de endpoints
 ```
 
 ---
