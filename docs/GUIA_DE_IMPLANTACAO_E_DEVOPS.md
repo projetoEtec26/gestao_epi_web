@@ -141,3 +141,37 @@ API_BASE_URL="http://10.0.2.2/gestao_epi_api/"
      SELECT COUNT(*) FROM itens_entrega WHERE item_numero_lote IS NULL OR item_numero_lote = '' OR item_numero_lote = '---';
      ```
      *(O resultado deve ser rigorosamente **0** em conformidade com a NR-6 e v8.4.4).*
+
+---
+
+## 6. Diretrizes de Hardening e Segurança em Produção
+
+Com base no diagnóstico da **Auditoria de Cybersecurity de 04/11/2026** ([`docs/AUDITORIA_CYBERSECURITY.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md)):
+
+### 6.1 Regras de Hardening no Servidor Apache (`.htaccess`)
+Para forçar o uso exclusivo de HTTPS, ativar cabeçalhos defensivos e impedir o acesso direto a arquivos de documentação, o arquivo `.htaccess` na raiz da hospedagem deve conter:
+```apache
+RewriteEngine On
+
+# 1. Redirecionamento Mandatório HTTP -> HTTPS (301)
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# 2. Bloqueio de Extensões Sensíveis e Documentações
+<FilesMatch "\.(md|txt|pdf|log|yml|yaml|sql|env.*|json|lock)$">
+    Require all denied
+</FilesMatch>
+
+# 3. Cabeçalhos de Segurança HTTP
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+</IfModule>
+```
+
+### 6.2 Firewall do Banco de Dados MySQL Cloud (DBAAS Locaweb)
+* **Bloqueio de Porta TCP 3306:** O banco `db_gestao_epi.mysql.dbaas.com.br` deve ser configurado no painel da Locaweb para **rejeitar conexões vindas da internet pública**, autorizando estritamente os endereços IP dos servidores web da aplicação.
+* **Isolamento de Credenciais:** As credenciais de acesso não devem residir em arquivos versionados no Git, utilizando o padrão `.env` protegido com permissão de leitura restrita `600`.
+

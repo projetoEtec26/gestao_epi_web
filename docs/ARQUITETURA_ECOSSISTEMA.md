@@ -85,3 +85,15 @@ De acordo com as exigências da **Norma Regulamentadora NR-6** e auditorias de f
 * **Blindagem de Busca Cega:** Consultas exatas de CPF utilizam o hash indexado HMAC-SHA256 (`fun_cpf_lookup`), evitando a descriptografia em lote para operações de busca.
 * **Mascaramento Preventivo:** A interface Web e o aplicativo exibem CPFs formatados e mascarados no padrão `***.456.789-**` para operadores não autorizados.
 * **Auditoria Contínua:** Toda exportação de dados, alteração de status ou assinatura é registrada na tabela `log_auditoria` com endereço IP, navegador/dispositivo, data/hora e payload JSON.
+
+---
+
+## 6. Governança e Diretrizes de Cibersegurança
+
+Em conformidade com a **Auditoria Complementar de Cybersecurity (04/11/2026)** documentada em [`docs/AUDITORIA_CYBERSECURITY.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md):
+* **Comunicação Criptografada Mandatória (HTTPS):** Todo o tráfego Web e de APIs deve operar obrigatoriamente sob HTTPS (TLS 1.2+), com redirecionamento forçado via servidor e cabeçalho `Strict-Transport-Security` (HSTS).
+* **Proteção e Isolamento do Banco de Dados:** A porta TCP 3306 do banco MySQL Cloud deve permanecer bloqueada para a internet externa, com permissão restrita de acesso aos endereços IP internos dos nós de aplicação.
+* **Sessões e Cookies Seguros:** Sessões PHP ativadas com flags `; HttpOnly; Secure; SameSite=Strict` via `SecurityService::initSecureSession()`.
+* **Proteção Anti-CSRF:** Validação de tokens criptográficos temporais em todos os formulários e rotas `POST`.
+* **Integridade de APIs e CORS:** Restrição das origens permitidas (CORS) aos domínios institucionais oficiais e eliminação de credenciais em `localStorage`.
+

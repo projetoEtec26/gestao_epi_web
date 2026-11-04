@@ -110,3 +110,5 @@ O sistema visual utiliza **Vanilla CSS moderno baseado em tokens HSL**, garantin
 ### 3.9 Auditoria de Logs e Segurança (`pages/auditoria.php` e `pages/usuarios.php`)
 * **Trilha de Auditoria Judicial:** Monitoramento pericial de todas as ações de usuários com visualizador de JSON.
 * **Gestão de Operadores (RBAC):** Criação de usuários, concessão de perfis e imposição de troca de senha no primeiro acesso.
+* **Governança de Acesso (Auditoria 04/11/2026):** Restrição estrita de perfis operacionais em telas de auditoria e usuários exclusiva para o perfil `ADMINISTRADOR`, além de requisitos para integração de tokens anti-CSRF e sanitização contínua com `htmlspecialchars()`.
+

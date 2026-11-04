@@ -15,6 +15,8 @@ Para aprofundamento técnico em cada módulo e camada da solução, consulte os 
 * 🛡️ **[Banco de Dados & Governança LGPD](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/BANCO_DE_DADOS_LGPD.md):** Dicionário de dados das tabelas, regras de integridade referencial, criptografia AES-256-GCM para dados sensíveis e imutabilidade dos logs de auditoria.
 * ⚙️ **[Guia de Implantação e DevOps](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/GUIA_DE_IMPLANTACAO_E_DEVOPS.md):** Instruções passo a passo para execução no XAMPP local, nuvem Locaweb, Render, pipeline GitHub Actions CI/CD via FTP, backups e geração do APK no Android Studio.
 * 📋 **[Fluxos Operacionais e Casos de Uso](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md):** Manuais práticos de operação com diagramas de sequência dos fluxos de Admissão, Entrega de EPI com Lote Obrigatório, Devoluções e Auditorias Trabalhistas.
+* 🔒 **[Relatório de Auditoria de Cybersecurity e Governança](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md):** Diagnóstico independente e integrado das camadas de aplicação, OWASP Top 10, infraestrutura Locaweb, blindagem de banco MySQL e plano diretor de mitigação em 4 etapas.
+
 
 ---
 
@@ -272,6 +274,14 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 ---
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
+
+### 📅 Versão 8.4.6 (04/11/2026) – Auditoria Complementar de Cybersecurity, Diagnóstico de Vulnerabilidades e Diretrizes de Blindagem
+* **Auditoria Técnica Independente de Cibersegurança ([`docs/AUDITORIA_CYBERSECURITY.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md)):**
+  - **Inexistência de Vazamento Ativo via URL/URI:** Análise pericial dos registros de auditoria em produção (`log_auditoria`) e dos parâmetros de Query String (`GET`), comprovando que credenciais e dados sigilosos não transitam na barra de endereços.
+  - **Validação de Prepared Statements com PDO:** Comprovada a mitigação total contra injeção de SQL (SQLi) em todas as rotas e controladores dinâmicos da aplicação Web e API.
+  - **Mapeamento de Riscos de Infraestrutura:** Identificada a abertura da porta 3306 do MySQL Cloud DBAAS e ausência de redirecionamento HTTP para HTTPS, estabelecendo as diretrizes técnicas imediatas de firewall e regras no `.htaccess`.
+  - **Diretrizes de Sessões e Anti-CSRF:** Documentada a ativação compulsória de `SecurityService::initSecureSession()` (`HttpOnly`, `Secure`, `SameSite=Strict`), eliminação de JWTs no `localStorage` e inserção de tokens anti-CSRF nos formulários `POST`.
+  - **Plano Diretor de Mitigação em 4 Fases:** Estruturação ordenada das ações de correção (Fase 1: Infraestrutura e Banco; Fase 2: Sessões e Acesso a Arquivos; Fase 3: CSRF, RBAC e IDOR; Fase 4: Defesa em Profundidade na API).
 
 ### 📅 Versão 8.4.5 (04/11/2026) – Unificação e Atualização Integral das Documentações de Todos os Projetos
 * **Consolidação Completa da Suíte de Documentações Técnicas (`docs/` e `README.md`):**
