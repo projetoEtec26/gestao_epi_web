@@ -9,9 +9,12 @@ O **Gestão EPI** é uma solução corporativa integrada e multiplataforma desen
 Para aprofundamento técnico em cada módulo e camada da solução, consulte os manuais específicos disponíveis na pasta [`docs/`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/):
 
 * 🏛️ **[Arquitetura do Ecossistema Integrado](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/ARQUITETURA_ECOSSISTEMA.md):** Visão completa da topologia dos 3 projetos (Web, API REST e Mobile Android), diagrama de fluxo de dados, políticas de sincronização e comunicação segura.
+* 🖥️ **[Painel Web Administrativo](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/PAINEL_WEB_ADMINISTRATIVO.md):** Arquitetura das 18 páginas web, componentes, tokens HSL (Dark/Light mode), submenus retráteis, Speed Dial FAB e conformidade multiplataforma (Web Desktop, Tablet e Celular).
 * 🔌 **[Especificação de Endpoints da API REST](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/API_REST_ENDPOINTS.md):** Contratos de dados em JSON, rotas autenticadas via JWT, payloads de entrega com lote e auditoria de exportações.
 * 📱 **[Módulo Mobile Android](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/MOBILE_ANDROID.md):** Arquitetura do aplicativo Android (Kotlin/Java, Room, Retrofit, WorkManager), fluxo de coleta de assinatura eletrônica offline e validação de PIN de 6 dígitos.
 * 🛡️ **[Banco de Dados & Governança LGPD](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/BANCO_DE_DADOS_LGPD.md):** Dicionário de dados das tabelas, regras de integridade referencial, criptografia AES-256-GCM para dados sensíveis e imutabilidade dos logs de auditoria.
+* ⚙️ **[Guia de Implantação e DevOps](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/GUIA_DE_IMPLANTACAO_E_DEVOPS.md):** Instruções passo a passo para execução no XAMPP local, nuvem Locaweb, Render, pipeline GitHub Actions CI/CD via FTP, backups e geração do APK no Android Studio.
+* 📋 **[Fluxos Operacionais e Casos de Uso](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md):** Manuais práticos de operação com diagramas de sequência dos fluxos de Admissão, Entrega de EPI com Lote Obrigatório, Devoluções e Auditorias Trabalhistas.
 
 ---
 
@@ -269,6 +272,15 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 ---
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
+
+### 📅 Versão 8.4.5 (04/11/2026) – Unificação e Atualização Integral das Documentações de Todos os Projetos
+* **Consolidação Completa da Suíte de Documentações Técnicas (`docs/` e `README.md`):**
+  - **Manual do Painel Web Administrativo ([`docs/PAINEL_WEB_ADMINISTRATIVO.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/PAINEL_WEB_ADMINISTRATIVO.md)):** Documentação detalhada dos 18 módulos e telas do sistema, design system HSL com alternância Dark/Light mode, submenus retráteis Senior ERP Style, Speed Dial FAB multi-módulo, sistema de autocomplete client-side com destaque de texto e conformidade estrita multiplataforma (Web Desktop, Tablet e Celular).
+  - **Guia de Implantação e DevOps ([`docs/GUIA_DE_IMPLANTACAO_E_DEVOPS.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/GUIA_DE_IMPLANTACAO_E_DEVOPS.md)):** Instruções passo a passo para configuração no XAMPP local, servidores em nuvem (Locaweb e Render), esteira automatizada de CI/CD via GitHub Actions FTP Deploy, rotinas de backup `mysqldump` e compilação do APK do aplicativo móvel no Android Studio.
+  - **Manual de Fluxos Operacionais e Casos de Uso ([`docs/FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md)):** Diagramas de sequência detalhando a jornada de Admissão de Colaboradores, Fornecimento de EPI com Lote Obrigatório e Assinatura Eletrônica, Devoluções e Inspeção Pericial em Fiscalizações do Trabalho (MTE).
+  - **Documentação da API REST Backend ([`docs/API_REST_ENDPOINTS.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/API_REST_ENDPOINTS.md)):** Atualização dos contratos de payload JSON, rotas protegidas por JWT, validação simétrica de PIN de 6 dígitos e auditoria judicial de exportações.
+  - **Documentação do Módulo Mobile Android ([`docs/MOBILE_ANDROID.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/MOBILE_ANDROID.md)):** Especificação da arquitetura MVVM, persistência offline com Room Database, sincronização via WorkManager (`SyncWorker`) e validação de PIN compatível (`HashUtils.java`).
+  - **Governança de Banco de Dados e LGPD ([`docs/BANCO_DE_DADOS_LGPD.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/BANCO_DE_DADOS_LGPD.md)):** Dicionário completo de dados, regras de integridade referencial, criptografia AES-256-GCM para dados sensíveis e auditoria imutável.
 
 ### 📅 Versão 8.4.4 (26/10/2026) – Obrigatoriedade e Garantia Global de Lote em Todos os Recibos de Entrega
 * **Garantia Total de Lote em 100% dos Recibos e Itens (`pages/entregas.php`, `pages/nova_entrega.php`):**
