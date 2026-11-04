@@ -97,3 +97,19 @@ Em conformidade com a **Auditoria Complementar de Cybersecurity (04/11/2026)** d
 * **Proteção Anti-CSRF:** Validação de tokens criptográficos temporais em todos os formulários e rotas `POST`.
 * **Integridade de APIs e CORS:** Restrição das origens permitidas (CORS) aos domínios institucionais oficiais e eliminação de credenciais em `localStorage`.
 
+---
+
+## 7. Rastreabilidade e Catálogo de Documentações Especializadas
+
+O ecossistema mantém 8 manuais especializados na pasta [`docs/`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/):
+
+1. **[Arquitetura do Ecossistema](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/ARQUITETURA_ECOSSISTEMA.md):** Topologia global e integração dos 3 pilares de software.
+2. **[Painel Web Administrativo](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/PAINEL_WEB_ADMINISTRATIVO.md):** Manual completo das 18 páginas, Design System HSL, submenus e compatibilidade multiplataforma.
+3. **[API RESTful Endpoints](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/API_REST_ENDPOINTS.md):** Dicionário de rotas, contratos JSON, autenticação JWT e sincronização mobile.
+4. **[Módulo Mobile Android](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/MOBILE_ANDROID.md):** App Android nativo (Kotlin/Room), resiliência offline e assinatura por PIN.
+5. **[Banco de Dados & Governança LGPD](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/BANCO_DE_DADOS_LGPD.md):** Modelagem DDL relacional, criptografia AES-256-GCM e trilha judicial.
+6. **[Guia de Implantação e DevOps](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/GUIA_DE_IMPLANTACAO_E_DEVOPS.md):** Instalação local XAMPP, nuvem Locaweb/Render, CI/CD GitHub Actions e compilação do APK.
+7. **[Fluxos Operacionais e Casos de Uso](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md):** Diagramas de sequência para admissão, fornecimento com lote e devoluções.
+8. **[Relatório de Auditoria de Cybersecurity](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md):** Diagnóstico OWASP Top 10, matriz de riscos e plano diretor de mitigação.
+
+

@@ -66,4 +66,31 @@ Quando o operador está em áreas sem sinal de internet (subsolos, áreas rurais
 1. A operação de entrega ou devolução é gravada na tabela local `operacoes_pendentes` do Room com carimbo de tempo (`timestamp`) e UUID único de idempotência.
 2. O recibo local é gerado e assinado com os dados em cache do colaborador.
 3. O `SyncWorker` do Android monitora o estado da rede via `NetworkCapabilities`.
-4. Assim que a conexão for restabelecida, o lote de operações pendentes é enviado de forma ordenada e atômica para o endpoint `POST /entregas` e `POST /devolucoes`, confirmando o registro no banco MySQL Cloud.
+4. Assim que a conexão for restabelecida, o lote de operações pendentes é enviado de forma ordenada e atômica para o endpoint `POST /sync/push` ou `POST /entregas`, confirmando o registro no banco MySQL Cloud.
+
+---
+
+## 5. Telas e Usabilidade no Campo
+
+1. **Dashboard Operacional:**
+   - 4 Cards de Indicadores (EPIs Vencidos, A Vencer em 7 dias, Entregas Hoje e Pendências).
+   - Taxa de Conformidade oficial calculada em 96% (`28 de 29 colaboradores em dia`).
+   - Top 5 EPIs mais fornecidos e status da fila de sincronização offline.
+2. **Nova Entrega de EPI:**
+   - Busca de colaborador com busca rápida por voz ou digitação.
+   - Seleção de equipamentos com validação em tempo real de C.A. e saldo em estoque.
+   - Preenchimento compulsório do número de lote (ex: `LT-2026-013`).
+   - Teclado numérico customizado para digitação segura do PIN de 6 dígitos.
+3. **Catálogo de EPIs e Controle de C.A.:**
+   - Ícones vetoriais por categoria (Capacete, Luvas, Botas, Óculos, Avental, Cinto, Protetor).
+   - Indicadores visuais de C.A. Vigente (Verde), A Vencer (Amarelo) e Vencido (Vermelho).
+4. **Devolução e Inspeção Física:**
+   - Listagem dos EPIs sob posse do colaborador selecionado e marcação do estado do equipamento.
+
+---
+
+## 6. Diretrizes Brasil e Paridade 1:1 com o Painel Web
+
+* **Localização Brasil:** Padrão estrito de idioma `pt-BR`, moeda em Real (`R$`), datas em `DD/MM/AAAA` e fuso horário oficial `America/Sao_Paulo` (GMT-3).
+* **Paridade de Regras:** 100% das regras de cálculo de KPIs, controle de lotes da NR-6 e proteção de dados LGPD operam de maneira idêntica entre o App Android e o Painel Web Administrativo.
+

@@ -112,3 +112,41 @@ O sistema visual utiliza **Vanilla CSS moderno baseado em tokens HSL**, garantin
 * **Gestão de Operadores (RBAC):** Criação de usuários, concessão de perfis e imposição de troca de senha no primeiro acesso.
 * **Governança de Acesso (Auditoria 04/11/2026):** Restrição estrita de perfis operacionais em telas de auditoria e usuários exclusiva para o perfil `ADMINISTRADOR`, além de requisitos para integração de tokens anti-CSRF e sanitização contínua com `htmlspecialchars()`.
 
+### 3.10 Configurações, Perfil e Termos de Uso (`pages/configuracoes.php` e `pages/aceitar-termos.php`)
+* **Gestão de Perfil:** Alteração de senha própria do operador via API REST, dados de conexão ativa e status de saúde dos serviços.
+* **Alternador de Tema (Dark/Light):** Seletor interativo com persistência imediata em `localStorage`.
+* **Aceite de Políticas LGPD:** Registro de concordância com as diretrizes de privacidade e termos da NR-6 com carimbo de data/hora no fuso `America/Sao_Paulo`.
+
+### 3.11 Gateway Server-to-Server e Tratamento de Erros (`pages/api_proxy.php`, `403.php`, `404.php`)
+* **CORS Proxy Gateway (`api_proxy.php`):** Ponte Server-to-Server que viabiliza requisições assíncronas seguras do navegador para a API REST sem bloqueios de política de mesma origem (CORS).
+* **Tratamento de Exceções HTTP:** Telas estilizadas de bloqueio por autorização insuficiente (`403 Acesso Negado`) e inexistência de recurso (`404 Não Encontrado`).
+
+---
+
+## 4. Matriz Consolidada das 18 Páginas e Componentes
+
+| Arquivo | Título da Página / Rota | Perfis Autorizados (RBAC) | Funcionalidade Principal |
+| :--- | :--- | :--- | :--- |
+| `pages/dashboard.php` | Painel Principal | Todos | KPIs, Alertas SST, Gráficos e Central de Pendências |
+| `pages/funcionarios.php` | Gestão de Funcionários | RH / SST / Admin | CRUD de colaboradores, PIN padrão `123456`, busca multi-campo |
+| `pages/epis.php` | EPIs (Controle C.A.) | Almoxarife / SST / Admin | Catálogo de EPIs, controle de C.A., vida útil e reajuste em lote |
+| `pages/entregas.php` | Histórico Geral de Entregas | Almoxarife / SST / Admin | Histórico de entregas, recibo assinado digitalmente e **lote obrigatório** |
+| `pages/nova_entrega.php` | Entregas & Devoluções | Almoxarife / SST / Admin | Emissão de EPIs em etapas, conferência de estoque e assinatura por PIN |
+| `pages/devolucoes.php` | Devolução de EPI | Almoxarife / SST / Admin | Baixa de custódia, estorno de estoque e inspeção de descarte |
+| `pages/ficha_colaborador.php` | Ficha do Colaborador | SST / RH / Admin | Dossiê individual de equipamentos, termos e histórico trabalhista |
+| `pages/relatorios.php` | Central de Relatórios | SST / Gestor / Admin | Central consolidada com 6 modalidades de relatórios gerenciais |
+| `pages/relatorio_geral.php` | Relatório Geral de Fornecimento | SST / Gestor / Admin | Listagem analítica com paginação e exportação CSV/PDF |
+| `pages/relatorio_financeiro.php` | Relatório Financeiro de Custos | Gestor / Admin | Demonstrativo de investimentos por departamento e gráficos de custo |
+| `pages/relatorio_consumo_epi.php`| Relatório de Consumo por EPI | Almoxarife / SST / Admin | Saídas quantitativas por equipamento com auto-impressão oficial |
+| `pages/relatorio_validade_ca.php`| Relatório de Validade de C.A. | SST / Admin | Monitoramento preventivo de vencimento de C.A. (NR-6) |
+| `pages/relatorio_auditoria_logs.php` | Relatório de Logs de Auditoria | SST / Admin | Auditoria de acessos e modificações estruturais com JSON |
+| `pages/relatorio_auditoria_impressao.php` | Impressão Oficial A4 | SST / Admin | Formatação em modelo oficial de folha para fiscalizações periciais |
+| `pages/usuarios.php` | Usuários e Permissões | Exclusivo `ADMINISTRADOR` | Criação de operadores, perfis RBAC e redefinição de acesso |
+| `pages/auditoria.php` | Auditoria de Logs | Exclusivo `ADMINISTRADOR` | Trilha de auditoria pericial judicial com decodificador JSON |
+| `pages/configuracoes.php` | Configurações do Sistema | Todos | Gestão de senha, tema Dark/Light e diagnóstico de conexão |
+| `pages/aceitar-termos.php` | Termos e Políticas LGPD | Todos | Validação obrigatória de termos de uso e privacidade |
+| `pages/api_proxy.php` | Gateway CORS Server-to-Server | Todos (Autenticado) | Proxy seguro para chamadas AJAX sem bloqueio de navegador |
+| `pages/403.php` | Acesso Não Autorizado | Público / Erro | Bloqueio amigável de RBAC com redirecionamento |
+| `pages/404.php` | Página Não Encontrada | Público / Erro | Tratamento visual de recursos inexistentes |
+
+

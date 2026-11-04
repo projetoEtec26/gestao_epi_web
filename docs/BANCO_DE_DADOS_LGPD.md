@@ -64,7 +64,27 @@ A estrutura de fornecimento adota relação Mestre-Detalhe (1:N):
 | `ass_status` | ENUM | Não | `ATIVO`, `BLOQUEADO`, `PENDENTE`, `INATIVO`. |
 | `ass_tentativas_incorretas`| INT | Não | Contador de tentativas falhas (bloqueia ao atingir 3). |
 
-### 2.5 Tabela `log_auditoria` (Trilha de Auditoria Judicial)
+### 2.5 Tabela `usuarios` (Operadores do Sistema)
+
+| Coluna | Tipo | Nulo | Descrição / Regra de Negócio |
+| :--- | :--- | :--- | :--- |
+| `usu_id` | INT AUTO_INCREMENT | Não | Chave primária do operador. |
+| `usu_login` | VARCHAR(50) | Não | Identificador de acesso único (ex: `admin`, `rh_admin`). |
+| `usu_nome` | VARCHAR(150) | Não | Nome de exibição do operador. |
+| `usu_email` | VARCHAR(150) | Sim | E-mail corporativo para recuperação de senha. |
+| `usu_senha` | VARCHAR(255) | Não | Senha criptografada irreversível em `bcrypt` (`cost => 10`). |
+| `usu_perfil` | ENUM | Não | `ADMINISTRADOR`, `TECNICO_SST`, `ALMOXARIFE`, `GESTOR_CONTRATO`, `RH_ADMINISTRATIVO`. |
+| `usu_situacao` | ENUM | Não | `ATIVO`, `INATIVO`, `BLOQUEADO`. |
+| `usu_tentativas_falha` | INT | Não | Contador de tentativas de login incorretas (bloqueio automático). |
+| `usu_trocar_senha` | TINYINT(1) | Não | Flag para forçar troca de senha no primeiro login. |
+| `usu_ultimo_login` | DATETIME | Sim | Carimbo do último acesso no fuso `America/Sao_Paulo`. |
+
+### 2.6 Tabelas Estruturais `departamentos` e `cargos`
+
+* **`departamentos`**: Setores corporativos oficiais (`dep_id`, `dep_nome`, `dep_codigo`, `dep_ativo`). Setores homologados: `Administrativo`, `Engenharia`, `Gestão`, `Produção`, `Produção - Web`, `RH`.
+* **`cargos`**: Atribuições funcionais dos colaboradores (`car_id`, `car_nome`, `car_descricao`, `dep_id` [FK], `car_ativo`).
+
+### 2.7 Tabela `log_auditoria` (Trilha de Auditoria Judicial)
 
 Armazena de forma imutável todos os eventos críticos do sistema:
 * `log_id`: Chave primária sequencial.

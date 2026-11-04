@@ -94,9 +94,13 @@ gestao_epi_web/
 │
 ├── docs/                                 # Documentações técnicas detalhadas de todos os módulos
 │   ├── ARQUITETURA_ECOSSISTEMA.md        # Topologia de comunicação entre Web, API, Mobile e Cloud DB
-│   ├── API_REST_ENDPOINTS.md             # Dicionário completo de rotas e contratos da API REST
-│   ├── MOBILE_ANDROID.md                 # Arquitetura, fluxo offline e validação de PIN no app Android
-│   └── BANCO_DE_DADOS_LGPD.md            # Modelagem relacional, dicionário de tabelas e segurança LGPD
+│   ├── PAINEL_WEB_ADMINISTRATIVO.md      # Manual do painel web, 18 telas, design system HSL e matriz
+│   ├── API_REST_ENDPOINTS.md             # Dicionário de rotas, contratos JSON, JWT e sync offline
+│   ├── MOBILE_ANDROID.md                 # Arquitetura MVVM, Room DB, WorkManager, PIN e telas de campo
+│   ├── BANCO_DE_DADOS_LGPD.md            # Modelagem relacional, dicionário de tabelas e segurança LGPD
+│   ├── GUIA_DE_IMPLANTACAO_E_DEVOPS.md   # Execução XAMPP, deploy GitHub Actions FTP, APK e backups
+│   ├── FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md # Diagramas de sequência: admissão, entrega, devolução e MTE
+│   └── AUDITORIA_CYBERSECURITY.md        # Diagnóstico OWASP Top 10, matriz de riscos e plano diretor
 │
 ├── config/
 │   └── api.php                           # Centralização da URL base da API, fuso America/Sao_Paulo e APP_ROOT dinâmico
@@ -274,6 +278,14 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 ---
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
+
+### 📅 Versão 8.4.7 (04/11/2026) – Sincronização e Atualização Master das Documentações de Todos os Projetos do Ecossistema
+* **Sincronização Integrada da Suíte de Documentações Técnicas (`docs/` e `README.md`):**
+  - **Painel Web Administrativo ([`docs/PAINEL_WEB_ADMINISTRATIVO.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/PAINEL_WEB_ADMINISTRATIVO.md)):** Consolidação da matriz completa das 18 páginas e rotas, especificações de RBAC exclusivo para `ADMINISTRADOR` em Usuários e Auditoria, detalhamento do CORS Proxy Gateway (`api_proxy.php`), tratamento de erros (403/404) e diretrizes multiplataforma estritas (Web Desktop $\ge 1200\text{px}$, Tablet $768\text{px} – 1199\text{px}$, Celular $< 768\text{px}$).
+  - **Especificação da API REST Backend ([`docs/API_REST_ENDPOINTS.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/API_REST_ENDPOINTS.md)):** Documentação das rotas de sincronização mobile offline (`/sync/push` e `/sync/pull`), parâmetros de tolerância a falhas, timeouts cURL (3s/30s) e tratamento de códigos HTTP de resposta.
+  - **Módulo Mobile Android ([`docs/MOBILE_ANDROID.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/MOBILE_ANDROID.md)):** Detalhamento das 4 telas operacionais de campo (Dashboard, Nova Entrega com teclado PIN e Lote compulsório, Catálogo com C.A. e Devoluções), rotina periódica do `SyncWorker` e paridade 1:1 de regras de negócio com o Painel Web.
+  - **Banco de Dados & Governança LGPD ([`docs/BANCO_DE_DADOS_LGPD.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/BANCO_DE_DADOS_LGPD.md)):** Expansão do dicionário de dados físico incluindo as tabelas `usuarios` (senhas `bcrypt`), `departamentos`, `cargos`, integridade relacional com `InnoDB` e regras de imutabilidade judicial em `log_auditoria`.
+  - **Arquitetura do Ecossistema ([`docs/ARQUITETURA_ECOSSISTEMA.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/ARQUITETURA_ECOSSISTEMA.md)):** Inclusão de catálogo de rastreabilidade cruzada dos 8 manuais de documentação, mapeamento de repositórios e conformidade legal brasileira (NR-6, LGPD e fuso horário `America/Sao_Paulo`).
 
 ### 📅 Versão 8.4.6 (04/11/2026) – Auditoria Complementar de Cybersecurity, Diagnóstico de Vulnerabilidades e Diretrizes de Blindagem
 * **Auditoria Técnica Independente de Cibersegurança ([`docs/AUDITORIA_CYBERSECURITY.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md)):**

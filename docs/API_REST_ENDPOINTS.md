@@ -118,3 +118,47 @@ Este documento descreve detalhadamente a arquitetura de rotas, contratos de entr
 | `GET` | `/relatorios/validade-ca` | Rastreio preventivo de vencimento de C.A. (NR-6) em 30, 60 e 90 dias. |
 | `GET` | `/auditoria/logs` | Trilha de auditoria judicial completa com paginação e busca por operador. |
 | `POST` | `/logs/registrar-exportacao`| Registra no log de auditoria qualquer emissão ou download de PDF/CSV. |
+
+---
+
+### 2.6 Sincronização Mobile Offline (`/sync`)
+
+Utilizada pelo aplicativo Android (`SyncWorker`) para operação em campo sem sinal contínuo de internet:
+
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `POST` | `/sync/push` | Envia pacote em lote de operações pendentes geradas offline (entregas e devoluções com UUID de idempotência). |
+| `GET` | `/sync/pull` | Retorna atualização incremental de funcionários, catálogo de EPIs e saldos de estoque para o Room Database local. |
+
+#### Formato do Lote de Sincronização (`POST /sync/push`):
+```json
+{
+  "device_id": "android-uuid-98f24b-2026",
+  "versao_app": "8.4.7",
+  "operacoes": [
+    {
+      "uuid": "e8d67c90-b1a2-4a55-bc91-5f6e8d9c0a1b",
+      "tipo": "ENTREGA",
+      "fun_id": 14,
+      "pin_hash": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      "timestamp_local": "2026-11-04 14:30:00",
+      "itens": [
+        { "epi_id": 13, "quantidade": 1, "tamanho": "M", "lote": "LT-2026-013", "motivo": "ADMISSAO" }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+## 3. Resiliência HTTP, Timeouts e Códigos de Status
+
+* **Status Sucesso:** `200 OK`, `201 Created`.
+* **Erros de Validação / Negócio:** `400 Bad Request`, `422 Unprocessable Entity` (ex: Lote ausente, saldo insuficiente).
+* **Segurança e Acesso:** `401 Unauthorized` (Token expirado), `403 Forbidden` (Perfil sem permissão RBAC).
+* **Resiliência cURL no Painel Web (`services/ApiService.php`):**
+  - Timeout de conexão (`CURLOPT_CONNECTTIMEOUT`): 3 segundos.
+  - Timeout total de resposta (`CURLOPT_TIMEOUT`): 30 segundos.
+  - Tentativa automática de retry em caso de `502 Bad Gateway` ou instabilidade de rede.
+
