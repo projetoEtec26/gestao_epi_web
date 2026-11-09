@@ -82,3 +82,23 @@ Em inspeções do Ministério do Trabalho e Emprego ou perícias judiciais traba
    * Gera a folha oficial de fornecimento de EPIs pronta para anexação processual com hash de auditoria criptográfica.
 3. **Auditoria de Logs LGPD:**
    * A emissão do relatório é automaticamente registrada na tabela `log_auditoria`, registrando o IP, identificador do operador, data/hora no fuso `America/Sao_Paulo` e finalidade da exportação.
+
+---
+
+## 5. Fluxo de Autenticação Segura e Recuperação de Senhas (Release 8.4.8 Hardened)
+
+### 5.1 Autenticação e Proteção Contra Força Bruta (`login.php`)
+1. **Entrada de Credenciais:** Operador informa `usu_login` e `senha`.
+2. **Checagem de Tentativas:** Se houver 5 tentativas incorretas consecutivas, a sessão entra em bloqueio temporário de 60 segundos com aviso em tela.
+3. **Autenticação Bem-Sucedida:** Reseta o contador de erros, emite cookie de sessão com `HttpOnly`, `SameSite=Lax` e `Secure`, e direciona para o painel principal.
+
+### 5.2 Assistente Seguro de Recuperação de Senhas (`recuperar-senha.php`)
+1. **Passo 1 — Identificação do Operador:** O operador digita o seu login. O sistema valida na base sem expor códigos na resposta JSON.
+2. **Passo 2 — Código de Verificação:**
+   - O sistema gera um código numérico de 6 dígitos associado à sessão.
+   - O código possui validade estrita de **15 minutos**.
+   - Limite de até **5 tentativas** de digitação; códigos de teste ou universais (`123456`) são sumariamente rejeitados.
+3. **Passo 3 — Redefinição de Senha:**
+   - Acesso autorizado **exclusivamente** após a validação confirmada da sessão (`$_SESSION['recup_codigo_validado'] === true`).
+   - Requisição à API REST com atualização segura da senha e expurgo das variáveis de recuperação da sessão.
+

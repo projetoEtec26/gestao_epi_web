@@ -161,4 +161,14 @@ Utilizada pelo aplicativo Android (`SyncWorker`) para operação em campo sem si
   - Timeout de conexão (`CURLOPT_CONNECTTIMEOUT`): 3 segundos.
   - Timeout total de resposta (`CURLOPT_TIMEOUT`): 30 segundos.
   - Tentativa automática de retry em caso de `502 Bad Gateway` ou instabilidade de rede.
+  - Prevenção ativa de IP Spoofing: aceita `X-Forwarded-For` ou `X-Real-IP` exclusivamente a partir de nós de proxy reverso confiáveis.
+
+---
+
+## 4. Garantia de Estabilidade e Paridade (Release 8.4.8 Hardened)
+
+* **Compatibilidade 100% Preservada:** A blindagem de cibersegurança executada na Release 8.4.8 concentrou-se inteiramente no painel Web e na camada de infraestrutura/servidor.
+* **Zero Alterações Contratuais na API:** Não houve modificação em nenhum endpoint, schema JSON, cabeçalho de autenticação Bearer JWT ou regra de negócio da API.
+* **Continuidade do Aplicativo Android:** O aplicativo móvel Android continua consumindo a API com 100% de transparência e estabilidade, sem necessidade de atualização ou geração de novo APK.
+
 

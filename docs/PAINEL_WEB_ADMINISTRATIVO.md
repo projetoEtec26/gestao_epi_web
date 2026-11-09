@@ -149,4 +149,23 @@ O sistema visual utiliza **Vanilla CSS moderno baseado em tokens HSL**, garantin
 | `pages/403.php` | Acesso Não Autorizado | Público / Erro | Bloqueio amigável de RBAC com redirecionamento |
 | `pages/404.php` | Página Não Encontrada | Público / Erro | Tratamento visual de recursos inexistentes |
 
+---
+
+## 5. Diretrizes de Segurança, Sessões e RBAC (Release 8.4.8 Hardened)
+
+1. **Blindagem de Sessões (`SecurityService::initSecureSession`):**
+   - Configuração de cookies de sessão nativos com `HttpOnly`, `SameSite=Lax` e `Secure` (sob HTTPS).
+   - Prevenção ativa de roubo de sessão (*Session Hijacking*) e Cross-Site Scripting (XSS).
+2. **Proteção Contra Força Bruta (`login.php`):**
+   - Monitoramento contínuo de tentativas de autenticação inválidas.
+   - Bloqueio temporário progressivo de 60 segundos após 5 erros consecutivos.
+3. **Assistente de Recuperação Seguro (`recuperar-senha.php`):**
+   - Omissão de códigos na resposta JSON e eliminação de senhas ou códigos universais.
+   - Expiração estrita de 15 minutos e validação de sessão obrigatória para redefinição.
+4. **Remoção de JWT no LocalStorage (`components/header.php`):**
+   - Descontinuação do armazenamento do token Bearer JWT no cliente; todas as chamadas client-side trafegam através do gateway server-side `pages/api_proxy.php` que consome a sessão do servidor.
+5. **Governança RBAC e Menu Sidebar:**
+   - As páginas `pages/usuarios.php` e `pages/auditoria.php` operam com acesso restrito com exclusividade ao perfil `ADMINISTRADOR`, sincronizadas dinamicamente com os itens do menu lateral em `components/sidebar.php`.
+
+
 

@@ -88,14 +88,16 @@ De acordo com as exigências da **Norma Regulamentadora NR-6** e auditorias de f
 
 ---
 
-## 6. Governança e Diretrizes de Cibersegurança
+## 6. Governança e Diretrizes de Cibersegurança (Release 8.4.8 Hardened)
 
-Em conformidade com a **Auditoria Complementar de Cybersecurity (04/11/2026)** documentada em [`docs/AUDITORIA_CYBERSECURITY.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md):
-* **Comunicação Criptografada Mandatória (HTTPS):** Todo o tráfego Web e de APIs deve operar obrigatoriamente sob HTTPS (TLS 1.2+), com redirecionamento forçado via servidor e cabeçalho `Strict-Transport-Security` (HSTS).
-* **Proteção e Isolamento do Banco de Dados:** A porta TCP 3306 do banco MySQL Cloud deve permanecer bloqueada para a internet externa, com permissão restrita de acesso aos endereços IP internos dos nós de aplicação.
-* **Sessões e Cookies Seguros:** Sessões PHP ativadas com flags `; HttpOnly; Secure; SameSite=Strict` via `SecurityService::initSecureSession()`.
-* **Proteção Anti-CSRF:** Validação de tokens criptográficos temporais em todos os formulários e rotas `POST`.
-* **Integridade de APIs e CORS:** Restrição das origens permitidas (CORS) aos domínios institucionais oficiais e eliminação de credenciais em `localStorage`.
+Em conformidade com a auditoria e implementação de **Hardening (09/11/2026)** documentada em [`docs/AUDITORIA_CYBERSECURITY.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md):
+* **Comunicação Criptografada Mandatória (HTTPS):** Todo o tráfego Web opera sob HTTPS forçado via `.htaccess` (301) compatível com Nginx Locaweb (`%{HTTP:X-Forwarded-Proto} !https`) e HSTS progressivo (30 dias).
+* **Proteção e Isolamento do Banco de Dados:** Remoção de dumps de banco do Git, eliminação de senhas hardcoded em produção e suporte a carregamento isolado em `/home/usuario/secrets.php`.
+* **Sessões e Cookies Seguros:** Sessões PHP ativadas com flags `; HttpOnly; SameSite=Lax; Secure` via `SecurityService::initSecureSession()`.
+* **Proteção Anti-CSRF e Anti-Força Bruta:** Rate limit com bloqueio temporário de 60 segundos após 5 tentativas de login consecutivas e validação de tokens anti-CSRF.
+* **Governança RBAC e LocalStorage:** Módulos de auditoria e usuários restritos ao perfil `ADMINISTRADOR` e purga completa de tokens JWT do `localStorage` do navegador.
+* **Compatibilidade 100% Preservada:** Zero alterações contratuais na API REST; paridade total com o aplicativo Android mantida.
+
 
 ---
 

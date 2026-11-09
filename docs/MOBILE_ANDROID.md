@@ -94,3 +94,12 @@ Quando o operador está em áreas sem sinal de internet (subsolos, áreas rurais
 * **Localização Brasil:** Padrão estrito de idioma `pt-BR`, moeda em Real (`R$`), datas em `DD/MM/AAAA` e fuso horário oficial `America/Sao_Paulo` (GMT-3).
 * **Paridade de Regras:** 100% das regras de cálculo de KPIs, controle de lotes da NR-6 e proteção de dados LGPD operam de maneira idêntica entre o App Android e o Painel Web Administrativo.
 
+---
+
+## 7. Garantia de Operação e Estabilidade no Ecossistema (Release 8.4.8 Hardened)
+
+* **Desacoplamento e Segurança:** O aplicativo Android opera de forma 100% desacoplada das tecnologias de apresentação web (PHP, Apache, `.htaccess` e cookies de navegador).
+* **Validação de PIN e Sincronização:** Os algoritmos de validação de assinatura digital (`HashUtils.java` com `SHA-256 + Salt`) permanecem 100% alinhados à classe `SecurityService.php`.
+* **Sem Necessidade de Recompilação:** Nenhuma das melhorias de segurança implementadas na Web impacta a camada de rede do Android (Retrofit 2), mantendo a versão de produção do aplicativo em pleno funcionamento.
+
+

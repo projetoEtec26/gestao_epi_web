@@ -149,29 +149,50 @@ API_BASE_URL="http://10.0.2.2/gestao_epi_api/"
 Com base no diagnóstico da **Auditoria de Cybersecurity de 04/11/2026** ([`docs/AUDITORIA_CYBERSECURITY.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md)):
 
 ### 6.1 Regras de Hardening no Servidor Apache (`.htaccess`)
-Para forçar o uso exclusivo de HTTPS, ativar cabeçalhos defensivos e impedir o acesso direto a arquivos de documentação, o arquivo `.htaccess` na raiz da hospedagem deve conter:
+Para forçar o uso exclusivo de HTTPS (respeitando o proxy reverso da Locaweb), ativar cabeçalhos defensivos e impedir o acesso direto a arquivos de documentação e backups, o arquivo `.htaccess` na raiz da aplicação está configurado da seguinte forma:
 ```apache
-RewriteEngine On
+Options -Indexes
 
-# 1. Redirecionamento Mandatório HTTP -> HTTPS (301)
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-# 2. Bloqueio de Extensões Sensíveis e Documentações
-<FilesMatch "\.(md|txt|pdf|log|yml|yaml|sql|env.*|json|lock)$">
-    Require all denied
+<FilesMatch "(^\.env|^\.git|secrets.*\.php|\.sql$|\.log$|\.md$|Dockerfile|composer\.json)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
 </FilesMatch>
 
-# 3. Cabeçalhos de Segurança HTTP
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Redirecionamento 301 para HTTPS em Produção (compatível com Proxy Reverso Nginx/Locaweb)
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+    RewriteCond %{HTTP:X-Forwarded-SSL} !on [NC]
+    RewriteCond %{HTTP_HOST} !localhost [NC]
+    RewriteCond %{HTTP_HOST} !127\.0\.0\.1 [NC]
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
 <IfModule mod_headers.c>
-    Header always set X-Frame-Options "SAMEORIGIN"
-    Header always set X-Content-Type-Options "nosniff"
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
-    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Strict-Transport-Security "max-age=2592000" "expr=%{HTTPS} == 'on' || %{HTTP:X-Forwarded-Proto} == 'https'"
 </IfModule>
 ```
 
-### 6.2 Firewall do Banco de Dados MySQL Cloud (DBAAS Locaweb)
-* **Bloqueio de Porta TCP 3306:** O banco `db_gestao_epi.mysql.dbaas.com.br` deve ser configurado no painel da Locaweb para **rejeitar conexões vindas da internet pública**, autorizando estritamente os endereços IP dos servidores web da aplicação.
-* **Isolamento de Credenciais:** As credenciais de acesso não devem residir em arquivos versionados no Git, utilizando o padrão `.env` protegido com permissão de leitura restrita `600`.
+### 6.2 Gestão de Segredos e Isolamento Fora da Raiz Pública (Locaweb)
+* **Estrutura de Diretórios Segura:** Em produção (Locaweb), as credenciais não residem em arquivos comitados no Git. Utiliza-se um arquivo PHP de segredos com permissão `0600` localizado **fora do diretório público** (`public_html/`):
+  ```text
+  /home/usuario_locaweb/
+  ├── public_html/          <-- Raiz da aplicação Web (deploy FTP do Git)
+  └── secrets.php           <-- Arquivo de credenciais fora da raiz pública
+  ```
+* **Carregamento Automático em `config/api.php`:** A aplicação detecta a existência de `/home/usuario_locaweb/secrets.php` e carrega dinamicamente as credenciais `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS` e `AES_SECRET_KEY`.
+* **Firewall do MySQL DBAAS Locaweb:** Configurado no painel Locaweb para rejeitar conexões de endereços IP não autorizados na porta TCP 3306.
+
 
