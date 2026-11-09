@@ -662,6 +662,29 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 *   **Otimização do Filtro de Status de C.A. e Higienização de Setores (`pages/relatorios.php`):**
     - Atualizado o combo de filtro de C.A. para os status reais (`Vigente`, `Vencido / Próximo`, `Isento`) e higienizada a lista de setores da empresa.
 
+### 📅 Versão 8.4.8 (09/11/2026) – Blindagem de Segurança Cibernética do Painel Web (Hardening OWASP / LGPD)
+*   **Linha de Corte e Ponto de Restauração (Rollback Baseline):** Criação da tag `checkpoint-pre-seguranca-v8.4.7` e branch `backup-pre-seguranca-v8.4.7` antes de qualquer alteração, garantindo rollback instantâneo e seguro.
+*   **Blindagem do Fluxo de Recuperação de Senha (`recuperar-senha.php`):**
+    - Remoção do campo `codigo_demonstrativo` das respostas JSON.
+    - Eliminação do código universal de bypass `123456`.
+    - Controle de tentativas contra força bruta (máximo 5) e expiração de código em 15 minutos com `hash_equals`.
+    - Bloqueio rígido na Etapa 3 (redefinição de senha): execução autorizada exclusivamente se `$_SESSION['recup_codigo_validado'] === true`.
+*   **Proteção de Infraestrutura e Diretório Raiz (`.htaccess`):**
+    - Redirecionamento 301 compulsório para HTTPS compatível com o proxy reverso Nginx da Locaweb (`%{HTTP:X-Forwarded-Proto} !https`).
+    - Ativação de cabeçalhos de segurança: `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `X-XSS-Protection: 1; mode=block`, `Referrer-Policy: strict-origin-when-cross-origin` e `Strict-Transport-Security` (30 dias).
+    - Bloqueio de acesso direto a arquivos de documentação, backups SQL, logs e configurações (`Options -Indexes` e `FilesMatch`).
+*   **Cookies de Sessão Seguros & Proteção de Sessão (`login.php`, `components/header.php`, `services/SecurityService.php`):**
+    - Inicialização padronizada de sessões via `SecurityService::initSecureSession()` com as flags `HttpOnly`, `SameSite=Lax` e `Secure` sob HTTPS.
+    - Rate limit contra ataques de força bruta no login com bloqueio temporário de 60 segundos após 5 tentativas inválidas.
+*   **Eliminação de Token JWT no LocalStorage (`components/header.php`):**
+    - Descontinuação do armazenamento do token Bearer JWT no `localStorage` do navegador e purga de tokens residuais (`localStorage.removeItem('token')`).
+*   **Sincronização de Controle de Acesso RBAC (`pages/usuarios.php`, `pages/auditoria.php`, `components/sidebar.php`):**
+    - Acesso aos módulos de Usuários/Permissões e Auditoria de Logs restrito com exclusividade ao perfil `ADMINISTRADOR`.
+*   **Gestão de Segredos e Conformidade LGPD (`config/api.php`, `.gitignore`, `deploy.yml`):**
+    - Remoção de senhas em fallback de produção; suporte a carregamento seguro via `/home/usuario/secrets.php` fora da raiz pública.
+    - Remoção dos arquivos `database_backup.sql` e `database_schema_v7.sql` do versionamento Git para conformidade com a LGPD.
+    - Exclusão de documentações e PDFs do upload FTP de produção via GitHub Actions.
+
 ### 📅 Versão 7.0.0 (05/10/2026) – Paridade 1:1 Dashboard Web × Android (`gestao_epi_8`), Audit Git/GitHub (Commit `19299fa`) e Homologação em Produção Locaweb (`http://gestaoepi.tecnologia.ws/`)
 *   **Paridade 1:1 de Regras de Negócio do Dashboard Web com o Android (`gestao_epi_8`):**
     - **Card 1 (EPIs Vencidos):** Consolidação dos equipamentos com Certificado de Aprovação (C.A.) vencidos no estoque com os equipamentos em uso ativo com Vida Útil vencida (5 itens: 2 C.A. + 3 Vida Útil).

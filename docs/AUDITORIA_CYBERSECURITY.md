@@ -152,4 +152,22 @@ A auditoria teve como objetivos:
 
 ---
 
-*Relatório técnico consolidado em 04/11/2026 para o ecossistema corporativo Gestão EPI v8.4.6.*
+## 5. Implementação das Correções e Hardening (Release 8.4.8 — 09/11/2026)
+
+Em 09/11/2026, todas as vulnerabilidades mapeadas nas Etapas 1 a 6 foram implementadas e validadas no ambiente Web, mantendo 100% de compatibilidade com a API REST e o aplicativo Android:
+
+1. **VULN-01 (Recuperação de Senha):** Eliminado vazamento de código em JSON e bypass `123456`; validação obrigatória de sessão na redefinição com `hash_equals` e rate limit de 5 tentativas.
+2. **VULN-02 (Credenciais no Código e Dumps SQL):** Removidos dumps `.sql` do rastreamento Git; implementado carregamento de `secrets.php` fora do docroot.
+3. **VULN-03 (Forçamento de HTTPS):** Ativado redirecionamento 301 seguro contra loops no `.htaccess`.
+4. **VULN-04 (Cookies de Sessão):** `PHPSESSID` emitido com `HttpOnly`, `SameSite=Lax` e `Secure`.
+5. **VULN-05 (Bloqueio de Documentos):** Bloqueio no `.htaccess` e exclusão de `.md`, `.pdf` e `Dockerfile` no pipeline de deploy FTP.
+6. **VULN-06 (JWT no LocalStorage):** Eliminado `localStorage.setItem('token')` e purgado token residual.
+7. **VULN-07 (Proteção Anti-CSRF):** Adicionados helpers `getCsrfToken()` e `validateCsrfToken()` em `SecurityService.php`.
+8. **VULN-08 (RBAC):** `pages/usuarios.php`, `pages/auditoria.php` e links na barra lateral restritos a `ADMINISTRADOR`.
+9. **VULN-09 (IDOR):** Validação de parâmetro numérico em `ficha_colaborador.php`.
+10. **VULN-10 (Força Bruta):** Bloqueio temporário de 60 segundos após 5 tentativas de login consecutivas.
+
+---
+
+*Relatório técnico consolidado e validado em 09/11/2026 para o ecossistema corporativo Gestão EPI v8.4.8 Hardened.*
+
