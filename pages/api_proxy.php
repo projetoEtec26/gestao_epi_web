@@ -13,9 +13,10 @@ date_default_timezone_set('America/Sao_Paulo');
  * de forma transparente e escalável.
  */
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../services/SecurityService.php';
+
+// Inicialização segura de sessão com cookies restritos
+\Services\SecurityService::initSecureSession();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -62,14 +63,18 @@ try {
         }
     }
 
-    // Helper para conexão PDO com a base de dados da API em Nuvem (Aiven Cloud)
+    // Helper para conexão PDO com a base de dados oficial
     $getDb = function(): ?PDO {
         $configData = require __DIR__ . '/../config/api.php';
-        $dbHost = $configData['db_host'] ?? 'db-gestao-epi-gestaoepi.a.aivencloud.com';
-        $dbPort = $configData['db_port'] ?? '10903';
-        $dbName = $configData['db_name'] ?? 'defaultdb';
-        $dbUser = $configData['db_user'] ?? 'avnadmin';
-        $dbPass = $configData['db_pass'] ?? base64_decode('QVZOU19UMlduaFU3X0RmOE1KMkN2dVcw');
+        $dbHost = $configData['db_host'] ?? '';
+        $dbPort = $configData['db_port'] ?? '3306';
+        $dbName = $configData['db_name'] ?? '';
+        $dbUser = $configData['db_user'] ?? '';
+        $dbPass = $configData['db_pass'] ?? '';
+
+        if (empty($dbHost) || empty($dbName) || empty($dbUser)) {
+            return null;
+        }
 
         try {
             $dsn = sprintf("mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4", $dbHost, $dbPort, $dbName);

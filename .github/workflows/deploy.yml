@@ -29,5 +29,13 @@ jobs:
             **/.github/**
             **/.agents/**
             **/node_modules/**
+            *.sql
             database_backup.sql
             database_schema_v7.sql
+            docs/**
+            *.md
+            *.pdf
+            Dockerfile
+            prompt*.txt
+            secrets*.php
+            cookie*.txt

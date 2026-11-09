@@ -4,14 +4,21 @@ declare(strict_types=1);
 // Garante o fuso horário padrão oficial do Brasil (America/Sao_Paulo - GMT-3)
 date_default_timezone_set('America/Sao_Paulo');
 
-if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
-    session_start();
-}
+require_once __DIR__ . '/../services/SecurityService.php';
 
-// Invalida o cache do navegador para que novos deploys reflitam de imediato
-header("Cache-Control: no-cache, no-store, must-revalidate");
-header("Pragma: no-cache");
-header("Expires: 0");
+// Inicialização segura de sessão com cookies restritos
+\Services\SecurityService::initSecureSession();
+
+// Cabeçalhos HTTP de Proteção e Invalidação de Cache
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+    header("X-Content-Type-Options: nosniff");
+    header("X-Frame-Options: SAMEORIGIN");
+    header("X-XSS-Protection: 1; mode=block");
+    header("Referrer-Policy: strict-origin-when-cross-origin");
+}
 
 $config = require __DIR__ . '/../config/api.php';
 if (!defined('APP_ROOT')) {
@@ -176,11 +183,12 @@ $isDarkMode = ($_COOKIE['theme-mode'] ?? '') === 'dark';
     <!-- Chart.js CDN (Para Gráficos) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Persistência de Autenticação Client-Side e Logs no Console -->
+    <!-- Sincronização Segura de Preferências e Logs no Console (Sem armazenamento de token JWT em localStorage) -->
     <script>
         console.log('[AUTH SESSION ACTIVE] Status HTTP 200 - Usuário: <?= htmlspecialchars($currentUser['usu_login'] ?? '') ?> | Perfil: <?= htmlspecialchars($userProfile) ?>');
         try {
-            localStorage.setItem('token', <?= json_encode((string)($_SESSION['token'] ?? '')) ?>);
+            // Purgar token JWT residual do localStorage para mitigar risco XSS
+            localStorage.removeItem('token');
             localStorage.setItem('usuario', <?= json_encode(json_encode($_SESSION['usuario'] ?? [])) ?>);
         } catch (e) {
             console.error('[AUTH ERROR] Erro ao sincronizar localStorage:', e);

@@ -23,8 +23,8 @@ if (!function_exists('hasPermission')) {
             'epis'         => ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'GESTOR', 'ALMOXARIFE_OPERADOR'],
             'entregas'     => ['ADMINISTRADOR', 'TECNICO_SST', 'GESTOR', 'ALMOXARIFE_OPERADOR'],
             'relatorios'   => ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'GESTOR', 'ALMOXARIFE_OPERADOR'],
-            'usuarios'     => ['ADMINISTRADOR', 'TECNICO_SST', 'GESTOR'],
-            'auditoria'    => ['ADMINISTRADOR', 'TECNICO_SST', 'GESTOR'],
+            'usuarios'     => ['ADMINISTRADOR'],
+            'auditoria'    => ['ADMINISTRADOR'],
             'pendencias'   => ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'GESTOR'],
             'configuracoes'=> ['ADMINISTRADOR', 'RH_ADMINISTRATIVO', 'TECNICO_SST', 'GESTOR', 'ALMOXARIFE_OPERADOR']
         ];

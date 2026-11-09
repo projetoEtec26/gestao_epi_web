@@ -121,21 +121,41 @@ $isLocalhost = (
     ))
 );
 
+// Carrega segredos externos fora da raiz pública se existirem (Locaweb / Produção)
+$secrets = [];
+$externalSecretsPath = dirname($_SERVER['DOCUMENT_ROOT'] ?? '') . '/secrets.php';
+$localSecretsPath = __DIR__ . '/secrets.local.php';
+
+if (!empty($_SERVER['DOCUMENT_ROOT']) && file_exists($externalSecretsPath)) {
+    $loaded = @require $externalSecretsPath;
+    if (is_array($loaded)) {
+        $secrets = $loaded;
+    }
+} elseif (file_exists($localSecretsPath)) {
+    $loaded = @require $localSecretsPath;
+    if (is_array($loaded)) {
+        $secrets = $loaded;
+    }
+}
+
+// Fallback de desenvolvimento exclusivo para localhost/XAMPP
+$devPass = $isLocalhost ? 'Gestaoepi@1' : '';
+
 return [
     // URL da API: no XAMPP busca a gestao_epi_api_8, na Locaweb busca a /api/
-    'api_base_url' => getenv('API_BASE_URL') ?: (
+    'api_base_url' => $secrets['API_BASE_URL'] ?? getenv('API_BASE_URL') ?: (
         $isLocalhost 
             ? 'http://localhost/gestao_epi_api_8/' 
             : 'http://gestaoepi.tecnologia.ws/api/'
     ),
     
     // Banco MySQL oficial da Locaweb
-    'db_host' => getenv('DB_HOST') ?: 'db_gestao_epi.mysql.dbaas.com.br',
-    'db_port' => getenv('DB_PORT') ?: '3306',
-    'db_name' => getenv('DB_NAME') ?: 'db_gestao_epi',
-    'db_user' => getenv('DB_USER') ?: 'db_gestao_epi',
-    'db_pass' => getenv('DB_PASS') ?: 'Gestaoepi@1',
+    'db_host' => $secrets['DB_HOST'] ?? getenv('DB_HOST') ?: 'db_gestao_epi.mysql.dbaas.com.br',
+    'db_port' => $secrets['DB_PORT'] ?? getenv('DB_PORT') ?: '3306',
+    'db_name' => $secrets['DB_NAME'] ?? getenv('DB_NAME') ?: 'db_gestao_epi',
+    'db_user' => $secrets['DB_USER'] ?? getenv('DB_USER') ?: 'db_gestao_epi',
+    'db_pass' => $secrets['DB_PASS'] ?? getenv('DB_PASS') ?: $devPass,
 
     // Raiz da aplicação Web-PHP
-    'app_root_url' => getenv('APP_ROOT_URL') ?: $appRoot
+    'app_root_url' => $secrets['APP_ROOT_URL'] ?? getenv('APP_ROOT_URL') ?: $appRoot
 ];

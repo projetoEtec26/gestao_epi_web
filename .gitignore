@@ -1,8 +1,21 @@
 # Ignorar arquivos temporários e logs de teste
 cookie.txt
 cookie_session.txt
+cookie*.txt
 output.html
 scratch/
+*.log
+
+# Backups de banco de dados e dados pessoais LGPD
+*.sql
+database_backup.sql
+database_schema_v7.sql
+
+# Segredos de ambiente e credenciais locais
+secrets.php
+secrets.*.php
+.env
+.env.*
 
 # IDE e sistema operacional
 .idea/

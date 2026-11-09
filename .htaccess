@@ -1,0 +1,49 @@
+# ==============================================================================
+# GESTÃO DE EPIS WEB — CONFIGURAÇÃO APACHE / LOCAWEB (.htaccess)
+# ==============================================================================
+
+# Desativa a listagem pública de diretórios
+Options -Indexes
+
+# Bloqueio de arquivos sensíveis, documentações, backups e configurações
+<FilesMatch "(^\.env|^\.git|secrets.*\.php|\.sql$|\.log$|\.md$|Dockerfile|composer\.json)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Configurações do Módulo de Reescrita (mod_rewrite)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Redirecionamento 301 para HTTPS em Produção (compatível com Proxy Reverso Nginx/Locaweb)
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+    RewriteCond %{HTTP:X-Forwarded-SSL} !on [NC]
+    RewriteCond %{HTTP_HOST} !localhost [NC]
+    RewriteCond %{HTTP_HOST} !127\.0\.0\.1 [NC]
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# Cabeçalhos de Proteção HTTP (mod_headers)
+<IfModule mod_headers.c>
+    # Previne que o navegador tente inferir o tipo MIME (MIME-Sniffing)
+    Header set X-Content-Type-Options "nosniff"
+
+    # Previne Clickjacking (permite abertura apenas no mesmo domínio)
+    Header set X-Frame-Options "SAMEORIGIN"
+
+    # Ativa filtro XSS legado dos navegadores
+    Header set X-XSS-Protection "1; mode=block"
+
+    # Política de Referência segura
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # HSTS seguro sem preload e sem includeSubdomains para compatibilidade Locaweb (30 dias)
+    Header set Strict-Transport-Security "max-age=2592000" "expr=%{HTTPS} == 'on' || %{HTTP:X-Forwarded-Proto} == 'https'"
+</IfModule>

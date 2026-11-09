@@ -18,7 +18,16 @@ class SecurityService {
     private static function getSecretKey(): string {
         $key = getenv('AES_SECRET_KEY') ?: ($_ENV['AES_SECRET_KEY'] ?? null);
         if (!$key) {
-            // Chave padrão simétrica de 32 bytes para dev/homologação (em prod deve vir do .env)
+            $externalSecretsPath = dirname($_SERVER['DOCUMENT_ROOT'] ?? '') . '/secrets.php';
+            if (!empty($_SERVER['DOCUMENT_ROOT']) && file_exists($externalSecretsPath)) {
+                $secrets = @require $externalSecretsPath;
+                if (is_array($secrets) && !empty($secrets['AES_SECRET_KEY'])) {
+                    $key = $secrets['AES_SECRET_KEY'];
+                }
+            }
+        }
+        if (!$key) {
+            // Chave padrão simétrica de 32 bytes para dev/homologação
             $key = 'GestaoEPI_AES256SecretKey_2026!';
         }
         return pad_to_32_bytes($key);
@@ -194,7 +203,7 @@ class SecurityService {
                 'domain'   => '',
                 'secure'   => $isSecure,
                 'httponly' => true,
-                'samesite' => 'Strict'
+                'samesite' => 'Lax'
             ]);
             session_start();
 
@@ -203,6 +212,29 @@ class SecurityService {
                 $_SESSION['initiated'] = true;
             }
         }
+    }
+
+    /**
+     * Gera ou recupera o token anti-CSRF da sessão ativa
+     */
+    public static function getCsrfToken(): string {
+        self::initSecureSession();
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['csrf_token'];
+    }
+
+    /**
+     * Valida um token anti-CSRF recebido
+     */
+    public static function validateCsrfToken(?string $token): bool {
+        self::initSecureSession();
+        $stored = $_SESSION['csrf_token'] ?? '';
+        if (empty($stored) || empty($token)) {
+            return false;
+        }
+        return hash_equals($stored, $token);
     }
 
     private static function isJsonRequest(): bool {

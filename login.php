@@ -5,12 +5,13 @@ declare(strict_types=1);
 date_default_timezone_set('America/Sao_Paulo');
 
 require_once __DIR__ . '/services/ApiService.php';
+require_once __DIR__ . '/services/SecurityService.php';
 
 use Services\ApiService;
+use Services\SecurityService;
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// Inicialização segura de sessão com cookies restritos (HttpOnly, Secure, SameSite)
+SecurityService::initSecureSession();
 
 $config = require __DIR__ . '/config/api.php';
 if (!defined('APP_ROOT')) {
@@ -51,9 +52,12 @@ if (isset($_SESSION['success_message'])) {
 // Fluxo 1: Login de Usuário
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] === 'login') {
     $login = isset($_POST['usu_login']) ? trim($_POST['usu_login']) : '';
-    $senha = isset($_POST['senha']) ? $_POST['senha'] : '';
-
-    if ($login === '' || $senha === '') {
+    // Verificação de bloqueio por Força Bruta
+    $lockoutUntil = $_SESSION['login_lockout_until'] ?? 0;
+    if ($lockoutUntil > time()) {
+        $segundosRestantes = $lockoutUntil - time();
+        $erro = "Muitas tentativas incorretas. Por segurança, aguarde {$segundosRestantes} segundo(s) antes de tentar novamente.";
+    } elseif ($login === '' || $senha === '') {
         $erro = 'Por favor, preencha o usuário e a senha.';
     } else {
         try {
@@ -82,6 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
                     }
                 } catch (\Throwable $e) {}
 
+                unset($_SESSION['login_tentativas'], $_SESSION['login_lockout_until']);
+
                 // Garante a gravação imediata da sessão PHP em disco
                 session_write_close();
 
@@ -90,7 +96,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
                 header('Location: ' . $redirectUrl);
                 exit;
             } else {
-                $erro = $response['message'] ?? 'Credenciais inválidas.';
+                $_SESSION['login_tentativas'] = ($_SESSION['login_tentativas'] ?? 0) + 1;
+                if ($_SESSION['login_tentativas'] >= 5) {
+                    $_SESSION['login_lockout_until'] = time() + 60; // 60 segundos de bloqueio temporário
+                    $_SESSION['login_tentativas'] = 0;
+                    $erro = 'Limite de 5 tentativas consecutivas excedido. Acesso temporariamente suspenso por 60 segundos.';
+                } else {
+                    $tentativasRestantes = 5 - $_SESSION['login_tentativas'];
+                    $erro = ($response['message'] ?? 'Credenciais inválidas.') . " ({$tentativasRestantes} tentativa(s) restante(s)).";
+                }
                 if (isset($response['raw_response'])) {
                     $erro .= ' [Bruto: ' . htmlspecialchars(substr($response['raw_response'], 0, 250)) . '...]';
                 }

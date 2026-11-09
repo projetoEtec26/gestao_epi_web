@@ -5,12 +5,13 @@ declare(strict_types=1);
 date_default_timezone_set('America/Sao_Paulo');
 
 require_once __DIR__ . '/services/ApiService.php';
+require_once __DIR__ . '/services/SecurityService.php';
 
 use Services\ApiService;
+use Services\SecurityService;
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// Inicialização segura de sessão com cookies restritos
+SecurityService::initSecureSession();
 
 $config = require __DIR__ . '/config/api.php';
 $appRoot = $config['app_root_url'] ?? '/OLD/gestao_epi_web_14/';
@@ -45,15 +46,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 exit;
             }
 
-            // Gera token numérico simulado/oficial de 6 dígitos para etapa 2
-            $codigoVerificacao = sprintf('%06d', mt_rand(100000, 999999));
+            // Gera token numérico seguro de 6 dígitos para etapa 2
+            $codigoVerificacao = sprintf('%06d', random_int(100000, 999999));
             $_SESSION['recup_login'] = $login;
             $_SESSION['recup_codigo'] = $codigoVerificacao;
+            $_SESSION['recup_tentativas'] = 0;
+            $_SESSION['recup_codigo_validado'] = false;
+            $_SESSION['recup_gerado_em'] = time();
 
             echo json_encode([
                 'success' => true,
-                'message' => 'Usuário identificado com sucesso.',
-                'codigo_demonstrativo' => $codigoVerificacao // Exibido para facilidade de verificação no ambiente de testes
+                'message' => 'Usuário identificado com sucesso. Código de segurança gerado.'
             ]);
             exit;
         } catch (\Throwable $e) {
@@ -65,14 +68,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if ($action === 'validar_codigo') {
         $codigoInput = trim($_POST['codigo_verificacao'] ?? '');
         $codigoSessao = $_SESSION['recup_codigo'] ?? '';
+        $geradoEm = $_SESSION['recup_gerado_em'] ?? 0;
 
         if (empty($codigoInput)) {
             echo json_encode(['success' => false, 'message' => 'Por favor, insira o código de 6 dígitos.']);
             exit;
         }
 
-        if ($codigoInput !== $codigoSessao && $codigoInput !== '123456') {
-            echo json_encode(['success' => false, 'message' => 'Código de verificação inválido ou expirado. Tente novamente.']);
+        // Expira o código após 15 minutos (900 segundos)
+        if (time() - $geradoEm > 900) {
+            unset($_SESSION['recup_codigo'], $_SESSION['recup_codigo_validado']);
+            echo json_encode(['success' => false, 'message' => 'Código de verificação expirado. Por favor, reinicie o processo.']);
+            exit;
+        }
+
+        // Controle de tentativas para prevenir força bruta (máximo 5)
+        $_SESSION['recup_tentativas'] = ($_SESSION['recup_tentativas'] ?? 0) + 1;
+        if ($_SESSION['recup_tentativas'] > 5) {
+            unset($_SESSION['recup_codigo'], $_SESSION['recup_codigo_validado']);
+            echo json_encode(['success' => false, 'message' => 'Limite de 5 tentativas excedido. Por segurança, reinicie o processo.']);
+            exit;
+        }
+
+        if (empty($codigoSessao) || !hash_equals((string)$codigoSessao, (string)$codigoInput)) {
+            echo json_encode(['success' => false, 'message' => 'Código de verificação inválido. Tente novamente.']);
             exit;
         }
 
@@ -94,7 +113,13 @@ if (!function_exists('validarPoliticaSenha')) {
 }
 
     if ($action === 'redefinir_senha') {
-        $login = $_SESSION['recup_login'] ?? trim($_POST['usu_login'] ?? '');
+        // Bloqueio rigoroso de IDOR e acesso direto à etapa 3
+        if (empty($_SESSION['recup_codigo_validado']) || $_SESSION['recup_codigo_validado'] !== true) {
+            echo json_encode(['success' => false, 'message' => 'Acesso não autorizado. Valide o código de segurança antes de redefinir a senha.']);
+            exit;
+        }
+
+        $login = $_SESSION['recup_login'] ?? '';
         $novaSenha = $_POST['nova_senha'] ?? '';
         $confirmarSenha = $_POST['confirmar_senha'] ?? '';
 
@@ -642,8 +667,9 @@ async function processarEtapa1(e) {
 
         if (res.success) {
             usuarioLoginGlobal = loginInput;
-            if (res.codigo_demonstrativo) {
-                document.getElementById('txt-codigo-demo').innerHTML = `Código de Segurança enviado: <strong>${res.codigo_demonstrativo}</strong> (ou digite 123456).`;
+            const demoText = document.getElementById('txt-codigo-demo');
+            if (demoText) {
+                demoText.innerHTML = `Código de Segurança enviado ao canal oficial cadastrado.`;
             }
             atualizarWizardVisual(2);
         } else {

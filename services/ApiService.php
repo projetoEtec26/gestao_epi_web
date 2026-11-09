@@ -40,13 +40,26 @@ class ApiService {
             $url = $this->baseUrl . ltrim($endpoint, '/');
 
             $deviceInfo = function_exists('obterDispositivoWeb') ? obterDispositivoWeb() : 'Web (Navegador Desconhecido)';
-            $clientIp = $_SERVER['HTTP_CF_CONNECTING_IP'] 
-                ?? $_SERVER['HTTP_X_FORWARDED_FOR'] 
-                ?? $_SERVER['REMOTE_ADDR'] 
-                ?? '127.0.0.1';
+            $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+            $trustedProxies = ['127.0.0.1', '::1'];
+            $isTrustedProxy = in_array($remoteAddr, $trustedProxies, true) || 
+                              preg_match('/^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.)/', $remoteAddr);
 
-            if (str_contains($clientIp, ',')) {
-                $clientIp = trim(explode(',', $clientIp)[0]);
+            $clientIp = $remoteAddr;
+            if ($isTrustedProxy) {
+                $rawForwarded = $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_CF_CONNECTING_IP'] ?? '';
+                if (!empty($rawForwarded)) {
+                    if (str_contains($rawForwarded, ',')) {
+                        $parts = array_map('trim', explode(',', $rawForwarded));
+                        $clientIp = end($parts) ?: $remoteAddr;
+                    } else {
+                        $clientIp = trim($rawForwarded);
+                    }
+                }
+            }
+
+            if (!filter_var($clientIp, FILTER_VALIDATE_IP)) {
+                $clientIp = '127.0.0.1';
             }
 
             $contextoPadrao = [
