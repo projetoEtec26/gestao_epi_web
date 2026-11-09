@@ -14,15 +14,23 @@ O Painel Web Administrativo é o centro de controle unificado para gestão de se
 * **Formato de Datas:** `DD/MM/AAAA` (com suporte a exibição de horário no padrão 24h `HH:mm:ss`).
 * **Fuso Horário:** `America/Sao_Paulo` (GMT-3), inicializado no topo de todos os scripts e templates.
 
-### 1.2 Regra de Compatibilidade Multiplataforma (Web Desktop, Tablet e Celular)
+### 1.2 Regra de Compatibilidade Multiplataforma Estrita (Web Desktop, Tablet e Celular)
 
-Toda funcionalidade do Gestão EPI Web opera de forma idêntica em três formatos de tela:
+Toda funcionalidade do Gestão EPI Web opera de forma idêntica e sem perda de recursos em três formatos de tela:
 
 | Plataforma | Largura de Referência | Entrada Primária | Adaptação de Interface |
 | :--- | :--- | :--- | :--- |
 | **Web Desktop** | $\ge 1200\text{px}$ | Mouse e teclado | Grid multi-colunas, tabelas completas, modais centralizados e sidebar expandida. |
 | **Tablet** | $768\text{px} – 1199\text{px}$ | Toque e teclado virtual | Grid compactado, tabelas com scroll horizontal suave (`table-responsive`) e botões com área de toque mínima de $44\times 44\text{px}$. |
 | **Celular** | $< 768\text{px}$ | Toque | Layout verticalizado em cartões (*cards*), sidebar recolhível em *offcanvas*, modais full-screen ou rolagem vertical sem transbordo horizontal. |
+
+#### Critérios Técnicos Mandatórios em Toda Alteração de Interface:
+1. **Eventos Híbridos de Interação:** Tratar eventos de mouse (`mousedown`/`click`), toque (`touchend` com `passive: false`) e teclado (`Enter`/`Espaço`). É estritamente proibido depender apenas de mouse ou apenas de toque.
+2. **Componentes Customizados Padronizados:** Uso dos componentes personalizados do projeto (ex.: calendário Material Design em `assets/js/main.js` e seletores customizados), garantindo consistência visual em qualquer navegador móvel ou desktop.
+3. **Hierarquia de Modais e Z-Index:** O modal Bootstrap base opera em `z-index: 10050`. Elementos flutuantes, autocompletes e sobreposições atuam em `z-index: 999999 !important`. Elementos filhos não podem sofrer corte por `overflow: hidden` do `.modal-content`.
+4. **Layout Responsivo e Áreas de Toque:** Grid e utilitários do Bootstrap 5 sob `@media (max-width: 1199.98px)`. Dimensão mínima de toque de $44\times 44\text{px}$ para evitar toques acidentais em smartphones.
+5. **Cobertura Universal de Modo Escuro:** Toda nova tela ou componente deve implementar estilos para `html.dark-mode` / `body.dark-mode`.
+6. **Tabelas Fluídas:** Uso mandatório de contêineres `.table-responsive` ou renderização alternativa em formato de cartões (*cards*) em resoluções móveis.
 
 ---
 
@@ -70,52 +78,41 @@ O sistema visual utiliza **Vanilla CSS moderno baseado em tokens HSL**, garantin
 * **Visualização com Mascaramento LGPD:** CPF exibido como `000.***.***-00` por padrão.
 
 ### 3.3 Catálogo de EPIs e Controle de C.A. (`pages/epis.php`)
-* **Gestão de Equipamentos:** Cadastro com Fabricante, C.A. (MTE), Validade do C.A., Estoque, Preço de Custo, Unidade, Lote de Fábrica e Vida Útil em dias.
-* **Reajuste em Lote:** Modal administrativo para aplicação de percentual de acréscimo ou desconto nos valores de custo dos EPIs.
-* **Controle Preventivo de Validade:** Badges coloridos indicando C.A. regular (verde), a vencer em até 90 dias (amarelo) e vencido (vermelho).
+* **Gestão de Equipamentos:** Cadastro com foto, unidade, fabricante, vida útil em dias e controle de estoque.
+* **Monitoramento de C.A.:** Badges dinâmicos com contadores automáticos para C.A. Válido (Verde), A Vencer em 30/60/90 dias (Laranja), Vencido (Vermelho) e Isento (Azul).
+* **Histórico de Preços:** Linha do tempo com variações de valores homologados em Reais (`R$`).
 
-### 3.4 Histórico de Entregas e Recibo Eletrônico (`pages/entregas.php`)
-* **Histórico Transacional:** Filtro por status (`FINALIZADA`, `CANCELADA`), período de datas e colaborador.
-* **Recibo / Ficha de Entrega Eletrônica de EPI:**
-  - Modal estilizado com cabeçalho de auditoria e status "ASSINADO DIGITALMENTE".
-  - Dados do receptor: Nome completo, CPF mascarado, Cargo e Departamento.
-  - Grid de equipamentos: Nome, Fabricante, C.A., Validade do C.A., Quantidade, Tamanho e **Lote Obrigatório**.
-  - **Garantia de Lote:** O campo Lote sob nenhuma hipótese exibe `---` ou vazio, utilizando resolução em cascata (`item_numero_lote` -> `epi_numero_lote` -> `epi_identificacao` -> `LT-ANO-COD`).
-  - Termo de Compromisso de guarda e conservação da NR-6.
-  - Trilha judicial de auditoria: Hash SHA-256 da assinatura, tipo de assinatura (PIN), data e hora legal.
-  - Botão de "Imprimir Termo" com formatação otimizada para folhas físicas A4.
-
-### 3.5 Workflow de Nova Entrega (`pages/nova_entrega.php`)
+### 3.4 Emissão de Entregas e Assinatura Eletrônica (`pages/nova_entrega.php`)
 * **Fluxo em Etapas:**
-  1. *Identificação do Colaborador:* Seleção via autocomplete de alta precisão.
-  2. *Seleção de Equipamentos:* Adição de itens ao carrinho com verificação de estoque e validade de C.A.
-  3. *Preenchimento Obrigatório de Lote:* O campo `#input-lote-item` é automaticamente preenchido com o lote do equipamento ou gerado no padrão institucional.
-  4. *Coleta de Assinatura Eletrônica:* Digitação do PIN de 6 dígitos do colaborador com validação criptográfica síncrona.
+  1. Identificação do colaborador receptor.
+  2. Seleção de equipamentos com validação em tempo real de saldo e validade de C.A.
+  3. Preenchimento compulsório do **número de lote** (NR-6).
+  4. Coleta do PIN de 6 dígitos com validação criptográfica SHA-256 e gravação na trilha de auditoria.
 
-### 3.6 Devoluções de EPIs (`pages/devolucoes.php`)
-* **Inspeção de Retorno:** Seleção do colaborador e listagem dos equipamentos sob sua posse.
-* **Motivo da Devolução:** Término de contrato, substituição periódica, dano/desgaste ou transferência.
-* **Atualização de Estoque:** Retorno imediato das quantidades ao saldo disponível no almoxarifado quando o item estiver em condições de reuso.
+### 3.5 Histórico Geral de Entregas e Recibos (`pages/entregas.php`)
+* **Rastreabilidade Completa:** Lista com filtros por período, setor e colaborador.
+* **Modal de Recibo de Entrega Eletrônica:**
+  - Exibição de dados completos: Nome, CPF mascarado, Cargo, Setor e identificação visual de Lote em 100% dos itens.
+  - Emissão de termo oficial com hash criptográfico de validação.
 
-### 3.7 Ficha Individual do Colaborador (`pages/ficha_colaborador.php`)
-* Dossiê completo do colaborador com dados cadastrais, histórico cronológico de todos os EPIs recebidos, termos assinados, devoluções registradas e equipamentos atualmente sob sua custódia.
+### 3.6 Controle de Devoluções e Baixas (`pages/devolucoes.php`)
+* **Encerramento de Custódia:** Identificação dos EPIs sob posse do colaborador.
+* **Classificação de Destino:** Retorno ao almoxarifado (apto para reuso) ou descarte definitivo (fim de vida útil ou danificado).
+
+### 3.7 Ficha Completa do Colaborador (`pages/ficha_colaborador.php`)
+* **Dossiê Funcional:** Visão 360° com dados cadastrais, histórico de entregas com C.A. e Lote, substituições e devoluções.
 
 ### 3.8 Central de Relatórios Gerenciais (`pages/relatorios.php`)
-* **Relatório Geral de Entregas:** Histórico analítico com paginação e filtros combinados.
-* **Relatório Financeiro de Custos (`pages/relatorio_financeiro.php`):** Investimento por centro de custo/departamento.
-* **Relatório de Consumo de EPIs (`pages/relatorio_consumo_epi.php`):** Saídas quantitativas por período e equipamento.
-* **Relatório de Validade de C.A. (`pages/relatorio_validade_ca.php`):** Rastreabilidade de conformidade com a NR-6.
-* **Modelo Oficial de Impressão A4 Paisagem (`pages/relatorio_auditoria_impressao.php`):** Folha padronizada para fiscalização trabalhista.
+* **6 Modalidades Especializadas:** Relatório Geral de Fornecimento, Relatório Financeiro de Custos, Relatório de Consumo por Equipamento, Validade de C.A., Logs de Auditoria e Impressão Oficial A4.
+* **Exportação Segura:** Exportação em CSV com codificação UTF-8 BOM e geração de PDF com registro automático no log de auditoria LGPD.
 
-### 3.9 Auditoria de Logs e Segurança (`pages/auditoria.php` e `pages/usuarios.php`)
-* **Trilha de Auditoria Judicial:** Monitoramento pericial de todas as ações de usuários com visualizador de JSON.
-* **Gestão de Operadores (RBAC):** Criação de usuários, concessão de perfis e imposição de troca de senha no primeiro acesso.
-* **Governança de Acesso (Auditoria 04/11/2026):** Restrição estrita de perfis operacionais em telas de auditoria e usuários exclusiva para o perfil `ADMINISTRADOR`, além de requisitos para integração de tokens anti-CSRF e sanitização contínua com `htmlspecialchars()`.
+### 3.9 Usuários e Permissões (`pages/usuarios.php`)
+* **Acesso Restrito:** Exclusivo para o perfil `ADMINISTRADOR`.
+* **Governança RBAC:** Atribuição de permissões operacionais, redefinição de senhas e bloqueio preventivo de acessos.
 
-### 3.10 Configurações, Perfil e Termos de Uso (`pages/configuracoes.php` e `pages/aceitar-termos.php`)
-* **Gestão de Perfil:** Alteração de senha própria do operador via API REST, dados de conexão ativa e status de saúde dos serviços.
-* **Alternador de Tema (Dark/Light):** Seletor interativo com persistência imediata em `localStorage`.
-* **Aceite de Políticas LGPD:** Registro de concordância com as diretrizes de privacidade e termos da NR-6 com carimbo de data/hora no fuso `America/Sao_Paulo`.
+### 3.10 Auditoria de Logs (`pages/auditoria.php`)
+* **Acesso Restrito:** Exclusivo para o perfil `ADMINISTRADOR`.
+* **Trilha Pericial:** Rastreabilidade completa com decodificador JSON estruturado, IP, data/hora no fuso `America/Sao_Paulo` e dispositivo do operador.
 
 ### 3.11 Gateway Server-to-Server e Tratamento de Erros (`pages/api_proxy.php`, `403.php`, `404.php`)
 * **CORS Proxy Gateway (`api_proxy.php`):** Ponte Server-to-Server que viabiliza requisições assíncronas seguras do navegador para a API REST sem bloqueios de política de mesma origem (CORS).
@@ -167,5 +164,14 @@ O sistema visual utiliza **Vanilla CSS moderno baseado em tokens HSL**, garantin
 5. **Governança RBAC e Menu Sidebar:**
    - As páginas `pages/usuarios.php` e `pages/auditoria.php` operam com acesso restrito com exclusividade ao perfil `ADMINISTRADOR`, sincronizadas dinamicamente com os itens do menu lateral em `components/sidebar.php`.
 
+---
 
+## 6. Governança de Commits e Entrega Contínua (Release 8.4.9)
 
+1. **Validação Pré-Commit Mandatória:**
+   - Todo ajuste em telas, scripts JS, folhas de estilo CSS ou componentes PHP deve ser verificado com o linter PHP (`php -l`) e validado visualmente no XAMPP local.
+   - O teste deve abranger Desktop ($\ge 1200\text{px}$) e modo responsivo do DevTools (Celular ~390px e Tablet ~820px).
+2. **Commit e Publicação Obrigatória (`git commit` + `git push`):**
+   - Toda alteração deve receber commit semântico imediato e ser enviada à branch `main` do GitHub (`https://github.com/projetoEtec26/gestao_epi_web.git`).
+   - A publicação aciona o pipeline GitHub Actions (`deploy.yml`) para sincronização imediata na Locaweb (`http://gestaoepi.tecnologia.ws/`).
+   - Uma modificação concluída apenas no ambiente local não é considerada entregue.

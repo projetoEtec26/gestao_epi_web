@@ -52,7 +52,7 @@ Este documento descreve detalhadamente a arquitetura de rotas, contratos de entr
 
 ---
 
-### 2.2 Gestão de Colaboradores (`/funcionarios`)
+## 2.2 Gestão de Colaboradores (`/funcionarios`)
 
 | Método | Rota | Perfil Mínimo | Descrição |
 | :--- | :--- | :--- | :--- |
@@ -66,41 +66,42 @@ Este documento descreve detalhadamente a arquitetura de rotas, contratos de entr
 
 ---
 
-### 2.3 Catálogo de EPIs e Controle de C.A. (`/epis`)
+## 2.3 Catálogo de EPIs e Controle de C.A. (`/epis`)
 
 | Método | Rota | Perfil Mínimo | Descrição |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/epis` | Consulta | Retorna catálogo completo de EPIs, estoque, C.A., validade e lote padrão. |
-| `GET` | `/epis/{id}` | Consulta | Retorna dados detalhados e histórico de preços do EPI. |
-| `POST` | `/epis` | SST / Admin | Cadastra novo EPI com controle de validade de C.A. e vida útil em dias. |
-| `PUT` | `/epis/{id}` | SST / Admin | Atualiza informações, fabricante, estoque e lote do equipamento. |
-| `POST` | `/epis/reajustar-precos` | Admin / Gestor | Aplica percentual de reajuste em lote nos preços de custo dos EPIs. |
+| `GET` | `/epis` | Consulta | Retorna o catálogo completo de EPIs com saldo de estoque e situação de C.A. |
+| `GET` | `/epis/{id}` | Consulta | Retorna os detalhes técnicos de um EPI. |
+| `POST` | `/epis` | Almoxarife / SST | Cadastra novo EPI no catálogo. |
+| `PUT` | `/epis/{id}` | Almoxarife / SST | Atualiza dados do EPI, fabricante, C.A., validade e estoque. |
+| `DELETE` | `/epis/{id}` | Admin | Inativa o EPI no catálogo (`epi_status = 'INATIVO'`). |
 
 ---
 
-### 2.4 Movimentações de Entrega e Devolução (`/entregas` e `/devolucoes`)
+## 2.4 Movimentações: Entregas e Devoluções (`/entregas`, `/devolucoes`)
 
 | Método | Rota | Perfil Mínimo | Descrição |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/entregas` | Operação | Lista todas as entregas realizadas com colaborador, status e quantidade. |
-| `GET` | `/entregas/{id}` | Operação | Retorna itens, termo de compromisso e dados de auditoria judicial da entrega. |
-| `POST` | `/entregas` | Almoxarife / SST | Registra nova entrega com assinatura eletrônica por PIN e **lote obrigatório**. |
-| `GET` | `/devolucoes` | Operação | Lista devoluções de EPIs realizadas e motivo de retorno (desgaste, troca, etc.). |
-| `POST` | `/devolucoes` | Almoxarife / SST | Registra devolução de item, atualiza estoque e estorna pendência de posse. |
+| `GET` | `/entregas` | Consulta | Retorna o histórico de entregas com paginação e filtros. |
+| `GET` | `/entregas/{id}` | Consulta | Retorna o recibo detalhado da entrega com itens, lotes e assinatura. |
+| `POST` | `/entregas` | Operação | Registra nova entrega com assinatura por PIN (exige **número de lote**). |
+| `GET` | `/devolucoes/pendentes/{fun_id}` | Operação | Lista os EPIs sob custódia ativa do colaborador para devolução. |
+| `POST` | `/devolucoes` | Operação | Registra a devolução ou baixa de EPIs com inspeção de descarte/reuso. |
 
-#### Estrutura do Payload de Entrega (`POST /entregas`):
+#### Exemplo de Payload de Entrega (`POST /entregas`):
 ```json
 {
   "fun_id": 14,
-  "pin_assinatura": "123456",
-  "dispositivo": "Web (Chrome 128 / Windows 11)",
+  "pin": "123456",
+  "data_entrega": "2026-11-09 20:30:00",
+  "observacoes": "Entrega periódica de renovação",
   "itens": [
     {
-      "epi_id": 13,
-      "quantidade": 1,
-      "tamanho": "M",
-      "lote": "LT-2026-013",
-      "motivo": "ADMISSAO"
+      "epi_id": 3,
+      "item_quantidade": 1,
+      "item_tamanho": "G",
+      "item_numero_lote": "LT-2026-003",
+      "item_motivo_entrega": "SUBSTITUICAO_PERIODICA"
     }
   ]
 }
@@ -108,20 +109,16 @@ Este documento descreve detalhadamente a arquitetura de rotas, contratos de entr
 
 ---
 
-### 2.5 Central de Relatórios e Auditoria (`/relatorios` e `/auditoria`)
+## 2.5 Logs de Auditoria e Governança LGPD (`/logs`)
 
 | Método | Rota | Descrição |
 | :--- | :--- | :--- |
-| `GET` | `/relatorios/geral` | Relatório consolidado de fornecimentos de EPIs por período e filtros. |
-| `GET` | `/relatorios/financeiro` | Demonstrativo de custos e consumo por centro de custo/departamento. |
-| `GET` | `/relatorios/consumo` | Métricas quantitativas de saída e movimentação por EPI. |
-| `GET` | `/relatorios/validade-ca` | Rastreio preventivo de vencimento de C.A. (NR-6) em 30, 60 e 90 dias. |
-| `GET` | `/auditoria/logs` | Trilha de auditoria judicial completa com paginação e busca por operador. |
+| `GET` | `/logs` | Retorna os registros da trilha pericial (restrito a `ADMINISTRADOR`). |
 | `POST` | `/logs/registrar-exportacao`| Registra no log de auditoria qualquer emissão ou download de PDF/CSV. |
 
 ---
 
-### 2.6 Sincronização Mobile Offline (`/sync`)
+## 2.6 Sincronização Mobile Offline (`/sync`)
 
 Utilizada pelo aplicativo Android (`SyncWorker`) para operação em campo sem sinal contínuo de internet:
 
@@ -134,16 +131,16 @@ Utilizada pelo aplicativo Android (`SyncWorker`) para operação em campo sem si
 ```json
 {
   "device_id": "android-uuid-98f24b-2026",
-  "versao_app": "8.4.7",
+  "versao_app": "8.4.9",
   "operacoes": [
     {
       "uuid": "e8d67c90-b1a2-4a55-bc91-5f6e8d9c0a1b",
       "tipo": "ENTREGA",
       "fun_id": 14,
       "pin_hash": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
-      "timestamp_local": "2026-11-04 14:30:00",
+      "timestamp_local": "2026-11-09 20:30:00",
       "itens": [
-        { "epi_id": 13, "quantidade": 1, "tamanho": "M", "lote": "LT-2026-013", "motivo": "ADMISSAO" }
+        { "epi_id": 3, "quantidade": 1, "tamanho": "G", "lote": "LT-2026-003", "motivo": "SUBSTITUICAO_PERIODICA" }
       ]
     }
   ]
@@ -165,10 +162,9 @@ Utilizada pelo aplicativo Android (`SyncWorker`) para operação em campo sem si
 
 ---
 
-## 4. Garantia de Estabilidade e Paridade (Release 8.4.8 Hardened)
+## 4. Garantia de Estabilidade, Paridade e Governança (Release 8.4.9)
 
-* **Compatibilidade 100% Preservada:** A blindagem de cibersegurança executada na Release 8.4.8 concentrou-se inteiramente no painel Web e na camada de infraestrutura/servidor.
+* **Compatibilidade 100% Preservada:** A blindagem de cibersegurança e a política de deploy contínuo mantêm contratos JSON, parâmetros e headers estritamente inalterados.
 * **Zero Alterações Contratuais na API:** Não houve modificação em nenhum endpoint, schema JSON, cabeçalho de autenticação Bearer JWT ou regra de negócio da API.
-* **Continuidade do Aplicativo Android:** O aplicativo móvel Android continua consumindo a API com 100% de transparência e estabilidade, sem necessidade de atualização ou geração de novo APK.
-
-
+* **Continuidade do Aplicativo Android:** O aplicativo móvel Android consome a API com 100% de transparência e estabilidade, sem necessidade de atualização de versão ou geração de novo APK.
+* **Governança de Entrega:** O deploy contínuo garante que o Painel Web e os consumidores da API estejam sempre alinhados com o repositório oficial no GitHub.

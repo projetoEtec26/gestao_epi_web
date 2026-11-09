@@ -102,3 +102,25 @@ Em inspeções do Ministério do Trabalho e Emprego ou perícias judiciais traba
    - Acesso autorizado **exclusivamente** após a validação confirmada da sessão (`$_SESSION['recup_codigo_validado'] === true`).
    - Requisição à API REST com atualização segura da senha e expurgo das variáveis de recuperação da sessão.
 
+---
+
+## 6. Fluxo de Entrega Contínua e Deploy Homologado (Release 8.4.9)
+
+Para garantir que toda melhoria seja refletida com integridade nos ambientes locais e de produção:
+
+```mermaid
+sequenceDiagram
+    participant Dev as Engenheiro / Desenvolvedor
+    participant Local as XAMPP Local (Desktop/Tablet/Mobile)
+    participant Git as GitHub (Repo Remoto)
+    participant Actions as GitHub Actions (CI/CD)
+    participant Prod as Servidor Produção Locaweb
+
+    Dev->>Local: Implementa melhoria ou correção
+    Dev->>Local: Valida sintaxe PHP (php -l) e testa nas 3 resoluções
+    Dev->>Git: git commit (mensagem semântica) + git push main
+    Git->>Actions: Aciona deploy.yml automaticamente
+    Actions->>Prod: Sincroniza arquivos via FTP para public_html/
+    Actions-->>Dev: Notificação de sucesso no pipeline
+    Dev->>Prod: Testa em http://gestaoepi.tecnologia.ws/
+```

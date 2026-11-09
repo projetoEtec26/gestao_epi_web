@@ -1,82 +1,97 @@
-# Banco de Dados & Governança LGPD — Gestão EPI
+# Banco de Dados & Governança LGPD — Ecossistema Gestão EPI
 
-Este documento detalha o modelo relacional físico, o dicionário de dados das tabelas, as diretrizes de criptografia de dados sensíveis sob a **LGPD (Lei nº 13.709/2018)** e as regras de integridade referencial do banco de dados `db_gestao_epi`.
-
----
-
-## 1. Visão Geral da Base de Dados
-
-* **SGBD:** MySQL 8.0+ / MariaDB 10.3+
-* **Encoding / Collation:** `utf8mb4 / utf8mb4_unicode_ci`
-* **Mecanismo de Armazenamento:** `InnoDB` com suporte pleno a transações ACID e chaves estrangeiras com restrições `ON DELETE RESTRICT` e `ON UPDATE CASCADE`.
+Este documento detalha o dicionário de dados físico, a modelagem relacional, as diretrizes de criptografia e as regras de conformidade com a **LGPD (Lei Geral de Proteção de Dados - Lei nº 13.709/2018)** e a **NR-6 (Ministério do Trabalho e Emprego)** do ecossistema **Gestão EPI**.
 
 ---
 
-## 2. Dicionário de Tabelas Principais
+## 1. Visão Geral da Modelagem e Arquitetura
 
-### 2.1 Tabela `funcionarios` (Colaboradores Receptores de EPI)
+O banco de dados corporativo `db_gestao_epi` foi projetado para alta concorrência e integridade referencial estrita:
+* **Mecanismo de Armazenamento:** `InnoDB` em 100% das tabelas para suporte a transações ACID e integridade referencial com chaves estrangeiras (`FOREIGN KEY`).
+* **Conjunto de Caracteres (Charset):** `utf8mb4` com Collation `utf8mb4_unicode_ci` (suporte a acentuação e caracteres especiais em língua portuguesa).
+* **Fuso Horário Padrão:** `America/Sao_Paulo` (GMT-3) gravado em todas as colunas de data e hora.
+
+---
+
+## 2. Dicionário de Dados das Tabelas Principais
+
+### 2.1 Tabela `tb_funcionario` (Colaboradores)
+
+Armazena os dados cadastrais e funcionais dos colaboradores da empresa:
 
 | Coluna | Tipo | Nulo | Descrição / Regra de Negócio |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :---: | :--- |
 | `fun_id` | INT AUTO_INCREMENT | Não | Chave primária do colaborador. |
-| `fun_nome` | VARCHAR(150) | Não | Nome completo do colaborador. |
-| `fun_matricula` | VARCHAR(50) | Sim | Matrícula funcional ou registro de ponto. |
-| `fun_cpf` | VARCHAR(20) | Sim | CPF no formato legível ou mascarado (`000.***.***-00`). |
-| `fun_cpf_enc` | TEXT | Sim | CPF criptografado com chave AES-256-GCM (LGPD). |
-| `fun_cpf_lookup` | VARCHAR(64) | Sim | Hash HMAC-SHA256 para busca indexada sem descriptografia. |
-| `fun_cargo` | VARCHAR(100) | Sim | Cargo ocupado pelo colaborador. |
-| `fun_departamento` | VARCHAR(100) | Sim | Setor / Departamento de alocação. |
-| `car_id` | INT | Sim | Chave estrangeira referenciando tabela `cargos`. |
-| `dep_id` | INT | Sim | Chave estrangeira referenciando tabela `departamentos`. |
-| `fun_situacao` | ENUM | Não | `ATIVO`, `AFASTADO`, `DEMITIDO`, `FERIAS`. |
-| `fun_ativo` | TINYINT(1) | Não | Flag booleana de atividade (`1` = Ativo, `0` = Inativo). |
+| `fun_nome` | VARCHAR(120) | Não | Nome completo do colaborador. |
+| `fun_matricula` | VARCHAR(30) | Não | Matrícula funcional única na empresa. |
+| `dep_id` | INT | Não | Chave estrangeira para a tabela `departamentos`. |
+| `car_id` | INT | Não | Chave estrangeira para a tabela `cargos`. |
+| `fun_cpf_enc` | VARCHAR(255) | Não | **CPF Criptografado** via AES-256-GCM sob a LGPD. |
+| `fun_cpf_lookup` | VARCHAR(64) | Não | Hash indexado HMAC-SHA256 para busca exata de CPF sem descriptografia. |
+| `fun_esocial_enc` | VARCHAR(255) | Sim | Matrícula eSocial criptografada via AES-256-GCM. |
+| `fun_data_admissao` | DATE | Não | Data oficial de admissão do colaborador. |
+| `fun_status` | ENUM | Não | Situação: `ATIVO`, `INATIVO`, `DEMITIDO`, `AFASTADO`. |
+| `fun_ativo` | TINYINT(1) | Não | Flag booleana de exclusão lógica (1 = Ativo, 0 = Inativo). |
 
-### 2.2 Tabela `epis` (Catálogo de Equipamentos)
+### 2.2 Tabela `assinatura_eletronica` (Credenciais de Assinatura)
 
 | Coluna | Tipo | Nulo | Descrição / Regra de Negócio |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :---: | :--- |
+| `ass_id` | INT AUTO_INCREMENT | Não | Chave primária da credencial de assinatura. |
+| `fun_id` | INT | Não | Chave estrangeira referenciando `tb_funcionario(fun_id)`. |
+| `hash_pin` | CHAR(64) | Não | Hash SHA-256 do PIN (`sha256(PIN + Salt)`). |
+| `salt` | CHAR(32) | Não | Salt criptográfico aleatório de 16 bytes em hexadecimal. |
+| `status` | ENUM | Não | `ATIVO`, `PENDENTE`, `BLOQUEADO`. Padrão: `ATIVO` com PIN inicial `123456`. |
+| `tentativas_incorretas`| INT | Não | Contador para bloqueio preventivo após erros consecutivos. |
+| `atualizado_em` | DATETIME | Não | Carimbo da última alteração de senha/PIN. |
+
+### 2.3 Tabela `epis` (Catálogo de Equipamentos)
+
+| Coluna | Tipo | Nulo | Descrição / Regra de Negócio |
+| :--- | :--- | :---: | :--- |
 | `epi_id` | INT AUTO_INCREMENT | Não | Chave primária do equipamento. |
-| `epi_nome` | VARCHAR(150) | Não | Descrição comercial do EPI (ex: Luva Nitrílica). |
-| `epi_ca` | VARCHAR(50) | Não | Número do Certificado de Aprovação emitido pelo MTE. |
-| `epi_validade_ca` | DATE | Sim | Data de validade oficial do C.A. (NR-6). |
-| `epi_fabricante` | VARCHAR(100) | Sim | Nome da empresa fabricante ou importadora. |
-| `epi_numero_lote` | VARCHAR(100) | Sim | Lote padrão de fabricação para rastreabilidade obrigatória. |
-| `epi_identificacao` | VARCHAR(100) | Sim | Código patrimonial ou código de barras. |
-| `epi_estoque` | INT | Não | Saldo quantitativo disponível no almoxarifado. |
-| `epi_preco_custo` | DECIMAL(10,2) | Não | Valor unitário de aquisição (em Real - R$). |
-| `epi_validade_uso_dias`| INT | Sim | Prazo de vida útil máxima em dias após a entrega. |
-| `epi_ativo` | TINYINT(1) | Não | `1` = Ativo no catálogo, `0` = Inativo/Descontinuado. |
+| `epi_nome` | VARCHAR(120) | Não | Nome comercial do EPI (ex: Calçado de Segurança com Biqueira). |
+| `epi_categoria` | VARCHAR(50) | Não | Categoria (Proteção Auditiva, Visual, Cabeça, Respiratória, Calçado, etc.). |
+| `epi_fabricante` | VARCHAR(100) | Não | Razão social ou marca do fabricante homologado. |
+| `epi_ca` | VARCHAR(20) | Sim | **Número do Certificado de Aprovação (C.A.)** emitido pelo MTE. |
+| `epi_validade_ca` | DATE | Sim | Data de validade oficial do Certificado de Aprovação. |
+| `epi_numero_lote` | VARCHAR(50) | Sim | Número do lote de fabricação do equipamento no almoxarifado. |
+| `epi_vida_util_dias`| INT | Não | Período máximo de uso recomendado em dias corridos antes da troca. |
+| `epi_estoque_atual` | INT | Não | Saldo físico atual em estoque no almoxarifado. |
+| `epi_estoque_minimo`| INT | Não | Ponto de pedido para alertas automáticos de reposição. |
+| `epi_valor` | DECIMAL(10,2) | Não | Valor unitário em Reais (`R$`). |
+| `epi_status` | ENUM | Não | `ATIVO`, `OBSOLETO`, `INATIVO`. |
 
-### 2.3 Tabelas `entrega_epis` e `itens_entrega` (Fornecimento de EPI)
+### 2.4 Tabelas de Movimentação: `entregas` e `itens_entrega`
 
-A estrutura de fornecimento adota relação Mestre-Detalhe (1:N):
-* **`entrega_epis`**: Cabeçalho do fornecimento. Contém `entr_id`, `fun_id`, `entr_data_entrega`, `entr_status` (`FINALIZADA`, `CANCELADA`), `entr_tipo_assinatura` (`PIN`, `BIOMETRIA`), `entr_hash_assinatura` (Hash SHA-256 gerado no momento da assinatura para auditoria jurídica) e `entr_motivo`.
-* **`itens_entrega`**: Itens individuais entregues. Contém `item_id`, `entr_id` (FK), `epi_id` (FK), `item_quantidade`, `item_tamanho`, `item_numero_lote` (**obrigatório**, preenchido em 100% dos registros), `item_epi_ca_snapshot` e `item_epi_validade_ca_snapshot`.
-
-### 2.4 Tabela `assinatura_eletronica` (Credenciais de PIN)
-
-| Coluna | Tipo | Nulo | Descrição |
-| :--- | :--- | :--- | :--- |
-| `ass_id` | INT AUTO_INCREMENT | Não | Chave primária. |
-| `fun_id` | INT | Não | ID do colaborador (relacionamento 1:1 único). |
-| `ass_salt` | VARCHAR(64) | Não | Salt criptográfico aleatório em hexadecimal (16 bytes). |
-| `ass_pin_hash` | VARCHAR(64) | Não | Hash SHA-256 gerado por `sha256(PIN + Salt)`. |
-| `ass_status` | ENUM | Não | `ATIVO`, `BLOQUEADO`, `PENDENTE`, `INATIVO`. |
-| `ass_tentativas_incorretas`| INT | Não | Contador de tentativas falhas (bloqueia ao atingir 3). |
+* **`entregas`:** Registra o evento de fornecimento de equipamentos:
+  - `entr_id`: Chave primária.
+  - `fun_id`: Colaborador receptor.
+  - `usu_id`: Operador responsável pelo atendimento no sistema.
+  - `entr_data_entrega`: Carimbo da entrega no fuso `America/Sao_Paulo`.
+  - `entr_status`: `FINALIZADA`, `CANCELADA`.
+  - `entr_assinatura_hash`: Hash pericial comprovando a validação do PIN no momento da entrega.
+* **`itens_entrega`:** Detalhamento individual dos equipamentos entregues:
+  - `item_id`: Chave primária do item.
+  - `entr_id`: Chave estrangeira para `entregas`.
+  - `epi_id`: Chave estrangeira para `epis`.
+  - `item_quantidade`: Quantidade fornecida.
+  - `item_numero_lote`: **Lote obrigatório (NR-6)** registrado para o item.
+  - `item_epi_ca_snapshot`: Número do C.A. vigente no ato da entrega.
+  - `item_epi_validade_ca_snapshot`: Validade do C.A. no ato da entrega.
+  - `item_status`: `EM_USO`, `DEVOLVIDO`, `DESCARTADO`.
 
 ### 2.5 Tabela `usuarios` (Operadores do Sistema)
 
 | Coluna | Tipo | Nulo | Descrição / Regra de Negócio |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :---: | :--- |
 | `usu_id` | INT AUTO_INCREMENT | Não | Chave primária do operador. |
-| `usu_login` | VARCHAR(50) | Não | Identificador de acesso único (ex: `admin`, `rh_admin`). |
-| `usu_nome` | VARCHAR(150) | Não | Nome de exibição do operador. |
-| `usu_email` | VARCHAR(150) | Sim | E-mail corporativo para recuperação de senha. |
-| `usu_senha` | VARCHAR(255) | Não | Senha criptografada irreversível em `bcrypt` (`cost => 10`). |
-| `usu_perfil` | ENUM | Não | `ADMINISTRADOR`, `TECNICO_SST`, `ALMOXARIFE`, `GESTOR_CONTRATO`, `RH_ADMINISTRATIVO`. |
-| `usu_situacao` | ENUM | Não | `ATIVO`, `INATIVO`, `BLOQUEADO`. |
-| `usu_tentativas_falha` | INT | Não | Contador de tentativas de login incorretas (bloqueio automático). |
-| `usu_trocar_senha` | TINYINT(1) | Não | Flag para forçar troca de senha no primeiro login. |
+| `usu_login` | VARCHAR(50) | Não | Nome de usuário único para autenticação. |
+| `usu_senha` | VARCHAR(255) | Não | Senha criptografada irreversivelmente via **Bcrypt** (`PASSWORD_BCRYPT`). |
+| `usu_nome` | VARCHAR(100) | Não | Nome completo do operador. |
+| `usu_perfil` | ENUM | Não | Perfil RBAC: `ADMINISTRADOR`, `TECNICO_SST`, `ALMOXARIFE`, `GESTOR_CONTRATO`, `RH_ADMINISTRATIVO`. |
+| `usu_status` | ENUM | Não | `ATIVO`, `INATIVO`, `BLOQUEADO`. |
+| `usu_tentativas_falha` | INT | Não | Contador para bloqueio progressivo de força bruta em `login.php`. |
 | `usu_ultimo_login` | DATETIME | Sim | Carimbo do último acesso no fuso `America/Sao_Paulo`. |
 
 ### 2.6 Tabelas Estruturais `departamentos` e `cargos`
@@ -112,7 +127,7 @@ Armazena de forma imutável todos os eventos críticos do sistema:
 
 ---
 
-## 4. Governança de Dumps e Isolamento de Credenciais (Release 8.4.8 Hardened)
+## 4. Governança de Dumps, Isolamento e CI/CD (Release 8.4.8 / 8.4.9)
 
 1. **Remoção de Arquivos de Dumps do Git (Art. 46 da LGPD):**
    - Os arquivos de dump `database_backup.sql` e `database_schema_v7.sql` foram removidos do versionamento do Git e adicionados ao `.gitignore`, impedindo a exposição de CPFs, eSocial e hashes de operadores.
@@ -121,4 +136,5 @@ Armazena de forma imutável todos os eventos críticos do sistema:
    - Conexões em produção utilizam carregamento isolado fora da raiz pública (`/home/usuario_locaweb/secrets.php`) ou variáveis de ambiente.
 3. **Firewall e Restrição de Acesso:**
    - A porta TCP 3306 do banco MySQL Cloud é configurada para acesso restrito às sub-redes da aplicação, eliminando varreduras não autorizadas a partir da internet.
-
+4. **Governança de Integridade via Commit Obrigatório:**
+   - A política de trabalho com árvore limpa (`working tree clean`) impede que arquivos de dump locais ou backups temporários de dados reais permaneçam na estrutura do projeto ou sejam expostos inadvertidamente.

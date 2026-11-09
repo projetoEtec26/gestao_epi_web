@@ -60,46 +60,45 @@ Em conformidade com a versão 8.4.4 do ecossistema:
 
 ---
 
-## 4. Estratégia de Sincronização e Resiliência Offline
+## 4. Telas Principais do Módulo Mobile
 
-Quando o operador está em áreas sem sinal de internet (subsolos, áreas rurais ou galpões metálicos blindados):
-1. A operação de entrega ou devolução é gravada na tabela local `operacoes_pendentes` do Room com carimbo de tempo (`timestamp`) e UUID único de idempotência.
-2. O recibo local é gerado e assinado com os dados em cache do colaborador.
-3. O `SyncWorker` do Android monitora o estado da rede via `NetworkCapabilities`.
-4. Assim que a conexão for restabelecida, o lote de operações pendentes é enviado de forma ordenada e atômica para o endpoint `POST /sync/push` ou `POST /entregas`, confirmando o registro no banco MySQL Cloud.
-
----
-
-## 5. Telas e Usabilidade no Campo
-
-1. **Dashboard Operacional:**
-   - 4 Cards de Indicadores (EPIs Vencidos, A Vencer em 7 dias, Entregas Hoje e Pendências).
-   - Taxa de Conformidade oficial calculada em 96% (`28 de 29 colaboradores em dia`).
-   - Top 5 EPIs mais fornecidos e status da fila de sincronização offline.
-2. **Nova Entrega de EPI:**
-   - Busca de colaborador com busca rápida por voz ou digitação.
-   - Seleção de equipamentos com validação em tempo real de C.A. e saldo em estoque.
-   - Preenchimento compulsório do número de lote (ex: `LT-2026-013`).
-   - Teclado numérico customizado para digitação segura do PIN de 6 dígitos.
-3. **Catálogo de EPIs e Controle de C.A.:**
-   - Ícones vetoriais por categoria (Capacete, Luvas, Botas, Óculos, Avental, Cinto, Protetor).
-   - Indicadores visuais de C.A. Vigente (Verde), A Vencer (Amarelo) e Vencido (Vermelho).
-4. **Devolução e Inspeção Física:**
-   - Listagem dos EPIs sob posse do colaborador selecionado e marcação do estado do equipamento.
+1. **Autenticação (Login):**
+   - Entrada com credenciais de operador (`usu_login` e `senha`).
+   - Armazenamento seguro de token JWT em `EncryptedSharedPreferences`.
+2. **Dashboard de Campo:**
+   - Resumo rápido de entregas do dia, pendências de sincronização offline e atalhos para nova entrega.
+3. **Nova Entrega de EPI com Teclado Numérico de PIN:**
+   - Seleção rápida de funcionário por busca ou QR Code do crachá.
+   - Seleção de múltiplos EPIs com validação de C.A. e Lote obrigatório.
+   - Teclado PIN customizado de 6 dígitos em tela cheia com feedback tátil.
+4. **Catálogo de EPIs e Consulta de C.A.:**
+   - Consulta instantânea offline dos Certificados de Aprovação e saldos de estoque.
+5. **Devoluções de Campo:**
+   - Listagem dos EPIs em custódia do empregado e baixa imediata com foto do estado de conservação (opcional).
 
 ---
 
-## 6. Diretrizes Brasil e Paridade 1:1 com o Painel Web
+## 5. Resiliência Offline e Mecanismo de Sincronização
+
+Quando o operador está em áreas sem sinal de internet (subsolos, áreas rurais ou túneis):
+1. O aplicativo gera um identificador único universal (UUID v4) para cada entrega ou devolução.
+2. A operação é gravada transacionalmente no Room Database local com status `PENDENTE_SYNC`.
+3. O `SyncWorker` agenda tentativas com recuo exponencial (*exponential backoff*).
+4. Ao restabelecer conexão (Wi-Fi ou 4G/5G), os pacotes são transmitidos em lote para `/sync/push`.
+5. O backend processa cada UUID de forma idempotente, impedindo duplicidade de registros.
+
+---
+
+## 6. Conformidade com Diretrizes do Brasil
 
 * **Localização Brasil:** Padrão estrito de idioma `pt-BR`, moeda em Real (`R$`), datas em `DD/MM/AAAA` e fuso horário oficial `America/Sao_Paulo` (GMT-3).
 * **Paridade de Regras:** 100% das regras de cálculo de KPIs, controle de lotes da NR-6 e proteção de dados LGPD operam de maneira idêntica entre o App Android e o Painel Web Administrativo.
 
 ---
 
-## 7. Garantia de Operação e Estabilidade no Ecossistema (Release 8.4.8 Hardened)
+## 7. Garantia de Operação, Estabilidade e Governança (Release 8.4.8 / 8.4.9)
 
 * **Desacoplamento e Segurança:** O aplicativo Android opera de forma 100% desacoplada das tecnologias de apresentação web (PHP, Apache, `.htaccess` e cookies de navegador).
 * **Validação de PIN e Sincronização:** Os algoritmos de validação de assinatura digital (`HashUtils.java` com `SHA-256 + Salt`) permanecem 100% alinhados à classe `SecurityService.php`.
-* **Sem Necessidade de Recompilação:** Nenhuma das melhorias de segurança implementadas na Web impacta a camada de rede do Android (Retrofit 2), mantendo a versão de produção do aplicativo em pleno funcionamento.
-
-
+* **Sem Necessidade de Recompilação:** Nenhuma das melhorias de segurança ou de governança CI/CD implementadas na Web impacta a camada de rede do Android (Retrofit 2), mantendo a versão de produção do aplicativo em pleno funcionamento.
+* **Governança de Sincronização:** Os endpoints `/sync/push` e `/sync/pull` continuam operando sob estrita conformidade com os schemas definidos em [API_REST_ENDPOINTS.md](API_REST_ENDPOINTS.md).

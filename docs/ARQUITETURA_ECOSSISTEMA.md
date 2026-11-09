@@ -90,7 +90,7 @@ De acordo com as exigências da **Norma Regulamentadora NR-6** e auditorias de f
 
 ## 6. Governança e Diretrizes de Cibersegurança (Release 8.4.8 Hardened)
 
-Em conformidade com a auditoria e implementação de **Hardening (09/11/2026)** documentada em [`docs/AUDITORIA_CYBERSECURITY.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md):
+Em conformidade com a auditoria e implementação de **Hardening (09/11/2026)** documentada em [AUDITORIA_CYBERSECURITY.md](AUDITORIA_CYBERSECURITY.md):
 * **Comunicação Criptografada Mandatória (HTTPS):** Todo o tráfego Web opera sob HTTPS forçado via `.htaccess` (301) compatível com Nginx Locaweb (`%{HTTP:X-Forwarded-Proto} !https`) e HSTS progressivo (30 dias).
 * **Proteção e Isolamento do Banco de Dados:** Remoção de dumps de banco do Git, eliminação de senhas hardcoded em produção e suporte a carregamento isolado em `/home/usuario/secrets.php`.
 * **Sessões e Cookies Seguros:** Sessões PHP ativadas com flags `; HttpOnly; SameSite=Lax; Secure` via `SecurityService::initSecureSession()`.
@@ -98,20 +98,34 @@ Em conformidade com a auditoria e implementação de **Hardening (09/11/2026)** 
 * **Governança RBAC e LocalStorage:** Módulos de auditoria e usuários restritos ao perfil `ADMINISTRADOR` e purga completa de tokens JWT do `localStorage` do navegador.
 * **Compatibilidade 100% Preservada:** Zero alterações contratuais na API REST; paridade total com o aplicativo Android mantida.
 
+---
+
+## 7. Governança de Engenharia, CI/CD e Ciclo de Vida Contínuo (Release 8.4.9)
+
+Com a consolidação da Release 8.4.9, o ecossistema instituiu regras definitivas de governança e entrega de software:
+
+1. **Commit Obrigatório a Cada Modificação:**
+   - Toda alteração em código, folhas de estilo (`assets/css/style.css`), lógica JavaScript (`assets/js/main.js`), componentes ou documentações deve ser imediatamente comitada via Git após teste local no XAMPP.
+   - Padrão de mensagens Conventional Commits (`feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `chore:`).
+2. **Entrega Contínua e Deploy em Produção (GitHub Actions):**
+   - Todo commit enviado para a branch `main` do GitHub (`https://github.com/projetoEtec26/gestao_epi_web.git`) aciona o workflow `.github/workflows/deploy.yml`.
+   - O pipeline executa sincronização automática via FTP para o servidor de produção na Locaweb (`http://gestaoepi.tecnologia.ws/`).
+   - Nenhuma alteração é considerada entregue se permanecer apenas no ambiente local XAMPP.
+3. **Paridade Multiplataforma Obrigatória:**
+   - Toda funcionalidade ou ajuste visual deve ser validado simultaneamente para Web Desktop ($\ge 1200\text{px}$), Tablet ($768\text{px} – 1199\text{px}$) e Celular ($< 768\text{px}$).
+   - Não são permitidas versões separadas de telas por dispositivo: a mesma base de código responsiva atende a todos os formatos.
 
 ---
 
-## 7. Rastreabilidade e Catálogo de Documentações Especializadas
+## 8. Rastreabilidade e Catálogo de Documentações Especializadas
 
-O ecossistema mantém 8 manuais especializados na pasta [`docs/`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/):
+O ecossistema mantém 8 manuais especializados na pasta `docs/`:
 
-1. **[Arquitetura do Ecossistema](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/ARQUITETURA_ECOSSISTEMA.md):** Topologia global e integração dos 3 pilares de software.
-2. **[Painel Web Administrativo](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/PAINEL_WEB_ADMINISTRATIVO.md):** Manual completo das 18 páginas, Design System HSL, submenus e compatibilidade multiplataforma.
-3. **[API RESTful Endpoints](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/API_REST_ENDPOINTS.md):** Dicionário de rotas, contratos JSON, autenticação JWT e sincronização mobile.
-4. **[Módulo Mobile Android](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/MOBILE_ANDROID.md):** App Android nativo (Kotlin/Room), resiliência offline e assinatura por PIN.
-5. **[Banco de Dados & Governança LGPD](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/BANCO_DE_DADOS_LGPD.md):** Modelagem DDL relacional, criptografia AES-256-GCM e trilha judicial.
-6. **[Guia de Implantação e DevOps](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/GUIA_DE_IMPLANTACAO_E_DEVOPS.md):** Instalação local XAMPP, nuvem Locaweb/Render, CI/CD GitHub Actions e compilação do APK.
-7. **[Fluxos Operacionais e Casos de Uso](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md):** Diagramas de sequência para admissão, fornecimento com lote e devoluções.
-8. **[Relatório de Auditoria de Cybersecurity](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md):** Diagnóstico OWASP Top 10, matriz de riscos e plano diretor de mitigação.
-
-
+1. **[Arquitetura do Ecossistema](ARQUITETURA_ECOSSISTEMA.md):** Topologia global e integração dos 3 pilares de software.
+2. **[Painel Web Administrativo](PAINEL_WEB_ADMINISTRATIVO.md):** Manual completo das 18 páginas, Design System HSL, submenus e compatibilidade multiplataforma.
+3. **[API RESTful Endpoints](API_REST_ENDPOINTS.md):** Dicionário de rotas, contratos JSON, autenticação JWT e sincronização mobile.
+4. **[Módulo Mobile Android](MOBILE_ANDROID.md):** App Android nativo (Kotlin/Room), resiliência offline e assinatura por PIN.
+5. **[Banco de Dados & Governança LGPD](BANCO_DE_DADOS_LGPD.md):** Modelagem DDL relacional, criptografia AES-256-GCM e trilha judicial.
+6. **[Guia de Implantação e DevOps](GUIA_DE_IMPLANTACAO_E_DEVOPS.md):** Instalação local XAMPP, nuvem Locaweb/Render, CI/CD GitHub Actions e compilação do APK.
+7. **[Fluxos Operacionais e Casos de Uso](FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md):** Diagramas de sequência para admissão, fornecimento com lote e devoluções.
+8. **[Relatório de Auditoria de Cybersecurity](AUDITORIA_CYBERSECURITY.md):** Diagnóstico OWASP Top 10, matriz de riscos e plano diretor de mitigação.

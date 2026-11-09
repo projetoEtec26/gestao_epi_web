@@ -6,16 +6,16 @@ O **Gestão EPI** é uma solução corporativa integrada e multiplataforma desen
 
 ## 📚 DOCUMENTAÇÕES ESPECIALIZADAS DO ECOSSISTEMA
 
-Para aprofundamento técnico em cada módulo e camada da solução, consulte os manuais específicos disponíveis na pasta [`docs/`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/):
+Para aprofundamento técnico em cada módulo e camada da solução, consulte os manuais específicos disponíveis na pasta [`docs/`](docs/):
 
-* 🏛️ **[Arquitetura do Ecossistema Integrado](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/ARQUITETURA_ECOSSISTEMA.md):** Visão completa da topologia dos 3 projetos (Web, API REST e Mobile Android), diagrama de fluxo de dados, políticas de sincronização e comunicação segura.
-* 🖥️ **[Painel Web Administrativo](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/PAINEL_WEB_ADMINISTRATIVO.md):** Arquitetura das 18 páginas web, componentes, tokens HSL (Dark/Light mode), submenus retráteis, Speed Dial FAB e conformidade multiplataforma (Web Desktop, Tablet e Celular).
-* 🔌 **[Especificação de Endpoints da API REST](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/API_REST_ENDPOINTS.md):** Contratos de dados em JSON, rotas autenticadas via JWT, payloads de entrega com lote e auditoria de exportações.
-* 📱 **[Módulo Mobile Android](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/MOBILE_ANDROID.md):** Arquitetura do aplicativo Android (Kotlin/Java, Room, Retrofit, WorkManager), fluxo de coleta de assinatura eletrônica offline e validação de PIN de 6 dígitos.
-* 🛡️ **[Banco de Dados & Governança LGPD](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/BANCO_DE_DADOS_LGPD.md):** Dicionário de dados das tabelas, regras de integridade referencial, criptografia AES-256-GCM para dados sensíveis e imutabilidade dos logs de auditoria.
-* ⚙️ **[Guia de Implantação e DevOps](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/GUIA_DE_IMPLANTACAO_E_DEVOPS.md):** Instruções passo a passo para execução no XAMPP local, nuvem Locaweb, Render, pipeline GitHub Actions CI/CD via FTP, backups e geração do APK no Android Studio.
-* 📋 **[Fluxos Operacionais e Casos de Uso](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md):** Manuais práticos de operação com diagramas de sequência dos fluxos de Admissão, Entrega de EPI com Lote Obrigatório, Devoluções e Auditorias Trabalhistas.
-* 🔒 **[Relatório de Auditoria de Cybersecurity e Governança](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md):** Diagnóstico independente e integrado das camadas de aplicação, OWASP Top 10, infraestrutura Locaweb, blindagem de banco MySQL e plano diretor de mitigação em 4 etapas.
+* 🏛️ **[Arquitetura do Ecossistema Integrado](docs/ARQUITETURA_ECOSSISTEMA.md):** Visão completa da topologia dos 3 projetos (Web, API REST e Mobile Android), diagrama de fluxo de dados, políticas de sincronização e comunicação segura.
+* 🖥️ **[Painel Web Administrativo](docs/PAINEL_WEB_ADMINISTRATIVO.md):** Arquitetura das 18 páginas web, componentes, tokens HSL (Dark/Light mode), submenus retráteis, Speed Dial FAB e conformidade multiplataforma (Web Desktop, Tablet e Celular).
+* 🔌 **[Especificação de Endpoints da API REST](docs/API_REST_ENDPOINTS.md):** Contratos de dados em JSON, rotas autenticadas via JWT, payloads de entrega com lote e auditoria de exportações.
+* 📱 **[Módulo Mobile Android](docs/MOBILE_ANDROID.md):** Arquitetura do aplicativo Android (Kotlin/Java, Room, Retrofit, WorkManager), fluxo de coleta de assinatura eletrônica offline e validação de PIN de 6 dígitos.
+* 🛡️ **[Banco de Dados & Governança LGPD](docs/BANCO_DE_DADOS_LGPD.md):** Dicionário de dados das tabelas, regras de integridade referencial, criptografia AES-256-GCM para dados sensíveis e imutabilidade dos logs de auditoria.
+* ⚙️ **[Guia de Implantação e DevOps](docs/GUIA_DE_IMPLANTACAO_E_DEVOPS.md):** Instruções passo a passo para execução no XAMPP local, nuvem Locaweb, Render, pipeline GitHub Actions CI/CD via FTP, backups e geração do APK no Android Studio.
+* 📋 **[Fluxos Operacionais e Casos de Uso](docs/FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md):** Manuais práticos de operação com diagramas de sequência dos fluxos de Admissão, Entrega de EPI com Lote Obrigatório, Devoluções e Auditorias Trabalhistas.
+* 🔒 **[Relatório de Auditoria de Cybersecurity e Governança](docs/AUDITORIA_CYBERSECURITY.md):** Diagnóstico independente e integrado das camadas de aplicação, OWASP Top 10, infraestrutura Locaweb, blindagem de banco MySQL e plano diretor de mitigação em 4 etapas.
 
 
 ---
@@ -149,7 +149,7 @@ gestao_epi_web/
 
 ## 3. CONFIGURAÇÃO DA API (AMBIENTE) E RESILIÊNCIA HTTP
 
-A integração HTTP entre o painel Web e o backend é gerenciada pela classe [`services/ApiService.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web/services/ApiService.php) e configurada dinamicamente em [`config/api.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web/config/api.php).
+A integração HTTP entre o painel Web e o backend é gerenciada pela classe [`services/ApiService.php`](services/ApiService.php) e configurada dinamicamente em [`config/api.php`](config/api.php).
 
 ### 3.1 Resoluções Dinâmicas de Ambiente
 *   **Nuven / Produção (Render):**
@@ -207,7 +207,7 @@ O sistema possui um controle rigoroso de autorização baseado em papéis (**RBA
 
 ## 5. MENU LATERAL E SUBMENUS EXPANSÍVEIS (SENIOR ERP STYLE)
 
-**Arquivo:** [`components/sidebar.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/components/sidebar.php)
+**Arquivo:** [`components/sidebar.php`](components/sidebar.php)
 
 O menu lateral adota o padrão visual **Senior ERP Style com expansão retrátil por botão `+`**, combinando elegância moderna com acesso rápido em um clique:
 
@@ -244,10 +244,10 @@ O painel integra um mecanismo de busca por autocomplete em tempo real de altíss
 
 ### 6.2 Módulos Integrados com Autocomplete
 
-1.  **Funcionários ([`pages/funcionarios.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/funcionarios.php)):** Localização imediata de fichas de colaboradores por nome, CPF ou matrícula.
-2.  **Catálogo de EPIs ([`pages/epis.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/epis.php)):** Busca por nome do equipamento, número de C.A., fabricante ou categoria.
-3.  **Devoluções de EPIs ([`pages/devolucoes.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/devolucoes.php)):** Seleção ágil do colaborador para carregar os EPIs pendentes sob sua posse.
-4.  **Filtro de Relatórios ([`pages/relatorios.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/relatorios.php)):** Autocomplete no filtro de colaborador do relatório de Entregas Gerais, incluindo opção final para selecionar *"Todos os Funcionários"*.
+1.  **Funcionários ([`pages/funcionarios.php`](pages/funcionarios.php)):** Localização imediata de fichas de colaboradores por nome, CPF ou matrícula.
+2.  **Catálogo de EPIs ([`pages/epis.php`](pages/epis.php)):** Busca por nome do equipamento, número de C.A., fabricante ou categoria.
+3.  **Devoluções de EPIs ([`pages/devolucoes.php`](pages/devolucoes.php)):** Seleção ágil do colaborador para carregar os EPIs pendentes sob sua posse.
+4.  **Filtro de Relatórios ([`pages/relatorios.php`](pages/relatorios.php)):** Autocomplete no filtro de colaborador do relatório de Entregas Gerais, incluindo opção final para selecionar *"Todos os Funcionários"*.
 
 ---
 
@@ -255,12 +255,12 @@ O painel integra um mecanismo de busca por autocomplete em tempo real de altíss
 
 O módulo de relatórios é composto por relatórios especializados que cobrem auditoria, custos, estoque e conformidade trabalhista:
 
-1.  **Relatório Geral de Entregas ([`pages/relatorio_geral.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/relatorio_geral.php)):** Listagem paginada com histórico completo de fornecimentos, colaborador, EPI, quantidade e data de entrega.
-2.  **Relatório Financeiro de Custos ([`pages/relatorio_financeiro.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/relatorio_financeiro.php)):** Demonstrativo mensal de investimentos em EPIs por departamento/centro de custo com valores formatados em **R$**.
-3.  **Relatório de Consumo de EPIs ([`pages/relatorio_consumo_epi.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/relatorio_consumo_epi.php)):** Quantitativo e histórico detalhado de saídas de equipamentos (modo EPI Específico ou Todos os EPIs) com botões para **Consultar**, **Exportar PDF** (auto-impressão nativa) e **Imprimir Modelo Oficial** em A4 paisagem.
-4.  **Relatório de Validade de C.A. ([`pages/relatorio_validade_ca.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/relatorio_validade_ca.php)):** Rastreabilidade rigorosa dos Certificados de Aprovação (NR-6), destacando EPIs com C.A. vencido ou a vencer nos próximos 30/60/90 dias.
-5.  **Relatório de Auditoria de Logs ([`pages/relatorio_auditoria_logs.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/relatorio_auditoria_logs.php)):** Histórico de operações realizadas no sistema com visualizador interativo de payloads em JSON.
-6.  **Modelo de Impressão A4 Paisagem ([`pages/relatorio_auditoria_impressao.php`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/pages/relatorio_auditoria_impressao.php)):** Layout profissional pré-formatado para impressão física ou geração de PDF oficial para fiscalizações do Trabalho/SST.
+1.  **Relatório Geral de Entregas ([`pages/relatorio_geral.php`](pages/relatorio_geral.php)):** Listagem paginada com histórico completo de fornecimentos, colaborador, EPI, quantidade e data de entrega.
+2.  **Relatório Financeiro de Custos ([`pages/relatorio_financeiro.php`](pages/relatorio_financeiro.php)):** Demonstrativo mensal de investimentos em EPIs por departamento/centro de custo com valores formatados em **R$**.
+3.  **Relatório de Consumo de EPIs ([`pages/relatorio_consumo_epi.php`](pages/relatorio_consumo_epi.php)):** Quantitativo e histórico detalhado de saídas de equipamentos (modo EPI Específico ou Todos os EPIs) com botões para **Consultar**, **Exportar PDF** (auto-impressão nativa) e **Imprimir Modelo Oficial** em A4 paisagem.
+4.  **Relatório de Validade de C.A. ([`pages/relatorio_validade_ca.php`](pages/relatorio_validade_ca.php)):** Rastreabilidade rigorosa dos Certificados de Aprovação (NR-6), destacando EPIs com C.A. vencido ou a vencer nos próximos 30/60/90 dias.
+5.  **Relatório de Auditoria de Logs ([`pages/relatorio_auditoria_logs.php`](pages/relatorio_auditoria_logs.php)):** Histórico de operações realizadas no sistema com visualizador interativo de payloads em JSON.
+6.  **Modelo de Impressão A4 Paisagem ([`pages/relatorio_auditoria_impressao.php`](pages/relatorio_auditoria_impressao.php)):** Layout profissional pré-formatado para impressão física ou geração de PDF oficial para fiscalizações do Trabalho/SST.
 
 ### 7.1 Conformidade e Governança LGPD nas Exportações
 Toda exportação de relatórios (seja para formato **PDF** ou **CSV**) dispara automaticamente um log de auditoria em background para o endpoint `/logs/registrar-exportacao`. Esse registro grava o ID do operador, IP de origem, fuso horário (`America/Sao_Paulo`), tipo de relatório e parâmetros de filtro aplicados, garantindo total rastreabilidade.
@@ -277,18 +277,71 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 
 ---
 
-## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
+## 9. GOVERNANÇA DE ENGENHARIA, COMMIT OBRIGATÓRIO E CI/CD CONTÍNUO
+
+A evolução do ecossistema Gestão EPI é regida por normas estritas de governança de código e automação contínua de entrega:
+
+### 9.1 Política de Commit e Publicação Contínua
+* **Validação Local Pré-Commit:** Nenhuma alteração é comitada sem validação prévia de sintaxe (`php -l`) e teste funcional no ambiente local (XAMPP).
+* **Commit Obrigatório a Cada Modificação:** Toda correção de bug, nova funcionalidade, ajuste de estilo CSS ou alteração em documentação deve receber imediatamente `git add` e `git commit` semântico padronizado (*Conventional Commits*).
+* **Push Obrigatório para o GitHub (`main`):** Logo após a criação do commit local, o desenvolvedor ou agente deve obrigatoriamente executar o envio (`git push`) para o repositório remoto no GitHub (`https://github.com/projetoEtec26/gestao_epi_web.git` na branch `main`).
+* **Deploy Automatizado (GitHub Actions -> Locaweb):** Cada push na branch `main` dispara o pipeline de CI/CD (`.github/workflows/deploy.yml`), sincronizando automaticamente via FTP os arquivos alterados com o servidor de produção na Locaweb (`http://gestaoepi.tecnologia.ws/`).
+* **Árvore de Trabalho 100% Limpa (`working tree clean`):** Não são permitidas alterações pendentes, arquivos desversionados ou modificações soltas na árvore de trabalho local ao término de qualquer atendimento.
+
+### 9.2 Conformidade Multiplataforma Mandatória
+* Toda alteração de interface deve funcionar com paridade 1:1 nas **três plataformas**:
+  1. **Web Desktop:** $\ge 1200\text{px}$ (Mouse e teclado).
+  2. **Tablet:** $768\text{px} – 1199\text{px}$ (Toque).
+  3. **Celular:** $< 768\text{px}$ (Toque com áreas mínimas de $44\times 44\text{px}$).
+* É terminantemente proibido criar arquivos ou versões separadas de telas por dispositivo: a mesma base de código responsiva e modular atende a todo o ecossistema.
+
+---
+
+## 10. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
+
+### 📅 Versão 8.4.9 (09/11/2026) – Governança de Commit Obrigatório, CI/CD Contínuo e Sincronização Master das Documentações
+* **Instituição da Regra de Commit e Publicação Obrigatória (`.agents/rules/commit_obrigatorio.md`):**
+  - Formalizada diretriz institucional onde qualquer modificação de código, layout ou documentação exige obrigatoriamente commit semântico padronizado e push imediato para o GitHub (`main`), acionando a esteira CI/CD para deploy automático na Locaweb.
+  - Eliminação de alterações locais soltas e garantia de integridade da árvore de trabalho (`working tree clean`).
+* **Sincronização Master da Suíte de Documentações Técnicas (`docs/` e `README.md`):**
+  - Atualização e alinhamento completo dos 8 manuais especializados: [`docs/ARQUITETURA_ECOSSISTEMA.md`](docs/ARQUITETURA_ECOSSISTEMA.md), [`docs/PAINEL_WEB_ADMINISTRATIVO.md`](docs/PAINEL_WEB_ADMINISTRATIVO.md), [`docs/API_REST_ENDPOINTS.md`](docs/API_REST_ENDPOINTS.md), [`docs/MOBILE_ANDROID.md`](docs/MOBILE_ANDROID.md), [`docs/BANCO_DE_DADOS_LGPD.md`](docs/BANCO_DE_DADOS_LGPD.md), [`docs/GUIA_DE_IMPLANTACAO_E_DEVOPS.md`](docs/GUIA_DE_IMPLANTACAO_E_DEVOPS.md), [`docs/FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md`](docs/FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md) e [`docs/AUDITORIA_CYBERSECURITY.md`](docs/AUDITORIA_CYBERSECURITY.md).
+  - Padronização de links relativos universais compatíveis com GitHub e visualizadores Markdown locais, eliminando caminhos absolutos legados.
+* **Garantia de Paridade Multiplataforma e Estabilidade do Ecossistema:**
+  - Validação contínua nas 3 plataformas homologadas (Desktop, Tablet e Celular) e confirmação de estabilidade sem impacto no aplicativo Android nem alterações contratuais na API REST.
+
+### 📅 Versão 8.4.8 (09/11/2026) – Blindagem de Segurança Cibernética do Painel Web (Hardening OWASP / LGPD)
+* **Linha de Corte e Ponto de Restauração (Rollback Baseline):** Criação da tag `checkpoint-pre-seguranca-v8.4.7` e branch `backup-pre-seguranca-v8.4.7` antes de qualquer alteração, garantindo rollback instantâneo e seguro.
+* **Blindagem do Fluxo de Recuperação de Senha (`recuperar-senha.php`):**
+  - Remoção do campo `codigo_demonstrativo` das respostas JSON.
+  - Eliminação do código universal de bypass `123456`.
+  - Controle de tentativas contra força bruta (máximo 5) e expiração de código em 15 minutos com `hash_equals`.
+  - Bloqueio rígido na Etapa 3 (redefinição de senha): execução autorizada exclusivamente se `$_SESSION['recup_codigo_validado'] === true`.
+* **Proteção de Infraestrutura e Diretório Raiz (`.htaccess`):**
+  - Redirecionamento 301 compulsório para HTTPS compatível com o proxy reverso Nginx da Locaweb (`%{HTTP:X-Forwarded-Proto} !https`).
+  - Ativação de cabeçalhos de segurança: `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `X-XSS-Protection: 1; mode=block`, `Referrer-Policy: strict-origin-when-cross-origin` e `Strict-Transport-Security` (30 dias).
+  - Bloqueio de acesso direto a arquivos de documentação, backups SQL, logs e configurações (`Options -Indexes` e `FilesMatch`).
+* **Cookies de Sessão Seguros & Proteção de Sessão (`login.php`, `components/header.php`, `services/SecurityService.php`):**
+  - Inicialização padronizada de sessões via `SecurityService::initSecureSession()` com as flags `HttpOnly`, `SameSite=Lax` e `Secure` sob HTTPS.
+  - Rate limit contra ataques de força bruta no login com bloqueio temporário de 60 segundos após 5 tentativas inválidas.
+* **Eliminação de Token JWT no LocalStorage (`components/header.php`):**
+  - Descontinuação do armazenamento do token Bearer JWT no `localStorage` do navegador e purga de tokens residuais (`localStorage.removeItem('token')`).
+* **Sincronização de Controle de Acesso RBAC (`pages/usuarios.php`, `pages/auditoria.php`, `components/sidebar.php`):**
+  - Acesso aos módulos de Usuários/Permissões e Auditoria de Logs restrito com exclusividade ao perfil `ADMINISTRADOR`.
+* **Gestão de Segredos e Conformidade LGPD (`config/api.php`, `.gitignore`, `deploy.yml`):**
+  - Remoção de senhas em fallback de produção; suporte a carregamento seguro via `/home/usuario/secrets.php` fora da raiz pública.
+  - Remoção dos arquivos `database_backup.sql` e `database_schema_v7.sql` do versionamento Git para conformidade com a LGPD.
+  - Exclusão de documentações e PDFs do upload FTP de produção via GitHub Actions.
 
 ### 📅 Versão 8.4.7 (04/11/2026) – Sincronização e Atualização Master das Documentações de Todos os Projetos do Ecossistema
 * **Sincronização Integrada da Suíte de Documentações Técnicas (`docs/` e `README.md`):**
-  - **Painel Web Administrativo ([`docs/PAINEL_WEB_ADMINISTRATIVO.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/PAINEL_WEB_ADMINISTRATIVO.md)):** Consolidação da matriz completa das 18 páginas e rotas, especificações de RBAC exclusivo para `ADMINISTRADOR` em Usuários e Auditoria, detalhamento do CORS Proxy Gateway (`api_proxy.php`), tratamento de erros (403/404) e diretrizes multiplataforma estritas (Web Desktop $\ge 1200\text{px}$, Tablet $768\text{px} – 1199\text{px}$, Celular $< 768\text{px}$).
-  - **Especificação da API REST Backend ([`docs/API_REST_ENDPOINTS.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/API_REST_ENDPOINTS.md)):** Documentação das rotas de sincronização mobile offline (`/sync/push` e `/sync/pull`), parâmetros de tolerância a falhas, timeouts cURL (3s/30s) e tratamento de códigos HTTP de resposta.
-  - **Módulo Mobile Android ([`docs/MOBILE_ANDROID.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/MOBILE_ANDROID.md)):** Detalhamento das 4 telas operacionais de campo (Dashboard, Nova Entrega com teclado PIN e Lote compulsório, Catálogo com C.A. e Devoluções), rotina periódica do `SyncWorker` e paridade 1:1 de regras de negócio com o Painel Web.
-  - **Banco de Dados & Governança LGPD ([`docs/BANCO_DE_DADOS_LGPD.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/BANCO_DE_DADOS_LGPD.md)):** Expansão do dicionário de dados físico incluindo as tabelas `usuarios` (senhas `bcrypt`), `departamentos`, `cargos`, integridade relacional com `InnoDB` e regras de imutabilidade judicial em `log_auditoria`.
-  - **Arquitetura do Ecossistema ([`docs/ARQUITETURA_ECOSSISTEMA.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/ARQUITETURA_ECOSSISTEMA.md)):** Inclusão de catálogo de rastreabilidade cruzada dos 8 manuais de documentação, mapeamento de repositórios e conformidade legal brasileira (NR-6, LGPD e fuso horário `America/Sao_Paulo`).
+  - **Painel Web Administrativo ([`docs/PAINEL_WEB_ADMINISTRATIVO.md`](docs/PAINEL_WEB_ADMINISTRATIVO.md)):** Consolidação da matriz completa das 18 páginas e rotas, especificações de RBAC exclusivo para `ADMINISTRADOR` em Usuários e Auditoria, detalhamento do CORS Proxy Gateway (`api_proxy.php`), tratamento de erros (403/404) e diretrizes multiplataforma estritas (Web Desktop $\ge 1200\text{px}$, Tablet $768\text{px} – 1199\text{px}$, Celular $< 768\text{px}$).
+  - **Especificação da API REST Backend ([`docs/API_REST_ENDPOINTS.md`](docs/API_REST_ENDPOINTS.md)):** Documentação das rotas de sincronização mobile offline (`/sync/push` e `/sync/pull`), parâmetros de tolerância a falhas, timeouts cURL (3s/30s) e tratamento de códigos HTTP de resposta.
+  - **Módulo Mobile Android ([`docs/MOBILE_ANDROID.md`](docs/MOBILE_ANDROID.md)):** Detalhamento das 4 telas operacionais de campo (Dashboard, Nova Entrega com teclado PIN e Lote compulsório, Catálogo com C.A. e Devoluções), rotina periódica do `SyncWorker` e paridade 1:1 de regras de negócio com o Painel Web.
+  - **Banco de Dados & Governança LGPD ([`docs/BANCO_DE_DADOS_LGPD.md`](docs/BANCO_DE_DADOS_LGPD.md)):** Expansão do dicionário de dados físico incluindo as tabelas `usuarios` (senhas `bcrypt`), `departamentos`, `cargos`, integridade relacional com `InnoDB` e regras de imutabilidade judicial em `log_auditoria`.
+  - **Arquitetura do Ecossistema ([`docs/ARQUITETURA_ECOSSISTEMA.md`](docs/ARQUITETURA_ECOSSISTEMA.md)):** Inclusão de catálogo de rastreabilidade cruzada dos 8 manuais de documentação, mapeamento de repositórios e conformidade legal brasileira (NR-6, LGPD e fuso horário `America/Sao_Paulo`).
 
 ### 📅 Versão 8.4.6 (04/11/2026) – Auditoria Complementar de Cybersecurity, Diagnóstico de Vulnerabilidades e Diretrizes de Blindagem
-* **Auditoria Técnica Independente de Cibersegurança ([`docs/AUDITORIA_CYBERSECURITY.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md)):**
+* **Auditoria Técnica Independente de Cibersegurança ([`docs/AUDITORIA_CYBERSECURITY.md`](docs/AUDITORIA_CYBERSECURITY.md)):**
   - **Inexistência de Vazamento Ativo via URL/URI:** Análise pericial dos registros de auditoria em produção (`log_auditoria`) e dos parâmetros de Query String (`GET`), comprovando que credenciais e dados sigilosos não transitam na barra de endereços.
   - **Validação de Prepared Statements com PDO:** Comprovada a mitigação total contra injeção de SQL (SQLi) em todas as rotas e controladores dinâmicos da aplicação Web e API.
   - **Mapeamento de Riscos de Infraestrutura:** Identificada a abertura da porta 3306 do MySQL Cloud DBAAS e ausência de redirecionamento HTTP para HTTPS, estabelecendo as diretrizes técnicas imediatas de firewall e regras no `.htaccess`.
@@ -297,12 +350,12 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 
 ### 📅 Versão 8.4.5 (04/11/2026) – Unificação e Atualização Integral das Documentações de Todos os Projetos
 * **Consolidação Completa da Suíte de Documentações Técnicas (`docs/` e `README.md`):**
-  - **Manual do Painel Web Administrativo ([`docs/PAINEL_WEB_ADMINISTRATIVO.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/PAINEL_WEB_ADMINISTRATIVO.md)):** Documentação detalhada dos 18 módulos e telas do sistema, design system HSL com alternância Dark/Light mode, submenus retráteis Senior ERP Style, Speed Dial FAB multi-módulo, sistema de autocomplete client-side com destaque de texto e conformidade estrita multiplataforma (Web Desktop, Tablet e Celular).
-  - **Guia de Implantação e DevOps ([`docs/GUIA_DE_IMPLANTACAO_E_DEVOPS.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/GUIA_DE_IMPLANTACAO_E_DEVOPS.md)):** Instruções passo a passo para configuração no XAMPP local, servidores em nuvem (Locaweb e Render), esteira automatizada de CI/CD via GitHub Actions FTP Deploy, rotinas de backup `mysqldump` e compilação do APK do aplicativo móvel no Android Studio.
-  - **Manual de Fluxos Operacionais e Casos de Uso ([`docs/FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md)):** Diagramas de sequência detalhando a jornada de Admissão de Colaboradores, Fornecimento de EPI com Lote Obrigatório e Assinatura Eletrônica, Devoluções e Inspeção Pericial em Fiscalizações do Trabalho (MTE).
-  - **Documentação da API REST Backend ([`docs/API_REST_ENDPOINTS.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/API_REST_ENDPOINTS.md)):** Atualização dos contratos de payload JSON, rotas protegidas por JWT, validação simétrica de PIN de 6 dígitos e auditoria judicial de exportações.
-  - **Documentação do Módulo Mobile Android ([`docs/MOBILE_ANDROID.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/MOBILE_ANDROID.md)):** Especificação da arquitetura MVVM, persistência offline com Room Database, sincronização via WorkManager (`SyncWorker`) e validação de PIN compatível (`HashUtils.java`).
-  - **Governança de Banco de Dados e LGPD ([`docs/BANCO_DE_DADOS_LGPD.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/BANCO_DE_DADOS_LGPD.md)):** Dicionário completo de dados, regras de integridade referencial, criptografia AES-256-GCM para dados sensíveis e auditoria imutável.
+  - **Manual do Painel Web Administrativo ([`docs/PAINEL_WEB_ADMINISTRATIVO.md`](docs/PAINEL_WEB_ADMINISTRATIVO.md)):** Documentação detalhada dos 18 módulos e telas do sistema, design system HSL com alternância Dark/Light mode, submenus retráteis Senior ERP Style, Speed Dial FAB multi-módulo, sistema de autocomplete client-side com destaque de texto e conformidade estrita multiplataforma (Web Desktop, Tablet e Celular).
+  - **Guia de Implantação e DevOps ([`docs/GUIA_DE_IMPLANTACAO_E_DEVOPS.md`](docs/GUIA_DE_IMPLANTACAO_E_DEVOPS.md)):** Instruções passo a passo para configuração no XAMPP local, servidores em nuvem (Locaweb e Render), esteira automatizada de CI/CD via GitHub Actions FTP Deploy, rotinas de backup `mysqldump` e compilação do APK do aplicativo móvel no Android Studio.
+  - **Manual de Fluxos Operacionais e Casos de Uso ([`docs/FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md`](docs/FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md)):** Diagramas de sequência detalhando a jornada de Admissão de Colaboradores, Fornecimento de EPI com Lote Obrigatório e Assinatura Eletrônica, Devoluções e Inspeção Pericial em Fiscalizações do Trabalho (MTE).
+  - **Documentação da API REST Backend ([`docs/API_REST_ENDPOINTS.md`](docs/API_REST_ENDPOINTS.md)):** Atualização dos contratos de payload JSON, rotas protegidas por JWT, validação simétrica de PIN de 6 dígitos e auditoria judicial de exportações.
+  - **Documentação do Módulo Mobile Android ([`docs/MOBILE_ANDROID.md`](docs/MOBILE_ANDROID.md)):** Especificação da arquitetura MVVM, persistência offline com Room Database, sincronização via WorkManager (`SyncWorker`) e validação de PIN compatível (`HashUtils.java`).
+  - **Governança de Banco de Dados e LGPD ([`docs/BANCO_DE_DADOS_LGPD.md`](docs/BANCO_DE_DADOS_LGPD.md)):** Dicionário de dados das tabelas, regras de integridade referencial, criptografia AES-256-GCM para dados sensíveis e imutabilidade dos logs de auditoria.
 
 ### 📅 Versão 8.4.4 (26/10/2026) – Obrigatoriedade e Garantia Global de Lote em Todos os Recibos de Entrega
 * **Garantia Total de Lote em 100% dos Recibos e Itens (`pages/entregas.php`, `pages/nova_entrega.php`):**
@@ -662,29 +715,6 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 *   **Otimização do Filtro de Status de C.A. e Higienização de Setores (`pages/relatorios.php`):**
     - Atualizado o combo de filtro de C.A. para os status reais (`Vigente`, `Vencido / Próximo`, `Isento`) e higienizada a lista de setores da empresa.
 
-### 📅 Versão 8.4.8 (09/11/2026) – Blindagem de Segurança Cibernética do Painel Web (Hardening OWASP / LGPD)
-*   **Linha de Corte e Ponto de Restauração (Rollback Baseline):** Criação da tag `checkpoint-pre-seguranca-v8.4.7` e branch `backup-pre-seguranca-v8.4.7` antes de qualquer alteração, garantindo rollback instantâneo e seguro.
-*   **Blindagem do Fluxo de Recuperação de Senha (`recuperar-senha.php`):**
-    - Remoção do campo `codigo_demonstrativo` das respostas JSON.
-    - Eliminação do código universal de bypass `123456`.
-    - Controle de tentativas contra força bruta (máximo 5) e expiração de código em 15 minutos com `hash_equals`.
-    - Bloqueio rígido na Etapa 3 (redefinição de senha): execução autorizada exclusivamente se `$_SESSION['recup_codigo_validado'] === true`.
-*   **Proteção de Infraestrutura e Diretório Raiz (`.htaccess`):**
-    - Redirecionamento 301 compulsório para HTTPS compatível com o proxy reverso Nginx da Locaweb (`%{HTTP:X-Forwarded-Proto} !https`).
-    - Ativação de cabeçalhos de segurança: `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `X-XSS-Protection: 1; mode=block`, `Referrer-Policy: strict-origin-when-cross-origin` e `Strict-Transport-Security` (30 dias).
-    - Bloqueio de acesso direto a arquivos de documentação, backups SQL, logs e configurações (`Options -Indexes` e `FilesMatch`).
-*   **Cookies de Sessão Seguros & Proteção de Sessão (`login.php`, `components/header.php`, `services/SecurityService.php`):**
-    - Inicialização padronizada de sessões via `SecurityService::initSecureSession()` com as flags `HttpOnly`, `SameSite=Lax` e `Secure` sob HTTPS.
-    - Rate limit contra ataques de força bruta no login com bloqueio temporário de 60 segundos após 5 tentativas inválidas.
-*   **Eliminação de Token JWT no LocalStorage (`components/header.php`):**
-    - Descontinuação do armazenamento do token Bearer JWT no `localStorage` do navegador e purga de tokens residuais (`localStorage.removeItem('token')`).
-*   **Sincronização de Controle de Acesso RBAC (`pages/usuarios.php`, `pages/auditoria.php`, `components/sidebar.php`):**
-    - Acesso aos módulos de Usuários/Permissões e Auditoria de Logs restrito com exclusividade ao perfil `ADMINISTRADOR`.
-*   **Gestão de Segredos e Conformidade LGPD (`config/api.php`, `.gitignore`, `deploy.yml`):**
-    - Remoção de senhas em fallback de produção; suporte a carregamento seguro via `/home/usuario/secrets.php` fora da raiz pública.
-    - Remoção dos arquivos `database_backup.sql` e `database_schema_v7.sql` do versionamento Git para conformidade com a LGPD.
-    - Exclusão de documentações e PDFs do upload FTP de produção via GitHub Actions.
-
 ### 📅 Versão 7.0.0 (05/10/2026) – Paridade 1:1 Dashboard Web × Android (`gestao_epi_8`), Audit Git/GitHub (Commit `19299fa`) e Homologação em Produção Locaweb (`http://gestaoepi.tecnologia.ws/`)
 *   **Paridade 1:1 de Regras de Negócio do Dashboard Web com o Android (`gestao_epi_8`):**
     - **Card 1 (EPIs Vencidos):** Consolidação dos equipamentos com Certificado de Aprovação (C.A.) vencidos no estoque com os equipamentos em uso ativo com Vida Útil vencida (5 itens: 2 C.A. + 3 Vida Útil).
@@ -868,14 +898,14 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 
 ---
 
-## 10. REQUISITOS E GUIA DE EXECUÇÃO LOCAL
+## 11. REQUISITOS E GUIA DE EXECUÇÃO LOCAL
 
-### 10.1 Requisitos de Ambiente
+### 11.1 Requisitos de Ambiente
 *   **Servidor Web:** Apache 2.4+ (XAMPP ou Docker) com módulo `mod_rewrite` ativo.
 *   **Linguagem:** PHP 8.0 ou superior (com extensões `curl`, `json`, `mbstring` e `session` habilitadas).
 *   **Navegadores Homologados:** Google Chrome, Microsoft Edge ou Mozilla Firefox (versões modernas).
 
-### 10.2 Como Executar o Projeto
+### 11.2 Como Executar o Projeto
 
 #### Opção A: Servidor PHP Embutido (Recomendado)
 1. Execute no terminal a partir do diretório raiz do projeto:
