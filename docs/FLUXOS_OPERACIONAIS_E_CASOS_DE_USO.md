@@ -102,3 +102,24 @@ Em inspeções do Ministério do Trabalho e Emprego ou perícias judiciais traba
    - Acesso autorizado **exclusivamente** após a validação confirmada da sessão (`$_SESSION['recup_codigo_validado'] === true`).
    - Requisição à API REST com atualização segura da senha e expurgo das variáveis de recuperação da sessão.
 
+---
+
+## 6. Fluxo de Manutenção Evolutiva, Validação Multiplataforma e Deploy Contínuo (Release 8.4.9)
+
+Conforme as diretrizes de engenharia do projeto ([`.agents/rules/commit_obrigatorio.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/commit_obrigatorio.md) e [`.agents/rules/multiplataforma.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/multiplataforma.md)), toda evolução ou ajuste técnico segue um fluxo auditável e automatizado:
+
+```mermaid
+sequenceDiagram
+    participant Eng as Engenharia de Software
+    participant XAMPP as Ambiente Local (XAMPP)
+    participant Git as GitHub (branch main)
+    participant Prod as Produção Locaweb
+
+    Eng->>XAMPP: Aplica alteração e testa em Desktop, Tablet e Celular
+    XAMPP-->>Eng: Validação sintática e visual aprovada
+    Eng->>Git: git add + git commit (Conventional Commits)
+    Eng->>Git: git push origin main
+    Git->>Prod: GitHub Actions (FTP Deploy p/ public_html/)
+    Prod-->>Eng: Ambiente http://gestaoepi.tecnologia.ws/ atualizado
+```
+

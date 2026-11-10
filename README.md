@@ -85,9 +85,15 @@ O painel Web foi estruturado com uma arquitetura modular limpa (SoC - *Separatio
 ```text
 gestao_epi_web/
 │
+├── .htaccess                             # Blindagem Apache: HTTPS 301, HSTS, Security Headers e bloqueio de arquivos
+├── .github/workflows/deploy.yml          # Pipeline CI/CD automatizado via FTP Deploy para produção Locaweb
+├── .agents/rules/                        # Diretrizes operacionais e de governança de engenharia
+│   ├── commit_obrigatorio.md             # Regra de commit semântico e push obrigatório a cada alteração
+│   └── multiplataforma.md                # Regra de compatibilidade estrita Web Desktop, Tablet e Celular
+│
 ├── index.php                             # Roteador de entrada de sessão (redireciona para Dashboard ou Login)
-├── login.php                             # Login institucional e redefinição obrigatória no 1º acesso
-├── recuperar-senha.php                   # Fluxo de redefinição de senhas provisórias via API REST
+├── login.php                             # Login institucional, rate limit e redefinição obrigatória no 1º acesso
+├── recuperar-senha.php                   # Assistente seguro de recuperação de senhas via API REST e sessão
 ├── logout.php                            # Destruição segura da sessão PHP e token JWT no cliente/servidor
 ├── template_relatorio_php.php            # Template estruturado para geração e exportação de relatórios PHP
 ├── README.md                             # Documentação técnica master do ecossistema e do painel Web
@@ -278,6 +284,36 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 ---
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
+
+### 📅 Versão 8.4.9 (09/11/2026) – Governança DevOps de Commit Obrigatório, Multiplataforma e Sincronização de Todas as Documentações
+* **Instituição da Regra de Commit e Publicação Obrigatória ([`.agents/rules/commit_obrigatorio.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/commit_obrigatorio.md)):**
+  - Formalização do fluxo mandatório de controle de versão (`git add` e `git commit` com *Conventional Commits*: `feat:`, `fix:`, `docs:`, `style:`, `refactor:`) imediatamente após a validação de qualquer alteração no ambiente local XAMPP (`http://localhost/OLD/gestao_epi_web_14/`).
+  - Publicação contínua (`git push` na branch `main`) para o repositório oficial (`https://github.com/projetoEtec26/gestao_epi_web.git`), acionando automaticamente o pipeline de CI/CD via GitHub Actions (`.github/workflows/deploy.yml`) para atualização do servidor de produção Locaweb (`http://gestaoepi.tecnologia.ws/`).
+  - Garantia de árvore de trabalho limpa (*clean working tree*) e rastreabilidade explícita de hash e mensagem de commit ao final de cada entrega.
+* **Sincronização Integral da Suíte de Documentações de Todos os Projetos (`README.md` e `docs/*.md`):**
+  - Atualização e alinhamento cronológico dos 8 manuais técnicos do ecossistema ([`ARQUITETURA_ECOSSISTEMA.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/ARQUITETURA_ECOSSISTEMA.md), [`PAINEL_WEB_ADMINISTRATIVO.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/PAINEL_WEB_ADMINISTRATIVO.md), [`API_REST_ENDPOINTS.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/API_REST_ENDPOINTS.md), [`MOBILE_ANDROID.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/MOBILE_ANDROID.md), [`BANCO_DE_DADOS_LGPD.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/BANCO_DE_DADOS_LGPD.md), [`GUIA_DE_IMPLANTACAO_E_DEVOPS.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/GUIA_DE_IMPLANTACAO_E_DEVOPS.md), [`FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/FLUXOS_OPERACIONAIS_E_CASOS_DE_USO.md) e [`AUDITORIA_CYBERSECURITY.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md)), consolidando as diretrizes de segurança, DevOps e conformidade multiplataforma (Web Desktop, Tablet e Celular).
+
+### 📅 Versão 8.4.8 (09/11/2026) – Blindagem de Segurança Cibernética do Painel Web (Hardening OWASP / LGPD)
+* **Linha de Corte e Ponto de Restauração (Rollback Baseline):** Criação da tag `checkpoint-pre-seguranca-v8.4.7` e branch `backup-pre-seguranca-v8.4.7` antes de qualquer alteração, garantindo rollback instantâneo e seguro.
+* **Blindagem do Fluxo de Recuperação de Senha (`recuperar-senha.php`):**
+  - Remoção do campo `codigo_demonstrativo` das respostas JSON e eliminação do código universal de bypass `123456`.
+  - Controle de tentativas contra força bruta (máximo 5) e expiração de código em 15 minutos com `hash_equals`.
+  - Bloqueio rígido na Etapa 3 (redefinição de senha): execução autorizada exclusivamente se `$_SESSION['recup_codigo_validado'] === true`.
+* **Proteção de Infraestrutura e Diretório Raiz (`.htaccess`):**
+  - Redirecionamento 301 compulsório para HTTPS compatível com o proxy reverso Nginx da Locaweb (`%{HTTP:X-Forwarded-Proto} !https`).
+  - Ativação de cabeçalhos de segurança: `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `X-XSS-Protection: 1; mode=block`, `Referrer-Policy: strict-origin-when-cross-origin` e `Strict-Transport-Security` (30 dias).
+  - Bloqueio de acesso direto a arquivos de documentação, backups SQL, logs e configurações (`Options -Indexes` e `FilesMatch`).
+* **Cookies de Sessão Seguros & Proteção de Sessão (`login.php`, `components/header.php`, `services/SecurityService.php`):**
+  - Inicialização padronizada de sessões via `SecurityService::initSecureSession()` com as flags `HttpOnly`, `SameSite=Lax` e `Secure` sob HTTPS.
+  - Rate limit contra ataques de força bruta no login com bloqueio temporário de 60 segundos após 5 tentativas inválidas.
+* **Eliminação de Token JWT no LocalStorage (`components/header.php`):**
+  - Descontinuação do armazenamento do token Bearer JWT no `localStorage` do navegador e purga de tokens residuais (`localStorage.removeItem('token')`).
+* **Sincronização de Controle de Acesso RBAC (`pages/usuarios.php`, `pages/auditoria.php`, `components/sidebar.php`):**
+  - Acesso aos módulos de Usuários/Permissões e Auditoria de Logs restrito com exclusividade ao perfil `ADMINISTRADOR`.
+* **Gestão de Segredos e Conformidade LGPD (`config/api.php`, `.gitignore`, `deploy.yml`):**
+  - Remoção de senhas em fallback de produção; suporte a carregamento seguro via `/home/usuario/secrets.php` fora da raiz pública.
+  - Remoção dos arquivos `database_backup.sql` e `database_schema_v7.sql` do versionamento Git para conformidade com a LGPD.
+  - Exclusão de documentações e PDFs do upload FTP de produção via GitHub Actions.
 
 ### 📅 Versão 8.4.7 (04/11/2026) – Sincronização e Atualização Master das Documentações de Todos os Projetos do Ecossistema
 * **Sincronização Integrada da Suíte de Documentações Técnicas (`docs/` e `README.md`):**
@@ -661,29 +697,6 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
     - Adicionada a função auxiliar `formatarDataBR()` e garantida a injeção do elemento `#pdfContainer` diretamente no `document.body` para o renderizador `html2pdf.js`, solucionando falhas no compartilhamento de PDF.
 *   **Otimização do Filtro de Status de C.A. e Higienização de Setores (`pages/relatorios.php`):**
     - Atualizado o combo de filtro de C.A. para os status reais (`Vigente`, `Vencido / Próximo`, `Isento`) e higienizada a lista de setores da empresa.
-
-### 📅 Versão 8.4.8 (09/11/2026) – Blindagem de Segurança Cibernética do Painel Web (Hardening OWASP / LGPD)
-*   **Linha de Corte e Ponto de Restauração (Rollback Baseline):** Criação da tag `checkpoint-pre-seguranca-v8.4.7` e branch `backup-pre-seguranca-v8.4.7` antes de qualquer alteração, garantindo rollback instantâneo e seguro.
-*   **Blindagem do Fluxo de Recuperação de Senha (`recuperar-senha.php`):**
-    - Remoção do campo `codigo_demonstrativo` das respostas JSON.
-    - Eliminação do código universal de bypass `123456`.
-    - Controle de tentativas contra força bruta (máximo 5) e expiração de código em 15 minutos com `hash_equals`.
-    - Bloqueio rígido na Etapa 3 (redefinição de senha): execução autorizada exclusivamente se `$_SESSION['recup_codigo_validado'] === true`.
-*   **Proteção de Infraestrutura e Diretório Raiz (`.htaccess`):**
-    - Redirecionamento 301 compulsório para HTTPS compatível com o proxy reverso Nginx da Locaweb (`%{HTTP:X-Forwarded-Proto} !https`).
-    - Ativação de cabeçalhos de segurança: `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `X-XSS-Protection: 1; mode=block`, `Referrer-Policy: strict-origin-when-cross-origin` e `Strict-Transport-Security` (30 dias).
-    - Bloqueio de acesso direto a arquivos de documentação, backups SQL, logs e configurações (`Options -Indexes` e `FilesMatch`).
-*   **Cookies de Sessão Seguros & Proteção de Sessão (`login.php`, `components/header.php`, `services/SecurityService.php`):**
-    - Inicialização padronizada de sessões via `SecurityService::initSecureSession()` com as flags `HttpOnly`, `SameSite=Lax` e `Secure` sob HTTPS.
-    - Rate limit contra ataques de força bruta no login com bloqueio temporário de 60 segundos após 5 tentativas inválidas.
-*   **Eliminação de Token JWT no LocalStorage (`components/header.php`):**
-    - Descontinuação do armazenamento do token Bearer JWT no `localStorage` do navegador e purga de tokens residuais (`localStorage.removeItem('token')`).
-*   **Sincronização de Controle de Acesso RBAC (`pages/usuarios.php`, `pages/auditoria.php`, `components/sidebar.php`):**
-    - Acesso aos módulos de Usuários/Permissões e Auditoria de Logs restrito com exclusividade ao perfil `ADMINISTRADOR`.
-*   **Gestão de Segredos e Conformidade LGPD (`config/api.php`, `.gitignore`, `deploy.yml`):**
-    - Remoção de senhas em fallback de produção; suporte a carregamento seguro via `/home/usuario/secrets.php` fora da raiz pública.
-    - Remoção dos arquivos `database_backup.sql` e `database_schema_v7.sql` do versionamento Git para conformidade com a LGPD.
-    - Exclusão de documentações e PDFs do upload FTP de produção via GitHub Actions.
 
 ### 📅 Versão 7.0.0 (05/10/2026) – Paridade 1:1 Dashboard Web × Android (`gestao_epi_8`), Audit Git/GitHub (Commit `19299fa`) e Homologação em Produção Locaweb (`http://gestaoepi.tecnologia.ws/`)
 *   **Paridade 1:1 de Regras de Negócio do Dashboard Web com o Android (`gestao_epi_8`):**

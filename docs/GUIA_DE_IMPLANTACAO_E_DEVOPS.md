@@ -37,10 +37,10 @@ C:\xampp\htdocs\
 ### 2.2 Configuração do Banco de Dados Local
 1. No painel de controle do XAMPP, inicie os módulos **Apache** e **MySQL**.
 2. Acesse `http://localhost/phpmyadmin/` e crie o banco de dados `db_gestao_epi` com charset `utf8mb4_unicode_ci`.
-3. Importe o script estrutural inicial `database_schema_v7.sql` localizado na raiz do projeto.
+3. Importe o script estrutural inicial do banco (por diretriz de segurança LGPD da Release 8.4.8+, os dumps `.sql` permanecem fora do versionamento público do Git no `.gitignore`).
 
 ### 2.3 Configuração do Painel Web (`config/api.php`)
-Edite o arquivo `config/api.php` para apontar para o endpoint local ou nuvem:
+Edite o arquivo `config/api.php` para apontar para o endpoint local ou nuvem (em produção, as credenciais são carregadas automaticamente de `/home/usuario_locaweb/secrets.php`):
 ```php
 <?php
 declare(strict_types=1);
@@ -49,7 +49,7 @@ date_default_timezone_set('America/Sao_Paulo');
 
 return [
     'api_base_url' => 'https://gestao-epi-api.onrender.com/', // Ou 'http://127.0.0.1/gestao_epi_api/'
-    'app_root_url' => '/gestao_epi_web/',
+    'app_root_url' => '/OLD/gestao_epi_web_14/',
     'db_host'      => '127.0.0.1',
     'db_name'      => 'db_gestao_epi',
     'db_user'      => 'root',
@@ -59,8 +59,8 @@ return [
 ```
 
 ### 2.4 Inicialização e Acesso
-* **URL do Painel Web:** `http://localhost/gestao_epi_web/`
-* **Usuário Inicial:** `admin` | **Senha:** `admin123` (ou `123456`)
+* **URL do Painel Web (XAMPP):** `http://localhost/OLD/gestao_epi_web_14/` (ou `http://localhost/gestao_epi_web/`)
+* **Usuário Inicial:** `admin` | **Senha:** `admin123`
 
 ---
 
@@ -92,6 +92,12 @@ Para que o deploy funcione, os seguintes segredos devem estar cadastrados nas co
 
 ### 3.3 Endereço de Produção Oficial
 * **Painel Web Homologado:** [http://gestaoepi.tecnologia.ws/](http://gestaoepi.tecnologia.ws/)
+
+### 3.4 Governança de Versionamento e Regra de Commit e Publicação Obrigatória
+Conforme instituído nas regras do projeto ([`.agents/rules/commit_obrigatorio.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/commit_obrigatorio.md) e [`.agents/rules/multiplataforma.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/multiplataforma.md)):
+1. **Validação Local Multiplataforma:** Toda alteração de código, layout, configuração ou documentação deve ser validada no XAMPP local nas três plataformas (Web Desktop $\ge 1200\text{px}$, Tablet $768\text{px} – 1199\text{px}$ e Celular $< 768\text{px}$).
+2. **Commit Semântico Obrigatório:** Ao concluir qualquer alteração, executa-se obrigatoriamente `git add` e `git commit` utilizando o padrão *Conventional Commits* (`feat:`, `fix:`, `docs:`, `style:`, `refactor:`). Nenhuma modificação pode permanecer pendente na árvore de trabalho (`working tree dirty`).
+3. **Publicação Contínua (`git push`):** Em seguida, realiza-se o `git push` para a branch `main` no GitHub (`https://github.com/projetoEtec26/gestao_epi_web.git`), disparando imediatamente o workflow de deploy FTP para atualizar a produção na Locaweb.
 
 ---
 

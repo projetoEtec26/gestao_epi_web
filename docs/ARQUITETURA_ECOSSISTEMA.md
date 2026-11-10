@@ -37,14 +37,14 @@ graph TD
 
 ---
 
-## 2. Componentes e Papéis de Cada Projeto
+## 2. Componentes, URLs e Papéis de Cada Projeto
 
-| Projeto | Repositório | Tecnologias Principais | Papel no Ecossistema |
+| Projeto | Repositório / Ambiente | Tecnologias Principais | Papel no Ecossistema |
 | :--- | :--- | :--- | :--- |
-| **Gestão EPI Web** | [projetoEtec26/gestao_epi_web](https://github.com/projetoEtec26/gestao_epi_web) | PHP 8+, Bootstrap 5, Vanilla JS, Chart.js, CSS3 HSL | Painel gerencial, emissão de relatórios, gestão de colaboradores, entregas, devoluções, auditoria e controle de C.A. Suporta Desktop, Tablet e Celular. |
-| **Gestão EPI API** | [projetoEtec26/gestao_epi_api](https://github.com/projetoEtec26/gestao_epi_api) | PHP 8+, MVC REST, JWT, Bcrypt, OpenSSL | Camada de serviços e regras de negócio para autenticação de operadores, assinaturas eletrônicas, registro de movimentações e logs de auditoria. |
-| **Gestão EPI Mobile** | Projeto Android Nativo | Android (Java/Kotlin), Room, Retrofit 2, OkHttp, WorkManager | Coleta de dados no canteiro de obras e chão de fábrica, validação de biometria/PIN de 6 dígitos em campo e operação resiliente offline. |
-| **Banco de Dados** | `db_gestao_epi` | MySQL 8.0+ / MariaDB na Nuvem (Locaweb / Aiven) | Armazenamento centralizado, rastreabilidade de lotes (NR-6), criptografia de dados pessoais (LGPD) e integridade referencial. |
+| **Gestão EPI Web** | [projetoEtec26/gestao_epi_web](https://github.com/projetoEtec26/gestao_epi_web)<br/>Prod: `http://gestaoepi.tecnologia.ws/`<br/>Local: `http://localhost/OLD/gestao_epi_web_14/` | PHP 8+, Bootstrap 5, Vanilla JS, Chart.js, CSS3 HSL | Painel gerencial, emissão de relatórios, gestão de colaboradores, entregas, devoluções, auditoria e controle de C.A. Suporta Desktop, Tablet e Celular. |
+| **Gestão EPI API** | [projetoEtec26/gestao_epi_api](https://github.com/projetoEtec26/gestao_epi_api)<br/>Cloud: `https://gestao-epi-api.onrender.com/` | PHP 8+, MVC REST, JWT, Bcrypt, OpenSSL | Camada de serviços e regras de negócio para autenticação de operadores, assinaturas eletrônicas, registro de movimentações e logs de auditoria. |
+| **Gestão EPI Mobile** | Projeto Android Nativo (`gestao_epi_8`) | Android (Java/Kotlin), Room, Retrofit 2, OkHttp, WorkManager | Coleta de dados no canteiro de obras e chão de fábrica, validação de biometria/PIN de 6 dígitos em campo e operação resiliente offline. |
+| **Banco de Dados** | `db_gestao_epi` (`db_gestao_epi.mysql.dbaas.com.br`) | MySQL 8.0+ / MariaDB na Nuvem (Locaweb / Aiven) | Armazenamento centralizado, rastreabilidade de lotes (NR-6), criptografia de dados pessoais (LGPD) e integridade referencial. |
 
 ---
 
@@ -88,14 +88,15 @@ De acordo com as exigências da **Norma Regulamentadora NR-6** e auditorias de f
 
 ---
 
-## 6. Governança e Diretrizes de Cibersegurança (Release 8.4.8 Hardened)
+## 6. Governança, Cibersegurança e Entrega Contínua (Release 8.4.9 Hardened)
 
-Em conformidade com a auditoria e implementação de **Hardening (09/11/2026)** documentada em [`docs/AUDITORIA_CYBERSECURITY.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md):
+Em conformidade com a auditoria e implementação de **Hardening (09/11/2026)** documentada em [`docs/AUDITORIA_CYBERSECURITY.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md) e com as regras de engenharia em [`.agents/rules/`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/):
 * **Comunicação Criptografada Mandatória (HTTPS):** Todo o tráfego Web opera sob HTTPS forçado via `.htaccess` (301) compatível com Nginx Locaweb (`%{HTTP:X-Forwarded-Proto} !https`) e HSTS progressivo (30 dias).
 * **Proteção e Isolamento do Banco de Dados:** Remoção de dumps de banco do Git, eliminação de senhas hardcoded em produção e suporte a carregamento isolado em `/home/usuario/secrets.php`.
 * **Sessões e Cookies Seguros:** Sessões PHP ativadas com flags `; HttpOnly; SameSite=Lax; Secure` via `SecurityService::initSecureSession()`.
 * **Proteção Anti-CSRF e Anti-Força Bruta:** Rate limit com bloqueio temporário de 60 segundos após 5 tentativas de login consecutivas e validação de tokens anti-CSRF.
 * **Governança RBAC e LocalStorage:** Módulos de auditoria e usuários restritos ao perfil `ADMINISTRADOR` e purga completa de tokens JWT do `localStorage` do navegador.
+* **Commit e Publicação Obrigatória (`.agents/rules/commit_obrigatorio.md` e `multiplataforma.md`):** Toda modificação validada no XAMPP nas três plataformas (Web Desktop, Tablet e Celular) recebe obrigatoriamente commit semântico (*Conventional Commits*) e push para a branch `main` no GitHub, acionando o deploy contínuo na Locaweb.
 * **Compatibilidade 100% Preservada:** Zero alterações contratuais na API REST; paridade total com o aplicativo Android mantida.
 
 

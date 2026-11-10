@@ -1,6 +1,6 @@
 # Relatório Técnico de Auditoria de Cybersecurity e Governança
-## Ecossistema Corporativo Gestão EPI — Release 8.4.6
-**Data da Auditoria:** 04/11/2026  
+## Ecossistema Corporativo Gestão EPI — Release 8.4.9 Hardened
+**Data da Auditoria Inicial:** 04/11/2026 | **Data do Hardening e Governança:** 09/11/2026  
 **Classificação:** Confidencial / Técnico  
 **Alvo da Auditoria:** Gestão de EPIs Web 14, API RESTful Backend, Banco de Dados MySQL Cloud e Aplicativo Mobile Android  
 **Regime:** Diagnóstico Independente e Integrado (OWASP Top 10, LGPD e NR-6)
@@ -166,8 +166,9 @@ Em 09/11/2026, todas as vulnerabilidades mapeadas nas Etapas 1 a 6 foram impleme
 8. **VULN-08 (RBAC):** `pages/usuarios.php`, `pages/auditoria.php` e links na barra lateral restritos a `ADMINISTRADOR`.
 9. **VULN-09 (IDOR):** Validação de parâmetro numérico em `ficha_colaborador.php`.
 10. **VULN-10 (Força Bruta):** Bloqueio temporário de 60 segundos após 5 tentativas de login consecutivas.
+11. **Governança Contínua (Release 8.4.9):** Instituição da regra obrigatória de commit semântico e deploy contínuo (`.agents/rules/commit_obrigatorio.md`), mantendo rastreabilidade total entre o repositório GitHub e o servidor de produção na Locaweb.
 
 ---
 
-*Relatório técnico consolidado e validado em 09/11/2026 para o ecossistema corporativo Gestão EPI v8.4.8 Hardened.*
+*Relatório técnico consolidado e validado em 09/11/2026 para o ecossistema corporativo Gestão EPI v8.4.9 Hardened.*
 

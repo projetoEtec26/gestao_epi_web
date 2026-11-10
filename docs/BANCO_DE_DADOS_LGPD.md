@@ -112,13 +112,13 @@ Armazena de forma imutável todos os eventos críticos do sistema:
 
 ---
 
-## 4. Governança de Dumps e Isolamento de Credenciais (Release 8.4.8 Hardened)
+## 4. Governança de Dumps e Isolamento de Credenciais (Release 8.4.9 Hardened)
 
 1. **Remoção de Arquivos de Dumps do Git (Art. 46 da LGPD):**
-   - Os arquivos de dump `database_backup.sql` e `database_schema_v7.sql` foram removidos do versionamento do Git e adicionados ao `.gitignore`, impedindo a exposição de CPFs, eSocial e hashes de operadores.
+   - Os arquivos de dump `database_backup.sql` e `database_schema_v7.sql` foram removidos do versionamento do Git e adicionados ao `.gitignore` e à lista de exclusão do deploy FTP (`.github/workflows/deploy.yml`), impedindo a exposição de CPFs, eSocial e hashes de operadores.
 2. **Gerenciamento de Segredos de Conexão:**
    - O arquivo `config/api.php` não armazena credenciais em texto claro para produção.
    - Conexões em produção utilizam carregamento isolado fora da raiz pública (`/home/usuario_locaweb/secrets.php`) ou variáveis de ambiente.
 3. **Firewall e Restrição de Acesso:**
-   - A porta TCP 3306 do banco MySQL Cloud é configurada para acesso restrito às sub-redes da aplicação, eliminando varreduras não autorizadas a partir da internet.
+   - A porta TCP 3306 do banco MySQL Cloud (`db_gestao_epi.mysql.dbaas.com.br`) é configurada para acesso restrito às sub-redes da aplicação, eliminando varreduras não autorizadas a partir da internet.
 

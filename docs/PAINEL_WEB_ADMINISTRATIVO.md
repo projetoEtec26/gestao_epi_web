@@ -151,7 +151,7 @@ O sistema visual utiliza **Vanilla CSS moderno baseado em tokens HSL**, garantin
 
 ---
 
-## 5. Diretrizes de Segurança, Sessões e RBAC (Release 8.4.8 Hardened)
+## 5. Diretrizes de Segurança, Sessões, RBAC e Governança (Release 8.4.9 Hardened)
 
 1. **Blindagem de Sessões (`SecurityService::initSecureSession`):**
    - Configuração de cookies de sessão nativos com `HttpOnly`, `SameSite=Lax` e `Secure` (sob HTTPS).
@@ -166,6 +166,8 @@ O sistema visual utiliza **Vanilla CSS moderno baseado em tokens HSL**, garantin
    - Descontinuação do armazenamento do token Bearer JWT no cliente; todas as chamadas client-side trafegam através do gateway server-side `pages/api_proxy.php` que consome a sessão do servidor.
 5. **Governança RBAC e Menu Sidebar:**
    - As páginas `pages/usuarios.php` e `pages/auditoria.php` operam com acesso restrito com exclusividade ao perfil `ADMINISTRADOR`, sincronizadas dinamicamente com os itens do menu lateral em `components/sidebar.php`.
+6. **Governança de Entrega Multiplataforma e Commit Obrigatório (`.agents/rules/`):**
+   - Toda alteração no painel é validada simultaneamente em Web Desktop ($\ge 1200\text{px}$), Tablet ($768\text{px} – 1199\text{px}$) e Celular ($< 768\text{px}$) com invalidação de cache via `?v=<?= time() ?>`, seguida de commit semântico obrigatório e publicação contínua para o servidor Locaweb (`http://gestaoepi.tecnologia.ws/`).
 
 
 

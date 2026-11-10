@@ -134,14 +134,14 @@ Utilizada pelo aplicativo Android (`SyncWorker`) para operação em campo sem si
 ```json
 {
   "device_id": "android-uuid-98f24b-2026",
-  "versao_app": "8.4.7",
+  "versao_app": "8.4.9",
   "operacoes": [
     {
       "uuid": "e8d67c90-b1a2-4a55-bc91-5f6e8d9c0a1b",
       "tipo": "ENTREGA",
       "fun_id": 14,
       "pin_hash": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
-      "timestamp_local": "2026-11-04 14:30:00",
+      "timestamp_local": "2026-11-09 14:30:00",
       "itens": [
         { "epi_id": 13, "quantidade": 1, "tamanho": "M", "lote": "LT-2026-013", "motivo": "ADMISSAO" }
       ]
@@ -165,9 +165,9 @@ Utilizada pelo aplicativo Android (`SyncWorker`) para operação em campo sem si
 
 ---
 
-## 4. Garantia de Estabilidade e Paridade (Release 8.4.8 Hardened)
+## 4. Garantia de Estabilidade e Paridade (Release 8.4.9 Hardened)
 
-* **Compatibilidade 100% Preservada:** A blindagem de cibersegurança executada na Release 8.4.8 concentrou-se inteiramente no painel Web e na camada de infraestrutura/servidor.
+* **Compatibilidade 100% Preservada:** A blindagem de cibersegurança e governança executada nas Releases 8.4.8 e 8.4.9 concentrou-se inteiramente no painel Web e na camada de infraestrutura/servidor.
 * **Zero Alterações Contratuais na API:** Não houve modificação em nenhum endpoint, schema JSON, cabeçalho de autenticação Bearer JWT ou regra de negócio da API.
 * **Continuidade do Aplicativo Android:** O aplicativo móvel Android continua consumindo a API com 100% de transparência e estabilidade, sem necessidade de atualização ou geração de novo APK.
 
