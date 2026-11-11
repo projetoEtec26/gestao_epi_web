@@ -45,6 +45,7 @@ Options -Indexes
     # Política de Referência segura
     Header set Referrer-Policy "strict-origin-when-cross-origin"
 
-    # HSTS seguro sem preload e sem includeSubdomains para compatibilidade Locaweb (30 dias)
-    Header set Strict-Transport-Security "max-age=2592000" "expr=%{HTTPS} == 'on' || %{HTTP:X-Forwarded-Proto} == 'https'"
+    # HSTS seguro sem preload e sem includeSubdomains (exceto domínio provisório .tecnologia.ws)
+    Header set Strict-Transport-Security "max-age=0" "expr=%{HTTP_HOST} =~ /\.tecnologia\.ws$/i"
+    Header set Strict-Transport-Security "max-age=2592000" "expr=(%{HTTPS} == 'on' || %{HTTP:X-Forwarded-Proto} == 'https') && %{HTTP_HOST} !~ /\.tecnologia\.ws$/i"
 </IfModule>

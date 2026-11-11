@@ -1,9 +1,8 @@
 <?php
 declare(strict_types=1);
 
-if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
-    session_start();
-}
+require_once __DIR__ . '/../services/SecurityService.php';
+\Services\SecurityService::initSecureSession();
 
 $user = $_SESSION['usuario'] ?? null;
 $login = $user['usu_login'] ?? 'Usuário';

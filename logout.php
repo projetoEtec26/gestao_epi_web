@@ -2,12 +2,12 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/services/ApiService.php';
+require_once __DIR__ . '/services/SecurityService.php';
 
 use Services\ApiService;
+use Services\SecurityService;
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+SecurityService::initSecureSession();
 
 try {
     // Se o usuário possui sessão ativa, tenta informar a API para invalidar o token JWT
@@ -35,8 +35,8 @@ if (ini_get("session.use_cookies")) {
 session_destroy();
 
 // Inicia uma nova sessão apenas para gravar a mensagem de logout com segurança
-session_start();
+SecurityService::initSecureSession();
 $_SESSION['success_message'] = 'Você foi desconectado com sucesso.';
 
-header('Location: login.php');
+header('Location: login.php?v=' . time());
 exit;

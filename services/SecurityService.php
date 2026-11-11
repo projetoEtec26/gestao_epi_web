@@ -194,8 +194,15 @@ class SecurityService {
      */
     public static function initSecureSession(): void {
         if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
-            $isSecure = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
-                        (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+            $host = $_SERVER['HTTP_HOST'] ?? '';
+            $isTecnologiaWs = str_contains($host, '.tecnologia.ws');
+            $isSecure = !$isTecnologiaWs && (
+                (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+                (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+            );
+
+            // Usa nome de cookie dedicado para contornar qualquer PHPSESSID antigo com flag Secure em cache no navegador
+            session_name('GESTAOEPI_SID');
 
             session_set_cookie_params([
                 'lifetime' => 0,

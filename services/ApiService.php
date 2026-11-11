@@ -22,9 +22,10 @@ class ApiService {
         $this->baseUrl = rtrim($config['api_base_url'], '/') . '/';
         $this->appRoot = $config['app_root_url'] ?? '/gestao_epi_web_8/';
 
-        // Garante que a sessão esteja iniciada
+        // Garante que a sessão esteja iniciada com o cookie oficial
         if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
-            session_start();
+            require_once __DIR__ . '/SecurityService.php';
+            SecurityService::initSecureSession();
         }
     }
 
@@ -86,18 +87,9 @@ class ApiService {
                 $headers[] = 'Authorization: Bearer ' . $_SESSION['token'];
             }
 
-            // Libera a trava do arquivo de sessão no PHP antes de iniciar a conexão HTTP para evitar deadlocks no Apache/localhost
-            $wasSessionActive = (session_status() === PHP_SESSION_ACTIVE);
-            if ($wasSessionActive) {
-                session_write_close();
-            }
-
             $ch = curl_init($url);
 
             if ($ch === false) {
-                if ($wasSessionActive && session_status() !== PHP_SESSION_ACTIVE && !headers_sent()) {
-                    @session_start();
-                }
                 return [
                     'success' => false,
                     'message' => 'Não foi possível inicializar a conexão com a API.',
@@ -144,11 +136,6 @@ class ApiService {
             $errno = curl_errno($ch);
             $error = curl_error($ch);
             curl_close($ch);
-
-            // Restaura a sessão se estava ativa antes da requisição HTTP para permitir que o script chamador grave $_SESSION
-            if ($wasSessionActive && session_status() !== PHP_SESSION_ACTIVE && !headers_sent()) {
-                @session_start();
-            }
 
             // Tenta novamente apenas se for falha pontual de rede/gateway (não se for timeout prolongado)
             $isGatewayError = in_array($statusCode, [502, 503, 504], true);
