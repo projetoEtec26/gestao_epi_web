@@ -21,12 +21,13 @@ Options -Indexes
     RewriteEngine On
     RewriteBase /
 
-    # Redirecionamento 301 para HTTPS em Produção (compatível com Proxy Reverso Nginx/Locaweb)
+    # Redirecionamento 301 para HTTPS em Produção (exceto localhost e domínio provisório .tecnologia.ws sem SSL próprio)
     RewriteCond %{HTTPS} off
     RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
     RewriteCond %{HTTP:X-Forwarded-SSL} !on [NC]
     RewriteCond %{HTTP_HOST} !localhost [NC]
     RewriteCond %{HTTP_HOST} !127\.0\.0\.1 [NC]
+    RewriteCond %{HTTP_HOST} !\.tecnologia\.ws$ [NC]
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 </IfModule>
 

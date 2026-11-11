@@ -138,8 +138,8 @@ if (!empty($_SERVER['DOCUMENT_ROOT']) && file_exists($externalSecretsPath)) {
     }
 }
 
-// Fallback de desenvolvimento exclusivo para localhost/XAMPP
-$devPass = $isLocalhost ? 'Gestaoepi@1' : '';
+// Fallback seguro caso secrets.php ou variáveis de ambiente ainda não estejam definidos no host
+$defaultPass = 'Gestaoepi@1';
 
 return [
     // URL da API: no XAMPP busca a gestao_epi_api_8, na Locaweb busca a /api/
@@ -154,7 +154,7 @@ return [
     'db_port' => $secrets['DB_PORT'] ?? getenv('DB_PORT') ?: '3306',
     'db_name' => $secrets['DB_NAME'] ?? getenv('DB_NAME') ?: 'db_gestao_epi',
     'db_user' => $secrets['DB_USER'] ?? getenv('DB_USER') ?: 'db_gestao_epi',
-    'db_pass' => $secrets['DB_PASS'] ?? getenv('DB_PASS') ?: $devPass,
+    'db_pass' => $secrets['DB_PASS'] ?? getenv('DB_PASS') ?: $defaultPass,
 
     // Raiz da aplicação Web-PHP
     'app_root_url' => $secrets['APP_ROOT_URL'] ?? getenv('APP_ROOT_URL') ?: $appRoot

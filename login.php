@@ -52,6 +52,8 @@ if (isset($_SESSION['success_message'])) {
 // Fluxo 1: Login de Usuário
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] === 'login') {
     $login = isset($_POST['usu_login']) ? trim($_POST['usu_login']) : '';
+    $senha = isset($_POST['senha']) ? (string)$_POST['senha'] : '';
+
     // Verificação de bloqueio por Força Bruta
     $lockoutUntil = $_SESSION['login_lockout_until'] ?? 0;
     if ($lockoutUntil > time()) {
