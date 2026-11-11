@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+// Garante o fuso horário padrão oficial do Brasil / São Paulo (America/Sao_Paulo - GMT-3)
+date_default_timezone_set('America/Sao_Paulo');
+
 require_once __DIR__ . '/../services/SecurityService.php';
 \Services\SecurityService::initSecureSession();
 
@@ -303,14 +306,15 @@ try {
         </thead>
         <tbody>
             <?php foreach ($logs as $log): 
-                $dtRaw = $log['aud_data_hora'] ?? $log['datahora'] ?? '';
-                $dtFmt = !empty($dtRaw) ? (new DateTime($dtRaw))->format('d/m/Y H:i') : '---';
+                $dtRaw = $log['log_datahora'] ?? $log['aud_data_hora'] ?? $log['datahora'] ?? '';
+                $dtFmt = !empty($dtRaw) ? formatarDataHoraBr((string)$dtRaw, 'd/m/Y H:i:s') : '---';
                 $usu = $log['usu_login'] ?? $log['usuario'] ?? 'Sistema';
                 $perfil = $log['usu_perfil'] ?? $log['perfil'] ?? '---';
-                $acao = strtoupper((string)($log['aud_acao'] ?? $log['acao'] ?? 'LOG'));
-                $entidade = $log['aud_entidade'] ?? $log['entidade'] ?? '---';
-                $regId = $log['aud_registro_id'] ?? $log['reg_id'] ?? '-';
-                $desc = $log['aud_descricao'] ?? $log['descricao'] ?? '';
+                $acao = strtoupper((string)($log['log_acao'] ?? $log['aud_acao'] ?? $log['acao'] ?? 'LOG'));
+                $entidade = $log['log_tabela'] ?? $log['aud_entidade'] ?? $log['entidade'] ?? '---';
+                $regId = $log['log_registro_id'] ?? $log['aud_registro_id'] ?? $log['reg_id'] ?? '-';
+                $detJson = json_decode((string)($log['log_detalhes'] ?? ''), true);
+                $desc = $log['log_ocorrencia'] ?? $detJson['ocorrencia'] ?? $log['aud_descricao'] ?? $log['descricao'] ?? '';
 
                 $badgeClass = 'badge-auth';
                 if ($acao === 'INSERT' || $acao === 'CRIACAO' || $acao === 'ENTREGA') $badgeClass = 'badge-insert';

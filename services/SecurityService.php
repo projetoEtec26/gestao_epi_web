@@ -5,6 +5,9 @@ namespace Services;
 
 use Exception;
 
+// Garante o fuso horário padrão oficial do Brasil / São Paulo (America/Sao_Paulo - GMT-3)
+date_default_timezone_set('America/Sao_Paulo');
+
 /**
  * Service responsável pela Segurança da Informação do sistema Gestão EPI Web.
  * Garante interoperabilidade de Criptografia (AES-256-GCM), Hashes (Bcrypt / SHA-256) e RBAC
@@ -193,6 +196,7 @@ class SecurityService {
      * Inicializa a Sessão PHP de forma segura com suporte a HTTPS e cookies HttpOnly + SameSite=Strict
      */
     public static function initSecureSession(): void {
+        date_default_timezone_set('America/Sao_Paulo');
         if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
             $host = $_SERVER['HTTP_HOST'] ?? '';
             $isTecnologiaWs = str_contains($host, '.tecnologia.ws');

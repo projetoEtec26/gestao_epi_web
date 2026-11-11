@@ -6,12 +6,18 @@ date_default_timezone_set('America/Sao_Paulo');
 
 if (!function_exists('formatarDataHoraBr')) {
     function formatarDataHoraBr(?string $datetimeStr, string $format = 'd/m/Y H:i'): string {
+        date_default_timezone_set('America/Sao_Paulo');
         if (empty($datetimeStr) || $datetimeStr === '0000-00-00 00:00:00' || $datetimeStr === '0000-00-00') {
             return '---';
         }
         try {
             $tzBrasil = new DateTimeZone('America/Sao_Paulo');
-            $dt = new DateTime((string)$datetimeStr, $tzBrasil);
+            $raw = trim((string)$datetimeStr);
+            if (str_ends_with($raw, 'Z') || str_ends_with($raw, '+00:00') || str_ends_with($raw, '+0000')) {
+                $dt = new DateTime($raw, new DateTimeZone('UTC'));
+            } else {
+                $dt = new DateTime($raw, $tzBrasil);
+            }
             $dt->setTimezone($tzBrasil);
             return $dt->format($format);
         } catch (\Throwable $e) {
@@ -23,11 +29,14 @@ if (!function_exists('formatarDataHoraBr')) {
 
 if (!function_exists('formatarDataBr')) {
     function formatarDataBr(?string $dateStr): string {
+        date_default_timezone_set('America/Sao_Paulo');
         if (empty($dateStr) || $dateStr === '0000-00-00') {
             return '---';
         }
         try {
-            $dt = new DateTime((string)$dateStr, new DateTimeZone('America/Sao_Paulo'));
+            $tzBrasil = new DateTimeZone('America/Sao_Paulo');
+            $dt = new DateTime(trim((string)$dateStr), $tzBrasil);
+            $dt->setTimezone($tzBrasil);
             return $dt->format('d/m/Y');
         } catch (\Throwable $e) {
             $ts = strtotime((string)$dateStr);

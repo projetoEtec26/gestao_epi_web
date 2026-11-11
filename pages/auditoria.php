@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+// Garante o fuso horário padrão oficial do Brasil / São Paulo (America/Sao_Paulo - GMT-3)
+date_default_timezone_set('America/Sao_Paulo');
+
 $page_title = 'Auditoria de Logs';
 $active_menu = 'auditoria';
 $page_roles = ['ADMINISTRADOR']; // Apenas Administradores do Sistema possuem acesso aos logs de auditoria
@@ -514,11 +517,19 @@ function verDetalhesLog(logId) {
                 document.getElementById('det-log-id').innerText = log.log_id;
                 let dtDisplay = '---';
                 if (log.log_datahora) {
-                    const m = String(log.log_datahora).match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/);
-                    if (m) {
-                        dtDisplay = `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}` + (m[6] !== undefined ? `:${m[6]}` : '');
+                    const rawDt = String(log.log_datahora).trim();
+                    if (rawDt.endsWith('Z') || rawDt.endsWith('+00:00') || rawDt.endsWith('+0000')) {
+                        const parsedDt = new Date(rawDt);
+                        if (!isNaN(parsedDt.getTime())) {
+                            dtDisplay = parsedDt.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }).replace(',', '');
+                        }
                     } else {
-                        dtDisplay = String(log.log_datahora);
+                        const m = rawDt.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/);
+                        if (m) {
+                            dtDisplay = `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}` + (m[6] !== undefined ? `:${m[6]}` : ':00');
+                        } else {
+                            dtDisplay = rawDt;
+                        }
                     }
                 }
                 document.getElementById('det-log-data').innerText = dtDisplay;

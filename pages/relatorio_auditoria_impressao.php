@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+// Garante o fuso horário padrão oficial do Brasil / São Paulo (America/Sao_Paulo - GMT-3)
+date_default_timezone_set('America/Sao_Paulo');
+
 require_once __DIR__ . '/../services/SecurityService.php';
 \Services\SecurityService::initSecureSession();
 
@@ -310,17 +313,8 @@ try {
         <?php else: ?>
             <?php foreach ($logs as $log): ?>
                 <?php
-                // Formatação de data/hora
-                $dataLog = '---';
-                if (!empty($log['log_datahora'])) {
-                    try {
-                        $dt = new DateTime((string)$log['log_datahora'], $tzBrasil);
-                        $dt->setTimezone($tzBrasil);
-                        $dataLog = $dt->format('d/m/Y H:i');
-                    } catch (\Throwable $e) {
-                        $dataLog = substr((string)$log['log_datahora'], 0, 16);
-                    }
-                }
+                // Formatação de data/hora no fuso oficial Brasil / São Paulo (America/Sao_Paulo)
+                $dataLog = formatarDataHoraBr($log['log_datahora'] ?? null, 'd/m/Y H:i:s');
 
                 $usuarioNome = $log['usu_login'] ?? 'Sistema/Automat.';
                 $perfilNome = $log['usu_perfil'] ?? $log['perfil'] ?? '---';
@@ -362,14 +356,8 @@ try {
 let isGeneratingAuditoriaPDF = false;
 
 function formatarDataTimestampAuditoria() {
-    const agora = new Date();
-    const ano = agora.getFullYear();
-    const mes = String(agora.getMonth() + 1).padStart(2, '0');
-    const dia = String(agora.getDate()).padStart(2, '0');
-    const hora = String(agora.getHours()).padStart(2, '0');
-    const min = String(agora.getMinutes()).padStart(2, '0');
-    const seg = String(agora.getSeconds()).padStart(2, '0');
-    return `${ano}${mes}${dia}_${hora}${min}${seg}`;
+    const agoraSp = new Date().toLocaleString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+    return agoraSp.replace(/[-:]/g, '').replace(' ', '_');
 }
 
 function obterNomeArquivoAuditoriaPDF() {

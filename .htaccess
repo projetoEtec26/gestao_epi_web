@@ -5,6 +5,14 @@
 # Desativa a listagem pública de diretórios
 Options -Indexes
 
+# Fuso horário oficial Brasil / São Paulo (America/Sao_Paulo - GMT-3)
+<IfModule mod_env.c>
+    SetEnv TZ America/Sao_Paulo
+</IfModule>
+<IfModule mod_php.c>
+    php_value date.timezone "America/Sao_Paulo"
+</IfModule>
+
 # Bloqueio de arquivos sensíveis, documentações, backups e configurações
 <FilesMatch "(^\.env|^\.git|secrets.*\.php|\.sql$|\.log$|\.md$|Dockerfile|composer\.json)">
     <IfModule mod_authz_core.c>
