@@ -1001,22 +1001,71 @@ async function compartilharReciboDevolucaoPDF() {
 
 function imprimirReciboDevolucao() {
     const area = document.getElementById('area-impressao-devolucao').innerHTML;
-    const janela = window.open('', '_blank', 'width=800,height=600');
-    
-    janela.document.write('<html><head><title>Imprimir Termo de Devolução de EPI</title>');
+    const janela = window.open('', '_blank', 'width=850,height=700');
+    if (!janela) {
+        window.print();
+        return;
+    }
+
+    janela.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Imprimir Termo de Devolução de EPI</title>');
     janela.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">');
-    janela.document.write('<style>body { font-family: sans-serif; padding: 20px; }</style>');
+    janela.document.write(`<style>
+        @page { size: A4 portrait; margin: 10mm; }
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #1e293b;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .card {
+            display: block !important;
+            border: 1px solid #cbd5e1 !important;
+            box-shadow: none !important;
+            padding: 16px !important;
+            margin: 0 !important;
+            page-break-before: avoid !important;
+            break-before: avoid !important;
+        }
+        .table-responsive {
+            overflow: visible !important;
+        }
+        #dev-texto-termo {
+            max-height: none !important;
+            overflow: visible !important;
+        }
+        .mb-4 {
+            margin-bottom: 12px !important;
+        }
+        .pb-3 {
+            padding-bottom: 10px !important;
+        }
+        .p-3 {
+            padding: 10px !important;
+        }
+        tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+    </style>`);
     janela.document.write('</head><body>');
     janela.document.write(area);
     janela.document.write('</body></html>');
-    
+
     janela.document.close();
     janela.focus();
-    
-    setTimeout(() => {
+
+    let printed = false;
+    const dispararImpressao = () => {
+        if (printed) return;
+        printed = true;
         janela.print();
-        janela.close();
-    }, 500);
+    };
+    janela.onafterprint = () => janela.close();
+    janela.onload = () => setTimeout(dispararImpressao, 150);
+    setTimeout(dispararImpressao, 500);
 }
 
 function exibirModalDevolucao(dadosDevolucao) {
