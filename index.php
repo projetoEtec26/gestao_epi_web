@@ -14,6 +14,6 @@ if (isset($_SESSION['token']) && $_SESSION['token'] !== '' && isset($_SESSION['u
     exit;
 }
 
-// Caso contrário, redireciona para a tela de login
-header('Location: login.php');
+// Caso contrário, redireciona para a tela de login (com cache-busting para evitar 301 em cache no navegador)
+header('Location: login.php?v=' . time());
 exit;

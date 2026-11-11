@@ -206,11 +206,7 @@ class SecurityService {
                 'samesite' => 'Lax'
             ]);
             session_start();
-
-            if (!isset($_SESSION['initiated'])) {
-                session_regenerate_id(true);
-                $_SESSION['initiated'] = true;
-            }
+            $_SESSION['initiated'] = true;
         }
     }
 

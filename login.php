@@ -411,7 +411,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
             <div><strong>Bloqueio Ativo:</strong> Sua senha é temporária. Cadastre uma nova senha para continuar.</div>
         </div>
 
-        <form method="POST" action="login.php" novalidate>
+        <form method="POST" action="login.php?auth=<?= time() ?>" novalidate>
             <input type="hidden" name="acao" value="alterar_senha">
             
             <!-- Campo Nova Senha -->
@@ -450,7 +450,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
         </form>
     <?php else: ?>
         <!-- FORMULÁRIO DE LOGIN NORMAL (EXATAMENTE COMO NO MODELO DO PRINT WEB) -->
-        <form method="POST" action="login.php" novalidate>
+        <form method="POST" action="login.php?auth=<?= time() ?>" novalidate>
             <input type="hidden" name="acao" value="login">
             
             <!-- Campo Usuário -->
