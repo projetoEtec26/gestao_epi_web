@@ -63,7 +63,7 @@ function formatarLogAuditoria(array $log): array {
         }
     } elseif (str_contains($lower, 'relatório') || str_contains($lower, 'relatorio') || str_contains($lower, 'consultado')) {
         $tipo = 'purple';
-        $icone = 'bi-file-earmark-bar-chart-fill';
+        $icone = 'bi-file-earmark-bar-graph-fill';
         $badgeTag = 'RELATÓRIO';
     } elseif (str_contains($lower, 'alterad') || str_contains($lower, 'editad') || str_contains($lower, 'atualizad') || str_contains($lower, 'campo')) {
         $tipo = 'warning';
@@ -753,7 +753,7 @@ if (empty($ultimasAtividades)) {
         ['tipo' => 'primary', 'icone' => 'bi-fingerprint', 'badge' => 'ASSINATURA', 'texto' => 'Validação de PIN de assinatura efetuada com sucesso.', 'data' => 'Atividade em ' . date('d/m') . ' às 21:17'],
         ['tipo' => 'info', 'icone' => 'bi-shield-lock-fill', 'badge' => 'ACESSO', 'texto' => 'Login realizado no sistema pelo dispositivo Motorola Moto G(60).', 'data' => 'Atividade em ' . date('d/m') . ' às 21:16'],
         ['tipo' => 'warning', 'icone' => 'bi-pencil-square', 'badge' => 'CADASTRO', 'texto' => '3 campos alterados no cadastro do EPI (Exige Tamanho, Status, C.A.).', 'data' => 'Atividade em ' . date('d/m') . ' às 21:14'],
-        ['tipo' => 'purple', 'icone' => 'bi-file-earmark-bar-chart-fill', 'badge' => 'RELATÓRIO', 'texto' => 'Relatório Geral de Consumo de EPIs gerado com sucesso.', 'data' => 'Atividade em ' . date('d/m') . ' às 21:10']
+        ['tipo' => 'purple', 'icone' => 'bi-file-earmark-bar-graph-fill', 'badge' => 'RELATÓRIO', 'texto' => 'Relatório Geral de Consumo de EPIs gerado com sucesso.', 'data' => 'Atividade em ' . date('d/m') . ' às 21:10']
     ];
 }
 
@@ -1836,7 +1836,7 @@ require_once __DIR__ . '/../components/sidebar.php';
 .activity-icon-primary { background-color: #dbeafe; color: #2563eb; }
 .activity-icon-info { background-color: #e0f2fe; color: #0284c7; }
 .activity-icon-warning { background-color: #fef3c7; color: #d97706; }
-.activity-icon-purple { background-color: #f3e8ff; color: #7c3aed; }
+.activity-icon-purple { background-color: #ede9fe; color: #6d28d9; }
 .activity-icon-success { background-color: #d1fae5; color: #059669; }
 
 .badge-subtle-info { background: #e0f2fe; color: #0284c7; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
@@ -1844,7 +1844,15 @@ require_once __DIR__ . '/../components/sidebar.php';
 .badge-subtle-success { background: #d1fae5; color: #059669; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
 .badge-subtle-danger { background: #fee2e2; color: #dc2626; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
 .badge-subtle-primary { background: #dbeafe; color: #2563eb; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
-.badge-subtle-purple { background: #f3e8ff; color: #7c3aed; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+.badge-subtle-purple { background: #ede9fe; color: #6d28d9; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+
+html.dark-mode .activity-icon-purple,
+body.dark-mode .activity-icon-purple,
+html.dark-mode .badge-subtle-purple,
+body.dark-mode .badge-subtle-purple {
+    background-color: rgba(139, 92, 246, 0.25) !important;
+    color: #c4b5fd !important;
+}
 
 .activity-text {
     font-size: 0.875rem;
