@@ -93,11 +93,12 @@ Para que o deploy funcione, os seguintes segredos devem estar cadastrados nas co
 ### 3.3 Endereço de Produção Oficial
 * **Painel Web Homologado:** [http://gestaoepi.tecnologia.ws/](http://gestaoepi.tecnologia.ws/)
 
-### 3.4 Governança de Versionamento e Regra de Commit e Publicação Obrigatória
-Conforme instituído nas regras do projeto ([`.agents/rules/commit_obrigatorio.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/commit_obrigatorio.md) e [`.agents/rules/multiplataforma.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/multiplataforma.md)):
-1. **Validação Local Multiplataforma:** Toda alteração de código, layout, configuração ou documentação deve ser validada no XAMPP local nas três plataformas (Web Desktop $\ge 1200\text{px}$, Tablet $768\text{px} – 1199\text{px}$ e Celular $< 768\text{px}$).
-2. **Commit Semântico Obrigatório:** Ao concluir qualquer alteração, executa-se obrigatoriamente `git add` e `git commit` utilizando o padrão *Conventional Commits* (`feat:`, `fix:`, `docs:`, `style:`, `refactor:`). Nenhuma modificação pode permanecer pendente na árvore de trabalho (`working tree dirty`).
-3. **Publicação Contínua (`git push`):** Em seguida, realiza-se o `git push` para a branch `main` no GitHub (`https://github.com/projetoEtec26/gestao_epi_web.git`), disparando imediatamente o workflow de deploy FTP para atualizar a produção na Locaweb.
+### 3.4 Governança de Versionamento, Fuso Horário e Regra de Commit e Publicação Obrigatória
+Conforme instituído nas regras do projeto ([`.agents/rules/commit_obrigatorio.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/commit_obrigatorio.md), [`.agents/rules/multiplataforma.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/multiplataforma.md) e [`.agents/rules/fuso_horario_brasil.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/fuso_horario_brasil.md)):
+1. **Padronização de Fuso Horário (`America/Sao_Paulo`):** Todo script PHP, sessão MySQL (`SET time_zone = '-03:00'`) e configuração Apache (`.htaccess`) deve operar estritamente no fuso de São Paulo / Brasília (GMT-3).
+2. **Validação Local Multiplataforma:** Toda alteração de código, layout, configuração ou documentação deve ser validada no XAMPP local nas três plataformas (Web Desktop $\ge 1200\text{px}$, Tablet $768\text{px} – 1199\text{px}$ e Celular $< 768\text{px}$).
+3. **Commit Semântico Obrigatório:** Ao concluir qualquer alteração, executa-se obrigatoriamente `git add` e `git commit` utilizando o padrão *Conventional Commits* (`feat:`, `fix:`, `docs:`, `style:`, `refactor:`). Nenhuma modificação pode permanecer pendente na árvore de trabalho (`working tree dirty`).
+4. **Publicação Contínua (`git push`):** Em seguida, realiza-se o `git push` para a branch `main` no GitHub (`https://github.com/projetoEtec26/gestao_epi_web.git`), disparando imediatamente o workflow de deploy FTP para atualizar a produção na Locaweb.
 
 ---
 
@@ -158,6 +159,15 @@ Com base no diagnóstico da **Auditoria de Cybersecurity de 04/11/2026** ([`docs
 Para forçar o uso exclusivo de HTTPS (respeitando o proxy reverso da Locaweb), ativar cabeçalhos defensivos e impedir o acesso direto a arquivos de documentação e backups, o arquivo `.htaccess` na raiz da aplicação está configurado da seguinte forma:
 ```apache
 Options -Indexes
+
+# Padronização de Fuso Horário Oficial: Brasil / São Paulo (GMT-3)
+SetEnv TZ America/Sao_Paulo
+<IfModule mod_php.c>
+    php_value date.timezone "America/Sao_Paulo"
+</IfModule>
+<IfModule mod_php8.c>
+    php_value date.timezone "America/Sao_Paulo"
+</IfModule>
 
 <FilesMatch "(^\.env|^\.git|secrets.*\.php|\.sql$|\.log$|\.md$|Dockerfile|composer\.json)">
     <IfModule mod_authz_core.c>

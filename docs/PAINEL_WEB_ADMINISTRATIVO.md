@@ -58,10 +58,10 @@ O sistema visual utiliza **Vanilla CSS moderno baseado em tokens HSL**, garantin
   - EPIs com C.A. vencido no catálogo ou em uso (Prioridade Máxima / Vermelho).
   - Colaboradores com EPIs próximos da vida útil (Troca programada em 30 dias).
   - Colaboradores sem PIN de assinatura cadastrado ou com pendência de termo.
-* **Gráficos Dinâmicos (Chart.js):**
-  - Entregas mensais x devoluções.
-  - Distribuição de custos por departamento.
-  - Top 5 EPIs mais fornecidos.
+* **Gráficos Dinâmicos (Chart.js) e Top 5 EPIs:**
+  - Entregas semanais (últimos 7 dias) e mensais com rótulos numéricos sobre as barras.
+  - **Top 5 EPIs Mais Utilizados (`GERAL` e `MENSAL`):** Ordenação determinística com desempate alfabético (`ORDER BY total DESC, nome ASC` + `normalizarParaOrdenacaoPHP()`) e atualização inteligente do DOM durante o polling em tempo real, garantindo que equipamentos empatados mantenham sempre a mesma posição fixa.
+  - **Feed de Últimas Atividades e Central de Alertas:** Ícones semânticos do Bootstrap Icons (`bi-file-earmark-bar-graph-fill` para relatórios, `bi-shield-lock-fill` para acessos, etc.) e abas `.nav-pills` com alto contraste tanto no Modo Claro (texto branco `#ffffff` sobre fundo azul `#2563eb`) quanto no Modo Escuro.
 
 ### 3.2 Gestão de Funcionários (`pages/funcionarios.php`)
 * **CRUD Completo:** Cadastro, visualização de ficha, edição e desligamento.
@@ -83,7 +83,7 @@ O sistema visual utiliza **Vanilla CSS moderno baseado em tokens HSL**, garantin
   - **Garantia de Lote:** O campo Lote sob nenhuma hipótese exibe `---` ou vazio, utilizando resolução em cascata (`item_numero_lote` -> `epi_numero_lote` -> `epi_identificacao` -> `LT-ANO-COD`).
   - Termo de Compromisso de guarda e conservação da NR-6.
   - Trilha judicial de auditoria: Hash SHA-256 da assinatura, tipo de assinatura (PIN), data e hora legal.
-  - Botão de "Imprimir Termo" com formatação otimizada para folhas físicas A4.
+  - Botão de "Imprimir Termo" com formatação otimizada para folhas físicas A4 (`.card` com `display: block !important` e `break-before: avoid !important` para eliminar páginas iniciais em branco no Chrome/Edge).
 
 ### 3.5 Workflow de Nova Entrega (`pages/nova_entrega.php`)
 * **Fluxo em Etapas:**
@@ -102,7 +102,7 @@ O sistema visual utiliza **Vanilla CSS moderno baseado em tokens HSL**, garantin
 
 ### 3.8 Central de Relatórios Gerenciais (`pages/relatorios.php`)
 * **Relatório Geral de Entregas:** Histórico analítico com paginação e filtros combinados.
-* **Relatório Financeiro de Custos (`pages/relatorio_financeiro.php`):** Investimento por centro de custo/departamento.
+* **Relatório Financeiro de Custos (`pages/relatorio_financeiro.php`):** Investimento por centro de custo/departamento com seção **Análise Gráfica de Custos** exibindo valores monetários em `R$`, percentuais (`%`) e quantidades (`un`) diretamente sobre as fatias do gráfico de rosca (**Distribuição de Custos por Setor**), na legenda lateral e nas barras horizontais (**Top EPIs por Impacto Financeiro**).
 * **Relatório de Consumo de EPIs (`pages/relatorio_consumo_epi.php`):** Saídas quantitativas por período e equipamento.
 * **Relatório de Validade de C.A. (`pages/relatorio_validade_ca.php`):** Rastreabilidade de conformidade com a NR-6.
 * **Modelo Oficial de Impressão A4 Paisagem (`pages/relatorio_auditoria_impressao.php`):** Folha padronizada para fiscalização trabalhista.
@@ -151,11 +151,10 @@ O sistema visual utiliza **Vanilla CSS moderno baseado em tokens HSL**, garantin
 
 ---
 
-## 5. Diretrizes de Segurança, Sessões, RBAC e Governança (Release 8.4.9 Hardened)
+## 5. Diretrizes de Segurança, Sessões, RBAC e Governança (Release 8.5.0 Hardened)
 
 1. **Blindagem de Sessões (`SecurityService::initSecureSession`):**
-   - Configuração de cookies de sessão nativos com `HttpOnly`, `SameSite=Lax` e `Secure` (sob HTTPS).
-   - Prevenção ativa de roubo de sessão (*Session Hijacking*) e Cross-Site Scripting (XSS).
+   - Configuração do cookie de sessão dedicado `GESTAOEPI_SID` com `HttpOnly`, `SameSite=Lax` e `Secure` (sob HTTPS), prevenindo conflitos de sessão entre ambientes HTTP/HTTPS e roubo de sessão (*Session Hijacking*).
 2. **Proteção Contra Força Bruta (`login.php`):**
    - Monitoramento contínuo de tentativas de autenticação inválidas.
    - Bloqueio temporário progressivo de 60 segundos após 5 erros consecutivos.
@@ -166,7 +165,8 @@ O sistema visual utiliza **Vanilla CSS moderno baseado em tokens HSL**, garantin
    - Descontinuação do armazenamento do token Bearer JWT no cliente; todas as chamadas client-side trafegam através do gateway server-side `pages/api_proxy.php` que consome a sessão do servidor.
 5. **Governança RBAC e Menu Sidebar:**
    - As páginas `pages/usuarios.php` e `pages/auditoria.php` operam com acesso restrito com exclusividade ao perfil `ADMINISTRADOR`, sincronizadas dinamicamente com os itens do menu lateral em `components/sidebar.php`.
-6. **Governança de Entrega Multiplataforma e Commit Obrigatório (`.agents/rules/`):**
+6. **Governança de Fuso Horário Brasil / São Paulo, Multiplataforma e Commit Obrigatório (`.agents/rules/`):**
+   - Operação estrita sob o fuso `America/Sao_Paulo` (GMT-3) em todas as camadas (`.htaccess`, PHP e MySQL).
    - Toda alteração no painel é validada simultaneamente em Web Desktop ($\ge 1200\text{px}$), Tablet ($768\text{px} – 1199\text{px}$) e Celular ($< 768\text{px}$) com invalidação de cache via `?v=<?= time() ?>`, seguida de commit semântico obrigatório e publicação contínua para o servidor Locaweb (`http://gestaoepi.tecnologia.ws/`).
 
 

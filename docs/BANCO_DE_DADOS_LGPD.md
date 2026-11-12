@@ -112,13 +112,13 @@ Armazena de forma imutável todos os eventos críticos do sistema:
 
 ---
 
-## 4. Governança de Dumps e Isolamento de Credenciais (Release 8.4.9 Hardened)
+## 4. Governança de Dumps, Fuso Horário e Isolamento de Credenciais (Release 8.5.0 Hardened)
 
 1. **Remoção de Arquivos de Dumps do Git (Art. 46 da LGPD):**
    - Os arquivos de dump `database_backup.sql` e `database_schema_v7.sql` foram removidos do versionamento do Git e adicionados ao `.gitignore` e à lista de exclusão do deploy FTP (`.github/workflows/deploy.yml`), impedindo a exposição de CPFs, eSocial e hashes de operadores.
-2. **Gerenciamento de Segredos de Conexão:**
-   - O arquivo `config/api.php` não armazena credenciais em texto claro para produção.
-   - Conexões em produção utilizam carregamento isolado fora da raiz pública (`/home/usuario_locaweb/secrets.php`) ou variáveis de ambiente.
+2. **Gerenciamento de Segredos de Conexão e Sessão MySQL em Fuso Horário Brasil (`-03:00`):**
+   - O arquivo `config/api.php` não armazena credenciais em texto claro para produção; conexões em produção utilizam carregamento isolado fora da raiz pública (`/home/usuario_locaweb/secrets.php`) ou variáveis de ambiente.
+   - Todas as conexões PDO com o MySQL executam obrigatoriamente `SET time_zone = '-03:00'`, sincronizando funções SQL (`NOW()`, `CURDATE()`, `CURRENT_TIMESTAMP`) com o fuso horário `America/Sao_Paulo` ([`.agents/rules/fuso_horario_brasil.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/fuso_horario_brasil.md)).
 3. **Firewall e Restrição de Acesso:**
    - A porta TCP 3306 do banco MySQL Cloud (`db_gestao_epi.mysql.dbaas.com.br`) é configurada para acesso restrito às sub-redes da aplicação, eliminando varreduras não autorizadas a partir da internet.
 

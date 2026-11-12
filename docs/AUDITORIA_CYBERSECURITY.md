@@ -1,6 +1,6 @@
 # Relatório Técnico de Auditoria de Cybersecurity e Governança
-## Ecossistema Corporativo Gestão EPI — Release 8.4.9 Hardened
-**Data da Auditoria Inicial:** 04/11/2026 | **Data do Hardening e Governança:** 09/11/2026  
+## Ecossistema Corporativo Gestão EPI — Release 8.5.0 Hardened
+**Data da Auditoria Inicial:** 04/11/2026 | **Data do Hardening e Governança:** 11/11/2026  
 **Classificação:** Confidencial / Técnico  
 **Alvo da Auditoria:** Gestão de EPIs Web 14, API RESTful Backend, Banco de Dados MySQL Cloud e Aplicativo Mobile Android  
 **Regime:** Diagnóstico Independente e Integrado (OWASP Top 10, LGPD e NR-6)
@@ -159,16 +159,16 @@ Em 09/11/2026, todas as vulnerabilidades mapeadas nas Etapas 1 a 6 foram impleme
 1. **VULN-01 (Recuperação de Senha):** Eliminado vazamento de código em JSON e bypass `123456`; validação obrigatória de sessão na redefinição com `hash_equals` e rate limit de 5 tentativas.
 2. **VULN-02 (Credenciais no Código e Dumps SQL):** Removidos dumps `.sql` do rastreamento Git; implementado carregamento de `secrets.php` fora do docroot.
 3. **VULN-03 (Forçamento de HTTPS):** Ativado redirecionamento 301 seguro contra loops no `.htaccess`.
-4. **VULN-04 (Cookies de Sessão):** `PHPSESSID` emitido com `HttpOnly`, `SameSite=Lax` e `Secure`.
+4. **VULN-04 (Cookies de Sessão):** Cookie dedicado `GESTAOEPI_SID` emitido com `HttpOnly`, `SameSite=Lax` e `Secure` (quando em HTTPS), prevenindo conflitos de sessão entre HTTP e HTTPS.
 5. **VULN-05 (Bloqueio de Documentos):** Bloqueio no `.htaccess` e exclusão de `.md`, `.pdf` e `Dockerfile` no pipeline de deploy FTP.
 6. **VULN-06 (JWT no LocalStorage):** Eliminado `localStorage.setItem('token')` e purgado token residual.
 7. **VULN-07 (Proteção Anti-CSRF):** Adicionados helpers `getCsrfToken()` e `validateCsrfToken()` em `SecurityService.php`.
 8. **VULN-08 (RBAC):** `pages/usuarios.php`, `pages/auditoria.php` e links na barra lateral restritos a `ADMINISTRADOR`.
 9. **VULN-09 (IDOR):** Validação de parâmetro numérico em `ficha_colaborador.php`.
 10. **VULN-10 (Força Bruta):** Bloqueio temporário de 60 segundos após 5 tentativas de login consecutivas.
-11. **Governança Contínua (Release 8.4.9):** Instituição da regra obrigatória de commit semântico e deploy contínuo (`.agents/rules/commit_obrigatorio.md`), mantendo rastreabilidade total entre o repositório GitHub e o servidor de produção na Locaweb.
+11. **Governança Contínua e Fuso Horário Brasil/SP (Release 8.5.0):** Instituição das regras obrigatórias de fuso horário `America/Sao_Paulo` (`.agents/rules/fuso_horario_brasil.md`), multiplataforma (`.agents/rules/multiplataforma.md`) e commit semântico com deploy contínuo (`.agents/rules/commit_obrigatorio.md`), mantendo rastreabilidade total entre o repositório GitHub e o servidor de produção na Locaweb.
 
 ---
 
-*Relatório técnico consolidado e validado em 09/11/2026 para o ecossistema corporativo Gestão EPI v8.4.9 Hardened.*
+*Relatório técnico consolidado e validado em 11/11/2026 para o ecossistema corporativo Gestão EPI v8.5.0 Hardened.*
 

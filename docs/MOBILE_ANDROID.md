@@ -96,10 +96,10 @@ Quando o operador está em áreas sem sinal de internet (subsolos, áreas rurais
 
 ---
 
-## 7. Garantia de Operação e Estabilidade no Ecossistema (Release 8.4.9 Hardened)
+## 7. Garantia de Operação e Estabilidade no Ecossistema (Release 8.5.0 Hardened)
 
-* **Desacoplamento e Segurança:** O aplicativo Android opera de forma 100% desacoplada das tecnologias de apresentação web (PHP, Apache, `.htaccess` e cookies de navegador).
-* **Validação de PIN e Sincronização:** Os algoritmos de validação de assinatura digital (`HashUtils.java` com `SHA-256 + Salt`) permanecem 100% alinhados à classe `SecurityService.php`.
-* **Sem Necessidade de Recompilação:** Nenhuma das melhorias de segurança e governança implementadas na Web impacta a camada de rede do Android (Retrofit 2), mantendo a versão de produção do aplicativo em pleno funcionamento e com paridade 1:1 de KPIs com o painel Web (`http://gestaoepi.tecnologia.ws/`).
+* **Desacoplamento e Segurança:** O aplicativo Android opera de forma 100% desacoplada das tecnologias de apresentação web (PHP, Apache, `.htaccess` e cookies de sessão `GESTAOEPI_SID`).
+* **Validação de PIN, Fuso Horário e Sincronização:** Os algoritmos de validação de assinatura digital (`HashUtils.java` com `SHA-256 + Salt`) e o fuso horário `America/Sao_Paulo` (GMT-3) permanecem 100% alinhados à classe `SecurityService.php` e ao banco MySQL Cloud.
+* **Paridade de Indicadores (Top 5 EPIs e Conformidade):** A ordenação do card **Top 5 EPIs Mais Utilizados** no Painel Web aplica a mesma consulta de entregas com desempate alfabético determinístico, mantendo paridade 1:1 de KPIs com o aplicativo Android (`http://gestaoepi.tecnologia.ws/`).
 
 

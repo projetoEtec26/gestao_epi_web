@@ -134,7 +134,7 @@ Utilizada pelo aplicativo Android (`SyncWorker`) para operação em campo sem si
 ```json
 {
   "device_id": "android-uuid-98f24b-2026",
-  "versao_app": "8.4.9",
+  "versao_app": "8.5.0",
   "operacoes": [
     {
       "uuid": "e8d67c90-b1a2-4a55-bc91-5f6e8d9c0a1b",
@@ -165,9 +165,9 @@ Utilizada pelo aplicativo Android (`SyncWorker`) para operação em campo sem si
 
 ---
 
-## 4. Garantia de Estabilidade e Paridade (Release 8.4.9 Hardened)
+## 4. Garantia de Estabilidade e Paridade (Release 8.5.0 Hardened)
 
-* **Compatibilidade 100% Preservada:** A blindagem de cibersegurança e governança executada nas Releases 8.4.8 e 8.4.9 concentrou-se inteiramente no painel Web e na camada de infraestrutura/servidor.
+* **Compatibilidade 100% Preservada:** A blindagem de cibersegurança, padronização de fuso horário (`America/Sao_Paulo`) e governança executada nas Releases 8.4.8 a 8.5.0 concentrou-se no painel Web e na camada de infraestrutura/servidor.
 * **Zero Alterações Contratuais na API:** Não houve modificação em nenhum endpoint, schema JSON, cabeçalho de autenticação Bearer JWT ou regra de negócio da API.
 * **Continuidade do Aplicativo Android:** O aplicativo móvel Android continua consumindo a API com 100% de transparência e estabilidade, sem necessidade de atualização ou geração de novo APK.
 

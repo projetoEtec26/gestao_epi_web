@@ -88,12 +88,12 @@ De acordo com as exigências da **Norma Regulamentadora NR-6** e auditorias de f
 
 ---
 
-## 6. Governança, Cibersegurança e Entrega Contínua (Release 8.4.9 Hardened)
+## 6. Governança, Cibersegurança e Entrega Contínua (Release 8.5.0 Hardened)
 
-Em conformidade com a auditoria e implementação de **Hardening (09/11/2026)** documentada em [`docs/AUDITORIA_CYBERSECURITY.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md) e com as regras de engenharia em [`.agents/rules/`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/):
-* **Comunicação Criptografada Mandatória (HTTPS):** Todo o tráfego Web opera sob HTTPS forçado via `.htaccess` (301) compatível com Nginx Locaweb (`%{HTTP:X-Forwarded-Proto} !https`) e HSTS progressivo (30 dias).
+Em conformidade com a auditoria e implementação de **Hardening (09/11/2026 – 11/11/2026)** documentada em [`docs/AUDITORIA_CYBERSECURITY.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md) e com as regras de engenharia em [`.agents/rules/`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/):
+* **Comunicação Criptografada e Fuso Horário Oficial (`America/Sao_Paulo`):** Todo o sistema opera sob o fuso horário padrão do Brasil (`.agents/rules/fuso_horario_brasil.md`) configurado em `.htaccess` (`SetEnv TZ America/Sao_Paulo`), PHP (`date_default_timezone_set('America/Sao_Paulo')`) e MySQL (`SET time_zone = '-03:00'`), com cabeçalhos de segurança HTTP e HSTS.
 * **Proteção e Isolamento do Banco de Dados:** Remoção de dumps de banco do Git, eliminação de senhas hardcoded em produção e suporte a carregamento isolado em `/home/usuario/secrets.php`.
-* **Sessões e Cookies Seguros:** Sessões PHP ativadas com flags `; HttpOnly; SameSite=Lax; Secure` via `SecurityService::initSecureSession()`.
+* **Sessões e Cookies Dedicados (`GESTAOEPI_SID`):** Sessões PHP inicializadas com o cookie dedicado `GESTAOEPI_SID` e flags `; HttpOnly; SameSite=Lax; Secure` via `SecurityService::initSecureSession()`.
 * **Proteção Anti-CSRF e Anti-Força Bruta:** Rate limit com bloqueio temporário de 60 segundos após 5 tentativas de login consecutivas e validação de tokens anti-CSRF.
 * **Governança RBAC e LocalStorage:** Módulos de auditoria e usuários restritos ao perfil `ADMINISTRADOR` e purga completa de tokens JWT do `localStorage` do navegador.
 * **Commit e Publicação Obrigatória (`.agents/rules/commit_obrigatorio.md` e `multiplataforma.md`):** Toda modificação validada no XAMPP nas três plataformas (Web Desktop, Tablet e Celular) recebe obrigatoriamente commit semântico (*Conventional Commits*) e push para a branch `main` no GitHub, acionando o deploy contínuo na Locaweb.

@@ -89,6 +89,7 @@ gestao_epi_web/
 ├── .github/workflows/deploy.yml          # Pipeline CI/CD automatizado via FTP Deploy para produção Locaweb
 ├── .agents/rules/                        # Diretrizes operacionais e de governança de engenharia
 │   ├── commit_obrigatorio.md             # Regra de commit semântico e push obrigatório a cada alteração
+│   ├── fuso_horario_brasil.md            # Regra obrigatória de fuso horário Brasil / São Paulo (America/Sao_Paulo)
 │   └── multiplataforma.md                # Regra de compatibilidade estrita Web Desktop, Tablet e Celular
 │
 ├── index.php                             # Roteador de entrada de sessão (redireciona para Dashboard ou Login)
@@ -284,6 +285,21 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 ---
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
+
+### 📅 Versão 8.5.0 (11/11/2026) – Governança de Fuso Horário Brasil/SP, Sessão GESTAOEPI_SID, Gráficos Financeiros com Rótulos, Impressão de Termos e Estabilização do Dashboard
+* **Regra e Padronização Obrigatória de Fuso Horário Brasil / São Paulo ([`.agents/rules/fuso_horario_brasil.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/fuso_horario_brasil.md)):**
+  - Instituição formal da regra `.agents/rules/fuso_horario_brasil.md` determinando `America/Sao_Paulo` (GMT-3 / `-03:00`) em todas as camadas do sistema.
+  - Configuração de `SetEnv TZ America/Sao_Paulo` e `php_value date.timezone "America/Sao_Paulo"` no `.htaccess`, `date_default_timezone_set('America/Sao_Paulo')` em `services/SecurityService.php`, `config/api.php`, `components/header.php`, `components/topbar.php`, `components/sidebar.php` e em todas as páginas de relatórios (`pages/relatorio_*.php`), além de `SET time_zone = '-03:00'` nas conexões PDO com o MySQL.
+* **Estabilidade de Sessão e Autenticação no Navegador (`services/SecurityService.php`, `login.php`):**
+  - Migração do cookie de sessão para `GESTAOEPI_SID` (evitando conflito com cookies `PHPSESSID` antigos/órfãos entre HTTP e HTTPS no Chrome/Edge) e consolidação de um único `session_write_close()` ao final do fluxo de autenticação.
+* **Correção da Página 1 em Branco na Impressão de Termos (`pages/entregas.php`, `pages/devolucoes.php`):**
+  - Adição da regra `.card { display: block !important; page-break-before: avoid !important; break-before: avoid !important; }` no CSS da janela de impressão (`imprimirRecibo` e `imprimirReciboDevolucao`), eliminando a quebra de página forçada causada por `display: flex` do Bootstrap 5 no Chrome e Edge.
+* **Exibição de Valores Monetários, Percentuais e Quantidades nos Gráficos Financeiros (`pages/relatorios.php`):**
+  - Implementação dos plugins customizados `doughnutSetorLabelsPlugin` e `barEpisLabelsPlugin` no Chart.js na seção **Análise Gráfica de Custos** do Relatório Financeiro, exibindo valores em `R$`, percentuais (`%`) e quantidades (`un`) diretamente sobre as fatias do gráfico de rosca (**Distribuição de Custos por Setor**), na legenda lateral e nas barras horizontais (**Top EPIs por Impacto Financeiro**), com suporte completo ao Modo Claro e Modo Escuro.
+* **Estabilização do Top 5 EPIs, Contraste de Abas e Ícone de Relatório no Dashboard (`pages/dashboard.php`, `assets/css/style.css`):**
+  - **Desempate Alfabético Determinístico no Top 5 EPIs:** Adicionado `ORDER BY total DESC, nome ASC` nas consultas SQL (`GERAL` e `MENSAL`) e ordenação secundária via `normalizarParaOrdenacaoPHP()` em PHP antes de `array_slice(..., 0, 5)`, além de verificação de mudança real no DOM (`containerTop5.innerHTML !== novoHtmlTop5`) durante o polling de 2 segundos, eliminando a troca de posição entre EPIs empatados.
+  - **Contraste nas Abas `.nav-pills` Ativas no Modo Claro:** Adicionada regra explícita garantindo fundo azul (`#2563eb !important`) e texto/ícones brancos (`#ffffff !important`) para `.nav-pills .nav-link.active` na Central de Alertas e Central de Pendências.
+  - **Ícone de Relatório no Feed de Atividades:** Corrigida a classe do ícone Bootstrap Icons para `bi-file-earmark-bar-graph-fill` em `formatarLogAuditoria()` e reforçado o contraste de `.activity-icon-purple` e `.badge-subtle-purple` nos modos claro e escuro.
 
 ### 📅 Versão 8.4.9 (09/11/2026) – Governança DevOps de Commit Obrigatório, Multiplataforma e Sincronização de Todas as Documentações
 * **Instituição da Regra de Commit e Publicação Obrigatória ([`.agents/rules/commit_obrigatorio.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/commit_obrigatorio.md)):**

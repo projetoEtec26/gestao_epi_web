@@ -90,7 +90,7 @@ Em inspeções do Ministério do Trabalho e Emprego ou perícias judiciais traba
 ### 5.1 Autenticação e Proteção Contra Força Bruta (`login.php`)
 1. **Entrada de Credenciais:** Operador informa `usu_login` e `senha`.
 2. **Checagem de Tentativas:** Se houver 5 tentativas incorretas consecutivas, a sessão entra em bloqueio temporário de 60 segundos com aviso em tela.
-3. **Autenticação Bem-Sucedida:** Reseta o contador de erros, emite cookie de sessão com `HttpOnly`, `SameSite=Lax` e `Secure`, e direciona para o painel principal.
+3. **Autenticação Bem-Sucedida:** Reseta o contador de erros, emite o cookie de sessão dedicado `GESTAOEPI_SID` com `HttpOnly`, `SameSite=Lax` e `Secure` (quando em HTTPS), e direciona para o painel principal.
 
 ### 5.2 Assistente Seguro de Recuperação de Senhas (`recuperar-senha.php`)
 1. **Passo 1 — Identificação do Operador:** O operador digita o seu login. O sistema valida na base sem expor códigos na resposta JSON.
@@ -104,9 +104,9 @@ Em inspeções do Ministério do Trabalho e Emprego ou perícias judiciais traba
 
 ---
 
-## 6. Fluxo de Manutenção Evolutiva, Validação Multiplataforma e Deploy Contínuo (Release 8.4.9)
+## 6. Fluxo de Manutenção Evolutiva, Validação Multiplataforma e Deploy Contínuo (Release 8.5.0)
 
-Conforme as diretrizes de engenharia do projeto ([`.agents/rules/commit_obrigatorio.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/commit_obrigatorio.md) e [`.agents/rules/multiplataforma.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/multiplataforma.md)), toda evolução ou ajuste técnico segue um fluxo auditável e automatizado:
+Conforme as diretrizes de engenharia do projeto ([`.agents/rules/commit_obrigatorio.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/commit_obrigatorio.md), [`.agents/rules/multiplataforma.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/multiplataforma.md) e [`.agents/rules/fuso_horario_brasil.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/fuso_horario_brasil.md)), toda evolução ou ajuste técnico segue um fluxo auditável e automatizado:
 
 ```mermaid
 sequenceDiagram
