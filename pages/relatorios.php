@@ -1672,9 +1672,12 @@ function gerarRelatorioCustos() {
 
             const setoresMap = {};
             const episMap = {};
+            const setoresQtdMap = {};
+            const episQtdMap = {};
 
             registros.forEach(r => {
                 const val = parseFloat(r.valor_total || r.ite_custo_total || 0);
+                const qtd = parseInt(r.item_quantidade || r.ite_quantidade || r.quantidade || 1, 10) || 1;
                 const status = String(r.status || r.ite_status_item || r.entr_motivo || '').toUpperCase();
                 const mot = String(r.item_motivo_entrega || r.entr_motivo || '').toUpperCase();
                 const setNome = r.fun_departamento || r.setor || 'Geral';
@@ -1689,6 +1692,8 @@ function gerarRelatorioCustos() {
 
                 setoresMap[setNome] = (setoresMap[setNome] || 0) + val;
                 episMap[epiNome] = (episMap[epiNome] || 0) + val;
+                setoresQtdMap[setNome] = (setoresQtdMap[setNome] || 0) + qtd;
+                episQtdMap[epiNome] = (episQtdMap[epiNome] || 0) + qtd;
             });
 
             const custoLiquido = custoBruto - estornos;
@@ -1701,8 +1706,11 @@ function gerarRelatorioCustos() {
             const blocoKpis = document.getElementById('custos-resumo-kpis');
             if (blocoKpis) blocoKpis.classList.remove('d-none');
 
-            // Atualiza Gráficos
-            renderizarGraficosFinanceiros(setoresMap, episMap);
+            // Atualiza Gráficos com valores, percentuais e quantidades
+            renderizarGraficosFinanceiros(setoresMap, episMap, setoresQtdMap, episQtdMap);
+
+            // Garante exibição da coluna Valor Total na tabela financeira
+            geralUltimaResposta = Object.assign({}, res.data, { permite_visualizar_custos: true });
 
             // Renderiza Tabela no bloco de resultados
             renderizarTabelaRegistrosGeral(registros);
@@ -1960,20 +1968,83 @@ async function compartilharRelatorioCustosPDF(btnElement) {
     }
 }
 
-function renderizarGraficosFinanceiros(setoresMap, episMap) {
+function renderizarGraficosFinanceiros(setoresMap, episMap, setoresQtdMap = {}, episQtdMap = {}) {
+    const isDark = document.documentElement.classList.contains('dark-mode') || (document.body && document.body.classList.contains('dark-mode'));
+    const textColor = isDark ? '#e2e8f0' : '#334155';
+    const subTextColor = isDark ? '#94a3b8' : '#64748b';
+    const gridColor = isDark ? '#334155' : '#e2e8f0';
+    const fmtBRL = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
     const setoresSorted = Object.entries(setoresMap)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 6);
-    
-    const labelsSetor = setoresSorted.map(item => item[0]);
+
+    const nomesSetor = setoresSorted.map(item => item[0]);
     const valoresSetor = setoresSorted.map(item => item[1]);
+    const totalSetor = valoresSetor.reduce((acc, v) => acc + v, 0);
+
+    const labelsSetorDetalhados = nomesSetor.map((nome, idx) => {
+        const val = valoresSetor[idx] || 0;
+        const pct = totalSetor > 0 ? ((val / totalSetor) * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '0,0';
+        const qtd = setoresQtdMap[nome] || 0;
+        return `${nome} — ${fmtBRL(val)} (${pct}%${qtd ? ` • ${qtd} un` : ''})`;
+    });
 
     const episSorted = Object.entries(episMap)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 6);
-    
+
     const labelsEpi = episSorted.map(item => item[0]);
     const valoresEpi = episSorted.map(item => item[1]);
+    const totalEpi = valoresEpi.reduce((acc, v) => acc + v, 0);
+
+    // Plugin customizado para exibir percentual/valor nas fatias e o Total no centro da rosca
+    const doughnutSetorLabelsPlugin = {
+        id: 'doughnutSetorLabelsPlugin',
+        afterDatasetsDraw(chart) {
+            const { ctx } = chart;
+            const meta = chart.getDatasetMeta(0);
+            const dataset = chart.data.datasets[0];
+            if (!meta || !meta.data || !meta.data.length || totalSetor <= 0) return;
+
+            ctx.save();
+            // 1. Texto central com o Custo Total
+            const firstArc = meta.data[0];
+            const centerX = firstArc.x;
+            const centerY = firstArc.y;
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = subTextColor;
+            ctx.font = '600 10px sans-serif';
+            ctx.fillText('TOTAL', centerX, centerY - 9);
+
+            ctx.fillStyle = isDark ? '#f8fafc' : '#0f172a';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.fillText(fmtBRL(totalSetor), centerX, centerY + 7);
+
+            // 2. Rótulo de valor e percentual sobre cada fatia
+            meta.data.forEach((arc, index) => {
+                const val = Number(dataset.data[index] || 0);
+                if (val <= 0) return;
+                const pct = (val / totalSetor) * 100;
+                if (pct < 7) return; // Evita sobreposição em fatias muito finas
+
+                const pos = arc.tooltipPosition();
+                const pctStr = pct.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+                ctx.shadowBlur = 3;
+                ctx.font = 'bold 11px sans-serif';
+                ctx.fillText(pctStr, pos.x, pos.y - 6);
+                ctx.font = '600 10px sans-serif';
+                ctx.fillText(fmtBRL(val), pos.x, pos.y + 7);
+                ctx.shadowBlur = 0;
+            });
+            ctx.restore();
+        }
+    };
 
     const ctxSetor = document.getElementById('chartCustosSetor');
     if (ctxSetor && typeof Chart !== 'undefined') {
@@ -1981,22 +2052,73 @@ function renderizarGraficosFinanceiros(setoresMap, episMap) {
         chartInstanceSetor = new Chart(ctxSetor, {
             type: 'doughnut',
             data: {
-                labels: labelsSetor.length ? labelsSetor : ['Sem dados'],
+                labels: labelsSetorDetalhados.length ? labelsSetorDetalhados : ['Sem dados (R$ 0,00)'],
                 datasets: [{
                     data: valoresSetor.length ? valoresSetor : [0],
                     backgroundColor: ['#305BD3', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'],
-                    borderWidth: 1
+                    borderWidth: 2,
+                    borderColor: isDark ? '#1e293b' : '#ffffff'
                 }]
             },
+            plugins: [doughnutSetorLabelsPlugin],
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                cutout: '56%',
                 plugins: {
-                    legend: { position: 'right' }
+                    legend: {
+                        position: window.innerWidth < 768 ? 'bottom' : 'right',
+                        labels: {
+                            color: textColor,
+                            font: { size: 11, weight: '600' },
+                            boxWidth: 14,
+                            padding: 12
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const idx = context.dataIndex;
+                                const nome = nomesSetor[idx] || context.label || 'Setor';
+                                const val = Number(context.raw || 0);
+                                const pct = totalSetor > 0 ? ((val / totalSetor) * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '0,0';
+                                const qtd = setoresQtdMap[nome] || 0;
+                                return ` ${nome}: ${fmtBRL(val)} (${pct}%${qtd ? ` • ${qtd} un.` : ''})`;
+                            }
+                        }
+                    }
                 }
             }
         });
     }
+
+    // Plugin customizado para exibir R$, % e unidades ao lado de cada barra horizontal
+    const barEpisLabelsPlugin = {
+        id: 'barEpisLabelsPlugin',
+        afterDatasetsDraw(chart) {
+            const { ctx } = chart;
+            const meta = chart.getDatasetMeta(0);
+            const dataset = chart.data.datasets[0];
+            if (!meta || !meta.data || !meta.data.length) return;
+
+            ctx.save();
+            ctx.font = 'bold 11px sans-serif';
+            ctx.fillStyle = isDark ? '#60a5fa' : '#1e3a8a';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+
+            meta.data.forEach((bar, index) => {
+                const val = Number(dataset.data[index] || 0);
+                if (val <= 0 && !labelsEpi.length) return;
+                const epiNome = labelsEpi[index] || '';
+                const pct = totalEpi > 0 ? ((val / totalEpi) * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '0,0';
+                const qtd = episQtdMap[epiNome] || 0;
+                const labelTexto = `${fmtBRL(val)} (${pct}%${qtd ? ` • ${qtd} un` : ''})`;
+                ctx.fillText(labelTexto, bar.x + 8, bar.y);
+            });
+            ctx.restore();
+        }
+    };
 
     const ctxEpi = document.getElementById('chartCustosEpis');
     if (ctxEpi && typeof Chart !== 'undefined') {
@@ -2008,19 +2130,51 @@ function renderizarGraficosFinanceiros(setoresMap, episMap) {
                 datasets: [{
                     label: 'Investimento (R$)',
                     data: valoresEpi.length ? valoresEpi : [0],
-                    backgroundColor: '#305BD3',
-                    borderRadius: 6
+                    backgroundColor: ['#305BD3', '#2563eb', '#3b82f6', '#0ea5e9', '#10b981', '#6366f1'],
+                    borderRadius: 6,
+                    barThickness: 26
                 }]
             },
+            plugins: [barEpisLabelsPlugin],
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 indexAxis: 'y',
+                layout: {
+                    padding: { right: window.innerWidth < 576 ? 115 : 145, top: 6, bottom: 6 }
+                },
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const idx = context.dataIndex;
+                                const epiNome = labelsEpi[idx] || context.label || 'EPI';
+                                const val = Number(context.raw || 0);
+                                const pct = totalEpi > 0 ? ((val / totalEpi) * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '0,0';
+                                const qtd = episQtdMap[epiNome] || 0;
+                                return ` Investimento: ${fmtBRL(val)} (${pct}% do total${qtd ? ` • ${qtd} un.` : ''})`;
+                            }
+                        }
+                    }
                 },
                 scales: {
-                    x: { ticks: { callback: v => 'R$ ' + v } }
+                    x: {
+                        beginAtZero: true,
+                        grid: { color: gridColor },
+                        ticks: {
+                            color: subTextColor,
+                            font: { size: 11 },
+                            callback: v => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+                        }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: {
+                            color: textColor,
+                            font: { size: 12, weight: '600' }
+                        }
+                    }
                 }
             }
         });
