@@ -3294,5 +3294,14 @@ body.dark-mode .table-custom .fw-bold {
     color: #f8fafc !important;
 }
 
+/* Alto contraste para abas nav-pills ativas no Modo Claro e Modo Escuro */
+html:not(.dark-mode) .nav-pills .nav-link.active,
+html:not(.dark-mode) .nav-pills .nav-link.active i,
+html:not(.dark-mode) .nav-pills .nav-link.active span {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+}
+
+
 
 

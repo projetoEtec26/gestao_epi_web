@@ -2069,13 +2069,24 @@ body.dark-mode .alert-central-toolbar span {
     color: #f8fafc !important;
 }
 
+html:not(.dark-mode) .nav-pills .nav-link.active,
+html:not(.dark-mode) .nav-pills .nav-link.active i,
+html:not(.dark-mode) .nav-pills .nav-link.active span {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+}
+
 html.dark-mode .nav-pills .nav-link,
 body.dark-mode .nav-pills .nav-link {
     color: #94a3b8 !important;
 }
 
 html.dark-mode .nav-pills .nav-link.active,
-body.dark-mode .nav-pills .nav-link.active {
+body.dark-mode .nav-pills .nav-link.active,
+html.dark-mode .nav-pills .nav-link.active i,
+body.dark-mode .nav-pills .nav-link.active i,
+html.dark-mode .nav-pills .nav-link.active span,
+body.dark-mode .nav-pills .nav-link.active span {
     background-color: #1e293b !important;
     color: #38bdf8 !important;
     border: 1px solid #38bdf8 !important;
