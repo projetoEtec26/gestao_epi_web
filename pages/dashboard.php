@@ -555,10 +555,20 @@ try {
             FROM itens_entrega i 
             LEFT JOIN epis e ON i.epi_id = e.epi_id 
             GROUP BY nome 
-            ORDER BY total DESC 
-            LIMIT 5
+            ORDER BY total DESC, nome ASC
         ");
-        $topRes = $stmtT->fetchAll(PDO::FETCH_ASSOC);
+        $topRes = $stmtT ? $stmtT->fetchAll(PDO::FETCH_ASSOC) : [];
+        usort($topRes, function ($a, $b) {
+            $cmpTotal = ((int)($b['total'] ?? 0)) <=> ((int)($a['total'] ?? 0));
+            if ($cmpTotal !== 0) {
+                return $cmpTotal;
+            }
+            $na = normalizarParaOrdenacaoPHP((string)($a['nome'] ?? ''));
+            $nb = normalizarParaOrdenacaoPHP((string)($b['nome'] ?? ''));
+            $cmpNome = $na <=> $nb;
+            return $cmpNome !== 0 ? $cmpNome : strcmp((string)($a['nome'] ?? ''), (string)($b['nome'] ?? ''));
+        });
+        $topRes = array_slice($topRes, 0, 5);
         $maxQ = (!empty($topRes) && isset($topRes[0]['total'])) ? max(1, (int)$topRes[0]['total']) : 1;
         $cores = ['#F59E0B', '#3B82F6', '#10B981', '#8B5CF6', '#CBD5E1'];
         $newTop = [];
@@ -583,11 +593,21 @@ try {
             WHERE MONTH(entr.entr_data_entrega) = :m
               AND YEAR(entr.entr_data_entrega) = :y
             GROUP BY nome 
-            ORDER BY total DESC 
-            LIMIT 5
+            ORDER BY total DESC, nome ASC
         ");
         $stmtTM->execute(['m' => $monthNum, 'y' => $yearNum]);
-        $topResM = $stmtTM->fetchAll(PDO::FETCH_ASSOC);
+        $topResM = $stmtTM ? $stmtTM->fetchAll(PDO::FETCH_ASSOC) : [];
+        usort($topResM, function ($a, $b) {
+            $cmpTotal = ((int)($b['total'] ?? 0)) <=> ((int)($a['total'] ?? 0));
+            if ($cmpTotal !== 0) {
+                return $cmpTotal;
+            }
+            $na = normalizarParaOrdenacaoPHP((string)($a['nome'] ?? ''));
+            $nb = normalizarParaOrdenacaoPHP((string)($b['nome'] ?? ''));
+            $cmpNome = $na <=> $nb;
+            return $cmpNome !== 0 ? $cmpNome : strcmp((string)($a['nome'] ?? ''), (string)($b['nome'] ?? ''));
+        });
+        $topResM = array_slice($topResM, 0, 5);
         $maxQM = (!empty($topResM) && isset($topResM[0]['total'])) ? max(1, (int)$topResM[0]['total']) : 1;
         $newTopM = [];
         foreach ($topResM as $idx => $r) {
@@ -2852,7 +2872,10 @@ function atualizarDashboardDOM(data) {
     }
     const containerTop5 = document.getElementById('card-top5-epis-list');
     if (containerTop5) {
-        containerTop5.innerHTML = (filtroTop5Atual === 'mensal') ? htmlTop5Mensal : htmlTop5Geral;
+        const novoHtmlTop5 = (filtroTop5Atual === 'mensal') ? htmlTop5Mensal : htmlTop5Geral;
+        if (containerTop5.innerHTML !== novoHtmlTop5) {
+            containerTop5.innerHTML = novoHtmlTop5;
+        }
     }
 
     // 7. Conteúdo HTML dos Modais e Atividades (Preservando Abas Ativas e Posição de Rolagem)
