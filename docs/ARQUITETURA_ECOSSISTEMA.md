@@ -41,7 +41,7 @@ graph TD
 
 | Projeto | Repositório / Ambiente | Tecnologias Principais | Papel no Ecossistema |
 | :--- | :--- | :--- | :--- |
-| **Gestão EPI Web** | [projetoEtec26/gestao_epi_web](https://github.com/projetoEtec26/gestao_epi_web)<br/>Prod: `http://gestaoepi.tecnologia.ws/`<br/>Local: `http://localhost/OLD/gestao_epi_web_14/` | PHP 8+, Bootstrap 5, Vanilla JS, Chart.js, CSS3 HSL | Painel gerencial, emissão de relatórios, gestão de colaboradores, entregas, devoluções, auditoria e controle de C.A. Suporta Desktop, Tablet e Celular. |
+| **Gestão EPI Web** | [projetoEtec26/gestao_epi_web](https://github.com/projetoEtec26/gestao_epi_web) *(Oficial ETEC)*<br/>[ronaldogomesdasilva/gestao_epi_web_14](https://github.com/ronaldogomesdasilva/gestao_epi_web_14) *(Pessoal)*<br/>Prod: `http://gestaoepi.tecnologia.ws/`<br/>Local: `http://localhost/OLD/gestao_epi_web_14/` | PHP 8+, Bootstrap 5, Vanilla JS, Chart.js, CSS3 HSL | Painel gerencial, emissão de relatórios com rótulos de dados integrados, gestão de colaboradores, entregas com lote (NR-6), devoluções, auditoria e controle de C.A. Suporta Desktop, Tablet e Celular. |
 | **Gestão EPI API** | [projetoEtec26/gestao_epi_api](https://github.com/projetoEtec26/gestao_epi_api)<br/>Cloud: `https://gestao-epi-api.onrender.com/` | PHP 8+, MVC REST, JWT, Bcrypt, OpenSSL | Camada de serviços e regras de negócio para autenticação de operadores, assinaturas eletrônicas, registro de movimentações e logs de auditoria. |
 | **Gestão EPI Mobile** | Projeto Android Nativo (`gestao_epi_8`) | Android (Java/Kotlin), Room, Retrofit 2, OkHttp, WorkManager | Coleta de dados no canteiro de obras e chão de fábrica, validação de biometria/PIN de 6 dígitos em campo e operação resiliente offline. |
 | **Banco de Dados** | `db_gestao_epi` (`db_gestao_epi.mysql.dbaas.com.br`) | MySQL 8.0+ / MariaDB na Nuvem (Locaweb / Aiven) | Armazenamento centralizado, rastreabilidade de lotes (NR-6), criptografia de dados pessoais (LGPD) e integridade referencial. |
@@ -88,12 +88,14 @@ De acordo com as exigências da **Norma Regulamentadora NR-6** e auditorias de f
 
 ---
 
-## 6. Governança, Cibersegurança e Entrega Contínua (Release 8.5.0 Hardened)
+## 6. Governança, Cibersegurança e Entrega Contínua (Release 8.5.1 Hardened)
 
-Em conformidade com a auditoria e implementação de **Hardening (09/11/2026 – 11/11/2026)** documentada em [`docs/AUDITORIA_CYBERSECURITY.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md) e com as regras de engenharia em [`.agents/rules/`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/):
+Em conformidade com a auditoria e implementação de **Hardening e Multi-Repositório (09/11/2026 – 13/11/2026)** documentada em [`docs/AUDITORIA_CYBERSECURITY.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/docs/AUDITORIA_CYBERSECURITY.md) e com as regras de engenharia em [`.agents/rules/`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/):
+* **Sincronização Multi-Repositório Git (`etec` e `origin`):** Gestão coordenada do repositório oficial da ETEC (`projetoEtec26/gestao_epi_web`) — com gatilho automático de CI/CD para deploy FTP na Locaweb — e do repositório espelho pessoal (`ronaldogomesdasilva/gestao_epi_web_14`), mantendo total alinhamento de commits semânticos.
 * **Comunicação Criptografada e Fuso Horário Oficial (`America/Sao_Paulo`):** Todo o sistema opera sob o fuso horário padrão do Brasil (`.agents/rules/fuso_horario_brasil.md`) configurado em `.htaccess` (`SetEnv TZ America/Sao_Paulo`), PHP (`date_default_timezone_set('America/Sao_Paulo')`) e MySQL (`SET time_zone = '-03:00'`), com cabeçalhos de segurança HTTP e HSTS.
 * **Proteção e Isolamento do Banco de Dados:** Remoção de dumps de banco do Git, eliminação de senhas hardcoded em produção e suporte a carregamento isolado em `/home/usuario/secrets.php`.
 * **Sessões e Cookies Dedicados (`GESTAOEPI_SID`):** Sessões PHP inicializadas com o cookie dedicado `GESTAOEPI_SID` e flags `; HttpOnly; SameSite=Lax; Secure` via `SecurityService::initSecureSession()`.
+* **Estabilização Visual e Relatórios Ricos:** Gráficos com rótulos de valores diretamente visíveis (R$, %, unidades), desempate determinístico alfanumérico no Top 5 EPIs, contraste corrigido nas abas ativas no modo claro e renderização íntegra de ícones de auditoria.
 * **Proteção Anti-CSRF e Anti-Força Bruta:** Rate limit com bloqueio temporário de 60 segundos após 5 tentativas de login consecutivas e validação de tokens anti-CSRF.
 * **Governança RBAC e LocalStorage:** Módulos de auditoria e usuários restritos ao perfil `ADMINISTRADOR` e purga completa de tokens JWT do `localStorage` do navegador.
 * **Commit e Publicação Obrigatória (`.agents/rules/commit_obrigatorio.md` e `multiplataforma.md`):** Toda modificação validada no XAMPP nas três plataformas (Web Desktop, Tablet e Celular) recebe obrigatoriamente commit semântico (*Conventional Commits*) e push para a branch `main` no GitHub, acionando o deploy contínuo na Locaweb.

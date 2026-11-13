@@ -96,10 +96,11 @@ Quando o operador está em áreas sem sinal de internet (subsolos, áreas rurais
 
 ---
 
-## 7. Garantia de Operação e Estabilidade no Ecossistema (Release 8.5.0 Hardened)
+## 7. Garantia de Operação e Estabilidade no Ecossistema (Release 8.5.1 Hardened)
 
 * **Desacoplamento e Segurança:** O aplicativo Android opera de forma 100% desacoplada das tecnologias de apresentação web (PHP, Apache, `.htaccess` e cookies de sessão `GESTAOEPI_SID`).
 * **Validação de PIN, Fuso Horário e Sincronização:** Os algoritmos de validação de assinatura digital (`HashUtils.java` com `SHA-256 + Salt`) e o fuso horário `America/Sao_Paulo` (GMT-3) permanecem 100% alinhados à classe `SecurityService.php` e ao banco MySQL Cloud.
-* **Paridade de Indicadores (Top 5 EPIs e Conformidade):** A ordenação do card **Top 5 EPIs Mais Utilizados** no Painel Web aplica a mesma consulta de entregas com desempate alfabético determinístico, mantendo paridade 1:1 de KPIs com o aplicativo Android (`http://gestaoepi.tecnologia.ws/`).
+* **Paridade de Indicadores (Top 5 EPIs e Conformidade):** A ordenação do card **Top 5 EPIs Mais Utilizados** no Painel Web aplica a mesma consulta de entregas com desempate alfanumérico determinístico (`ORDER BY total DESC, nome ASC`), mantendo paridade 1:1 de KPIs com o aplicativo Android (`http://gestaoepi.tecnologia.ws/`).
+* **Sincronização Multi-Repositório e Homologação Local:** O ecossistema suporta testes com o backend local XAMPP (`10.0.2.2/OLD/gestao_epi_web_14/`) e produção na Locaweb (`http://gestaoepi.tecnologia.ws/`), com versionamento sincronizado nos repositórios `projetoEtec26/gestao_epi_web` e `ronaldogomesdasilva/gestao_epi_web_14`.
 
 

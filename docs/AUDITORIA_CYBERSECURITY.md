@@ -1,6 +1,6 @@
 # Relatório Técnico de Auditoria de Cybersecurity e Governança
-## Ecossistema Corporativo Gestão EPI — Release 8.5.0 Hardened
-**Data da Auditoria Inicial:** 04/11/2026 | **Data do Hardening e Governança:** 11/11/2026  
+## Ecossistema Corporativo Gestão EPI — Release 8.5.1 Hardened
+**Data da Auditoria Inicial:** 04/11/2026 | **Data do Hardening e Governança:** 13/11/2026  
 **Classificação:** Confidencial / Técnico  
 **Alvo da Auditoria:** Gestão de EPIs Web 14, API RESTful Backend, Banco de Dados MySQL Cloud e Aplicativo Mobile Android  
 **Regime:** Diagnóstico Independente e Integrado (OWASP Top 10, LGPD e NR-6)
@@ -167,8 +167,9 @@ Em 09/11/2026, todas as vulnerabilidades mapeadas nas Etapas 1 a 6 foram impleme
 9. **VULN-09 (IDOR):** Validação de parâmetro numérico em `ficha_colaborador.php`.
 10. **VULN-10 (Força Bruta):** Bloqueio temporário de 60 segundos após 5 tentativas de login consecutivas.
 11. **Governança Contínua e Fuso Horário Brasil/SP (Release 8.5.0):** Instituição das regras obrigatórias de fuso horário `America/Sao_Paulo` (`.agents/rules/fuso_horario_brasil.md`), multiplataforma (`.agents/rules/multiplataforma.md`) e commit semântico com deploy contínuo (`.agents/rules/commit_obrigatorio.md`), mantendo rastreabilidade total entre o repositório GitHub e o servidor de produção na Locaweb.
+12. **Topologia Multi-Repositório e Estabilização Visual de UI (Release 8.5.1):** Mapeamento sincronizado dos remotes `etec` (`projetoEtec26/gestao_epi_web`) e `origin` (`ronaldogomesdasilva/gestao_epi_web_14`), homologação local no XAMPP, estabilização de ordenação do Top 5 EPIs, labels em gráficos financeiros e contraste em modo claro.
 
 ---
 
-*Relatório técnico consolidado e validado em 11/11/2026 para o ecossistema corporativo Gestão EPI v8.5.0 Hardened.*
+*Relatório técnico consolidado e validado em 13/11/2026 para o ecossistema corporativo Gestão EPI v8.5.1 Hardened.*
 

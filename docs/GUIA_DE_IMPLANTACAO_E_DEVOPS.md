@@ -64,18 +64,28 @@ return [
 
 ---
 
-## 3. Pipeline de CI/CD e Deploy em Produção (Locaweb)
+## 3. Pipeline de CI/CD, Deploy em Produção (Locaweb) e Sincronização Multi-Repositório
 
-O repositório oficial [projetoEtec26/gestao_epi_web](https://github.com/projetoEtec26/gestao_epi_web) possui uma esteira automatizada de integração e entrega contínua configurada via **GitHub Actions** (`.github/workflows/deploy.yml`):
+O projeto conta com topologia multi-repositório no Git e esteira automatizada de integração e entrega contínua configurada via **GitHub Actions** (`.github/workflows/deploy.yml`):
 
-### 3.1 Funcionamento do Workflow de Deploy
+### 3.1 Mapeamento de Remotes Git (Oficial ETEC e Pessoal)
+* **Remote `etec` (Repositório Oficial):** [`https://github.com/projetoEtec26/gestao_epi_web.git`](https://github.com/projetoEtec26/gestao_epi_web)
+  - Branch de produção: `main`.
+  - Dispara automaticamente o workflow de deploy via FTP para a Locaweb.
+* **Remote `origin` (Repositório Pessoal / Backup):** [`https://github.com/ronaldogomesdasilva/gestao_epi_web_14.git`](https://github.com/ronaldogomesdasilva/gestao_epi_web_14)
+  - Branch de sincronização: `main`.
+  - Espelho idêntico para rastreabilidade complementar de código e histórico.
+
+### 3.2 Funcionamento do Workflow de Deploy
 ```mermaid
 sequenceDiagram
     participant Dev as Desenvolvedor (Git)
-    participant GH as GitHub (Repo / Actions)
+    participant GH as GitHub ETEC (Repo / Actions)
+    participant Mirror as GitHub Pessoal (Espelho)
     participant Prod as Servidor Produção (Locaweb)
 
     Dev->>GH: git push etec main
+    Dev->>Mirror: git push origin main
     GH->>GH: Dispara Workflow "Deploy WEB-PHP to Locaweb"
     GH->>GH: Checkout do código-fonte (v4)
     GH->>Prod: FTP Deploy Action (v4.3.5)
@@ -84,21 +94,21 @@ sequenceDiagram
     GH-->>Dev: Status: Completed (Success)
 ```
 
-### 3.2 Secrets do GitHub Actions
+### 3.3 Secrets do GitHub Actions
 Para que o deploy funcione, os seguintes segredos devem estar cadastrados nas configurações do repositório no GitHub (*Settings > Secrets and variables > Actions*):
 * `FTP_SERVER`: Endereço do host FTP da Locaweb (ex: `ftp.gestaoepi.tecnologia.ws`).
 * `FTP_USERNAME`: Usuário com permissão de escrita em `public_html/`.
 * `FTP_PASSWORD`: Senha de acesso FTP criptografada.
 
-### 3.3 Endereço de Produção Oficial
+### 3.4 Endereço de Produção Oficial
 * **Painel Web Homologado:** [http://gestaoepi.tecnologia.ws/](http://gestaoepi.tecnologia.ws/)
 
-### 3.4 Governança de Versionamento, Fuso Horário e Regra de Commit e Publicação Obrigatória
+### 3.5 Governança de Versionamento, Fuso Horário e Regra de Commit e Publicação Obrigatória (Release 8.5.1)
 Conforme instituído nas regras do projeto ([`.agents/rules/commit_obrigatorio.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/commit_obrigatorio.md), [`.agents/rules/multiplataforma.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/multiplataforma.md) e [`.agents/rules/fuso_horario_brasil.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/fuso_horario_brasil.md)):
-1. **Padronização de Fuso Horário (`America/Sao_Paulo`):** Todo script PHP, sessão MySQL (`SET time_zone = '-03:00'`) e configuração Apache (`.htaccess`) deve operar estritamente no fuso de São Paulo / Brasília (GMT-3).
+1. **Padronização de Fuso Horário (`America/Sao_Paulo`):** Todo script PHP, sessão MySQL (`SET time_zone = '-03:00'`) e configuração Apache (`.htaccess`) opera estritamente no fuso de São Paulo / Brasília (GMT-3).
 2. **Validação Local Multiplataforma:** Toda alteração de código, layout, configuração ou documentação deve ser validada no XAMPP local nas três plataformas (Web Desktop $\ge 1200\text{px}$, Tablet $768\text{px} – 1199\text{px}$ e Celular $< 768\text{px}$).
 3. **Commit Semântico Obrigatório:** Ao concluir qualquer alteração, executa-se obrigatoriamente `git add` e `git commit` utilizando o padrão *Conventional Commits* (`feat:`, `fix:`, `docs:`, `style:`, `refactor:`). Nenhuma modificação pode permanecer pendente na árvore de trabalho (`working tree dirty`).
-4. **Publicação Contínua (`git push`):** Em seguida, realiza-se o `git push` para a branch `main` no GitHub (`https://github.com/projetoEtec26/gestao_epi_web.git`), disparando imediatamente o workflow de deploy FTP para atualizar a produção na Locaweb.
+4. **Publicação Contínua (`git push`):** Em seguida, realiza-se o `git push etec main` para o repositório oficial no GitHub (`https://github.com/projetoEtec26/gestao_epi_web.git`), disparando imediatamente o workflow de deploy FTP para atualizar a produção na Locaweb, replicando também para `git push origin main` (`https://github.com/ronaldogomesdasilva/gestao_epi_web_14.git`).
 
 ---
 

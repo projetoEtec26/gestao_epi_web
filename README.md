@@ -48,11 +48,11 @@ O ecossistema é formado por 3 pilares de código sincronizados:
                                                    └───────────────────┘
 ```
 
-1. **Gestão EPI Web ([Repositório GitHub](https://github.com/projetoEtec26/gestao_epi_web)):**
+1. **Gestão EPI Web ([Repositório Oficial ETEC](https://github.com/projetoEtec26/gestao_epi_web) | [Repositório Pessoal](https://github.com/ronaldogomesdasilva/gestao_epi_web_14)):**
    - **Tecnologias:** PHP 8+, Bootstrap 5, Vanilla JavaScript, CSS3 Design System (HSL / Dark Mode nativo), Chart.js.
    - **Público:** Administradores, Técnicos de Segurança do Trabalho (SST), Gestores de Contratos, Encarregados de RH e Almoxarifes.
    - **Plataformas:** 100% responsivo para Web Desktop (≥ 1200px), Tablet (768px – 1199px) e Celular (< 768px).
-   - **Deploy Contínuo:** GitHub Actions com deploy automatizado via FTP para Locaweb (`http://gestaoepi.tecnologia.ws/`).
+   - **Ambiente Local e Nuvem:** Homologado para execução local via XAMPP (`http://localhost/OLD/gestao_epi_web_14/`) e deploy automatizado via GitHub Actions (FTP Deploy) para o servidor Locaweb (`http://gestaoepi.tecnologia.ws/`).
 
 2. **Gestão EPI API ([Repositório GitHub](https://github.com/projetoEtec26/gestao_epi_api)):**
    - **Tecnologias:** PHP 8+ Puro, Arquitetura MVC RESTful, PDO, Autenticação JWT (`HS256`), Bcrypt e OpenSSL.
@@ -285,6 +285,24 @@ Durante a evolução do projeto Web, foram aplicadas otimizações arquiteturais
 ---
 
 ## 9. HISTÓRICO DE ATUALIZAÇÕES E VERSÕES
+
+### 📅 Versão 8.5.1 (13/11/2026) – Sincronização Multi-Repositório Git, Homologação XAMPP Local e Atualização Master das Documentações
+* **Topologia e Sincronização Multi-Repositório Git Oficial e Pessoal:**
+  - Configuração e mapeamento simultâneo dos remotes:
+    - `etec`: Repositório oficial ETEC (`https://github.com/projetoEtec26/gestao_epi_web.git`), responsável pelo pipeline contínuo de CI/CD via GitHub Actions (`.github/workflows/deploy.yml`) com deploy automático por FTP para o ambiente de produção na Locaweb (`http://gestaoepi.tecnologia.ws/`).
+    - `origin`: Repositório espelho pessoal (`https://github.com/ronaldogomesdasilva/gestao_epi_web_14.git`), mantido em paridade total para rastreabilidade e histórico complementar.
+  - Sincronização e publicação garantida em ambos os remotes sem pendências na árvore de trabalho (`clean working tree`).
+* **Homologação e Validação em Tempo de Execução no XAMPP Local:**
+  - Validação completa dos serviços locais Apache 2.4.58 (HTTP) e MySQL 10.4.32-MariaDB sob `http://localhost/OLD/gestao_epi_web_14/`.
+  - Verificação de integridade operacional de ponta a ponta: login, RBAC, consulta de colaboradores, catálogo de EPIs, histórico de auditoria e painéis analíticos.
+* **Consolidação das Correções Visuais, Responsivas e Operacionais:**
+  - **Gráficos Financeiros com Rótulos de Dados Integrados (`pages/relatorios.php`):** Exibição permanente de rótulos em R$, percentuais (%) e quantidades (un) no gráfico de rosca (Distribuição de Custos por Setor) e nas barras horizontais (Top EPIs por Impacto Financeiro) com alto contraste nos modos claro e escuro.
+  - **Estabilização de Ordenação do Top 5 EPIs (`pages/dashboard.php`, `pages/get_top_epis.php`):** Aplicação de desempate alfanumérico determinístico via SQL e PHP, garantindo que itens empatados em consumo mantenham posição estável sem alternância indesejada.
+  - **Contraste Perfeito no Modo Claro nas Abas Nav-Pills (`pages/modal_central_alertas.php`, `assets/css/style.css`):** Correção de visibilidade garantindo texto e ícones brancos (`#ffffff`) sobre fundo azul (`#0d6efd`) nas abas ativas.
+  - **Ícones de Relatório no Feed de Atividades e Auditoria (`pages/dashboard.php`, `pages/historico_completo.php`):** Correção da classe `bi-file-earmark-bar-graph-fill`, eliminando espaços e caixas em branco no histórico.
+  - **Formatação de Impressão de Termos (`pages/entregas.php`, `pages/devolucoes.php`):** Supressão de quebra forçada de página em branco no Chrome e Edge.
+* **Sincronização Master da Suíte Completa de Documentações (`docs/*.md`):**
+  - Atualização dos 8 manuais técnicos de arquitetura, DevOps, segurança, endpoints e banco de dados para a Release 8.5.1 Hardened.
 
 ### 📅 Versão 8.5.0 (11/11/2026) – Governança de Fuso Horário Brasil/SP, Sessão GESTAOEPI_SID, Gráficos Financeiros com Rótulos, Impressão de Termos e Estabilização do Dashboard
 * **Regra e Padronização Obrigatória de Fuso Horário Brasil / São Paulo ([`.agents/rules/fuso_horario_brasil.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/fuso_horario_brasil.md)):**

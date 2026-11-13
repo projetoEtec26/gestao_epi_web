@@ -104,7 +104,7 @@ Em inspeções do Ministério do Trabalho e Emprego ou perícias judiciais traba
 
 ---
 
-## 6. Fluxo de Manutenção Evolutiva, Validação Multiplataforma e Deploy Contínuo (Release 8.5.0)
+## 6. Fluxo de Manutenção Evolutiva, Validação Multiplataforma e Deploy Contínuo (Release 8.5.1)
 
 Conforme as diretrizes de engenharia do projeto ([`.agents/rules/commit_obrigatorio.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/commit_obrigatorio.md), [`.agents/rules/multiplataforma.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/multiplataforma.md) e [`.agents/rules/fuso_horario_brasil.md`](file:///c:/xampp/htdocs/OLD/gestao_epi_web_14/.agents/rules/fuso_horario_brasil.md)), toda evolução ou ajuste técnico segue um fluxo auditável e automatizado:
 
@@ -112,14 +112,16 @@ Conforme as diretrizes de engenharia do projeto ([`.agents/rules/commit_obrigato
 sequenceDiagram
     participant Eng as Engenharia de Software
     participant XAMPP as Ambiente Local (XAMPP)
-    participant Git as GitHub (branch main)
+    participant Etec as GitHub ETEC (etec main)
+    participant Mirror as GitHub Pessoal (origin main)
     participant Prod as Produção Locaweb
 
     Eng->>XAMPP: Aplica alteração e testa em Desktop, Tablet e Celular
     XAMPP-->>Eng: Validação sintática e visual aprovada
-    Eng->>Git: git add + git commit (Conventional Commits)
-    Eng->>Git: git push origin main
-    Git->>Prod: GitHub Actions (FTP Deploy p/ public_html/)
+    Eng->>Etec: git add + git commit (Conventional Commits)
+    Eng->>Etec: git push etec main
+    Eng->>Mirror: git push origin main
+    Etec->>Prod: GitHub Actions (FTP Deploy p/ public_html/)
     Prod-->>Eng: Ambiente http://gestaoepi.tecnologia.ws/ atualizado
 ```
 
