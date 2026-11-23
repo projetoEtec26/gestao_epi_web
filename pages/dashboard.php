@@ -288,6 +288,7 @@ try {
             SELECT epi_id, epi_nome, epi_fabricante, epi_ca, epi_vencimento_ca
             FROM epis
             WHERE epi_tipo_item = 'EPI_COM_CA'
+              AND (epi_status IS NULL OR UPPER(epi_status) != 'INATIVO')
               AND epi_vencimento_ca >= :today
               AND epi_vencimento_ca <= :in7days
             ORDER BY epi_vencimento_ca ASC
@@ -300,6 +301,7 @@ try {
             SELECT epi_id, epi_nome, epi_fabricante, epi_ca, epi_vencimento_ca
             FROM epis
             WHERE epi_tipo_item = 'EPI_COM_CA'
+              AND (epi_status IS NULL OR UPPER(epi_status) != 'INATIVO')
               AND epi_vencimento_ca >= :today
               AND epi_vencimento_ca <= :in30days
             ORDER BY epi_vencimento_ca ASC
