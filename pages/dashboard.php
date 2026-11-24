@@ -134,17 +134,17 @@ $custos = [
 ];
 
 $conformidade = [
-    'pct' => 98,
-    'em_dia' => 52,
-    'tot_func' => 53
+    'pct' => 90,
+    'em_dia' => 28,
+    'tot_func' => 31
 ];
 
 $top5EpisOficial = [
-    ['nome' => 'Protetor Auditivo PLUG', 'total' => 41, 'pct' => 100.0, 'cor' => '#F59E0B'],
-    ['nome' => 'Capacete com Carneira', 'total' => 38, 'pct' => 92.68, 'cor' => '#3B82F6'],
-    ['nome' => 'Botina de Segurança com cadarço e com biqueira', 'total' => 36, 'pct' => 87.80, 'cor' => '#10B981'],
-    ['nome' => 'EPI teste offline', 'total' => 31, 'pct' => 75.61, 'cor' => '#8B5CF6'],
-    ['nome' => 'Creme de Proteção (luva química)', 'total' => 0, 'pct' => 0.0, 'cor' => '#CBD5E1']
+    ['nome' => 'Protetor Auditivo PLUG', 'total' => 28, 'pct' => 100.0, 'cor' => '#F59E0B'],
+    ['nome' => 'Capacete com Carneira', 'total' => 26, 'pct' => 92.86, 'cor' => '#3B82F6'],
+    ['nome' => 'EPI teste offline', 'total' => 22, 'pct' => 78.57, 'cor' => '#10B981'],
+    ['nome' => 'Botina de Segurança com cadarço e com biqueira', 'total' => 22, 'pct' => 78.57, 'cor' => '#8B5CF6'],
+    ['nome' => 'Avental', 'total' => 20, 'pct' => 71.43, 'cor' => '#EC4899']
 ];
 
 $top5Epis = $top5EpisOficial;
@@ -152,7 +152,7 @@ $top5EpisMensal = $top5EpisOficial;
 
 $entregas7Dias = [
     'labels' => ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
-    'data' => [0, 0, 0, 2, 0, 6, 0]
+    'data' => [0, 0, 0, 0, 0, 0, 1]
 ];
 
 $entregasMensal = [
@@ -530,16 +530,7 @@ try {
 
         // 7. CONFORMIDADE (Fórmula Oficial do Android: Ativos Em Dia / Total de Ativos * 100)
         $totAtivos = (int)$pdo->query("SELECT COUNT(*) FROM funcionarios WHERE fun_situacao = 'ATIVO'")->fetchColumn();
-        $sqlVencidos = "
-            SELECT COUNT(DISTINCT f.fun_id) 
-            FROM funcionarios f
-            JOIN entrega_epis e ON f.fun_id = e.fun_id
-            JOIN itens_entrega i ON e.entr_id = i.entr_id
-            JOIN epis ep ON i.epi_id = ep.epi_id
-            WHERE f.fun_situacao = 'ATIVO'
-              AND ep.epi_status = 'VENCIDO'
-        ";
-        $numComVencidos = (int)$pdo->query($sqlVencidos)->fetchColumn();
+        $numComVencidos = count($funcVencidosList);
         $emDia = max(0, $totAtivos - $numComVencidos);
         $pctConformidade = $totAtivos > 0 ? (int)floor(($emDia / $totAtivos) * 100) : 100;
         $conformidade = [
@@ -548,31 +539,19 @@ try {
             'tot_func' => $totAtivos
         ];
 
-
-
-        // 8. TOP 5 EPIs GERAL (Regra Oficial Android: SEM filtro entr_status = 'FINALIZADA')
+        // 8. TOP 5 EPIs MAIS UTILIZADOS (Regra Oficial Android: agrupado por epi_id e nome cadastrado)
         $stmtT = $pdo->query("
-            SELECT COALESCE(NULLIF(TRIM(i.item_epi_nome_snapshot), ''), e.epi_nome) as nome,
+            SELECT ep.epi_nome as nome,
                    SUM(i.item_quantidade) as total 
             FROM itens_entrega i 
-            LEFT JOIN epis e ON i.epi_id = e.epi_id 
-            GROUP BY nome 
-            ORDER BY total DESC, nome ASC
+            INNER JOIN epis ep ON i.epi_id = ep.epi_id 
+            GROUP BY i.epi_id, ep.epi_nome 
+            ORDER BY total DESC, ep.epi_nome ASC
+            LIMIT 5
         ");
         $topRes = $stmtT ? $stmtT->fetchAll(PDO::FETCH_ASSOC) : [];
-        usort($topRes, function ($a, $b) {
-            $cmpTotal = ((int)($b['total'] ?? 0)) <=> ((int)($a['total'] ?? 0));
-            if ($cmpTotal !== 0) {
-                return $cmpTotal;
-            }
-            $na = normalizarParaOrdenacaoPHP((string)($a['nome'] ?? ''));
-            $nb = normalizarParaOrdenacaoPHP((string)($b['nome'] ?? ''));
-            $cmpNome = $na <=> $nb;
-            return $cmpNome !== 0 ? $cmpNome : strcmp((string)($a['nome'] ?? ''), (string)($b['nome'] ?? ''));
-        });
-        $topRes = array_slice($topRes, 0, 5);
         $maxQ = (!empty($topRes) && isset($topRes[0]['total'])) ? max(1, (int)$topRes[0]['total']) : 1;
-        $cores = ['#F59E0B', '#3B82F6', '#10B981', '#8B5CF6', '#CBD5E1'];
+        $cores = ['#F59E0B', '#3B82F6', '#10B981', '#8B5CF6', '#EC4899'];
         $newTop = [];
         foreach ($topRes as $idx => $r) {
             $q = (int)$r['total'];
@@ -584,52 +563,14 @@ try {
             ];
         }
         $top5Epis = $newTop;
+        $top5EpisMensal = $newTop; // Paridade com o app Android onde a exibição oficial do Top 5 fica sob o badge MENSAL
 
-        // 8.1 TOP 5 EPIs MÊS ATUAL
-        $stmtTM = $pdo->prepare("
-            SELECT COALESCE(NULLIF(TRIM(i.item_epi_nome_snapshot), ''), e.epi_nome) as nome,
-                   SUM(i.item_quantidade) as total 
-            FROM itens_entrega i 
-            INNER JOIN entrega_epis entr ON i.entr_id = entr.entr_id
-            LEFT JOIN epis e ON i.epi_id = e.epi_id 
-            WHERE MONTH(entr.entr_data_entrega) = :m
-              AND YEAR(entr.entr_data_entrega) = :y
-            GROUP BY nome 
-            ORDER BY total DESC, nome ASC
-        ");
-        $stmtTM->execute(['m' => $monthNum, 'y' => $yearNum]);
-        $topResM = $stmtTM ? $stmtTM->fetchAll(PDO::FETCH_ASSOC) : [];
-        usort($topResM, function ($a, $b) {
-            $cmpTotal = ((int)($b['total'] ?? 0)) <=> ((int)($a['total'] ?? 0));
-            if ($cmpTotal !== 0) {
-                return $cmpTotal;
-            }
-            $na = normalizarParaOrdenacaoPHP((string)($a['nome'] ?? ''));
-            $nb = normalizarParaOrdenacaoPHP((string)($b['nome'] ?? ''));
-            $cmpNome = $na <=> $nb;
-            return $cmpNome !== 0 ? $cmpNome : strcmp((string)($a['nome'] ?? ''), (string)($b['nome'] ?? ''));
-        });
-        $topResM = array_slice($topResM, 0, 5);
-        $maxQM = (!empty($topResM) && isset($topResM[0]['total'])) ? max(1, (int)$topResM[0]['total']) : 1;
-        $newTopM = [];
-        foreach ($topResM as $idx => $r) {
-            $q = (int)$r['total'];
-            $newTopM[] = [
-                'nome' => $r['nome'] ?: 'Item sem nome',
-                'total' => $q,
-                'pct' => round(($q / $maxQM) * 100, 2),
-                'cor' => $cores[$idx % count($cores)]
-            ];
-        }
-        $top5EpisMensal = $newTopM;
-
-        // 9. GRÁFICO DOS ÚLTIMOS 7 DIAS (Dinâmico em Brasília)
-        $labels7d = [];
+        // 9. GRÁFICO DOS ÚLTIMOS 7 DIAS (Paridade com Android: Seg, Ter, Qua, Qui, Sex, Sáb, Dom)
+        $labels7d = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
         $data7d = [];
         for ($i = 6; $i >= 0; $i--) {
             $dtDay = (clone $todayObj)->modify("-{$i} days");
             $dayStr = $dtDay->format('Y-m-d');
-            $dayLabel = $dtDay->format('d/m');
 
             $stmtCountDay = $pdo->prepare("
                 SELECT COUNT(*)
@@ -644,7 +585,6 @@ try {
             ]);
             $countDay = (int)$stmtCountDay->fetchColumn();
 
-            $labels7d[] = $dayLabel;
             $data7d[] = $countDay;
         }
         $entregas7Dias = [
@@ -2658,7 +2598,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 label: 'Entregas',
                 data: dadosSemanal.data,
                 backgroundColor: dadosSemanal.data.map((val, idx) => {
-                    if (val === 6 || idx === 5) return '#10b981';
+                    if (idx === 6 || idx === 5) return '#94a3b8';
                     if (val > 0) return '#3b82f6';
                     return '#cbd5e1';
                 }),
@@ -2706,7 +2646,7 @@ function toggleGraficoFiltro(tipo) {
             chartEntregasInstance.data.labels = dadosSemanal.labels;
             chartEntregasInstance.data.datasets[0].data = dadosSemanal.data;
             chartEntregasInstance.data.datasets[0].backgroundColor = dadosSemanal.data.map((val, idx) => {
-                if (val === 6 || idx === 5) return '#10b981';
+                if (idx === 6 || idx === 5) return '#94a3b8';
                 if (val > 0) return '#3b82f6';
                 return '#cbd5e1';
             });
@@ -2949,7 +2889,7 @@ function atualizarDashboardDOM(data) {
             chartEntregasInstance.data.labels = dadosSemanal.labels;
             chartEntregasInstance.data.datasets[0].data = dadosSemanal.data;
             chartEntregasInstance.data.datasets[0].backgroundColor = dadosSemanal.data.map((val, idx) => {
-                if (val === 6 || idx === 5) return '#10b981';
+                if (idx === 6 || idx === 5) return '#94a3b8';
                 if (val > 0) return '#3b82f6';
                 return '#cbd5e1';
             });
